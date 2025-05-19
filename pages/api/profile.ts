@@ -9,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Missing profile name' });
   }
 
-  const name = decodeURIComponent(req.query.name as string);
+  const name = decodeURIComponent(raw);
 
   const { data, error } = await supabase
     .from('profile_metadata')
