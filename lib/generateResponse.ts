@@ -4,11 +4,6 @@ import supabase from '../lib/supabase-admin';
 import { buildSystemPrompt } from './buildSystemPrompt';
 import { OpenAI } from 'openai';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
 export async function generateResponse(sessionId: string): Promise<string> {
