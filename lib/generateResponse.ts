@@ -36,7 +36,7 @@ export async function generateResponse(sessionId: string): Promise<string> {
 
   const reactionTypes = ['common', 'typical', 'rare'];
   const reactions = reactionsData.data
-  ? reactionsData.data as {
+  ? reactionsTypes.data as {
       common: string[];
       typical: string[];
       rare: string[];
