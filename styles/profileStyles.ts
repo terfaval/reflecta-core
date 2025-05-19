@@ -1,6 +1,6 @@
 // File: /styles/profileStyles.ts
 
-export const profileStyles: Record<string, React.CSSProperties> = {
+export const profileStyles: Record<string, React.CSSProperties & Record<string, string>> = {
   Akasza: {
     '--bg-color': '#ffffff',
     '--user-color': '#E75735',
