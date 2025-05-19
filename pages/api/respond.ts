@@ -2,12 +2,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { generateResponse } from '../../lib/generateResponse';
-import supabase from '../../lib/supabase-admin';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import supabase from '../lib/supabase-admin';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();

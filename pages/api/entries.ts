@@ -1,13 +1,8 @@
 // File: /pages/api/entries.ts
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import supabase from '../../lib/supabase-admin';
+import supabase from '../lib/supabase-admin';
 import { labelSession } from '../../lib/labelSession';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {

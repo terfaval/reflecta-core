@@ -1,13 +1,8 @@
 // File: /pages/api/prompt.ts
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import supabase from '../../lib/supabase-admin';
+import supabase from '../lib/supabase-admin';
 import { buildSystemPrompt } from '../../lib/buildSystemPrompt';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 // Típusok újrahasználata (opcionálisan kiszervezheted később a /types mappába)
 type UserPreferences = {
