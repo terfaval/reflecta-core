@@ -1,0 +1,54 @@
+/* File: styles/globals.css */
+
+.reflecta-chat {
+  background-color: var(--bg-color);
+  padding: 20px;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+.reflecta-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reflecta-message {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 30px;
+  word-wrap: break-word;
+}
+
+.reflecta-message.user {
+  background-color: var(--user-color);
+  align-self: flex-end;
+  border-bottom-right-radius: 6px;
+}
+
+.reflecta-message.assistant {
+  background-color: var(--ai-color);
+  align-self: flex-start;
+  border-bottom-left-radius: 6px;
+}
+
+.reflecta-input {
+  margin-top: 20px;
+}
+
+.reflecta-input textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 1rem;
+  min-height: 100px;
+  resize: vertical;
+}
+
+.reflecta-close-button {
+  margin-left: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background-color: #eee;
+  border: none;
+  cursor: pointer;
+}

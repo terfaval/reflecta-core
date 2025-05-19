@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { profileStyles } from '../../styles/profileStyles';
 
 interface Entry {
   id: string;
@@ -20,6 +21,7 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
 
   const userId = 'demo-user'; // később WordPress-ből érkezik majd
+  const currentStyle = profileStyles[profile as string] || {};
 
   // Session és profilmeta betöltése
   useEffect(() => {
@@ -65,6 +67,16 @@ export default function ChatPage() {
       body: JSON.stringify({ sessionId, entry: newEntry }),
     });
 
+    // Válasz betöltése animációval
+    const thinkingId = `${Date.now()}-thinking`;
+    const thinkingEntry: Entry = {
+      id: thinkingId,
+      role: 'assistant',
+      content: '…',
+      created_at: new Date().toISOString(),
+    };
+    setEntries((prev) => [...prev, thinkingEntry]);
+
     const res = await fetch('/api/respond', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -73,19 +85,15 @@ export default function ChatPage() {
 
     const { content } = await res.json();
 
-    const aiEntry: Entry = {
-      id: `${Date.now()}-ai`,
-      role: 'assistant',
-      content,
-      created_at: new Date().toISOString(),
-    };
+    setEntries((prev) =>
+      prev.map((e) => (e.id === thinkingId ? { ...e, content } : e))
+    );
 
-    setEntries((prev) => [...prev, aiEntry]);
     setLoading(false);
   };
 
   return (
-    <div className="reflecta-chat">
+    <div className="reflecta-chat" style={currentStyle}>
       <h2>Napló: {profile}</h2>
       <div className="reflecta-messages">
         {entries.map((entry) => (
