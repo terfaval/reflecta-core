@@ -4,72 +4,78 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { buildSystemPrompt } from '../../lib/buildSystemPrompt';
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
 // Típusok újrahasználata (opcionálisan kiszervezheted később a /types mappába)
 type UserPreferences = {
   answer_length?: 'short' | 'long';
-  style_mode?: 'simple' | 'symbolic';
-  guidance_mode?: 'free' | 'guided';
-  tone_preference?: 'supportive' | 'confronting' | 'soothing';
+  style?: 'simple' | 'symbolic';
+  guidance?: 'free' | 'guided';
 };
-
-type SessionMeta = {
-  hasRecentSilence?: boolean;
-  showsRepetition?: boolean;
-};
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // fontos: csak szerveroldalon használható!
-);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { profileName, userPreferences, sessionMeta } = req.body as {
+  const { profileName, userId, preferences, sessionMeta } = req.body as {
     profileName: string;
-    userPreferences?: UserPreferences;
-    sessionMeta?: SessionMeta;
+    userId: string;
+    preferences: UserPreferences;
+    sessionMeta: Record<string, any>;
   };
 
-  // 1. Profil és metaadatok lekérése
-  const { data: profile, error: profileError } = await supabase
+  if (!profileName || !userId) {
+    return res.status(400).json({ error: 'Missing profileName or userId' });
+  }
+
+  // 1. Lekérjük a profil alapadatait
+  const { data: profile } = await supabase
     .from('profiles')
     .select('name, prompt_core, description')
     .eq('name', profileName)
-    .single();
+    .maybeSingle();
 
-  if (!profile || profileError) return res.status(404).json({ error: 'Profile not found' });
+  if (!profile) {
+    return res.status(404).json({ error: 'Profile not found' });
+  }
 
-  const { data: metadata, error: metaError } = await supabase
+  // 2. Lekérjük a metadata-t
+  const { data: metadata } = await supabase
     .from('profile_metadata')
     .select('*')
     .eq('profile', profileName)
-    .single();
+    .maybeSingle();
 
-  if (!metadata || metaError) return res.status(500).json({ error: 'Metadata missing' });
+  // 3. Lekérjük az összes reakciót
+  const { data: allReactions } = await supabase
+    .from('profile_reactions')
+    .select('reaction_type, description')
+    .eq('profile', profileName);
 
-  // 2. Reakciók lekérése három szinten
-  const reactionLevels = ['common', 'typical', 'rare'];
-  const reactions: Record<string, string[]> = { common: [], typical: [], rare: [] };
+  // 4. Reakciók strukturálása
+  const reactionTypes = ['common', 'typical', 'rare'] as const;
+  const reactions: { [key in (typeof reactionTypes)[number]]: string[] } = {
+    common: [],
+    typical: [],
+    rare: [],
+  };
 
-  for (const level of reactionLevels) {
-    const { data, error } = await supabase
-      .from('profile_reactions')
-      .select('description')
-      .eq('profile', profileName)
-      .eq('reaction_type', level);
-
-    if (!error && data) reactions[level] = data.map((r) => r.description);
+  for (const type of reactionTypes) {
+    reactions[type] = allReactions
+      ?.filter((r) => r.reaction_type === type)
+      .map((r) => r.description) || [];
   }
 
-  // 3. System prompt összeállítása
+  // 5. System prompt generálása
   const systemPrompt = buildSystemPrompt({
     name: profile.name,
     prompt_core: profile.prompt_core,
     description: profile.description,
     metadata,
     reactions,
-  }, userPreferences, sessionMeta);
+  }, preferences, sessionMeta);
 
   return res.status(200).json({ systemPrompt });
 }
