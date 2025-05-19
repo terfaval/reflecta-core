@@ -1,0 +1,30 @@
+{
+  "name": "reflecta",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+  "dev": "next dev",
+  "build": "next build",
+  "start": "next start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/terfaval/reflecta-core.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/terfaval/reflecta-core/issues"
+  },
+  "homepage": "https://github.com/terfaval/reflecta-core#readme",
+  "description": "",
+  "dependencies": {
+    "next": "^15.3.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  }
+}
