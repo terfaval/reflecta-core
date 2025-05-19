@@ -2,7 +2,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
-import { labelSession } from '@/lib/labelSession';
+import { labelSession } from '../../lib/labelSession';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
