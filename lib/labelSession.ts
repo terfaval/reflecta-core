@@ -1,12 +1,7 @@
 // File: /lib/labelSession.ts
 
-import supabase from '../../lib/supabase-admin';
+import supabase from '../lib/supabase-admin';
 import { OpenAI } from 'openai';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 

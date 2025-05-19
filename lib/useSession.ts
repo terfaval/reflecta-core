@@ -1,11 +1,6 @@
 // File: /lib/useSession.ts
 
-import supabase from '../../lib/supabase-admin';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import supabase from '../lib/supabase-admin';
 
 export async function getOrCreateConversationAndSession(userId: string, profile: string) {
   // 1. Keresünk aktív conversation-t
