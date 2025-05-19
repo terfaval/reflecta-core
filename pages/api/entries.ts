@@ -1,7 +1,7 @@
 // File: /pages/api/entries.ts
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import supabase from '../lib/supabase-admin';
+import supabase from '@/lib/supabase-admin';
 import { labelSession } from '../../lib/labelSession';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
