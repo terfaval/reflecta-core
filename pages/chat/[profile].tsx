@@ -23,9 +23,10 @@ export default function ChatPage() {
   const userId = 'demo-user'; // később WordPress-ből érkezik majd
   const currentStyle = profileStyles[profile as string] || {};
 
-  // Session és profilmeta betöltése
   useEffect(() => {
     if (!profile || typeof profile !== 'string') return;
+
+    console.log('[Reflecta] Lekérdezés indul profilra:', profile);
 
     fetch('/api/session', {
       method: 'POST',
@@ -34,16 +35,24 @@ export default function ChatPage() {
     })
       .then((res) => res.json())
       .then(({ session }) => {
+        console.log('[Reflecta] session létrejött vagy betöltve:', session);
         setSessionId(session.id);
-        // Entryk lekérése
         fetch(`/api/entries?sessionId=${session.id}`)
           .then((res) => res.json())
-          .then((data) => setEntries(data.entries || []));
-      });
+          .then((data) => {
+            console.log('[Reflecta] betöltött entries:', data.entries);
+            setEntries(data.entries || []);
+          });
+      })
+      .catch((err) => console.error('[Reflecta] session hiba:', err));
 
     fetch(`/api/profile?name=${profile}`)
       .then((res) => res.json())
-      .then(({ closing_trigger }) => setClosingTrigger(closing_trigger));
+      .then(({ closing_trigger }) => {
+        console.log('[Reflecta] closingTrigger betöltve:', closing_trigger);
+        setClosingTrigger(closing_trigger);
+      })
+      .catch((err) => console.error('[Reflecta] profile lekérés hiba:', err));
   }, [profile]);
 
   const handleSend = async (override?: string) => {
@@ -67,7 +76,6 @@ export default function ChatPage() {
       body: JSON.stringify({ sessionId, entry: newEntry }),
     });
 
-    // Válasz betöltése animációval
     const thinkingId = `${Date.now()}-thinking`;
     const thinkingEntry: Entry = {
       id: thinkingId,
