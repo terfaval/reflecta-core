@@ -1,6 +1,6 @@
 // File: /lib/generateResponse.ts
 
-import supabase from '../../lib/supabase-admin';
+import supabase from '../lib/supabase-admin';
 import { buildSystemPrompt } from './buildSystemPrompt';
 import { OpenAI } from 'openai';
 
