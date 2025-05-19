@@ -1,6 +1,6 @@
 // File: /lib/labelSession.ts
 
-import { createClient } from '@supabase/supabase-js';
+import supabase from '../../lib/supabase-admin';
 import { OpenAI } from 'openai';
 
 const supabase = createClient(

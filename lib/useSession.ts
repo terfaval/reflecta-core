@@ -1,6 +1,6 @@
 // File: /lib/useSession.ts
 
-import { createClient } from '@supabase/supabase-js';
+import supabase from '../../lib/supabase-admin';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

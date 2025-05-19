@@ -1,7 +1,7 @@
 // File: /pages/api/entries.ts
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import supabase from '../../lib/supabase-admin';
 import { labelSession } from '../../lib/labelSession';
 
 const supabase = createClient(

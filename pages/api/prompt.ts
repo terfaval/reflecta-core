@@ -1,7 +1,7 @@
 // File: /pages/api/prompt.ts
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import supabase from '../../lib/supabase-admin';
 import { buildSystemPrompt } from '../../lib/buildSystemPrompt';
 
 const supabase = createClient(
