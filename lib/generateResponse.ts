@@ -34,18 +34,13 @@ export async function generateResponse(sessionId: string): Promise<string> {
     .eq('profile', session.profile)
     .maybeSingle();
 
-  const reactionTypes = ['common', 'typical', 'rare'];
-  const reactions = reactionsData.data
-  ? reactionsTypes.data as {
-      common: string[];
-      typical: string[];
-      rare: string[];
-    }
-  : {
-      common: [],
-      typical: [],
-      rare: []
-    };
+  const reactionTypes = ['common', 'typical', 'rare'] as const;
+const reactions: { [key in (typeof reactionTypes)[number]]: string[] } = {
+  common: [],
+  typical: [],
+  rare: [],
+};
+
 
   for (const type of reactionTypes) {
     const { data } = await supabase
