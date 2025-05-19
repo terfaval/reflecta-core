@@ -1,7 +1,7 @@
 // File: /pages/api/respond.ts
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { generateResponse } from '@/lib/generateResponse';
+import { generateResponse } from '../../lib/generateResponse';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(

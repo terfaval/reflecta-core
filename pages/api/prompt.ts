@@ -2,7 +2,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
-import { buildSystemPrompt } from '@/lib/buildSystemPrompt';
+import { buildSystemPrompt } from '../../lib/buildSystemPrompt';
 
 // Típusok újrahasználata (opcionálisan kiszervezheted később a /types mappába)
 type UserPreferences = {

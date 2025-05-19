@@ -1,7 +1,7 @@
 // File: /pages/api/session.ts
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getOrCreateConversationAndSession } from '@/lib/useSession';
+import { getOrCreateConversationAndSession } from '../../lib/useSession';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
