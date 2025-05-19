@@ -35,7 +35,18 @@ export async function generateResponse(sessionId: string): Promise<string> {
     .maybeSingle();
 
   const reactionTypes = ['common', 'typical', 'rare'];
-  const reactions: Record<string, string[]> = { common: [], typical: [], rare: [] };
+  const reactions = reactionsData.data
+  ? reactionsData.data as {
+      common: string[];
+      typical: string[];
+      rare: string[];
+    }
+  : {
+      common: [],
+      typical: [],
+      rare: []
+    };
+
   for (const type of reactionTypes) {
     const { data } = await supabase
       .from('profile_reactions')
