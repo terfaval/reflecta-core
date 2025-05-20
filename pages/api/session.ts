@@ -1,7 +1,7 @@
 // File: /pages/api/session.ts
 
 import type { NextApiRequest, NextApiResponse } from 'next';
-import supabase from '@/lib/supabase-admin';
+import supabase from '../../lib/supabase-admin';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
