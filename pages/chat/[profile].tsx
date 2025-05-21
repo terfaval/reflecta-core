@@ -27,10 +27,15 @@ export default function ChatPage() {
       if (event.data?.type === 'wp_user') {
         const { wp_user_id, email } = event.data;
 
+        if (!wp_user_id || !email) {
+          console.warn('[Reflecta] Hiányzó user adat:', event.data);
+          return;
+        }
+
         fetch('/api/user', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ wp_user_id, email }),
+          body: JSON.stringify({ wp_user_id, email })
         })
           .then((res) => res.json())
           .then(() => {
@@ -45,7 +50,7 @@ export default function ChatPage() {
     return () => window.removeEventListener('message', handleWPUser);
   }, []);
 
-  // 🔹 Session és profil betöltés csak ha van userId
+  // 🔹 Session és profil betöltés
   useEffect(() => {
     if (!profile || typeof profile !== 'string' || !userId) return;
 
@@ -54,20 +59,21 @@ export default function ChatPage() {
     fetch('/api/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, profile }),
+      body: JSON.stringify({ userId, profile })
     })
       .then((res) => res.json())
-      .then(({ session }) => {
-        console.log('[Reflecta] session létrejött vagy betöltve:', session);
-        setSessionId(session.id);
-        fetch(`/api/entries?sessionId=${session.id}`)
-          .then((res) => res.json())
-          .then((data) => {
-            console.log('[Reflecta] betöltött entries:', data.entries);
-            setEntries(data.entries || []);
-          });
+      .then((data) => {
+        if (!data?.session?.id) throw new Error('Hiányzó session.id');
+        console.log('[Reflecta] session létrejött vagy betöltve:', data.session);
+        setSessionId(data.session.id);
+        return fetch(`/api/entries?sessionId=${data.session.id}`);
       })
-      .catch((err) => console.error('[Reflecta] session hiba:', err));
+      .then((res) => res.json())
+      .then((data) => {
+        console.log('[Reflecta] betöltött entries:', data.entries);
+        setEntries(data.entries || []);
+      })
+      .catch((err) => console.error('[Reflecta] session/entries hiba:', err));
 
     fetch(`/api/profile?name=${profile}`)
       .then((res) => res.json())
@@ -96,7 +102,7 @@ export default function ChatPage() {
     await fetch('/api/entries', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId, entry: newEntry }),
+      body: JSON.stringify({ sessionId, entry: newEntry })
     });
 
     const thinkingId = `${Date.now()}-thinking`;
@@ -111,7 +117,7 @@ export default function ChatPage() {
     const res = await fetch('/api/respond', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId }),
+      body: JSON.stringify({ sessionId })
     });
 
     const { content } = await res.json();
