@@ -1,5 +1,3 @@
-// File: /pages/chat/[profile].tsx
-
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { profileStyles } from '../../styles/profileStyles';
@@ -19,12 +17,37 @@ export default function ChatPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [closingTrigger, setClosingTrigger] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const userId = 'demo-user'; // később WordPress-ből érkezik majd
   const currentStyle = profileStyles[profile as string] || {};
 
+  // 🔹 Iframe üzenet fogadása WordPress-ből
   useEffect(() => {
-    if (!profile || typeof profile !== 'string') return;
+    const handleWPUser = (event: MessageEvent) => {
+      if (event.data?.type === 'wp_user') {
+        const { wp_user_id, email } = event.data;
+
+        fetch('/api/user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wp_user_id, email }),
+        })
+          .then((res) => res.json())
+          .then(() => {
+            console.log('[Reflecta] user mentve Supabase-be');
+            setUserId(wp_user_id);
+          })
+          .catch((err) => console.error('[Reflecta] user mentés hiba:', err));
+      }
+    };
+
+    window.addEventListener('message', handleWPUser);
+    return () => window.removeEventListener('message', handleWPUser);
+  }, []);
+
+  // 🔹 Session és profil betöltés csak ha van userId
+  useEffect(() => {
+    if (!profile || typeof profile !== 'string' || !userId) return;
 
     console.log('[Reflecta] Lekérdezés indul profilra:', profile);
 
@@ -53,7 +76,7 @@ export default function ChatPage() {
         setClosingTrigger(closing_trigger);
       })
       .catch((err) => console.error('[Reflecta] profile lekérés hiba:', err));
-  }, [profile]);
+  }, [profile, userId]);
 
   const handleSend = async (override?: string) => {
     const text = override || message;
