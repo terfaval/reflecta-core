@@ -10,7 +10,11 @@ interface UserPreferences {
 interface SessionMeta {
   hasRecentSilence?: boolean;
   showsRepetition?: boolean;
+  isShortEntry?: boolean;
+  isQuestion?: boolean;
+  isReflective?: boolean;
 }
+
 
 interface ProfileMetadata {
   domain: string;
