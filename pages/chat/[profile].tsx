@@ -38,9 +38,9 @@ export default function ChatPage() {
           body: JSON.stringify({ wp_user_id, email })
         })
           .then((res) => res.json())
-          .then(() => {
-            console.log('[Reflecta] user mentve Supabase-be');
-            setUserId(wp_user_id);
+          .then(({ user_id }) => {
+            console.log('[Reflecta] user_id lekérve:', user_id);
+            setUserId(user_id);
           })
           .catch((err) => console.error('[Reflecta] user mentés hiba:', err));
       }
