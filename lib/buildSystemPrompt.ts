@@ -101,5 +101,17 @@ export function buildSystemPrompt(
     lines.push(`If appropriate, you may suggest: ${profile.metadata.recommendation_logic}`);
   }
 
+  // 🔹 Új: felhasználói bejegyzés ritmus- és típusérzékeny kezelés
+if (sessionMeta?.isShortEntry) {
+  lines.push('If the user input is very short, reply in a minimal and gentle way, avoid overexplaining.');
+}
+if (sessionMeta?.isQuestion) {
+  lines.push('If the user asked a question, answer it clearly and directly first, then you may elaborate.');
+}
+if (sessionMeta?.isReflective) {
+  lines.push('If the user seems introspective, respond in a soft and meditative rhythm.');
+}
+
+
   return lines.join('\n');
 }

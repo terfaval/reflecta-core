@@ -1,5 +1,3 @@
-// File: /lib/generateResponse.ts
-
 import supabase from '@/lib/supabase-admin';
 import { buildSystemPrompt } from './buildSystemPrompt';
 import { OpenAI } from 'openai';
@@ -30,12 +28,11 @@ export async function generateResponse(sessionId: string): Promise<string> {
     .maybeSingle();
 
   const reactionTypes = ['common', 'typical', 'rare'] as const;
-const reactions: { [key in (typeof reactionTypes)[number]]: string[] } = {
-  common: [],
-  typical: [],
-  rare: [],
-};
-
+  const reactions: { [key in (typeof reactionTypes)[number]]: string[] } = {
+    common: [],
+    typical: [],
+    rare: [],
+  };
 
   for (const type of reactionTypes) {
     const { data } = await supabase
@@ -47,16 +44,7 @@ const reactions: { [key in (typeof reactionTypes)[number]]: string[] } = {
     reactions[type] = data?.map((r) => r.description) || [];
   }
 
-  // 3. System prompt generálása
-  const systemPrompt = buildSystemPrompt({
-    name: profile.name,
-    prompt_core: profile.prompt_core,
-    description: profile.description,
-    metadata,
-    reactions,
-  });
-
-  // 4. Lekérjük az eddigi entries-t (max 20)
+  // 3. Lekérjük az eddigi entries-t (max 20)
   const { data: entries } = await supabase
     .from('entries')
     .select('role, content')
@@ -64,12 +52,45 @@ const reactions: { [key in (typeof reactionTypes)[number]]: string[] } = {
     .order('created_at', { ascending: true })
     .limit(20);
 
+  // 🔍 4. Dinamikus sessionMeta meghatározás (az utolsó user entry alapján)
+  const lastUserEntry = [...(entries || [])]
+    .reverse()
+    .find((e) => e.role === 'user');
+
+  let sessionMeta = {};
+
+  if (lastUserEntry) {
+    const content = lastUserEntry.content.trim();
+    const isShort = content.length < 50;
+    const isQuestion = content.endsWith('?');
+    const isReflective = /érzem|gondolom|hiszem|talán|nem tudom/i.test(content);
+
+    sessionMeta = {
+      isShortEntry: isShort,
+      isQuestion,
+      isReflective,
+    };
+  }
+
+  // 5. System prompt generálása
+  const systemPrompt = buildSystemPrompt(
+    {
+      name: profile.name,
+      prompt_core: profile.prompt_core,
+      description: profile.description,
+      metadata,
+      reactions,
+    },
+    undefined, // nincsenek user preferences
+    sessionMeta
+  );
+
   const messages = [
     { role: 'system', content: systemPrompt },
     ...(entries || []).map((e) => ({ role: e.role, content: e.content }))
   ];
 
-  // 5. OpenAI hívás (GPT-3.5)
+  // 6. OpenAI hívás
   const chat = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
     messages,
