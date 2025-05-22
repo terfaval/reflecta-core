@@ -40,9 +40,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .insert({ wp_user_id, email, anon_token });
 
   if (insertError) {
-    console.error('[Reflecta] Insert hiba:', insertError.message, insertError.details || '');
-    return res.status(500).json({ error: insertError.message, details: insertError.details });
-  }
+  console.error('[Reflecta] Insert hiba:', {
+    message: insertError.message,
+    details: insertError.details,
+    hint: insertError.hint,
+    code: insertError.code,
+  });
+  return res.status(500).json({
+    error: insertError.message,
+    details: insertError.details,
+    hint: insertError.hint,
+    code: insertError.code,
+  });
+}
+
 
   // 3. Újra lekérjük az ID-t
   const { data: newUser, error: refetchError } = await supabase
