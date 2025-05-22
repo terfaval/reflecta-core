@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Missing wp_user_id or email' });
   }
 
-  // 1. Megpróbáljuk lekérni a user-t
+  // 1. Megpróbáljuk lekérni a meglévő user-t
   const { data: existingUser, error: fetchError } = await supabase
     .from('users')
     .select('id')
@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({ user_id: existingUser.id });
   }
 
-  // 2. Ha nincs, létrehozzuk (de nem kérjük vissza azonnal)
+  // 2. Ha nem létezik, létrehozzuk új UUID-vel
   const anon_token = uuidv4();
 
   const { error: insertError } = await supabase
@@ -40,11 +40,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .insert({ wp_user_id, email, anon_token });
 
   if (insertError) {
-    console.error('[Reflecta] Insert hiba:', insertError.message);
-    return res.status(500).json({ error: insertError.message });
+    console.error('[Reflecta] Insert hiba:', insertError.message, insertError.details || '');
+    return res.status(500).json({ error: insertError.message, details: insertError.details });
   }
 
-  // 3. Újra lekérjük
+  // 3. Újra lekérjük az ID-t
   const { data: newUser, error: refetchError } = await supabase
     .from('users')
     .select('id')
