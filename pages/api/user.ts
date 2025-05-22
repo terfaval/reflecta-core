@@ -2,6 +2,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import supabase from '../../lib/supabase-admin';
+import { v4 as uuidv4 } from 'uuid';  // ✅ új UUID generátor
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -31,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // 3. Ha nem létezik, beszúrjuk és visszakérjük
-  const anon_token = crypto.randomUUID();
+  const anon_token = uuidv4();
 
   const { data: insertedUser, error: insertError } = await supabase
     .from('users')
