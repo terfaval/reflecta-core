@@ -1,3 +1,5 @@
+// File: pages/chat/[profile].tsx
+
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { profileStyles } from '../../styles/profileStyles';
@@ -21,9 +23,15 @@ export default function ChatPage() {
 
   const currentStyle = profileStyles[profile as string] || {};
 
-  // 🔹 Iframe üzenet fogadása WordPress-ből
+  // 🔹 Iframe üzenet fogadása WordPress-ből (origin ellenőrzéssel)
   useEffect(() => {
     const handleWPUser = (event: MessageEvent) => {
+      const allowedOrigins = ['https://beenook.hu'];
+      if (!allowedOrigins.includes(event.origin)) {
+        console.warn('[Reflecta] Tiltott origin:', event.origin);
+        return;
+      }
+
       if (event.data?.type === 'wp_user') {
         const { wp_user_id, email } = event.data;
 
