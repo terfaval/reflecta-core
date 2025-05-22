@@ -26,11 +26,7 @@ export default function ChatPage() {
   // 🔹 Iframe üzenet fogadása WordPress-ből (origin ellenőrzéssel)
   useEffect(() => {
   const handleWPUser = (event: MessageEvent) => {
-    const allowedOrigins = ['https://beenook.hu'];
-    if (!allowedOrigins.includes(event.origin)) {
-      console.warn('[Reflecta] Tiltott origin:', event.origin);
-      return;
-    }
+    console.log('[Reflecta DEBUG] Iframe üzenet érkezett:', event.data);
 
     if (event.data?.type === 'wp_user') {
       const { wp_user_id, email } = event.data;
@@ -40,18 +36,17 @@ export default function ChatPage() {
         return;
       }
 
-      console.log('[Reflecta] Fogadott wp_user adat:', { wp_user_id, email });
-
       fetch('/api/user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ wp_user_id, email })
       })
         .then((res) => res.json())
-        .then((result) => {
-          console.log('[Reflecta] /api/user válasz:', result);
+        .then(({ user_id }) => {
+          console.log('[Reflecta] user_id lekérve:', user_id);
+          setUserId(user_id);
         })
-        .catch((err) => console.error('[Reflecta] user hiba:', err));
+        .catch((err) => console.error('[Reflecta] user mentés hiba:', err));
     }
   };
 
