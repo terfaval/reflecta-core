@@ -1,3 +1,5 @@
+// Reflecta: generateResponse.ts
+
 import supabase from '@/lib/supabase-admin';
 import { buildSystemPrompt } from './buildSystemPrompt';
 import { OpenAI } from 'openai';
@@ -37,12 +39,18 @@ export async function generateResponse(sessionId: string): Promise<string> {
   for (const type of reactionTypes) {
     const { data } = await supabase
       .from('profile_reactions')
-      .select('description')
+      .select('reaction')
       .eq('profile', session.profile)
-      .eq('reaction_type', type);
+      .eq('rarity', type);
 
-    reactions[type] = data?.map((r) => r.description) || [];
+    reactions[type] = data?.map((r) => r.reaction) || [];
   }
+
+  // 🔍 Opcionális: Ajánlások lekérése (később hasznos)
+  const { data: recommendations } = await supabase
+    .from('recommendations')
+    .select('trigger, name, type, intensity, guidance_direction')
+    .eq('profile', session.profile);
 
   // 3. Lekérjük az eddigi entries-t (max 20)
   const { data: entries } = await supabase
@@ -52,23 +60,15 @@ export async function generateResponse(sessionId: string): Promise<string> {
     .order('created_at', { ascending: true })
     .limit(20);
 
-  // 🔍 4. Dinamikus sessionMeta meghatározás (az utolsó user entry alapján)
-  const lastUserEntry = [...(entries || [])]
-    .reverse()
-    .find((e) => e.role === 'user');
-
+  // 4. Dinamikus sessionMeta meghatározás
+  const lastUserEntry = [...(entries || [])].reverse().find((e) => e.role === 'user');
   let sessionMeta = {};
-
   if (lastUserEntry) {
     const content = lastUserEntry.content.trim();
-    const isShort = content.length < 50;
-    const isQuestion = content.endsWith('?');
-    const isReflective = /érzem|gondolom|hiszem|talán|nem tudom/i.test(content);
-
     sessionMeta = {
-      isShortEntry: isShort,
-      isQuestion,
-      isReflective,
+      isShortEntry: content.length < 50,
+      isQuestion: content.endsWith('?'),
+      isReflective: /érzem|gondolom|hiszem|talán|nem tudom/i.test(content),
     };
   }
 
@@ -81,7 +81,7 @@ export async function generateResponse(sessionId: string): Promise<string> {
       metadata,
       reactions,
     },
-    undefined, // nincsenek user preferences
+    undefined,
     sessionMeta
   );
 
@@ -100,5 +100,12 @@ export async function generateResponse(sessionId: string): Promise<string> {
   const reply = chat.choices[0].message.content;
   if (!reply) throw new Error('No reply generated');
 
+  // 7. Reakciók azonosítása a válaszból
+  const lowerReply = reply.toLowerCase();
+  const triggeredReactions = Object.entries(reactions).flatMap(([type, list]) =>
+    list.filter(desc => lowerReply.includes(desc.toLowerCase())).map(desc => ({ type, desc }))
+  );
+
+  console.log('[Reflecta] Triggered reactions:', triggeredReactions);
   return reply;
 }

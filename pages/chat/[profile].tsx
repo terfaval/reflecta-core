@@ -154,14 +154,30 @@ export default function ChatPage() {
           {loading ? 'Válasz folyamatban...' : 'Küldés'}
         </button>
         {closingTrigger && (
-          <button
-            onClick={() => handleSend(closingTrigger)}
-            className="reflecta-close-button"
-            disabled={loading}
-          >
-            Mára elég volt
-          </button>
-        )}
+  <button
+    onClick={async () => {
+      if (!closingTrigger || !sessionId) return;
+      setLoading(true);
+
+      await handleSend(closingTrigger); // elküldi az entry-t
+
+      // Csendes session zárás közvetlenül utána
+      await fetch('/api/session/close', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      });
+
+      setLoading(false);
+    }}
+    className="reflecta-close-button"
+    disabled={loading}
+  >
+    Mára elég volt
+  </button>
+)}
+
+
       </div>
     </div>
   );

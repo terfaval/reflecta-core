@@ -63,11 +63,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (error) return res.status(500).json({ error: error.message });
 
     // 2. ha closing_trigger → session lezárása + label generálás
-    if (entry.content === trigger) {
+    if (trigger && entry.content.trim() === trigger.trim()) {
       await supabase
         .from('sessions')
         .update({ ended_at: new Date().toISOString() })
         .eq('id', sessionId);
+
+      await supabase.from('system_events').insert({
+        session_id: sessionId,
+        event_type: 'session_closed_by_trigger',
+        note: 'Session closed by matching closing_trigger'
+      });
 
       try {
         await labelSession(sessionId);
@@ -75,6 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.warn('Labeling failed:', e);
       }
     }
+
 
     return res.status(200).json({ success: true });
   }

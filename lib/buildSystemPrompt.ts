@@ -15,17 +15,25 @@ interface SessionMeta {
   isReflective?: boolean;
 }
 
-
 interface ProfileMetadata {
   domain: string;
   worldview: string;
   inspirations: string[];
   not_suitable_for: string;
-  style_options: Record<string, string>; // pl. tempo, hangnem
+  style_options: Record<string, string>;
   closing_trigger: string;
   closing_style: string;
   highlight_keywords: string[];
   recommendation_logic?: string;
+
+  preferred_context?: string;
+  response_focus?: string;
+  primary_metaphors?: string[];
+  question_archetypes?: string[];
+  interaction_rhythm?: string;
+  connects_well_after?: string[];
+  connects_well_before?: string[];
+  avoidance_logic?: string;
 }
 
 interface Profile {
@@ -56,12 +64,21 @@ export function buildSystemPrompt(
   lines.push(`You operate in the domain of: "${profile.metadata.domain}"`);
   lines.push(`Your inspirations include: ${profile.metadata.inspirations.join(', ')}.`);
   lines.push(`You are not suitable for: ${profile.metadata.not_suitable_for}`);
+  if (profile.metadata.preferred_context) {
+    lines.push(`You are best used in this context: ${profile.metadata.preferred_context}.`);
+  }
+  if (profile.metadata.response_focus) {
+    lines.push(`Your replies should focus on: ${profile.metadata.response_focus}.`);
+  }
   lines.push('');
 
   // Interakciós stílus
   const tempo = profile.metadata.style_options?.tempo || 'medium';
   const tone = profile.metadata.style_options?.hangnem || 'neutral';
   lines.push(`Your interaction tempo is ${tempo}. Your tone is ${tone}.`);
+  if (profile.metadata.interaction_rhythm) {
+    lines.push(`Use a rhythm like: ${profile.metadata.interaction_rhythm}.`);
+  }
   lines.push('');
 
   // Reakciók
@@ -69,6 +86,21 @@ export function buildSystemPrompt(
   lines.push('- Common: ' + profile.reactions.common.join(' | '));
   lines.push('- Typical: ' + profile.reactions.typical.join(' | '));
   lines.push('- Rare: ' + profile.reactions.rare.join(' | '));
+  lines.push('');
+
+  // Kapcsolódási logikák
+  if (profile.metadata.avoidance_logic) {
+    lines.push(`Avoid this situation: ${profile.metadata.avoidance_logic}`);
+  }
+  lines.push('');
+
+  // Kérdés- és metaforaalapú logika
+  if (profile.metadata.question_archetypes?.length) {
+    lines.push(`Your questions follow these archetypes: ${profile.metadata.question_archetypes.join(', ')}.`);
+  }
+  if (profile.metadata.primary_metaphors?.length) {
+    lines.push(`You use these metaphors often: ${profile.metadata.primary_metaphors.join(', ')}.`);
+  }
   lines.push('');
 
   // Csend és ismétlés felismerése
@@ -81,7 +113,7 @@ export function buildSystemPrompt(
   lines.push(`Respond in a style of: ${profile.metadata.closing_style}.`);
   lines.push('');
 
-  // Felhasználói preferenciák (ha vannak)
+  // Felhasználói preferenciák
   if (userPreferences) {
     const prefs: string[] = [];
     if (userPreferences.answer_length)
@@ -97,26 +129,24 @@ export function buildSystemPrompt(
       lines.push(`Adjust your behavior to user preferences: ${prefs.join('; ')}.`);
   }
 
-  // Highlight kulcsszavak (későbbi visszacsatolásra)
+  // Kulcsszavak
   lines.push(`Pay attention to these keywords: ${profile.metadata.highlight_keywords.join(', ')}.`);
 
-  // Opcionális ajánlások
+  // Ajánlások
   if (profile.metadata.recommendation_logic) {
     lines.push(`If appropriate, you may suggest: ${profile.metadata.recommendation_logic}`);
   }
 
-  // 🔹 Új: felhasználói bejegyzés ritmus- és típusérzékeny kezelés
-if (sessionMeta?.isShortEntry) {
-  lines.push('If the user input is very short, reply in a minimal and gentle way, avoid overexplaining.');
-}
-if (sessionMeta?.isQuestion) {
-  lines.push('If the user asked a question, answer it clearly and directly first, then you may elaborate.');
-}
-if (sessionMeta?.isReflective) {
-  lines.push('If the user seems introspective, respond in a soft and meditative rhythm.');
-}
+  // Válaszstílus ritmus alapján
+  if (sessionMeta?.isShortEntry) {
+    lines.push('If the user input is very short, reply in a minimal and gentle way, avoid overexplaining.');
+  }
+  if (sessionMeta?.isQuestion) {
+    lines.push('If the user asked a question, answer it clearly and directly first, then you may elaborate.');
+  }
+  if (sessionMeta?.isReflective) {
+    lines.push('If the user seems introspective, respond in a soft and meditative rhythm.');
+  }
 
   return lines.join('\n');
-
-  console.log('[Reflecta] systemPrompt:', lines.join('\n'));
 }
