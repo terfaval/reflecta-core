@@ -14,8 +14,8 @@
 
 .reflecta-message {
   max-width: 75%;
-  padding: 20px 14px 70px 50px;
-  border-radius: 30px;
+  padding: 15px 15px 15px 30px;
+  border-radius: 20px;
   word-wrap: break-word;
 }
 
@@ -23,14 +23,14 @@
   background-color: var(--user-color);
   color: white;
   align-self: flex-end;
-  border-bottom-right-radius: 6px;
+  border-bottom-right-radius: 5px;
 }
 
 .reflecta-message.assistant {
   background-color: var(--ai-color);
   color: black;
   align-self: flex-start;
-  border-bottom-left-radius: 6px;
+  border-bottom-left-radius: 5px;
 }
 
 .reflecta-input {
@@ -41,6 +41,7 @@
   width: 100%;
   padding: 10px;
   border-radius: 10px;
+  font-family: 'Raleway', sans-serif;
   font-size: 1rem;
   min-height: 70px;
   resize: vertical;
