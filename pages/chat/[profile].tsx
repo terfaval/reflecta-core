@@ -25,34 +25,34 @@ export default function ChatPage() {
 
   // 🔹 Iframe üzenet fogadása WordPress-ből (origin ellenőrzéssel)
   useEffect(() => {
-  const handleWPUser = (event: MessageEvent) => {
-    console.log('[Reflecta DEBUG] Iframe üzenet érkezett:', event.data);
+    const handleWPUser = (event: MessageEvent) => {
+      console.log('[Reflecta DEBUG] Iframe üzenet érkezett:', event.data);
 
-    if (event.data?.type === 'wp_user') {
-      const { wp_user_id, email } = event.data;
+      if (event.data?.type === 'wp_user') {
+        const { wp_user_id, email } = event.data;
 
-      if (!wp_user_id || !email) {
-        console.warn('[Reflecta] Hiányzó user adat:', event.data);
-        return;
-      }
+        if (!wp_user_id || !email) {
+          console.warn('[Reflecta] Hiányzó user adat:', event.data);
+          return;
+        }
 
-      fetch('/api/user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wp_user_id, email })
-      })
-        .then((res) => res.json())
-        .then(({ user_id }) => {
-          console.log('[Reflecta] user_id lekérve:', user_id);
-          setUserId(user_id);
+        fetch('/api/user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wp_user_id, email })
         })
-        .catch((err) => console.error('[Reflecta] user mentés hiba:', err));
-    }
-  };
+          .then((res) => res.json())
+          .then(({ user_id }) => {
+            console.log('[Reflecta] user_id lekérve:', user_id);
+            setUserId(user_id);
+          })
+          .catch((err) => console.error('[Reflecta] user mentés hiba:', err));
+      }
+    };
 
-  window.addEventListener('message', handleWPUser);
-  return () => window.removeEventListener('message', handleWPUser);
-}, []);
+    window.addEventListener('message', handleWPUser);
+    return () => window.removeEventListener('message', handleWPUser);
+  }, []);
 
   // 🔹 Session és profil betöltés
   useEffect(() => {
@@ -150,34 +150,32 @@ export default function ChatPage() {
           placeholder="Írd be, amit meg szeretnél osztani..."
           disabled={loading}
         />
-        <button onClick={() => handleSend()} disabled={loading}>
+        <button
+          className="reflecta-send-button"
+          onClick={() => handleSend()}
+          disabled={loading}
+        >
           {loading ? 'Válasz folyamatban...' : 'Küldés'}
         </button>
         {closingTrigger && (
-  <button
-    onClick={async () => {
-      if (!closingTrigger || !sessionId) return;
-      setLoading(true);
-
-      await handleSend(closingTrigger); // elküldi az entry-t
-
-      // Csendes session zárás közvetlenül utána
-      await fetch('/api/session/close', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId }),
-      });
-
-      setLoading(false);
-    }}
-    className="reflecta-close-button"
-    disabled={loading}
-  >
-    Mára elég volt
-  </button>
-)}
-
-
+          <button
+            onClick={async () => {
+              if (!closingTrigger || !sessionId) return;
+              setLoading(true);
+              await handleSend(closingTrigger);
+              await fetch('/api/session/close', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId }),
+              });
+              setLoading(false);
+            }}
+            className="reflecta-close-button"
+            disabled={loading}
+          >
+            Mára elég volt
+          </button>
+        )}
       </div>
     </div>
   );
