@@ -116,6 +116,7 @@ if (sessionMeta?.isReflective) {
   lines.push('If the user seems introspective, respond in a soft and meditative rhythm.');
 }
 
-
   return lines.join('\n');
+
+  console.log('[Reflecta] systemPrompt:', lines.join('\n'));
 }
