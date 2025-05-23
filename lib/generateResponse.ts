@@ -6,8 +6,11 @@ import { OpenAI } from 'openai';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
-export async function generateResponse(sessionId: string): Promise<string> {
-  // 1. Lekérjük a session-hoz tartozó adatokat
+export async function generateResponse(sessionId: string): Promise<{
+  reply: string;
+  reaction_tag?: string;
+  recommendation_tag?: string;
+}> {
   const { data: session } = await supabase
     .from('sessions')
     .select('id, profile, user_id, conversation_id')
@@ -16,7 +19,6 @@ export async function generateResponse(sessionId: string): Promise<string> {
 
   if (!session) throw new Error('Session not found');
 
-  // 2. Lekérjük a profil összes adatát
   const { data: profile } = await supabase
     .from('profiles')
     .select('name, prompt_core, description')
@@ -46,13 +48,11 @@ export async function generateResponse(sessionId: string): Promise<string> {
     reactions[type] = data?.map((r) => r.reaction) || [];
   }
 
-  // 🔍 Opcionális: Ajánlások lekérése (később hasznos)
   const { data: recommendations } = await supabase
     .from('recommendations')
-    .select('trigger, name, type, intensity, guidance_direction')
+    .select('name, trigger')
     .eq('profile', session.profile);
 
-  // 3. Lekérjük az eddigi entries-t (max 20)
   const { data: entries } = await supabase
     .from('entries')
     .select('role, content')
@@ -60,7 +60,6 @@ export async function generateResponse(sessionId: string): Promise<string> {
     .order('created_at', { ascending: true })
     .limit(20);
 
-  // 4. Dinamikus sessionMeta meghatározás
   const lastUserEntry = [...(entries || [])].reverse().find((e) => e.role === 'user');
   let sessionMeta = {};
   if (lastUserEntry) {
@@ -72,7 +71,6 @@ export async function generateResponse(sessionId: string): Promise<string> {
     };
   }
 
-  // 5. System prompt generálása
   const systemPrompt = buildSystemPrompt(
     {
       name: profile.name,
@@ -90,7 +88,6 @@ export async function generateResponse(sessionId: string): Promise<string> {
     ...(entries || []).map((e) => ({ role: e.role, content: e.content }))
   ];
 
-  // 6. OpenAI hívás
   const chat = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
     messages,
@@ -100,12 +97,25 @@ export async function generateResponse(sessionId: string): Promise<string> {
   const reply = chat.choices[0].message.content;
   if (!reply) throw new Error('No reply generated');
 
-  // 7. Reakciók azonosítása a válaszból
   const lowerReply = reply.toLowerCase();
+
   const triggeredReactions = Object.entries(reactions).flatMap(([type, list]) =>
     list.filter(desc => lowerReply.includes(desc.toLowerCase())).map(desc => ({ type, desc }))
   );
 
+  const triggeredRecommendations = (recommendations || []).filter(r =>
+    lowerReply.includes(r.trigger.toLowerCase())
+  );
+
+  const firstReaction = triggeredReactions[0]?.desc;
+  const firstRecommendation = triggeredRecommendations[0]?.name;
+
   console.log('[Reflecta] Triggered reactions:', triggeredReactions);
-  return reply;
+  console.log('[Reflecta] Triggered recommendations:', triggeredRecommendations);
+
+  return {
+    reply,
+    reaction_tag: firstReaction,
+    recommendation_tag: firstRecommendation
+  };
 }
