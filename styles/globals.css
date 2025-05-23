@@ -14,7 +14,6 @@
 
 .reflecta-message {
   max-width: 75%;
-  padding: 15px 15px 15px 30px;
   border-radius: 20px;
   word-wrap: break-word;
 }
@@ -22,6 +21,7 @@
 .reflecta-message.user {
   background-color: var(--user-color);
   color: white;
+  padding: 15px 15px 15px 30px;
   align-self: flex-end;
   border-bottom-right-radius: 5px;
 }
@@ -29,6 +29,7 @@
 .reflecta-message.assistant {
   background-color: var(--ai-color);
   color: black;
+  padding: 5px 30px 5px 15px;
   align-self: flex-start;
   border-bottom-left-radius: 5px;
 }
