@@ -11,14 +11,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const name = decodeURIComponent(raw);
 
-  const { data, error } = await supabase
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('name, prompt_core, description, color, tone_instructions, style_profile, is_active')
+    .eq('name', name)
+    .maybeSingle();
+
+  const { data: metadata, error: metaError } = await supabase
     .from('profile_metadata')
     .select('*')
     .eq('profile', name)
     .maybeSingle();
 
-  if (error) return res.status(500).json({ error: error.message });
-  if (!data) return res.status(404).json({ error: 'Profile metadata not found' });
+  if (profileError || metaError) {
+    return res.status(500).json({ error: profileError?.message || metaError?.message });
+  }
 
-  res.status(200).json(data);
+  if (!profile || !metadata) {
+    return res.status(404).json({ error: 'Profile or metadata not found' });
+  }
+
+  res.status(200).json({ ...profile, metadata });
 }
