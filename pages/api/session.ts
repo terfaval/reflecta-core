@@ -14,6 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    // 1. Meglévő nyitott session keresése
     const { data: existing, error: findError } = await supabase
       .from('sessions')
       .select('*')
@@ -29,9 +30,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ session: existing });
     }
 
+    // 2. Conversation lekérése vagy létrehozása
+    const { data: existingConv } = await supabase
+      .from('conversations')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('profile', profile)
+      .eq('is_archived', false)
+      .maybeSingle();
+
+    let conversationId = existingConv?.id;
+
+    if (!conversationId) {
+      const { data: newConv } = await supabase
+        .from('conversations')
+        .insert([{ user_id: userId, profile }])
+        .select()
+        .single();
+      conversationId = newConv?.id;
+    }
+
+    // 3. Új session létrehozása
     const { data, error: insertError } = await supabase
       .from('sessions')
-      .insert([{ user_id: userId, profile }])
+      .insert([{ user_id: userId, profile, conversation_id: conversationId }])
       .select()
       .single();
 

@@ -4,11 +4,11 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import supabase from '@/lib/supabase-admin';
 import { buildSystemPrompt } from '../../lib/buildSystemPrompt';
 
-// Típusok újrahasználata (opcionálisan kiszervezheted később a /types mappába)
 type UserPreferences = {
   answer_length?: 'short' | 'long';
-  style?: 'simple' | 'symbolic';
-  guidance?: 'free' | 'guided';
+  style_mode?: 'simple' | 'symbolic';
+  guidance_mode?: 'free' | 'guided';
+  tone_preference?: 'supportive' | 'confronting' | 'soothing';
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -25,7 +25,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Missing profileName or userId' });
   }
 
-  // 1. Lekérjük a profil alapadatait
   const { data: profile } = await supabase
     .from('profiles')
     .select('name, prompt_core, description')
@@ -36,20 +35,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(404).json({ error: 'Profile not found' });
   }
 
-  // 2. Lekérjük a metadata-t
   const { data: metadata } = await supabase
     .from('profile_metadata')
     .select('*')
     .eq('profile', profileName)
     .maybeSingle();
 
-  // 3. Lekérjük az összes reakciót
   const { data: allReactions } = await supabase
     .from('profile_reactions')
-    .select('reaction_type, description')
+    .select('rarity, reaction')
     .eq('profile', profileName);
 
-  // 4. Reakciók strukturálása
   const reactionTypes = ['common', 'typical', 'rare'] as const;
   const reactions: { [key in (typeof reactionTypes)[number]]: string[] } = {
     common: [],
@@ -59,11 +55,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   for (const type of reactionTypes) {
     reactions[type] = allReactions
-      ?.filter((r) => r.reaction_type === type)
-      .map((r) => r.description) || [];
+      ?.filter((r) => r.rarity === type)
+      .map((r) => r.reaction) || [];
   }
 
-  // 5. System prompt generálása
+  const { data: recommendations } = await supabase
+    .from('recommendations')
+    .select('name, trigger, type, intensity, guidance_direction, style_keywords, target_mode')
+    .eq('profile', profileName);
+
   const systemPrompt = buildSystemPrompt({
     name: profile.name,
     prompt_core: profile.prompt_core,
@@ -72,5 +72,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     reactions,
   }, preferences, sessionMeta);
 
-  return res.status(200).json({ systemPrompt });
+  return res.status(200).json({ systemPrompt, recommendations });
 }

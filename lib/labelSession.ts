@@ -1,12 +1,9 @@
-// File: /lib/labelSession.ts
-
 import supabase from '@/lib/supabase-admin';
 import { OpenAI } from 'openai';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
 export async function labelSession(sessionId: string): Promise<string> {
-  // Lekérjük a session entry-it (maximum 25)
   const { data: entries } = await supabase
     .from('entries')
     .select('role, content')
@@ -21,7 +18,7 @@ export async function labelSession(sessionId: string): Promise<string> {
       role: 'system',
       content: `You are a helpful assistant that summarizes self-reflection sessions in 1–4 words.
 Return a compact and intuitive label for the emotional or thematic content of the conversation.
-Do not explain. Just return the label as a short phrase.`
+Respond with a short phrase in Hungarian. Do not explain.`
     },
     ...entries.map((e) => ({ role: e.role, content: e.content }))
   ];
@@ -34,12 +31,14 @@ Do not explain. Just return the label as a short phrase.`
   });
 
   const label = chat.choices[0].message.content?.trim();
-  if (!label) throw new Error('No label generated');
+  if (!label || label.length < 2) throw new Error('No meaningful label generated');
 
   await supabase
     .from('sessions')
     .update({ label, label_confidence: 0.9 })
     .eq('id', sessionId);
+
+  console.log('[Reflecta] Label generated (HU) for session', sessionId, ':', label);
 
   return label;
 }
