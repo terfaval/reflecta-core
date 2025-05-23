@@ -27,6 +27,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         role: 'user' | 'assistant';
         content: string;
         created_at: string;
+        reaction_tag?: string;
+        recommendation_tag?: string;
       };
     };
 
@@ -52,17 +54,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       trigger = meta.data?.closing_trigger || '';
     }
 
-    // 1. entry mentése
+    // 1. entry mentése (reaction_tag + recommendation_tag támogatással)
     const { error } = await supabase.from('entries').insert({
       session_id: sessionId,
       role: entry.role,
       content: entry.content,
       created_at: entry.created_at,
+      reaction_tag: entry.reaction_tag || null,
+      recommendation_tag: entry.recommendation_tag || null,
     });
 
     if (error) return res.status(500).json({ error: error.message });
 
-    // 2. ha closing_trigger → session lezárása + label generálás
+    // 2. system_events rögzítése reaction és recommendation esetén
+    const events = [];
+
+    if (entry.reaction_tag) {
+      events.push({
+        session_id: sessionId,
+        event_type: 'reaction_triggered',
+        note: `Reaction: ${entry.reaction_tag}`
+      });
+    }
+
+    if (entry.recommendation_tag) {
+      events.push({
+        session_id: sessionId,
+        event_type: 'recommendation_triggered',
+        note: `Recommendation: ${entry.recommendation_tag}`
+      });
+    }
+
+    if (events.length) {
+      await supabase.from('system_events').insert(events);
+    }
+
+    // 3. ha closing_trigger → session lezárása + label generálás
     if (trigger && entry.content.trim() === trigger.trim()) {
       await supabase
         .from('sessions')
@@ -81,7 +108,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.warn('Labeling failed:', e);
       }
     }
-
 
     return res.status(200).json({ success: true });
   }
