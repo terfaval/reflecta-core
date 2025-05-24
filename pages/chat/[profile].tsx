@@ -1,5 +1,3 @@
-// File: pages/chat/[profile].tsx
-
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { profileStyles } from '../../styles/profileStyles';
@@ -23,19 +21,16 @@ export default function ChatPage() {
 
   const currentStyle = profileStyles[profile as string] || {};
 
-  // 🔹 Iframe üzenet fogadása WordPress-ből (origin ellenőrzéssel)
+  // 🔹 Iframe üzenet fogadása WordPress-ből
   useEffect(() => {
     const handleWPUser = (event: MessageEvent) => {
       console.log('[Reflecta DEBUG] Iframe üzenet érkezett:', event.data);
-
       if (event.data?.type === 'wp_user') {
         const { wp_user_id, email } = event.data;
-
         if (!wp_user_id || !email) {
           console.warn('[Reflecta] Hiányzó user adat:', event.data);
           return;
         }
-
         fetch('/api/user', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -49,7 +44,6 @@ export default function ChatPage() {
           .catch((err) => console.error('[Reflecta] user mentés hiba:', err));
       }
     };
-
     window.addEventListener('message', handleWPUser);
     return () => window.removeEventListener('message', handleWPUser);
   }, []);
@@ -57,7 +51,6 @@ export default function ChatPage() {
   // 🔹 Session és profil betöltés
   useEffect(() => {
     if (!profile || typeof profile !== 'string' || !userId) return;
-
     console.log('[Reflecta] Lekérdezés indul profilra:', profile);
 
     fetch('/api/session', {
@@ -125,7 +118,6 @@ export default function ChatPage() {
     });
 
     const { content } = await res.json();
-
     setEntries((prev) =>
       prev.map((e) => (e.id === thinkingId ? { ...e, content } : e))
     );
@@ -142,70 +134,70 @@ export default function ChatPage() {
           </div>
         ))}
       </div>
+
       <div className="reflecta-input">
-  <textarea
-    value={message}
-    onChange={(e) => setMessage(e.target.value)}
-    placeholder="Írd be, amit meg szeretnél osztani..."
-    disabled={loading}
-  />
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Írd be, amit meg szeretnél osztani..."
+          disabled={loading}
+        />
 
-  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-    <button
-      className="reflecta-send-button"
-      onClick={() => handleSend()}
-      disabled={loading}
-      aria-label="Küldés"
-    >
-      <svg
-  xmlns="http://www.w3.org/2000/svg"
-  width="20"
-  height="20"
-  viewBox="0 0 24 24"
-  fill="none"
-  stroke="currentColor"
-  strokeWidth="2"
-  strokeLinecap="round"
-  strokeLinejoin="round"
->
-  <line x1="22" y1="2" x2="11" y2="13" />
-  <polygon points="22 2 15 22 11 13 2 9 22 2" />
-</svg>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+          <button
+            className="reflecta-send-button"
+            onClick={() => handleSend()}
+            disabled={loading}
+            aria-label="Küldés"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
+          </button>
 
-    </button>
-
-    {closingTrigger && (
-      <button
-        onClick={async () => {
-          if (!closingTrigger || !sessionId) return;
-          await handleSend(closingTrigger);
-          await fetch('/api/session/close', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId }),
-          });
-        }}
-        className="reflecta-close-button"
-        aria-label="Zárás"
-      >   <svg
-  xmlns="http://www.w3.org/2000/svg"
-  width="20"
-  height="20"
-  viewBox="0 0 24 24"
-  fill="none"
-  stroke="currentColor"
-  strokeWidth="2"
-  strokeLinecap="round"
-  strokeLinejoin="round"
->
-  <path d="M18 6L6 18" />
-  <path d="M6 6l12 12" />
-</svg>
-
-      </button>
-    )}
-  </div>
-</div>
-
+          {closingTrigger && (
+            <button
+              onClick={async () => {
+                if (!closingTrigger || !sessionId) return;
+                await handleSend(closingTrigger);
+                await fetch('/api/session/close', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ sessionId }),
+                });
+              }}
+              className="reflecta-close-button"
+              aria-label="Zárás"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18 6L6 18" />
+                <path d="M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
