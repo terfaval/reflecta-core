@@ -170,35 +170,59 @@ export default function ChatPage() {
             </svg>
           </button>
 
+<button
+  className={`reflecta-send-button ${loading ? 'reflecta-send-loading' : ''}`}
+  onClick={() => handleSend()}
+  disabled={loading}
+  aria-label="Küldés"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="22" y1="2" x2="11" y2="13" />
+    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+  </svg>
+</button>
+
+
           {closingTrigger && (
             <button
-              onClick={async () => {
-                if (!closingTrigger || !sessionId) return;
-                await handleSend(closingTrigger);
-                await fetch('/api/session/close', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ sessionId }),
-                });
-              }}
-              className="reflecta-close-button"
-              aria-label="Zárás"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M18 6L6 18" />
-                <path d="M6 6l12 12" />
-              </svg>
-            </button>
+  onClick={async () => {
+    if (!closingTrigger || !sessionId) return;
+    await handleSend(closingTrigger);
+    await fetch('/api/session/close', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId }),
+    });
+  }}
+  className="reflecta-close-button has-label"
+  aria-label="Zárás"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M18 6L6 18" />
+    <path d="M6 6l12 12" />
+  </svg>
+  <span className="close-label">Mára elég volt</span>
+</button>
           )}
         </div>
       </div>

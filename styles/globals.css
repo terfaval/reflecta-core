@@ -2,10 +2,11 @@
 .reflecta-chat {
   margin: 0 auto;
   padding: 10px;
-  width: 80%;
+  width: 90%;
   box-sizing: border-box;
   background-color: var(--bg-color);
   font-family: 'Raleway', sans-serif;
+  font-size: 16px;
   display: flex;
   flex-direction: column;
 }
@@ -29,8 +30,8 @@
 }
 
 .reflecta-message.user {
-  background-color: var(--user-color);
-  color: white;
+  background-color: transparent;
+  color: black;
   padding: 5px 15px 5px 30px;
   align-self: flex-end;
   border-bottom-right-radius: 5px;
@@ -54,7 +55,7 @@
   border-radius: 20px;
   background-color: var(--bg-color);
   border: 0.5px solid var(--ai-color);
-  box-shadow: 0 0 8px var(--ai-color);
+  box-shadow: 0 10 8px var(--ai-color);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -62,8 +63,8 @@
 
 /* Szövegmező */
 .reflecta-input textarea {
-  width: 100%;
-  min-height: 100px;
+  width: 80%;
+  min-height: 50px;
   max-height: 200px;
   resize: vertical;
   padding: 10px 12px;
@@ -122,9 +123,15 @@
   color: white;
 }
 .reflecta-send-button:hover {
-  background-color: #006aa8; /* sötétebb árnyalat */
-  border-color: #006aa8;
+  background-color: var(--user-color);
+  border-color: var(--user-color);
   transform: scale(1.1);
+}
+
+.reflecta-send-loading {
+  background-color: white;
+  border-color: var(--user-color);
+  color: var(--user-color);
 }
 
 /* Lezárás gomb – világos ikon */
@@ -138,3 +145,19 @@
   color: white;
   transform: scale(1.1);
 }
+
+/* Alapértelmezésben elrejtve */
+.reflecta-close-button .close-label {
+  display: none;
+  margin-left: 8px;
+  font-size: 14px;
+  font-family: 'Raleway', sans-serif;
+  color: var(--user-color);
+  white-space: nowrap;
+}
+
+/* Hoverre megjelenik */
+.reflecta-close-button.has-label:hover .close-label {
+  display: inline;
+}
+
