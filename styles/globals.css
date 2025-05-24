@@ -152,6 +152,14 @@
   border-radius: 22px;
 }
 
+.reflecta-close-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  stroke: var(--user-color);
+  transition: stroke 0.2s ease;
+}
+
 .reflecta-close-animated {
   color: var(--user-color);
   display: flex;
