@@ -49,15 +49,16 @@
 /* Szövegmező */
 .reflecta-input textarea {
   width: 100%;
-  height: 70px;
+  min-height: 100px;
+  max-height: 200px;
+  resize: vertical;
+  color: #999;
   padding: 0;
   margin: 0;
   border: none;
   outline: none;
-  resize: none;
   font-size: 14px;
   background: transparent;
-  color: transparent; /* elrejti a beírt szöveget */
   caret-color: var(--user-color); /* a kurzor látszódik */
   text-align: center;
   vertical-align: middle;
@@ -68,9 +69,9 @@
 
 /* Kizárólag a placeholder szöveg jelenjen meg */
 .reflecta-input textarea::placeholder {
-  color: #999;
+  color: #333;
   font-style: italic;
-  text-align: center;
+  text-align: left;
 }
 
 
@@ -140,29 +141,4 @@
   background-color: var(--user-color);
   color: white;
   transform: scale(1.1);
-}
-
-.reflecta-textarea-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100px; /* vagy amekkora helyet szeretnél */
-}
-
-/* textarea normál módon jelenik meg */
-.reflecta-textarea-wrapper textarea {
-  width: 100%;
-  border: none;
-  outline: none;
-  padding: 10px 12px;
-  border-radius: 12px;
-  font-family: 'Raleway', sans-serif;
-  font-size: 14px;
-  background: transparent;
-  resize: none;
-  color: #333;
-}
-
-.reflecta-textarea-wrapper textarea::placeholder {
-  color: #aaa;
 }
