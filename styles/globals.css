@@ -7,7 +7,7 @@
   box-sizing: border-box;
   background-color: var(--bg-color);
   font-family: 'Raleway', sans-serif;
-  font-size: 12px;
+  font-size: 14px;
   display: flex;
   flex-direction: column;
 }
@@ -129,7 +129,6 @@
 .reflecta-send-button:hover {
   background-color: var(--user-color);
   border-color: var(--user-color);
-  transform: scale(1.1);
 }
 
 /* Küldés gomb – loading alatt kinézetváltás */
@@ -139,8 +138,13 @@
   color: var(--user-color);
 }
 
+.reflecta-close {
+  color: var(--user-color);
+}
+
 /* Lezárás gomb – animált ikon+szöveg */
 .reflecta-close-animated {
+  color: var(--user-color);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -148,7 +152,6 @@
   height: 44px;
   background-color: white;
   border: 1px solid var(--user-color);
-  color: var(--user-color);
   border-radius: 22px;
   cursor: pointer;
   transition: max-width 0.3s ease, background-color 0.3s ease;
