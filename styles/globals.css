@@ -33,7 +33,7 @@
 .reflecta-message.user {
   background-color: var(--ai-color);
   color: black;
-  padding: 5px 20px 5px 10px;
+  padding: 5px 20px 5px 40px;
   align-self: flex-end;
   border-bottom-right-radius: 2px;
 }
@@ -41,7 +41,7 @@
 .reflecta-message.assistant {
   background-color: var(--user-color);
   color: white;
-  padding: 5px 10px 5px 20px;
+  padding: 5px 40px 5px 20px;
   align-self: flex-start;
   border-bottom-left-radius: 2px;
 }
