@@ -142,9 +142,6 @@ export default function ChatPage() {
           placeholder="Írd be, amit meg szeretnél osztani..."
           disabled={loading}
         />
-  </div>
-
-
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
           <button
