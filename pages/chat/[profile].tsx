@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { profileStyles } from '../../styles/profileStyles';
 
 interface Entry {
@@ -19,7 +19,13 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
+  const bottomRef = useRef<HTMLDivElement | null>(null);
   const currentStyle = profileStyles[profile as string] || {};
+
+  // 🔽 Automatikus görgetés az utolsó üzenethez
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [entries]);
 
   // 🔹 Textarea auto-height
   useEffect(() => {
@@ -129,6 +135,7 @@ export default function ChatPage() {
             <p>{entry.content}</p>
           </div>
         ))}
+        <div ref={bottomRef} />
       </div>
 
       <div className="reflecta-input">
