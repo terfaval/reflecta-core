@@ -85,14 +85,22 @@
   scroll-behavior: smooth;
 }
 
+/* Új beíró doboz: kerek, finom border és árnyék a profil AI-színe alapján */
 .reflecta-input {
   position: sticky;
   bottom: 0;
-  background-color: var(--bg-color);
-  padding-top: 10px;
   margin-top: auto;
   z-index: 10;
+  padding: 14px 14px 60px 14px;
+  border-radius: 20px;
+  background-color: var(--bg-color);
+  border: 1px solid var(--ai-color);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.04), 0 0 0 3px var(--ai-color);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
+
 
 /* Küldés gomb – alapszín, ikonhoz */
 .reflecta-send-button {

@@ -143,66 +143,42 @@ export default function ChatPage() {
         ))}
       </div>
       <div className="reflecta-input">
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Írd be, amit meg szeretnél osztani..."
-          disabled={loading}
-        />
+  <textarea
+    value={message}
+    onChange={(e) => setMessage(e.target.value)}
+    placeholder="Írd be, amit meg szeretnél osztani..."
+    disabled={loading}
+  />
 
-        <button
-  className="reflecta-send-button"
-  onClick={() => handleSend()}
-  disabled={loading}
-  aria-label="Küldés"
->
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+    <button
+      className="reflecta-send-button"
+      onClick={() => handleSend()}
+      disabled={loading}
+      aria-label="Küldés"
     >
-      <line x1="22" y1="2" x2="11" y2="13" />
-      <polygon points="22 2 15 22 11 13 2 9 22 2" />
-    </svg>
-</button>
-        {closingTrigger && (
-  <button
-  onClick={async () => {
-    if (!closingTrigger || !sessionId) return;
-    await handleSend(closingTrigger);
-    await fetch('/api/session/close', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId }),
-    });
-  }}
-  className="reflecta-close-button"
-  aria-label="Zárás"
->
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 6L6 18" />
-      <path d="M6 6l12 12" />
-    </svg>
-  </button>
-)}
+      <svg ...>...</svg>
+    </button>
 
-      </div>
-    </div>
+    {closingTrigger && (
+      <button
+        onClick={async () => {
+          if (!closingTrigger || !sessionId) return;
+          await handleSend(closingTrigger);
+          await fetch('/api/session/close', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId }),
+          });
+        }}
+        className="reflecta-close-button"
+        aria-label="Zárás"
+      >
+        <svg ...>...</svg>
+      </button>
+    )}
+  </div>
+</div>
+
   );
 }
