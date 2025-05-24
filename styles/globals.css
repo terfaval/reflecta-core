@@ -10,12 +10,15 @@
   flex-direction: column;
 }
 
-
 /* Üzenet lista */
 .reflecta-messages {
+  flex: 1;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding-right: 4px;
+  scroll-behavior: smooth;
 }
 
 /* Üzenet kártyák */
@@ -41,9 +44,20 @@
   border-bottom-left-radius: 5px;
 }
 
-/* Input mező */
+/* Beviteli szekció */
 .reflecta-input {
-  margin-top: 20px;
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  z-index: 10;
+  padding: 14px;
+  border-radius: 20px;
+  background-color: var(--bg-color);
+  border: 0.5px solid var(--ai-color);
+  box-shadow: 0 0 8px var(--ai-color);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 /* Szövegmező */
@@ -52,30 +66,28 @@
   min-height: 100px;
   max-height: 200px;
   resize: vertical;
-  color: #999;
-  padding: 0;
+  padding: 10px 12px;
   margin: 0;
   border: none;
   outline: none;
+  font-family: 'Raleway', sans-serif;
   font-size: 14px;
+  color: #333;
   background: transparent;
-  caret-color: var(--user-color); /* a kurzor látszódik */
-  text-align: center;
-  vertical-align: middle;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  caret-color: var(--user-color);
+  text-align: left;
+  vertical-align: top;
+  display: block;
 }
 
-/* Kizárólag a placeholder szöveg jelenjen meg */
+/* Placeholder stílus */
 .reflecta-input textarea::placeholder {
-  color: #333;
+  color: #999;
   font-style: italic;
   text-align: left;
 }
 
-
-/* Gomb stílusok ikonhoz optimalizálva */
+/* Gombok (küldés + lezárás) */
 .reflecta-send-button,
 .reflecta-close-button {
   width: 44px;
@@ -91,35 +103,7 @@
   transition: all 0.2s ease;
 }
 
-/* Fixed input felület és görgetés */
-.reflecta-messages {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding-right: 4px;
-  scroll-behavior: smooth;
-}
-
-/* Új beíró doboz: kerek, finom border és árnyék a profil AI-színe alapján */
-.reflecta-input {
-  position: sticky;
-  bottom: 0;
-  margin-top: auto;
-  z-index: 10;
-  padding: 14px 14px 14px 14px;
-  border-radius: 20px;
-  background-color: var(--bg-color);
-  border: .5px solid var(--ai-color);
-  box-shadow: 0 0 8px var(--ai-color);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-
-/* Küldés gomb – alapszín, ikonhoz */
+/* Küldés gomb – színes */
 .reflecta-send-button {
   background-color: var(--user-color);
   border-color: var(--user-color);
@@ -131,7 +115,7 @@
   transform: scale(1.1);
 }
 
-/* Lezárás gomb – világos ikon gomb */
+/* Lezárás gomb – világos ikon */
 .reflecta-close-button {
   background-color: white;
   border-color: var(--user-color);
