@@ -21,7 +21,7 @@ export default function ChatPage() {
 
   const currentStyle = profileStyles[profile as string] || {};
 
-  // 🔹 Automatikus textarea magasságnövelés gépeléskor
+  // 🔹 Textarea auto-height
   useEffect(() => {
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
     if (!textarea) return;
@@ -35,7 +35,7 @@ export default function ChatPage() {
     return () => textarea.removeEventListener('input', handleInput);
   }, []);
 
-  // 🔹 WordPress-ből jövő iframe useradatok
+  // 🔹 WordPress-ből érkező user info
   useEffect(() => {
     const handleWPUser = (event: MessageEvent) => {
       if (event.data?.type === 'wp_user') {
@@ -55,28 +55,21 @@ export default function ChatPage() {
     return () => window.removeEventListener('message', handleWPUser);
   }, []);
 
-  // 🔹 Session és profil betöltés
+  // 🔹 Chatload endpoint használata (session + entries + closing_trigger)
   useEffect(() => {
     if (!profile || typeof profile !== 'string' || !userId) return;
 
-    fetch('/api/session', {
+    fetch('/api/chatload', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, profile }),
     })
       .then(res => res.json())
-      .then(data => {
-        if (!data?.session?.id) throw new Error('Hiányzó session.id');
-        setSessionId(data.session.id);
-        return fetch(`/api/entries?sessionId=${data.session.id}`);
+      .then(({ sessionId, entries, closingTrigger }) => {
+        setSessionId(sessionId);
+        setEntries(entries);
+        setClosingTrigger(closingTrigger);
       })
-      .then(res => res.json())
-      .then(data => setEntries(data.entries || []))
-      .catch(console.error);
-
-    fetch(`/api/profile?name=${profile}`)
-      .then(res => res.json())
-      .then(({ closing_trigger }) => setClosingTrigger(closing_trigger))
       .catch(console.error);
   }, [profile, userId]);
 
@@ -121,90 +114,71 @@ export default function ChatPage() {
 
   return (
     <div className="reflecta-chat" style={{
-      ...currentStyle, // 👈 megmaradnak a profilalapú színek!
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100vh',
-}}>
+      ...currentStyle,
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100vh',
+    }}>
       <div className="reflecta-messages" style={{
-  flex: 1,
-  overflowY: 'auto',
-  padding: '1rem',
-}}>
-  {entries.map(entry => (
-    <div key={entry.id} className={`reflecta-message ${entry.role}`}>
-      <p>{entry.content}</p>
-    </div>
-  ))}
-</div>
-
+        flex: 1,
+        overflowY: 'auto',
+        padding: '1rem',
+      }}>
+        {entries.map(entry => (
+          <div key={entry.id} className={`reflecta-message ${entry.role}`}>
+            <p>{entry.content}</p>
+          </div>
+        ))}
+      </div>
 
       <div className="reflecta-input">
-  <textarea
-    value={message}
-    onChange={(e) => setMessage(e.target.value)}
-    placeholder="Írd be, amit meg szeretnél osztani..."
-    disabled={loading}
-  />
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Írd be, amit meg szeretnél osztani..."
+          disabled={loading}
+        />
 
-  <div className="reflecta-input-buttons">
-    {closingTrigger && (
-      <button
-        onClick={async () => {
-          if (!closingTrigger || !sessionId) return;
-          await handleSend(closingTrigger);
-          await fetch('/api/session/close', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId }),
-          });
-        }}
-        className="reflecta-close-animated"
-        aria-label="Zárás"
-      >
-        <svg
-  className="reflecta-close-icon"
-  xmlns="http://www.w3.org/2000/svg"
-  width="20"
-  height="20"
-  viewBox="0 0 24 24"
-  fill="none"
-  stroke="currentColor"
-  strokeWidth="2"
-  strokeLinecap="round"
-  strokeLinejoin="round"
->
-  <path d="M18 6L6 18" />
-  <path d="M6 6l12 12" />
-</svg>
+        <div className="reflecta-input-buttons">
+          {closingTrigger && (
+            <button
+              onClick={async () => {
+                if (!closingTrigger || !sessionId) return;
+                await handleSend(closingTrigger);
+                await fetch('/api/session/close', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ sessionId }),
+                });
+              }}
+              className="reflecta-close-animated"
+              aria-label="Zárás"
+            >
+              <svg className="reflecta-close-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6L6 18" />
+                <path d="M6 6l12 12" />
+              </svg>
+              <span className="reflecta-close-label">Mára elég volt</span>
+            </button>
+          )}
 
-        <span className="reflecta-close-label">Mára elég volt</span>
-      </button>
-    )}
-
-    <button
-      className={`reflecta-send-button ${loading ? 'reflecta-send-loading' : ''}`}
-      onClick={() => handleSend()}
-      disabled={loading}
-      aria-label="Küldés"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <line x1="22" y1="2" x2="11" y2="13" />
-        <polygon points="22 2 15 22 11 13 2 9 22 2" />
-      </svg>
-    </button>
-  </div>
-</div>
+          <button
+            className={`reflecta-send-button ${loading ? 'reflecta-send-loading' : ''}`}
+            onClick={() => handleSend()}
+            disabled={loading}
+            aria-label="Küldés"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
