@@ -49,14 +49,30 @@
 /* Szövegmező */
 .reflecta-input textarea {
   width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  font-family: 'Raleway', sans-serif;
-  font-size: 12px;
-  min-height: 70px;
-  resize: vertical;
-  border: 1px solid #ccc;
+  height: 70px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 14px;
+  background: transparent;
+  color: transparent; /* elrejti a beírt szöveget */
+  caret-color: var(--user-color); /* a kurzor látszódik */
+  text-align: center;
+  vertical-align: middle;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+/* Kizárólag a placeholder szöveg jelenjen meg */
+.reflecta-input textarea::placeholder {
+  color: #999;
+  font-style: italic;
+  text-align: center;
+}
+
 
 /* Gomb stílusok ikonhoz optimalizálva */
 .reflecta-send-button,
@@ -91,11 +107,11 @@
   bottom: 0;
   margin-top: auto;
   z-index: 10;
-  padding: 14px 14px 60px 14px;
+  padding: 14px 14px 14px 14px;
   border-radius: 20px;
   background-color: var(--bg-color);
-  border: 1px solid var(--ai-color);
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.04), 0 0 0 3px var(--ai-color);
+  border: .5px solid var(--ai-color);
+  box-shadow: 0 0 8px var(--ai-color);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -124,4 +140,29 @@
   background-color: var(--user-color);
   color: white;
   transform: scale(1.1);
+}
+
+.reflecta-textarea-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px; /* vagy amekkora helyet szeretnél */
+}
+
+/* textarea normál módon jelenik meg */
+.reflecta-textarea-wrapper textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 14px;
+  background: transparent;
+  resize: none;
+  color: #333;
+}
+
+.reflecta-textarea-wrapper textarea::placeholder {
+  color: #aaa;
 }
