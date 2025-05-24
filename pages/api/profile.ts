@@ -31,5 +31,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(404).json({ error: 'Profile or metadata not found' });
   }
 
-  res.status(200).json({ ...profile, metadata });
+  res.status(200).json({ 
+  ...profile,
+  closing_trigger: metadata.closing_trigger // 🔥 ez kell nekünk!
+});
+
 }
