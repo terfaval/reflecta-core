@@ -144,14 +144,14 @@
   color: var(--user-color);
 }
 
-.reflecta-close-button {
+/* Lezárás gomb – animált ikon+szöveg */
+.reflecta-close-animated {
   color: var(--user-color);
   background-color: white;
   border: 1px solid var(--user-color);
   border-radius: 22px;
 }
 
-/* Lezárás gomb – animált ikon+szöveg */
 .reflecta-close-animated {
   color: var(--user-color);
   display: flex;
