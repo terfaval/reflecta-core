@@ -3,10 +3,11 @@
   margin: 0 auto;
   padding: 10px;
   width: 90%;
+  max-height: 50%;
   box-sizing: border-box;
   background-color: var(--bg-color);
   font-family: 'Raleway', sans-serif;
-  font-size: 16px;
+  font-size: 12px;
   display: flex;
   flex-direction: column;
 }
@@ -32,15 +33,15 @@
 .reflecta-message.user {
   background-color: var(--ai-color);
   color: black;
-  padding: 5px 10px 5px 10px;
+  padding: 5px 10px;
   align-self: flex-end;
   border-bottom-right-radius: 2px;
 }
 
 .reflecta-message.assistant {
   background-color: var(--user-color);
-  color: black;
-  padding: 5px 10px 5px 10px;
+  color: white;
+  padding: 5px 10px;
   align-self: flex-start;
   border-bottom-left-radius: 2px;
 }
@@ -55,15 +56,16 @@
   border-radius: 20px;
   background-color: var(--bg-color);
   border: 0.5px solid var(--ai-color);
-  box-shadow: 0 10 8px var(--ai-color);
+  box-shadow: 0 0 8px var(--ai-color);
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 12px;
 }
 
 /* Szövegmező */
 .reflecta-input textarea {
-  width: 80%;
+  flex: 1;
   min-height: 50px;
   max-height: 200px;
   resize: vertical;
@@ -82,16 +84,9 @@
   overflow: auto;
 }
 
-.reflecta-input textarea {
-  resize: vertical;
-  overflow: auto;
-
-  /* Safari, Chrome (WebKit) – sarkot eltünteti */
-  &::-webkit-resizer {
-    display: none;
-  }
+.reflecta-input textarea::-webkit-resizer {
+  display: none;
 }
-
 
 /* Placeholder stílus */
 .reflecta-input textarea::placeholder {
@@ -100,8 +95,16 @@
   text-align: left;
 }
 
+/* Gombkonténer (jobb oldal) */
+.reflecta-input-buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 10px;
+}
 
-/* Gombok (küldés + lezárás) */
+/* Gombok alapszabályai */
 .reflecta-send-button,
 .reflecta-close-button {
   width: 44px;
@@ -117,7 +120,7 @@
   transition: all 0.2s ease;
 }
 
-/* Küldés gomb – színes */
+/* Küldés gomb – normál állapot */
 .reflecta-send-button {
   background-color: var(--user-color);
   border-color: var(--user-color);
@@ -129,37 +132,48 @@
   transform: scale(1.1);
 }
 
+/* Küldés gomb – loading alatt kinézetváltás */
 .reflecta-send-loading {
   background-color: white;
   border-color: var(--user-color);
   color: var(--user-color);
 }
 
-/* Lezárás gomb – világos ikon */
-.reflecta-close-button {
+/* Lezárás gomb – animált ikon+szöveg */
+.reflecta-close-animated {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  height: 44px;
   background-color: white;
-  border-color: var(--user-color);
+  border: 1px solid var(--user-color);
   color: var(--user-color);
-}
-.reflecta-close-button:hover {
-  background-color: var(--user-color);
-  color: white;
-  transform: scale(1.1);
+  border-radius: 22px;
+  cursor: pointer;
+  transition: max-width 0.3s ease, background-color 0.3s ease;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 44px; /* csak ikon látszik alapból */
 }
 
-/* Alapértelmezésben elrejtve */
-.reflecta-close-button .close-label {
-  display: none;
+/* Hoverre kibomlik */
+.reflecta-close-animated:hover {
+  max-width: 180px;
+}
+
+/* A szöveg hover nélkül rejtve */
+.reflecta-close-label {
+  opacity: 0;
   margin-left: 8px;
   font-size: 14px;
-color: white;
   font-family: 'Raleway', sans-serif;
   color: var(--user-color);
   white-space: nowrap;
+  transition: opacity 0.2s ease 0.1s;
 }
 
-/* Hoverre megjelenik */
-.reflecta-close-button.has-label:hover .close-label {
-  display: inline;
+/* Hoverre megjelenik a szöveg */
+.reflecta-close-animated:hover .reflecta-close-label {
+  opacity: 1;
 }
-
