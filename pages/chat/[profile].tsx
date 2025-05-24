@@ -170,29 +170,43 @@ export default function ChatPage() {
       <line x1="22" y1="2" x2="11" y2="13" />
       <polygon points="22 2 15 22 11 13 2 9 22 2" />
     </svg>
-  )}
 </button>
 
 
         {closingTrigger && (
-          <button
-            onClick={async () => {
-              if (!closingTrigger || !sessionId) return;
-              setLoading(true);
-              await handleSend(closingTrigger);
-              await fetch('/api/session/close', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId }),
-              });
-              setLoading(false);
-            }}
-            className="reflecta-close-button"
-            disabled={loading}
-          >
-            Mára elég volt
-          </button>
-        )}
+  <button
+    onClick={async () => {
+      if (!closingTrigger || !sessionId) return;
+      setLoading(true);
+      await handleSend(closingTrigger);
+      await fetch('/api/session/close', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      });
+      setLoading(false);
+    }}
+    className="reflecta-close-button"
+    disabled={loading}
+    aria-label="Zárás"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M18 6L6 18" />
+      <path d="M6 6l12 12" />
+    </svg>
+  </button>
+)}
+
       </div>
     </div>
   );
