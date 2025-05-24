@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // belső kulcs kell, ha insert is történik
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // belső kulcs a beszúráshoz is kellhet
 );
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -14,49 +14,62 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (!userId || !profile) return res.status(400).json({ error: 'Missing userId or profile' });
 
-  // 🔹 1. Session keresés vagy létrehozás
-  const { data: existingSession, error: findError } = await supabase
-    .from('sessions')
+  // 🔹 1. Legutóbbi conversation ID lekérése
+  const { data: conversation, error: convError } = await supabase
+    .from('conversations')
     .select('id')
     .eq('user_id', userId)
     .eq('profile', profile)
     .order('started_at', { ascending: false })
     .limit(1)
-    .maybeSingle();
+    .single();
 
-  let sessionId = existingSession?.id;
-
-  if (!sessionId) {
-    const { data: newSession, error: insertError } = await supabase
-      .from('sessions')
-      .insert({ user_id: userId, profile })
-      .select('id')
-      .single();
-
-    if (insertError || !newSession) return res.status(500).json({ error: 'Session create failed' });
-    sessionId = newSession.id;
+  if (convError || !conversation) {
+    return res.status(404).json({ error: 'No conversation found' });
   }
 
-  // 🔹 2. Entries betöltése
+  const conversationId = conversation.id;
+
+  // 🔹 2. Ehhez tartozó összes session ID
+  const { data: sessions, error: sessError } = await supabase
+    .from('sessions')
+    .select('id')
+    .eq('conversation_id', conversationId);
+
+  if (sessError || !sessions?.length) {
+    return res.status(404).json({ error: 'No sessions found for conversation' });
+  }
+
+  const sessionIds = sessions.map((s) => s.id);
+
+  // 🔹 3. Az összes entries ezekhez
   const { data: entries, error: entriesError } = await supabase
     .from('entries')
     .select('id, role, content, created_at')
-    .eq('session_id', sessionId)
+    .in('session_id', sessionIds)
     .order('created_at', { ascending: true });
 
-  if (entriesError) return res.status(500).json({ error: 'Entries fetch failed' });
+  if (entriesError) {
+    return res.status(500).json({ error: 'Failed to fetch entries' });
+  }
 
-  // 🔹 3. Closing trigger betöltése
-  const { data: metadata, error: profileError } = await supabase
+  // 🔹 4. Closing trigger betöltése
+  const { data: metadata, error: metaError } = await supabase
     .from('profile_metadata')
     .select('closing_trigger')
     .eq('profile', profile)
     .single();
 
-  if (profileError) return res.status(500).json({ error: 'Profile metadata fetch failed' });
+  if (metaError || !metadata) {
+    return res.status(500).json({ error: 'Failed to fetch profile metadata' });
+  }
+
+  // 🔹 5. (Opcionális) Aktuális session – a legutolsó
+  const latestSessionId = sessionIds[sessionIds.length - 1];
 
   return res.status(200).json({
-    sessionId,
+    conversationId,
+    sessionId: latestSessionId, // erre megy a POST a frontendről
     entries,
     closingTrigger: metadata.closing_trigger || ''
   });
