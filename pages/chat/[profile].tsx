@@ -171,25 +171,20 @@ export default function ChatPage() {
       <polygon points="22 2 15 22 11 13 2 9 22 2" />
     </svg>
 </button>
-
-
         {closingTrigger && (
   <button
-    onClick={async () => {
-      if (!closingTrigger || !sessionId) return;
-      setLoading(true);
-      await handleSend(closingTrigger);
-      await fetch('/api/session/close', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId }),
-      });
-      setLoading(false);
-    }}
-    className="reflecta-close-button"
-    disabled={loading}
-    aria-label="Zárás"
-  >
+  onClick={async () => {
+    if (!closingTrigger || !sessionId) return;
+    await handleSend(closingTrigger);
+    await fetch('/api/session/close', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId }),
+    });
+  }}
+  className="reflecta-close-button"
+  aria-label="Zárás"
+>
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="20"
