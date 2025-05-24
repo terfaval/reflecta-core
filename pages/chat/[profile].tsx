@@ -121,6 +121,7 @@ export default function ChatPage() {
 
   return (
     <div className="reflecta-chat" style={{
+      ...currentStyle, // 👈 megmaradnak a profilalapú színek!
   display: 'flex',
   flexDirection: 'column',
   height: '100vh',
