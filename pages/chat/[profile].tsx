@@ -126,13 +126,18 @@ export default function ChatPage() {
   flexDirection: 'column',
   height: '100vh',
 }}>
-      <div className="reflecta-messages">
-        {entries.map(entry => (
-          <div key={entry.id} className={`reflecta-message ${entry.role}`}>
-            <p>{entry.content}</p>
-          </div>
-        ))}
-      </div>
+      <div className="reflecta-messages" style={{
+  flex: 1,
+  overflowY: 'auto',
+  padding: '1rem',
+}}>
+  {entries.map(entry => (
+    <div key={entry.id} className={`reflecta-message ${entry.role}`}>
+      <p>{entry.content}</p>
+    </div>
+  ))}
+</div>
+
 
       <div className="reflecta-input">
         <textarea
