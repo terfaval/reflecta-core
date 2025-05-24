@@ -33,7 +33,7 @@
 .reflecta-message.user {
   background-color: var(--ai-color);
   color: black;
-  padding: 5px 10px;
+  padding: 5px 20px 5px 10px;
   align-self: flex-end;
   border-bottom-right-radius: 2px;
 }
@@ -41,7 +41,7 @@
 .reflecta-message.assistant {
   background-color: var(--user-color);
   color: white;
-  padding: 5px 10px;
+  padding: 5px 10px 5px 20px;
   align-self: flex-start;
   border-bottom-left-radius: 2px;
 }
@@ -138,8 +138,17 @@
   color: var(--user-color);
 }
 
-.reflecta-close {
+.reflecta-send-loading:hover {
+  background-color: white;
+  border-color: var(--user-color);
   color: var(--user-color);
+}
+
+.reflecta-close-button {
+  color: var(--user-color);
+  background-color: white;
+  border: 1px solid var(--user-color);
+  border-radius: 22px;
 }
 
 /* Lezárás gomb – animált ikon+szöveg */
