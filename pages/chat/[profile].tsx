@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { profileStyles } from '../../styles/profileStyles';
+import SpiralLoader from '../../components/SpiralLoader';
 
 interface Entry {
   id: string;
@@ -18,22 +19,19 @@ export default function ChatPage() {
   const [closingTrigger, setClosingTrigger] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [loadingEntries, setLoadingEntries] = useState(true);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const currentStyle = profileStyles[profile as string] || {};
 
-  // 🔽 Automatikus görgetés az utolsó üzenethez
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [entries]);
 
-// 🔝 Egyszeri görgetés az oldal tetejére
-useEffect(() => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}, []);
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
-
-  // 🔹 Textarea auto-height
   useEffect(() => {
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
     if (!textarea) return;
@@ -47,7 +45,6 @@ useEffect(() => {
     return () => textarea.removeEventListener('input', handleInput);
   }, []);
 
-  // 🔹 WordPress-ből érkező user info
   useEffect(() => {
     const handleWPUser = (event: MessageEvent) => {
       if (event.data?.type === 'wp_user') {
@@ -67,7 +64,6 @@ useEffect(() => {
     return () => window.removeEventListener('message', handleWPUser);
   }, []);
 
-  // 🔹 Chatload endpoint használata (session + entries + closing_trigger)
   useEffect(() => {
     if (!profile || typeof profile !== 'string' || !userId) return;
 
@@ -81,6 +77,7 @@ useEffect(() => {
         setSessionId(sessionId);
         setEntries(entries);
         setClosingTrigger(closingTrigger);
+        setLoadingEntries(false);
       })
       .catch(console.error);
   }, [profile, userId]);
@@ -108,7 +105,10 @@ useEffect(() => {
 
     const thinkingId = `${Date.now()}-thinking`;
     setEntries(prev => [...prev, {
-      id: thinkingId, role: 'assistant', content: '…', created_at: new Date().toISOString(),
+      id: thinkingId,
+      role: 'assistant',
+      content: '…',
+      created_at: new Date().toISOString(),
     }]);
 
     const res = await fetch('/api/respond', {
@@ -136,11 +136,18 @@ useEffect(() => {
         overflowY: 'auto',
         padding: '1rem',
       }}>
-        {entries.map(entry => (
-          <div key={entry.id} className={`reflecta-message ${entry.role}`}>
-            <p>{entry.content}</p>
-          </div>
-        ))}
+        {loadingEntries && sessionId ? (
+          <SpiralLoader
+            userColor={currentStyle.accentColor || '#7A4DFF'}
+            aiColor={currentStyle.backgroundColor || '#FFB347'}
+          />
+        ) : (
+          entries.map(entry => (
+            <div key={entry.id} className={`reflecta-message ${entry.role}`}>
+              <p>{entry.content}</p>
+            </div>
+          ))
+        )}
         <div ref={bottomRef} />
       </div>
 
