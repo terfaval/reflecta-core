@@ -168,6 +168,7 @@ export default function ChatPage() {
           flex: 1,
           overflowY: 'auto',
           padding: '1rem',
+          position: 'relative',
         }}
       >
         {loadingEntries && sessionId ? (
@@ -187,14 +188,24 @@ export default function ChatPage() {
           ))
         )}
         <div ref={bottomRef} style={{ scrollMarginBottom: '60px' }} />
-      </div>
 
-      {showScrollDown && (
-        <ScrollToBottomButton
-          onClick={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })}
-          color={currentStyle['--ai-color'] || '#444'}
-        />
-      )}
+        {showScrollDown && (
+          <div style={{
+            position: 'sticky',
+            bottom: '-10px',
+            display: 'flex',
+            justifyContent: 'center',
+            pointerEvents: 'none',
+          }}>
+            <div style={{ pointerEvents: 'auto' }}>
+              <ScrollToBottomButton
+                onClick={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                color={currentStyle['--ai-color'] || '#444'}
+              />
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="reflecta-input">
         <textarea

@@ -10,7 +10,7 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 6px var(--ai-color);
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
