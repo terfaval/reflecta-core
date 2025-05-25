@@ -26,12 +26,17 @@ export default function ChatPage() {
   const currentStyle = profileStyles[profile as string] || {};
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [entries]);
+  bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+}, [entries]);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+useEffect(() => {
+  const observer = new ResizeObserver(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  });
+  if (bottomRef.current) observer.observe(bottomRef.current);
+  return () => observer.disconnect();
+}, []);
+
 
   useEffect(() => {
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
@@ -165,7 +170,7 @@ export default function ChatPage() {
           ))
 
         )}
-        <div ref={bottomRef} />
+        <div ref={bottomRef} style={{ scrollMarginBottom: '60px' }} />
       </div>
 
       <div className="reflecta-input">
