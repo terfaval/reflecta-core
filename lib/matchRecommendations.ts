@@ -1,6 +1,6 @@
 // File: lib/matchRecommendations.ts
 
-import { supabase } from '@/lib/supabase-admin';
+import supabase from '@/lib/supabase-admin';
 import { evaluateTriggerCondition, EvaluationContext } from './evaluateTriggerCondition';
 
 export async function matchRecommendations(
