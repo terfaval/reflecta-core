@@ -187,13 +187,14 @@ export default function ChatPage() {
           ))
         )}
         <div ref={bottomRef} style={{ scrollMarginBottom: '60px' }} />
-        {showScrollDown && (
-          <ScrollToBottomButton
-            onClick={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })}
-            color={currentStyle['--ai-color'] || '#444'}
-          />
-        )}
       </div>
+
+      {showScrollDown && (
+        <ScrollToBottomButton
+          onClick={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })}
+          color={currentStyle['--ai-color'] || '#444'}
+        />
+      )}
 
       <div className="reflecta-input">
         <textarea
