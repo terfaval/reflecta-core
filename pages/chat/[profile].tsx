@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { profileStyles } from '../../styles/profileStyles';
 import SpiralLoader from '../../components/SpiralLoader';
 import ThinkingDots from '../../components/ThinkingDots';
+import ScrollToBottomButton from '../../components/ScrollToBottomButton';
 
 interface Entry {
   id: string;
@@ -21,22 +22,23 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [loadingEntries, setLoadingEntries] = useState(true);
+  const [showScrollDown, setShowScrollDown] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const messagesRef = useRef<HTMLDivElement | null>(null);
   const currentStyle = profileStyles[profile as string] || {};
 
   useEffect(() => {
-  bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-}, [entries]);
-
-useEffect(() => {
-  const observer = new ResizeObserver(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  });
-  if (bottomRef.current) observer.observe(bottomRef.current);
-  return () => observer.disconnect();
-}, []);
+  }, [entries]);
 
+  useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    });
+    if (bottomRef.current) observer.observe(bottomRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
@@ -83,12 +85,10 @@ useEffect(() => {
         setSessionId(sessionId);
         setEntries(entries);
         setClosingTrigger(closingTrigger);
-        // ⛔ Ne kapcsoljuk ki itt rögtön a loadingEntries-t
       })
       .catch(console.error);
   }, [profile, userId]);
 
-  // ✅ Betöltési animáció biztosítása legalább 300ms ideig
   useEffect(() => {
     const minDelay = setTimeout(() => {
       if (entries.length > 0) {
@@ -98,6 +98,19 @@ useEffect(() => {
 
     return () => clearTimeout(minDelay);
   }, [entries]);
+
+  useEffect(() => {
+    const el = messagesRef.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+      setShowScrollDown(!nearBottom);
+    };
+
+    el.addEventListener('scroll', handleScroll);
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleSend = async (override?: string) => {
     const text = override || message;
@@ -148,11 +161,15 @@ useEffect(() => {
       flexDirection: 'column',
       height: '100vh',
     }}>
-      <div className="reflecta-messages" style={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: '1rem',
-      }}>
+      <div
+        className="reflecta-messages"
+        ref={messagesRef}
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '1rem',
+        }}
+      >
         {loadingEntries && sessionId ? (
           <SpiralLoader
             userColor={currentStyle['--user-color'] || '#7A4DFF'}
@@ -168,9 +185,14 @@ useEffect(() => {
               )}
             </div>
           ))
-
         )}
         <div ref={bottomRef} style={{ scrollMarginBottom: '60px' }} />
+        {showScrollDown && (
+          <ScrollToBottomButton
+            onClick={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })}
+            color={currentStyle['--ai-color'] || '#444'}
+          />
+        )}
       </div>
 
       <div className="reflecta-input">
