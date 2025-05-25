@@ -7,7 +7,6 @@ import { extractContext } from '@/lib/contextExtractor';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
-// 🔍 Új: reakció- és ajánlásdetektáló segédfüggvények user input alapján
 export async function generateResponse(sessionId: string): Promise<{
   reply: string;
   reaction_tag?: string;
@@ -18,7 +17,6 @@ export async function generateResponse(sessionId: string): Promise<{
     .select('id, profile, user_id, conversation_id')
     .eq('id', sessionId)
     .maybeSingle();
-
   if (!session) throw new Error('Session not found');
 
   const { data: profile } = await supabase
@@ -33,6 +31,8 @@ export async function generateResponse(sessionId: string): Promise<{
     .eq('profile', session.profile)
     .maybeSingle();
 
+  const closingTrigger = metadata?.closing_trigger?.trim();
+
   const reactionTypes = ['common', 'typical', 'rare'] as const;
   const reactions: { [key in (typeof reactionTypes)[number]]: string[] } = {
     common: [],
@@ -46,7 +46,6 @@ export async function generateResponse(sessionId: string): Promise<{
       .select('reaction')
       .eq('profile', session.profile)
       .eq('rarity', type);
-
     reactions[type] = data?.map((r) => r.reaction) || [];
   }
 
@@ -55,14 +54,35 @@ export async function generateResponse(sessionId: string): Promise<{
     .select('name, trigger')
     .eq('profile', session.profile);
 
-  const { data: entries } = await supabase
+  const { data: recentEntries } = await supabase
     .from('entries')
-    .select('role, content')
+    .select('role, content, reaction_tag')
     .eq('session_id', sessionId)
     .order('created_at', { ascending: true })
-    .limit(20);
+    .limit(30);
 
-  const lastUserEntry = [...(entries || [])].reverse().find((e) => e.role === 'user');
+  const { data: highlightedEntries } = await supabase
+    .from('entries')
+    .select('role, content, reaction_tag')
+    .eq('session_id', sessionId)
+    .not('reaction_tag', 'is', null)
+    .order('created_at', { ascending: true })
+    .limit(10);
+
+  const allEntriesMap = new Map<string, { role: string; content: string; reaction_tag?: string }>();
+  [...(highlightedEntries || []), ...(recentEntries || [])].forEach(entry => {
+    allEntriesMap.set(`${entry.role}-${entry.content}`, entry);
+  });
+
+  const entries = Array.from(allEntriesMap.values());
+
+  const lastUserEntry = [...entries]
+    .reverse()
+    .find(e =>
+      e.role === 'user' &&
+      (!closingTrigger || e.content.trim() !== closingTrigger)
+    );
+
   let sessionMeta = {};
   if (lastUserEntry) {
     const content = lastUserEntry.content.trim();
@@ -87,7 +107,7 @@ export async function generateResponse(sessionId: string): Promise<{
 
   const messages = [
     { role: 'system', content: systemPrompt },
-    ...(entries || []).map((e) => ({ role: e.role, content: e.content }))
+    ...entries.map((e) => ({ role: e.role, content: e.content }))
   ];
 
   const chat = await openai.chat.completions.create({
@@ -96,7 +116,7 @@ export async function generateResponse(sessionId: string): Promise<{
     temperature: 0.7,
   });
 
-    const reply = chat.choices[0].message.content;
+  const reply = chat.choices[0].message.content;
   if (!reply) throw new Error('No reply generated');
 
   let reaction_tag = undefined;
