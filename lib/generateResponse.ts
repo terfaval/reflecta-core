@@ -1,10 +1,45 @@
-// Reflecta: generateResponse.ts
-
 import supabase from '@/lib/supabase-admin';
 import { buildSystemPrompt } from './buildSystemPrompt';
 import { OpenAI } from 'openai';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+
+// 🔍 Új: reakció- és ajánlásdetektáló segédfüggvények user input alapján
+
+async function matchReactions(profile: string, message: string) {
+  const { data: reactions } = await supabase
+    .from('profile_reactions')
+    .select('reaction, trigger_context, rarity')
+    .eq('profile', profile)
+    .eq('rarity', 'common');
+
+  if (!reactions) return null;
+
+  const msg = message.toLowerCase();
+  for (const reaction of reactions) {
+    const triggers = reaction.trigger_context?.toLowerCase().split(/[\s,]+/) || [];
+    if (triggers.some(t => msg.includes(t))) return reaction.reaction;
+  }
+
+  return null;
+}
+
+async function matchRecommendations(profile: string, message: string) {
+  const { data: recs } = await supabase
+    .from('recommendations')
+    .select('name, trigger, can_lead')
+    .eq('profile', profile)
+    .eq('can_lead', true);
+
+  if (!recs) return null;
+
+  const msg = message.toLowerCase();
+  for (const rec of recs) {
+    if (rec.trigger && msg.includes(rec.trigger.toLowerCase())) return rec.name;
+  }
+
+  return null;
+}
 
 export async function generateResponse(sessionId: string): Promise<{
   reply: string;
@@ -97,25 +132,42 @@ export async function generateResponse(sessionId: string): Promise<{
   const reply = chat.choices[0].message.content;
   if (!reply) throw new Error('No reply generated');
 
-  const lowerReply = reply.toLowerCase();
+  // 🔄 Új: triggerelés USER input alapján
+  let reaction_tag = undefined;
+  let recommendation_tag = undefined;
 
-  const triggeredReactions = Object.entries(reactions).flatMap(([type, list]) =>
-    list.filter(desc => lowerReply.includes(desc.toLowerCase())).map(desc => ({ type, desc }))
-  );
+  if (lastUserEntry) {
+    reaction_tag = await matchReactions(profile.name, lastUserEntry.content);
+    recommendation_tag = await matchRecommendations(profile.name, lastUserEntry.content);
+  }
 
-  const triggeredRecommendations = (recommendations || []).filter(r =>
-    lowerReply.includes(r.trigger.toLowerCase())
-  );
+  // 🔔 System event naplózás, ha történt trigger
+if (reaction_tag || recommendation_tag) {
+  const events = [];
 
-  const firstReaction = triggeredReactions[0]?.desc;
-  const firstRecommendation = triggeredRecommendations[0]?.name;
+  if (reaction_tag) {
+    events.push({
+      session_id: sessionId,
+      event_type: 'reaction_triggered',
+      note: `Reakció aktiválódott: ${reaction_tag}`
+    });
+  }
 
-  console.log('[Reflecta] Triggered reactions:', triggeredReactions);
-  console.log('[Reflecta] Triggered recommendations:', triggeredRecommendations);
+  if (recommendation_tag) {
+    events.push({
+      session_id: sessionId,
+      event_type: 'recommendation_triggered',
+      note: `Ajánlás aktiválódott: ${recommendation_tag}`
+    });
+  }
+
+  await supabase.from('system_events').insert(events);
+}
+
 
   return {
     reply,
-    reaction_tag: firstReaction,
-    recommendation_tag: firstRecommendation
+    reaction_tag,
+    recommendation_tag
   };
 }
