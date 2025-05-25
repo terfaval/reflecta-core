@@ -23,6 +23,8 @@ export default function ChatPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [showScrollDown, setShowScrollDown] = useState(false);
+  const [page, setPage] = useState(0);
+  const limit = 20;
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
@@ -72,45 +74,46 @@ export default function ChatPage() {
     return () => window.removeEventListener('message', handleWPUser);
   }, []);
 
-  useEffect(() => {
-    if (!profile || typeof profile !== 'string' || !userId) return;
+  const fetchMoreEntries = async () => {
+    if (!userId || !profile) return;
 
-    fetch('/api/chatload', {
+    const res = await fetch('/api/chatload', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, profile }),
-    })
-      .then(res => res.json())
-      .then(({ sessionId, entries, closingTrigger }) => {
-        setSessionId(sessionId);
-        setEntries(entries);
-        setClosingTrigger(closingTrigger);
-      })
-      .catch(console.error);
-  }, [profile, userId]);
+      body: JSON.stringify({ userId, profile, offset: page * limit, limit }),
+    });
+
+    const data = await res.json();
+    if (data?.entries?.length) {
+      setSessionId(data.sessionId);
+      setClosingTrigger(data.closingTrigger);
+      setEntries(prev => [...data.entries, ...prev]);
+    }
+  };
 
   useEffect(() => {
-    const minDelay = setTimeout(() => {
-      if (entries.length > 0) {
-        setLoadingEntries(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(minDelay);
-  }, [entries]);
+    if (!profile || typeof profile !== 'string' || !userId) return;
+    fetchMoreEntries();
+  }, [profile, userId]);
 
   useEffect(() => {
     const el = messagesRef.current;
     if (!el) return;
 
     const handleScroll = () => {
+      const nearTop = el.scrollTop < 50;
       const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
       setShowScrollDown(!nearBottom);
+
+      if (nearTop && !loading) {
+        setPage(prev => prev + 1);
+        fetchMoreEntries();
+      }
     };
 
     el.addEventListener('scroll', handleScroll);
     return () => el.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [loading]);
 
   const handleSend = async (override?: string) => {
     const text = override || message;

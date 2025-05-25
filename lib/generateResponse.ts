@@ -3,7 +3,9 @@ import { buildSystemPrompt } from './buildSystemPrompt';
 import { OpenAI } from 'openai';
 import { matchReactions } from '@/lib/matchReactions';
 import { matchRecommendations } from '@/lib/matchRecommendations';
-import { extractContext } from '@/lib/contextExtractor'; 
+import { extractContext } from '@/lib/contextExtractor';
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
+ 
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
@@ -105,10 +107,14 @@ export async function generateResponse(sessionId: string): Promise<{
     sessionMeta
   );
 
-  const messages = [
-    { role: 'system', content: systemPrompt },
-    ...entries.map((e) => ({ role: e.role, content: e.content }))
-  ];
+  const messages: ChatCompletionMessageParam[] = [
+  { role: 'system', content: systemPrompt },
+  ...entries.map((e) => ({
+    role: e.role as 'user' | 'assistant',
+    content: e.content
+  }))
+];
+
 
   const chat = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
