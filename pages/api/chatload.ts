@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Missing userId or profile' });
   }
 
-  // 🔹 1. Legutóbbi conversation ID lekérése
+  // 1. Conversation ID
   const { data: conversation, error: convError } = await supabase
     .from('conversations')
     .select('id')
@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const conversationId = conversation.id;
 
-  // 🔹 2. Session ID-k ehhez a conversationhöz
+  // 2. Sessions for this conversation
   const { data: sessions, error: sessError } = await supabase
     .from('sessions')
     .select('id')
@@ -42,10 +42,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(404).json({ error: 'No sessions found for conversation' });
   }
 
-  const sessionIds = sessions.map((s) => s.id);
+  const sessionIds = sessions.map(s => s.id);
   const latestSessionId = sessionIds[sessionIds.length - 1];
 
-  // 🔹 3. Lapozott entries
+  // 3. Entries by pagination
   const { data: entries, error: entriesError } = await supabase
     .from('entries')
     .select('id, role, content, created_at')
@@ -57,7 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Failed to fetch entries' });
   }
 
-  // 🔹 4. Closing trigger
+  // 4. Closing trigger
   const { data: metadata, error: metaError } = await supabase
     .from('profile_metadata')
     .select('closing_trigger')
