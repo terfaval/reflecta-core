@@ -90,7 +90,12 @@ export default function ChatPage() {
       if (data?.entries?.length) {
         setSessionId(data.sessionId);
         setClosingTrigger(data.closingTrigger);
-        setEntries(prev => [...data.entries, ...prev]);
+
+        setEntries(prev => {
+          const existingIds = new Set(prev.map(e => e.id));
+          const newOnes = data.entries.filter(e => !existingIds.has(e.id));
+          return [...newOnes, ...prev];
+        });
       }
 
       setLoadingEntries(false);
@@ -123,6 +128,11 @@ export default function ChatPage() {
     el.addEventListener('scroll', handleScroll);
     return () => el.removeEventListener('scroll', handleScroll);
   }, [loading]);
+
+  useEffect(() => {
+    console.log('[state] entries state updated:', entries.length);
+    console.table(entries.map(e => ({ id: e.id, role: e.role, created: e.created_at })));
+  }, [entries]);
 
   const handleSend = async (override?: string) => {
     const text = override || message;
@@ -189,15 +199,21 @@ export default function ChatPage() {
             aiColor={currentStyle['--ai-color'] || '#FFB347'}
           />
         ) : (
-          entries.map(entry => (
-            <div key={entry.id} className={`reflecta-message ${entry.role}`}>
-              {entry.content === '__thinking__' ? (
-                <ThinkingDots />
-              ) : (
-                <p>{entry.content}</p>
-              )}
+          entries.length === 0 ? (
+            <div className="reflecta-empty-state">
+              <p>Még nincs üzenet ebben a beszélgetésben.</p>
             </div>
-          ))
+          ) : (
+            entries.map(entry => (
+              <div key={entry.id} className={`reflecta-message ${entry.role}`}>
+                {entry.content === '__thinking__' ? (
+                  <ThinkingDots />
+                ) : (
+                  <p>{entry.content}</p>
+                )}
+              </div>
+            ))
+          )
         )}
         <div ref={bottomRef} style={{ scrollMarginBottom: '60px' }} />
 
