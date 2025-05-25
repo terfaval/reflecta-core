@@ -74,14 +74,14 @@ export default function ChatPage() {
     return () => window.removeEventListener('message', handleWPUser);
   }, []);
 
-  const fetchMoreEntries = async () => {
+  const fetchMoreEntries = async (pageIndex: number) => {
     if (!userId || !profile) return;
 
     try {
       const res = await fetch('/api/chatload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, profile, offset: page * limit, limit }),
+        body: JSON.stringify({ userId, profile, offset: pageIndex * limit, limit }),
       });
 
       const data = await res.json();
@@ -107,7 +107,9 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!profile || typeof profile !== 'string' || !userId) return;
-    fetchMoreEntries();
+    setPage(0);
+    setEntries([]);
+    fetchMoreEntries(0);
   }, [profile, userId]);
 
   useEffect(() => {
@@ -120,8 +122,12 @@ export default function ChatPage() {
       setShowScrollDown(!nearBottom);
 
       if (nearTop && !loading) {
-        setPage(prev => prev + 1);
-        fetchMoreEntries();
+        setPage(prev => {
+          const nextPage = prev + 1;
+          console.log('[scroll] requesting page:', nextPage);
+          fetchMoreEntries(nextPage);
+          return nextPage;
+        });
       }
     };
 
