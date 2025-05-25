@@ -77,10 +77,21 @@ export default function ChatPage() {
         setSessionId(sessionId);
         setEntries(entries);
         setClosingTrigger(closingTrigger);
-        setLoadingEntries(false);
+        // ⛔ Ne kapcsoljuk ki itt rögtön a loadingEntries-t
       })
       .catch(console.error);
   }, [profile, userId]);
+
+  // ✅ Betöltési animáció biztosítása legalább 300ms ideig
+  useEffect(() => {
+    const minDelay = setTimeout(() => {
+      if (entries.length > 0) {
+        setLoadingEntries(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(minDelay);
+  }, [entries]);
 
   const handleSend = async (override?: string) => {
     const text = override || message;
@@ -140,7 +151,6 @@ export default function ChatPage() {
           <SpiralLoader
             userColor={currentStyle['--user-color'] || '#7A4DFF'}
             aiColor={currentStyle['--ai-color'] || '#FFB347'}
-
           />
         ) : (
           entries.map(entry => (
