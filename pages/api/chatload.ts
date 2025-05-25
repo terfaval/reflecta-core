@@ -58,4 +58,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // 🔹 4. Closing trigger
-  const { data: metadata, error: met
+  const { data: metadata, error: metaError } = await supabase
+    .from('profile_metadata')
+    .select('closing_trigger')
+    .eq('profile', profile)
+    .single();
+
+  if (metaError || !metadata) {
+    return res.status(500).json({ error: 'Failed to fetch profile metadata' });
+  }
+
+  return res.status(200).json({
+    conversationId,
+    sessionId: latestSessionId,
+    sessionIds,
+    entries,
+    closingTrigger: metadata.closing_trigger || ''
+  });
+}
