@@ -1,46 +1,12 @@
 import supabase from '@/lib/supabase-admin';
 import { buildSystemPrompt } from './buildSystemPrompt';
 import { OpenAI } from 'openai';
+import { matchReactions } from '@/lib/matchReactions';
+import { matchRecommendations } from '@/lib/matchRecommendations';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
 // 🔍 Új: reakció- és ajánlásdetektáló segédfüggvények user input alapján
-
-async function matchReactions(profile: string, message: string) {
-  const { data: reactions } = await supabase
-    .from('profile_reactions')
-    .select('reaction, trigger_context, rarity')
-    .eq('profile', profile)
-    .eq('rarity', 'common');
-
-  if (!reactions) return null;
-
-  const msg = message.toLowerCase();
-  for (const reaction of reactions) {
-    const triggers = reaction.trigger_context?.toLowerCase().split(/[\s,]+/) || [];
-    if (triggers.some(t => msg.includes(t))) return reaction.reaction;
-  }
-
-  return null;
-}
-
-async function matchRecommendations(profile: string, message: string) {
-  const { data: recs } = await supabase
-    .from('recommendations')
-    .select('name, trigger, can_lead')
-    .eq('profile', profile)
-    .eq('can_lead', true);
-
-  if (!recs) return null;
-
-  const msg = message.toLowerCase();
-  for (const rec of recs) {
-    if (rec.trigger && msg.includes(rec.trigger.toLowerCase())) return rec.name;
-  }
-
-  return null;
-}
-
 export async function generateResponse(sessionId: string): Promise<{
   reply: string;
   reaction_tag?: string;
@@ -137,8 +103,20 @@ export async function generateResponse(sessionId: string): Promise<{
   let recommendation_tag = undefined;
 
   if (lastUserEntry) {
-    reaction_tag = await matchReactions(profile.name, lastUserEntry.content);
-    recommendation_tag = await matchRecommendations(profile.name, lastUserEntry.content);
+    const content = lastUserEntry.content.trim();
+
+reaction_tag = await matchReactions(profile.name, content, {
+  message: content,
+  entryLength: content.length,
+  // később: tags, features, sessionStats
+});
+
+recommendation_tag = await matchRecommendations(profile.name, content, {
+  message: content,
+  entryLength: content.length,
+  // később: tags, features, sessionStats
+});
+
   }
 
   // 🔔 System event naplózás, ha történt trigger
