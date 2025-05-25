@@ -25,6 +25,7 @@ export default function ChatPage() {
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [page, setPage] = useState(0);
   const limit = 20;
+  const isFetchingRef = useRef(false);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
@@ -75,8 +76,9 @@ export default function ChatPage() {
   }, []);
 
   const fetchMoreEntries = async (pageIndex: number) => {
-    if (!userId || !profile) return;
+    if (!userId || !profile || isFetchingRef.current) return;
 
+    isFetchingRef.current = true;
     try {
       const res = await fetch('/api/chatload', {
         method: 'POST',
@@ -96,12 +98,18 @@ export default function ChatPage() {
           const newOnes = data.entries.filter(e => !existingIds.has(e.id));
           return [...newOnes, ...prev];
         });
+
+        if (data.entries?.length > 0) {
+          console.log('[chatload] first entry:', data.entries[0]);
+        }
       }
 
       setLoadingEntries(false);
     } catch (err) {
       console.error('[chatload] fetch error:', err);
       setLoadingEntries(false);
+    } finally {
+      isFetchingRef.current = false;
     }
   };
 
