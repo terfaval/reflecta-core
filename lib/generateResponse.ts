@@ -96,50 +96,42 @@ export async function generateResponse(sessionId: string): Promise<{
     temperature: 0.7,
   });
 
-  const reply = chat.choices[0].message.content;
+    const reply = chat.choices[0].message.content;
   if (!reply) throw new Error('No reply generated');
 
-  // 🔄 Új: triggerelés USER input alapján
   let reaction_tag = undefined;
   let recommendation_tag = undefined;
 
   if (lastUserEntry) {
     const content = lastUserEntry.content.trim();
+    const context = extractContext(content);
 
-
-const context = extractContext(content);
-
-reaction_tag = await matchReactions(profile.name, content, context);
-recommendation_tag = await matchRecommendations(profile.name, content, context);
-
-
-  // 🔔 System event naplózás, ha történt trigger
-if (reaction_tag || recommendation_tag) {
-  const events = [];
-
-  if (reaction_tag) {
-    events.push({
-      session_id: sessionId,
-      event_type: 'reaction_triggered',
-      note: `Reakció aktiválódott: ${reaction_tag}`
-    });
+    reaction_tag = await matchReactions(profile.name, content, context);
+    recommendation_tag = await matchRecommendations(profile.name, content, context);
   }
 
-  if (recommendation_tag) {
-    events.push({
-      session_id: sessionId,
-      event_type: 'recommendation_triggered',
-      note: `Ajánlás aktiválódott: ${recommendation_tag}`
-    });
+  if (reaction_tag || recommendation_tag) {
+    const events = [];
+    if (reaction_tag) {
+      events.push({
+        session_id: sessionId,
+        event_type: 'reaction_triggered',
+        note: `Reakció aktiválódott: ${reaction_tag}`,
+      });
+    }
+    if (recommendation_tag) {
+      events.push({
+        session_id: sessionId,
+        event_type: 'recommendation_triggered',
+        note: `Ajánlás aktiválódott: ${recommendation_tag}`,
+      });
+    }
+    await supabase.from('system_events').insert(events);
   }
-
-  await supabase.from('system_events').insert(events);
-}
-
 
   return {
     reply,
     reaction_tag,
-    recommendation_tag
+    recommendation_tag,
   };
 }
