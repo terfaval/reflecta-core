@@ -77,17 +77,26 @@ export default function ChatPage() {
   const fetchMoreEntries = async () => {
     if (!userId || !profile) return;
 
-    const res = await fetch('/api/chatload', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, profile, offset: page * limit, limit }),
-    });
+    try {
+      const res = await fetch('/api/chatload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, profile, offset: page * limit, limit }),
+      });
 
-    const data = await res.json();
-    if (data?.entries?.length) {
-      setSessionId(data.sessionId);
-      setClosingTrigger(data.closingTrigger);
-      setEntries(prev => [...data.entries, ...prev]);
+      const data = await res.json();
+      console.log('[chatload] response:', data);
+
+      if (data?.entries?.length) {
+        setSessionId(data.sessionId);
+        setClosingTrigger(data.closingTrigger);
+        setEntries(prev => [...data.entries, ...prev]);
+      }
+
+      setLoadingEntries(false);
+    } catch (err) {
+      console.error('[chatload] fetch error:', err);
+      setLoadingEntries(false);
     }
   };
 
@@ -174,7 +183,7 @@ export default function ChatPage() {
           position: 'relative',
         }}
       >
-        {loadingEntries && sessionId ? (
+        {loadingEntries && !entries.length ? (
           <SpiralLoader
             userColor={currentStyle['--user-color'] || '#7A4DFF'}
             aiColor={currentStyle['--ai-color'] || '#FFB347'}
