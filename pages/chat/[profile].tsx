@@ -67,13 +67,25 @@ export default function ChatPage() {
           body: JSON.stringify({ wp_user_id, email }),
         })
           .then(res => res.json())
-          .then(({ user_id }) => setUserId(user_id))
+          .then(async ({ user_id }) => {
+            setUserId(user_id);
+            // 🔹 Session létrehozása vagy lekérése
+            const sessionRes = await fetch('/api/session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId: user_id, profile }),
+            });
+            const sessionData = await sessionRes.json();
+            if (sessionData?.session?.id) {
+              setSessionId(sessionData.session.id);
+            }
+          })
           .catch(console.error);
       }
     };
     window.addEventListener('message', handleWPUser);
     return () => window.removeEventListener('message', handleWPUser);
-  }, []);
+  }, [profile]);
 
   const fetchMoreEntries = async (pageIndex: number) => {
     if (!userId || !profile || isFetchingRef.current) return;
@@ -87,10 +99,8 @@ export default function ChatPage() {
       });
 
       const data = await res.json();
-      console.log('[chatload] response:', data);
 
       if (data?.entries?.length) {
-        setSessionId(data.sessionId);
         setClosingTrigger(data.closingTrigger);
 
         setEntries(prev => {
@@ -98,10 +108,6 @@ export default function ChatPage() {
           const newOnes = data.entries.filter(e => !existingIds.has(e.id));
           return [...newOnes, ...prev];
         });
-
-        if (data.entries?.length > 0) {
-          console.log('[chatload] first entry:', data.entries[0]);
-        }
       }
 
       setLoadingEntries(false);
@@ -114,11 +120,11 @@ export default function ChatPage() {
   };
 
   useEffect(() => {
-    if (!profile || typeof profile !== 'string' || !userId) return;
+    if (!profile || typeof profile !== 'string' || !userId || !sessionId) return;
     setPage(0);
     setEntries([]);
     fetchMoreEntries(0);
-  }, [profile, userId]);
+  }, [profile, userId, sessionId]);
 
   useEffect(() => {
     const el = messagesRef.current;
@@ -132,7 +138,6 @@ export default function ChatPage() {
       if (nearTop && !loading) {
         setPage(prev => {
           const nextPage = prev + 1;
-          console.log('[scroll] requesting page:', nextPage);
           fetchMoreEntries(nextPage);
           return nextPage;
         });
@@ -142,11 +147,6 @@ export default function ChatPage() {
     el.addEventListener('scroll', handleScroll);
     return () => el.removeEventListener('scroll', handleScroll);
   }, [loading]);
-
-  useEffect(() => {
-    console.log('[state] entries state updated:', entries.length);
-    console.table(entries.map(e => ({ id: e.id, role: e.role, created: e.created_at })));
-  }, [entries]);
 
   const handleSend = async (override?: string) => {
     const text = override || message;

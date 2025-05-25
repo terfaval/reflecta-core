@@ -47,7 +47,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .insert([{ user_id: userId, profile }])
         .select()
         .single();
-      conversationId = newConv?.id;
+      if (!newConv || !newConv.id) {
+  throw new Error('Failed to create new conversation');
+}
+conversationId = newConv.id;
+
     }
 
     // 3. Új session létrehozása
