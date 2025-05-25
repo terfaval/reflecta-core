@@ -57,12 +57,12 @@ export function evaluateTriggerCondition(
   }
 
   if ('keyword_count' in condition) {
-    for (const [word, rule] of Object.entries(condition.keyword_count)) {
-      const count = (context.message.match(new RegExp(word, 'gi')) || []).length;
-      if (count < rule.gte) return false;
-    }
-    return true;
+  for (const [word, rule] of Object.entries(condition.keyword_count as Record<string, { gte: number }>)) {
+    const count = (context.message.match(new RegExp(word, 'gi')) || []).length;
+    if (count < rule.gte) return false;
   }
+  return true;
+}
 
   if ('symbolic_language' in condition && context.features) {
     return context.features.symbolic_language === condition.symbolic_language;
