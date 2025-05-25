@@ -1,4 +1,4 @@
-.spiral-loader {
+.spiralLoader {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -6,7 +6,7 @@
   padding: 10px 0;
 }
 
-.spiral-svg {
+.spiralSvg {
   width: 40px;
   height: 40px;
 }
