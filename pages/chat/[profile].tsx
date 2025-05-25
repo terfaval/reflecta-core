@@ -59,6 +59,27 @@ export default function ChatPage() {
     return () => textarea.removeEventListener('input', handleInput);
   }, []);
 
+  const loadInitialData = async (user_id: string, profile: string) => {
+    try {
+      const sessionRes = await fetch('/api/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user_id, profile }),
+      });
+      const sessionData = await sessionRes.json();
+      if (!sessionData?.session?.id) return;
+
+      const profileRes = await fetch(`/api/profile?name=${profile}`);
+      const profileData = await profileRes.json();
+      setStartingPrompts(profileData?.starting_prompts || []);
+
+      setSessionId(sessionData.session.id);
+      setSessionIsFresh(true);
+    } catch (err) {
+      console.error('[loadInitialData] error:', err);
+    }
+  };
+
   useEffect(() => {
     const handleWPUser = (event: MessageEvent) => {
       if (event.data?.type === 'wp_user') {
@@ -72,23 +93,7 @@ export default function ChatPage() {
           .then(res => res.json())
           .then(async ({ user_id }) => {
             setUserId(user_id);
-
-            const sessionRes = await fetch('/api/session', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userId: user_id, profile }),
-            });
-            const sessionData = await sessionRes.json();
-            if (sessionData?.session?.id) {
-              setSessionId(sessionData.session.id);
-              setSessionIsFresh(true);
-            }
-
-            const profileRes = await fetch(`/api/profile?name=${profile}`);
-            const profileData = await profileRes.json();
-            if (profileData?.starting_prompts?.length) {
-              setStartingPrompts(profileData.starting_prompts);
-            }
+            await loadInitialData(user_id, profile as string);
           })
           .catch(console.error);
       }
