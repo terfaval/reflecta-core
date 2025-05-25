@@ -2,6 +2,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { profileStyles } from '../../styles/profileStyles';
 import SpiralLoader from '../../components/SpiralLoader';
+import ThinkingDots from '../../components/ThinkingDots';
 
 interface Entry {
   id: string;
@@ -118,7 +119,7 @@ export default function ChatPage() {
     setEntries(prev => [...prev, {
       id: thinkingId,
       role: 'assistant',
-      content: '…',
+      content: '__thinking__',
       created_at: new Date().toISOString(),
     }]);
 
@@ -155,9 +156,14 @@ export default function ChatPage() {
         ) : (
           entries.map(entry => (
             <div key={entry.id} className={`reflecta-message ${entry.role}`}>
-              <p>{entry.content}</p>
+              {entry.content === '__thinking__' ? (
+                <ThinkingDots />
+              ) : (
+                <p>{entry.content}</p>
+              )}
             </div>
           ))
+
         )}
         <div ref={bottomRef} />
       </div>
