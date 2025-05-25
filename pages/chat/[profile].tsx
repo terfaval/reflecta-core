@@ -25,6 +25,7 @@ export default function ChatPage() {
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [startingPrompts, setStartingPrompts] = useState<{ label: string; message: string }[]>([]);
+  const [sessionIsFresh, setSessionIsFresh] = useState(false);
   const [page, setPage] = useState(0);
   const limit = 20;
   const isFetchingRef = useRef(false);
@@ -80,6 +81,7 @@ export default function ChatPage() {
             const sessionData = await sessionRes.json();
             if (sessionData?.session?.id) {
               setSessionId(sessionData.session.id);
+              setSessionIsFresh(true);
             }
 
             const profileRes = await fetch(`/api/profile?name=${profile}`);
@@ -109,6 +111,7 @@ export default function ChatPage() {
       const data = await res.json();
 
       if (data?.entries?.length) {
+        setSessionIsFresh(false);
         setClosingTrigger(data.closingTrigger);
 
         setEntries(prev => {
@@ -160,6 +163,7 @@ export default function ChatPage() {
     const text = override || message;
     if (!text.trim() || !sessionId) return;
     setLoading(true);
+    setSessionIsFresh(false);
 
     const newEntry: Entry = {
       id: `${Date.now()}`,
@@ -221,7 +225,7 @@ export default function ChatPage() {
             aiColor={currentStyle['--ai-color'] || '#FFB347'}
           />
         ) : (
-          entries.length === 0 ? (
+          entries.length === 0 && sessionIsFresh ? (
             <StartingPromptSelector
               prompts={startingPrompts}
               onSelectPrompt={handleSend}
