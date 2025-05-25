@@ -1,13 +1,17 @@
 .thinking {
   display: flex;
-  gap: 6px;
-  font-size: 2.5rem; /* nagyobb pontok */
+  gap: 3px;
+  font-size: 1.5rem; /* nagyobb pontok */
   font-weight: bold;
   color: white; /* fehér szín */
   padding: 0.5rem 0;
 }
 
 .thinking span {
+  width: 10px;
+  height: 10px;
+  background-color: white;
+  border-radius: 50%;
   animation: blink 1.4s infinite both;
 }
 
@@ -26,3 +30,4 @@
     opacity: 1;
   }
 }
+
