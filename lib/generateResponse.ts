@@ -3,6 +3,7 @@ import { buildSystemPrompt } from './buildSystemPrompt';
 import { OpenAI } from 'openai';
 import { matchReactions } from '@/lib/matchReactions';
 import { matchRecommendations } from '@/lib/matchRecommendations';
+import { extractContext } from '@/lib/contextExtractor'; 
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
@@ -105,19 +106,12 @@ export async function generateResponse(sessionId: string): Promise<{
   if (lastUserEntry) {
     const content = lastUserEntry.content.trim();
 
-reaction_tag = await matchReactions(profile.name, content, {
-  message: content,
-  entryLength: content.length,
-  // később: tags, features, sessionStats
-});
 
-recommendation_tag = await matchRecommendations(profile.name, content, {
-  message: content,
-  entryLength: content.length,
-  // később: tags, features, sessionStats
-});
+const context = extractContext(content);
 
-  }
+reaction_tag = await matchReactions(profile.name, content, context);
+recommendation_tag = await matchRecommendations(profile.name, content, context);
+
 
   // 🔔 System event naplózás, ha történt trigger
 if (reaction_tag || recommendation_tag) {
