@@ -4,6 +4,7 @@ import { profileStyles } from '../../styles/profileStyles';
 import SpiralLoader from '../../components/SpiralLoader';
 import ThinkingDots from '../../components/ThinkingDots';
 import ScrollToBottomButton from '../../components/ScrollToBottomButton';
+import StartingPromptSelector from '../../components/StartingPromptSelector';
 
 interface Entry {
   id: string;
@@ -23,6 +24,7 @@ export default function ChatPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [showScrollDown, setShowScrollDown] = useState(false);
+  const [startingPrompts, setStartingPrompts] = useState<{ label: string; message: string }[]>([]);
   const [page, setPage] = useState(0);
   const limit = 20;
   const isFetchingRef = useRef(false);
@@ -69,7 +71,7 @@ export default function ChatPage() {
           .then(res => res.json())
           .then(async ({ user_id }) => {
             setUserId(user_id);
-            // 🔹 Session létrehozása vagy lekérése
+
             const sessionRes = await fetch('/api/session', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -78,6 +80,12 @@ export default function ChatPage() {
             const sessionData = await sessionRes.json();
             if (sessionData?.session?.id) {
               setSessionId(sessionData.session.id);
+            }
+
+            const profileRes = await fetch(`/api/profile?name=${profile}`);
+            const profileData = await profileRes.json();
+            if (profileData?.starting_prompts?.length) {
+              setStartingPrompts(profileData.starting_prompts);
             }
           })
           .catch(console.error);
@@ -214,9 +222,12 @@ export default function ChatPage() {
           />
         ) : (
           entries.length === 0 ? (
-            <div className="reflecta-empty-state">
-              <p>Még nincs üzenet ebben a beszélgetésben.</p>
-            </div>
+            <StartingPromptSelector
+              prompts={startingPrompts}
+              onSelectPrompt={handleSend}
+              aiColor={currentStyle['--ai-color']}
+              userColor={currentStyle['--user-color']}
+            />
           ) : (
             entries.map(entry => (
               <div key={entry.id} className={`reflecta-message ${entry.role}`}>
