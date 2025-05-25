@@ -138,8 +138,9 @@ export default function ChatPage() {
       }}>
         {loadingEntries && sessionId ? (
           <SpiralLoader
-            userColor={currentStyle.accentColor || '#7A4DFF'}
-            aiColor={currentStyle.backgroundColor || '#FFB347'}
+            userColor={currentStyle['--user-color'] || '#7A4DFF'}
+            aiColor={currentStyle['--ai-color'] || '#FFB347'}
+
           />
         ) : (
           entries.map(entry => (
