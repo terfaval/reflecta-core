@@ -136,7 +136,8 @@ const coreStyle =
 
   // ========== [CLOSURE] ==========
   lines.push('\n# CLOSING');
-  lines.push(`Closure trigger: "${profile.metadata.closing_trigger}" → use: ${profile.metadata.closing_style}`);
+lines.push(`If the user input matches exactly: "${profile.metadata.closing_trigger}", treat this as a signal to close the session.`);
+lines.push(`Do not include this phrase in your response. Respond with a final reflection in the "${profile.metadata.closing_style}" style.`);
   if (sessionMeta?.isClosing) {
     lines.push('This is a closure. Do not ask follow-up questions.');
     lines.push('Offer short, symbolic, emotionally resonant final reflection.');
