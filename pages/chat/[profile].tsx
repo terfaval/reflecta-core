@@ -250,28 +250,26 @@ const bottomRef = useRef<HTMLDivElement | null>(null);
 
           {closingTrigger && repliesAreShrinking && (
             <button
-              onClick={async () => {
-                if (!sessionId || isClosing) return;
-                  setIsClosing(true);
-  await handleSend(closingTrigger);
-  await fetchMoreEntries(0); // ide helyesen bekerülhet
-  setIsClosing(false);
-              }}
-              disabled={isClosing}
-              className="reflecta-close-animated"
-              aria-label="Zárás"
-              style={{
-  backgroundColor: repliesAreShrinking
-    ? currentStyle['--ai-color'] || '#4CAF50'
-    : currentStyle['--disabled-bg'] || '#ccc',
-  color: '#fff',
-  opacity: isClosing ? 0.6 : repliesAreShrinking ? 1 : 0.6,
-  cursor: repliesAreShrinking ? 'pointer' : 'not-allowed',
-  disabled={!repliesAreShrinking || isClosing},
-  pointerEvents: repliesAreShrinking ? 'auto' : 'none', // 💥 hover OFF ha disabled
-}}
-
-            >
+  onClick={async () => {
+    if (!sessionId || isClosing) return;
+    setIsClosing(true);
+    await handleSend(closingTrigger);
+    await fetchMoreEntries(0);
+    setIsClosing(false);
+  }}
+  disabled={!repliesAreShrinking || isClosing}
+  className="reflecta-close-animated"
+  aria-label="Zárás"
+  style={{
+    backgroundColor: repliesAreShrinking
+      ? currentStyle['--ai-color'] || '#4CAF50'
+      : currentStyle['--disabled-bg'] || '#ccc',
+    color: '#fff',
+    opacity: isClosing ? 0.6 : repliesAreShrinking ? 1 : 0.6,
+    cursor: repliesAreShrinking ? 'pointer' : 'not-allowed',
+    pointerEvents: repliesAreShrinking ? 'auto' : 'none',
+  }}
+>
               <svg className="reflecta-close-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 6L6 18" />
                 <path d="M6 6l12 12" />
