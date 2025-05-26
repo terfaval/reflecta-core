@@ -29,7 +29,8 @@ export default function ChatPage() {
   const [startingPrompts, setStartingPrompts] = useState<{ label: string; message: string }[]>([]);
   const [sessionIsFresh, setSessionIsFresh] = useState(false);
   const [page, setPage] = useState(0);
-  const bottomRef = useRef<HTMLDivElement | null>(null);
+const isFetchingRef = useRef(false); // ✅ EZ HIÁNYZIK
+const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const currentStyle = profileStyles[profile as string] || {};
 
