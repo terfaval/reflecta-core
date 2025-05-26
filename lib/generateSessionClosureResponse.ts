@@ -53,12 +53,16 @@ Do not summarize assistant replies, only user thoughts.
 Style hint: ${metadata?.closing_style || 'összegző, támogató'}
 `;
 
-  const messages = [
-    { role: 'system', content: systemPrompt },
-    ...entries
-      .filter(e => e.role === 'user')
-      .map(e => ({ role: 'user' as const, content: e.content })),
-  ];
+  const messages: ChatCompletionMessageParam[] = [
+  { role: 'system', content: systemPrompt },
+  ...entries
+    .filter(e => e.role === 'user' || e.role === 'assistant')
+    .map((e) => ({
+      role: e.role as 'user' | 'assistant',
+      content: e.content
+    }))
+];
+
 
   // 3. OpenAI hívás
   const chat = await openai.chat.completions.create({
