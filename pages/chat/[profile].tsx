@@ -29,10 +29,6 @@ export default function ChatPage() {
   const [startingPrompts, setStartingPrompts] = useState<{ label: string; message: string }[]>([]);
   const [sessionIsFresh, setSessionIsFresh] = useState(false);
   const [page, setPage] = useState(0);
-  await handleSend(closingTrigger);
-  await fetchMoreEntries(0); // <-- ezt add hozzá
-  setIsClosing(false);
-
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const currentStyle = profileStyles[profile as string] || {};
