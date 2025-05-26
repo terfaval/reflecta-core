@@ -23,17 +23,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .eq('profile', name)
     .maybeSingle();
 
-  if (profileError || metaError) {
-    return res.status(500).json({ error: profileError?.message || metaError?.message });
+  const { data: prompts, error: promptsError } = await supabase
+    .from('profile_starting_prompts')
+    .select('label, message')
+    .eq('profile', name)
+    .order('priority');
+
+  if (profileError || metaError || promptsError) {
+    return res.status(500).json({
+      error: profileError?.message || metaError?.message || promptsError?.message
+    });
   }
 
   if (!profile || !metadata) {
     return res.status(404).json({ error: 'Profile or metadata not found' });
   }
 
-  res.status(200).json({ 
-  ...profile,
-  closing_trigger: metadata.closing_trigger // 🔥 ez kell nekünk!
-});
-
+  res.status(200).json({
+    ...profile,
+    closing_trigger: metadata.closing_trigger,
+    starting_prompts: prompts || []
+  });
 }
