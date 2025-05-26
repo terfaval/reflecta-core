@@ -72,8 +72,16 @@ export function buildSystemPrompt(
 
   // ========== [STYLE CONFIGURATION] ==========
   lines.push('\n# STYLE');
-  const metaStyle = JSON.parse(profile.metadata.style_options || '{}');
-  const coreStyle = JSON.parse((profile as any).style_profile || '{}');
+  const metaStyle =
+  typeof profile.metadata.style_options === 'string'
+    ? JSON.parse(profile.metadata.style_options)
+    : profile.metadata.style_options || {};
+
+const coreStyle =
+  typeof (profile as any).style_profile === 'string'
+    ? JSON.parse((profile as any).style_profile)
+    : (profile as any).style_profile || {};
+
   const styleConfig = { ...metaStyle, ...coreStyle };
   if (Object.keys(styleConfig).length > 0) {
     const styleDesc = Object.entries(styleConfig)
