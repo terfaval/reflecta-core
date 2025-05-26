@@ -2,6 +2,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import supabase from '../../../lib/supabase-admin';
+import { sessionCloseEnhanced } from '@/lib/sessionCloseEnhanced';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -15,16 +16,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { error } = await supabase
-      .from('sessions')
-      .update({ ended_at: new Date().toISOString() })
-      .eq('id', sessionId);
-
-    if (error) throw error;
-
+    await sessionCloseEnhanced(sessionId);
     return res.status(200).json({ success: true });
   } catch (err: any) {
-    console.error('[Reflecta] session/close hiba:', err.message || err);
+    console.error('[Reflecta] sessionCloseEnhanced hiba:', err.message || err);
     return res.status(500).json({ error: err.message || 'Unknown error' });
   }
 }

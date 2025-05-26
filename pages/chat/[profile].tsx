@@ -1,3 +1,4 @@
+// ✅ Reflecta ChatPage with session label bubble integration
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { profileStyles } from '../../styles/profileStyles';
@@ -5,10 +6,11 @@ import SpiralLoader from '../../components/SpiralLoader';
 import ThinkingDots from '../../components/ThinkingDots';
 import ScrollToBottomButton from '../../components/ScrollToBottomButton';
 import StartingPromptSelector from '../../components/StartingPromptSelector';
+import SessionLabelBubble from '../../components/SessionLabelBubble';
 
 interface Entry {
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
   created_at: string;
 }
@@ -49,12 +51,10 @@ export default function ChatPage() {
   useEffect(() => {
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
     if (!textarea) return;
-
     const handleInput = () => {
       textarea.style.height = 'auto';
       textarea.style.height = `${textarea.scrollHeight}px`;
     };
-
     textarea.addEventListener('input', handleInput);
     return () => textarea.removeEventListener('input', handleInput);
   }, []);
@@ -68,11 +68,9 @@ export default function ChatPage() {
       });
       const sessionData = await sessionRes.json();
       if (!sessionData?.session?.id) return;
-
       const profileRes = await fetch(`/api/profile?name=${profile}`);
       const profileData = await profileRes.json();
       setStartingPrompts(profileData?.starting_prompts || []);
-
       setSessionId(sessionData.session.id);
       setSessionIsFresh(true);
     } catch (err) {
@@ -104,7 +102,6 @@ export default function ChatPage() {
 
   const fetchMoreEntries = async (pageIndex: number) => {
     if (!userId || !profile || isFetchingRef.current) return;
-
     isFetchingRef.current = true;
     try {
       const res = await fetch('/api/chatload', {
@@ -112,20 +109,16 @@ export default function ChatPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, profile, offset: pageIndex * limit, limit }),
       });
-
       const data = await res.json();
-
       if (data?.entries?.length) {
         setSessionIsFresh(false);
         setClosingTrigger(data.closingTrigger);
-
         setEntries(prev => {
           const existingIds = new Set(prev.map(e => e.id));
           const newOnes = data.entries.filter(e => !existingIds.has(e.id));
           return [...newOnes, ...prev];
         });
       }
-
       setLoadingEntries(false);
     } catch (err) {
       console.error('[chatload] fetch error:', err);
@@ -145,12 +138,10 @@ export default function ChatPage() {
   useEffect(() => {
     const el = messagesRef.current;
     if (!el) return;
-
     const handleScroll = () => {
       const nearTop = el.scrollTop < 50;
       const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
       setShowScrollDown(!nearBottom);
-
       if (nearTop && !loading) {
         setPage(prev => {
           const nextPage = prev + 1;
@@ -159,7 +150,6 @@ export default function ChatPage() {
         });
       }
     };
-
     el.addEventListener('scroll', handleScroll);
     return () => el.removeEventListener('scroll', handleScroll);
   }, [loading]);
@@ -169,23 +159,19 @@ export default function ChatPage() {
     if (!text.trim() || !sessionId) return;
     setLoading(true);
     setSessionIsFresh(false);
-
     const newEntry: Entry = {
       id: `${Date.now()}`,
       role: 'user',
       content: text,
       created_at: new Date().toISOString(),
     };
-
     setEntries(prev => [...prev, newEntry]);
     setMessage('');
-
     await fetch('/api/entries', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId, entry: newEntry }),
     });
-
     const thinkingId = `${Date.now()}-thinking`;
     setEntries(prev => [...prev, {
       id: thinkingId,
@@ -193,13 +179,11 @@ export default function ChatPage() {
       content: '__thinking__',
       created_at: new Date().toISOString(),
     }]);
-
     const res = await fetch('/api/respond', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId }),
     });
-
     const { content } = await res.json();
     setEntries(prev =>
       prev.map(e => (e.id === thinkingId ? { ...e, content } : e))
@@ -208,40 +192,23 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="reflecta-chat" style={{
-      ...currentStyle,
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100vh',
-    }}>
-      <div
-        className="reflecta-messages"
-        ref={messagesRef}
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '1rem',
-          position: 'relative',
-        }}
-      >
+    <div className="reflecta-chat" style={{ ...currentStyle, display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <div className="reflecta-messages" ref={messagesRef} style={{ flex: 1, overflowY: 'auto', padding: '1rem', position: 'relative' }}>
         {loadingEntries && !entries.length ? (
-          <SpiralLoader
-            userColor={currentStyle['--user-color'] || '#7A4DFF'}
-            aiColor={currentStyle['--ai-color'] || '#FFB347'}
-          />
+          <SpiralLoader userColor={currentStyle['--user-color'] || '#7A4DFF'} aiColor={currentStyle['--ai-color'] || '#FFB347'} />
         ) : (
           entries.length === 0 && sessionIsFresh ? (
-            <StartingPromptSelector
-              prompts={startingPrompts}
-              onSelectPrompt={handleSend}
-              aiColor={currentStyle['--ai-color']}
-              userColor={currentStyle['--user-color']}
-            />
+            <StartingPromptSelector prompts={startingPrompts} onSelectPrompt={handleSend} aiColor={currentStyle['--ai-color']} userColor={currentStyle['--user-color']} />
           ) : (
             entries.map(entry => (
               <div key={entry.id} className={`reflecta-message ${entry.role}`}>
                 {entry.content === '__thinking__' ? (
                   <ThinkingDots />
+                ) : entry.role === 'system' && entry.content.startsWith('Szakasz lezárása:') ? (
+                  <SessionLabelBubble
+                    initialLabel={entry.content.replace('Szakasz lezárása:', '').trim()}
+                    sessionId={sessionId!}
+                  />
                 ) : (
                   <p>{entry.content}</p>
                 )}
@@ -250,67 +217,36 @@ export default function ChatPage() {
           )
         )}
         <div ref={bottomRef} style={{ scrollMarginBottom: '60px' }} />
-
         {showScrollDown && (
-          <div style={{
-            position: 'sticky',
-            bottom: '-10px',
-            display: 'flex',
-            justifyContent: 'center',
-            pointerEvents: 'none',
-          }}>
+          <div style={{ position: 'sticky', bottom: '-10px', display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
             <div style={{ pointerEvents: 'auto' }}>
-              <ScrollToBottomButton
-                onClick={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                color={currentStyle['--ai-color'] || '#444'}
-              />
+              <ScrollToBottomButton onClick={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })} color={currentStyle['--ai-color'] || '#444'} />
             </div>
           </div>
         )}
       </div>
-
       <div className="reflecta-input">
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Írd be, amit meg szeretnél osztani..."
-          disabled={loading}
-        />
-
+        <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Írd be, amit meg szeretnél osztani..." disabled={loading} />
         <div className="reflecta-input-buttons">
           {closingTrigger && (
-            <button
-              onClick={async () => {
-                if (!closingTrigger || !sessionId) return;
-                await handleSend(closingTrigger);
-                await fetch('/api/session/close', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ sessionId }),
-                });
-              }}
-              className="reflecta-close-animated"
-              aria-label="Zárás"
-            >
-              <svg className="reflecta-close-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <button onClick={async () => {
+              if (!closingTrigger || !sessionId) return;
+              await handleSend(closingTrigger);
+              await fetch('/api/session/close', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId }),
+              });
+            }} className="reflecta-close-animated" aria-label="Zárás">
+              <svg className="reflecta-close-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 6L6 18" />
                 <path d="M6 6l12 12" />
               </svg>
               <span className="reflecta-close-label">Mára elég volt</span>
             </button>
           )}
-
-          <button
-            className={`reflecta-send-button ${loading ? 'reflecta-send-loading' : ''}`}
-            onClick={() => handleSend()}
-            disabled={loading}
-            aria-label="Küldés"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <button className={`reflecta-send-button ${loading ? 'reflecta-send-loading' : ''}`} onClick={() => handleSend()} disabled={loading} aria-label="Küldés">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="22" y1="2" x2="11" y2="13" />
               <polygon points="22 2 15 22 11 13 2 9 22 2" />
             </svg>

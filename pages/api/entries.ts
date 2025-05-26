@@ -3,6 +3,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import supabase from '@/lib/supabase-admin';
 import { labelSession } from '../../lib/labelSession';
+import { sessionCloseEnhanced } from '@/lib/sessionCloseEnhanced';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
@@ -89,23 +90,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await supabase.from('system_events').insert(events);
     }
 
-    // 3. ha closing_trigger → session lezárása + label generálás
+    // 3. ha closing_trigger → session teljes zárása
     if (trigger && entry.content.trim() === trigger.trim()) {
-      await supabase
-        .from('sessions')
-        .update({ ended_at: new Date().toISOString() })
-        .eq('id', sessionId);
-
-      await supabase.from('system_events').insert({
-        session_id: sessionId,
-        event_type: 'session_closed_by_trigger',
-        note: 'Session closed by matching closing_trigger'
-      });
-
       try {
-        await labelSession(sessionId);
+        await sessionCloseEnhanced(sessionId);
       } catch (e) {
-        console.warn('Labeling failed:', e);
+        console.warn('[Reflecta] Enhanced session close failed:', e);
       }
     }
 
