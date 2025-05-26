@@ -28,23 +28,15 @@ export default function ChatPage() {
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [startingPrompts, setStartingPrompts] = useState<{ label: string; message: string }[]>([]);
   const [sessionIsFresh, setSessionIsFresh] = useState(false);
-const [page, setPage] = useState(0);
-const [isClosing, setIsClosing] = useState(false); // ⬅️ IDE
-const limit = 20; // ✅ ezt add be
-const isFetchingRef = useRef(false);
-const bottomRef = useRef<HTMLDivElement | null>(null);
+  const [page, setPage] = useState(0);
+  const [isClosing, setIsClosing] = useState(false);
+  const limit = 20;
+  const isFetchingRef = useRef(false);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const currentStyle = profileStyles[profile as string] || {};
 
-  const lastAssistantReplies = entries
-    .filter(e => e.role === 'assistant' && e.content !== '__thinking__')
-    .slice(-3)
-    .map(e => e.content.length);
-
-  const repliesAreShrinking =
-    lastAssistantReplies.length === 3 &&
-    lastAssistantReplies[0] > lastAssistantReplies[1] &&
-    lastAssistantReplies[1] > lastAssistantReplies[2];
+  const assistantReplyCount = entries.filter(e => e.role === 'assistant' && e.content !== '__thinking__').length;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -166,62 +158,60 @@ const bottomRef = useRef<HTMLDivElement | null>(null);
   }, [loading]);
 
   const handleSend = async (override?: string) => {
-  const text = override || message;
-  if (!text.trim() || !sessionId) return;
+    const text = override || message;
+    if (!text.trim() || !sessionId) return;
 
-  setLoading(true);
-  setSessionIsFresh(false);
+    setLoading(true);
+    setSessionIsFresh(false);
 
-  const newEntry: Entry = {
-    id: `${Date.now()}`,
-    role: 'user',
-    content: text,
-    created_at: new Date().toISOString(),
-  };
-
-  setEntries(prev => [...prev, newEntry]);
-  setMessage('');
-
-  const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
-  if (textarea) textarea.style.height = 'auto';
-
-  await fetch('/api/entries', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sessionId, entry: newEntry }),
-  });
-
-  const thinkingId = `${Date.now()}-thinking`;
-  setEntries(prev => [
-    ...prev,
-    {
-      id: thinkingId,
-      role: 'assistant',
-      content: '__thinking__',
+    const newEntry: Entry = {
+      id: `${Date.now()}`,
+      role: 'user',
+      content: text,
       created_at: new Date().toISOString(),
+    };
+
+    setEntries(prev => [...prev, newEntry]);
+    setMessage('');
+
+    const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
+    if (textarea) textarea.style.height = 'auto';
+
+    await fetch('/api/entries', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId, entry: newEntry }),
+    });
+
+    const thinkingId = `${Date.now()}-thinking`;
+    setEntries(prev => [
+      ...prev,
+      {
+        id: thinkingId,
+        role: 'assistant',
+        content: '__thinking__',
+        created_at: new Date().toISOString(),
+      },
+    ]);
+
+    const res = await fetch('/api/respond', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId }),
+    });
+
+    const { content } = await res.json();
+
+    setEntries(prev =>
+      prev.map(e => (e.id === thinkingId ? { ...e, content } : e))
+    );
+
+    if (text.trim() === closingTrigger.trim()) {
+      await fetchMoreEntries(0);
     }
-  ]);
 
-  const res = await fetch('/api/respond', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sessionId }),
-  });
-
-  const { content } = await res.json();
-
-  setEntries(prev =>
-    prev.map(e => (e.id === thinkingId ? { ...e, content } : e))
-  );
-
-  // ⬇️ Ha zárási trigger volt, újra lekérjük a friss entry-ket (assistant válasz + system címke)
-  if (text.trim() === closingTrigger.trim()) {
-    await fetchMoreEntries(0);
-  }
-
-  setLoading(false);
-};
-
+    setLoading(false);
+  };
 
   return (
     <div className="reflecta-chat" style={{ ...currentStyle, display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -268,54 +258,52 @@ const bottomRef = useRef<HTMLDivElement | null>(null);
           </button>
 
           {closingTrigger && (
-  <button
-    onClick={async () => {
-      if (!sessionId || isClosing || assistantReplyCount < 3) return;
-      setIsClosing(true);
-      await handleSend(closingTrigger);
-      await fetchMoreEntries(0);
-      setIsClosing(false);
-    }}
-    disabled={assistantReplyCount < 3 || isClosing}
-    className="reflecta-close-animated"
-    aria-label="Zárás"
-    style={{
-      backgroundColor: currentStyle['--ai-color'] || '#4CAF50',
-      color: currentStyle['--user-color'] || '#ffffff', // szöveg és ikon színe
-      opacity: assistantReplyCount < 3 || isClosing ? 0.5 : 1,
-      cursor: assistantReplyCount < 3 || isClosing ? 'not-allowed' : 'pointer',
-      pointerEvents: assistantReplyCount < 3 || isClosing ? 'none' : 'auto',
-      transition: 'opacity 0.3s ease, background-color 0.3s ease',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-      padding: '0.4rem 1rem',
-      borderRadius: '1.5rem',
-      border: 'none',
-    }}
-  >
-    <svg
-      className="reflecta-close-icon"
-      xmlns="http://www.w3.org/2000/svg"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={currentStyle['--user-color'] || '#ffffff'}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M18 6L6 18" />
-      <path d="M6 6l12 12" />
-    </svg>
-    <span className="reflecta-close-label">
-      {isClosing ? 'Zárás folyamatban...' : 'Mára elég volt'}
-    </span>
-  </button>
-)}
-
-
+            <button
+              onClick={async () => {
+                if (!sessionId || isClosing || assistantReplyCount < 3) return;
+                setIsClosing(true);
+                await handleSend(closingTrigger);
+                await fetchMoreEntries(0);
+                setIsClosing(false);
+              }}
+              disabled={assistantReplyCount < 3 || isClosing}
+              className="reflecta-close-animated"
+              aria-label="Zárás"
+              style={{
+                backgroundColor: currentStyle['--ai-color'] || '#4CAF50',
+                color: currentStyle['--user-color'] || '#ffffff',
+                opacity: assistantReplyCount < 3 || isClosing ? 0.5 : 1,
+                cursor: assistantReplyCount < 3 || isClosing ? 'not-allowed' : 'pointer',
+                pointerEvents: assistantReplyCount < 3 || isClosing ? 'none' : 'auto',
+                transition: 'opacity 0.3s ease, background-color 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.4rem 1rem',
+                borderRadius: '1.5rem',
+                border: 'none',
+              }}
+            >
+              <svg
+                className="reflecta-close-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke={currentStyle['--user-color'] || '#ffffff'}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18 6L6 18" />
+                <path d="M6 6l12 12" />
+              </svg>
+              <span className="reflecta-close-label">
+                {isClosing ? 'Zárás folyamatban...' : 'Mára elég volt'}
+              </span>
+            </button>
+          )}
         </div>
       </div>
     </div>
