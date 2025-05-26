@@ -1,5 +1,3 @@
-// File: lib/sessionCloseEnhanced.ts
-
 import supabase from '@/lib/supabase-admin';
 import { labelSession } from './labelSession';
 import { generateSessionClosureResponse } from './generateSessionClosureResponse';
@@ -53,7 +51,10 @@ export async function sessionCloseEnhanced(sessionId: string) {
     created_at: new Date().toISOString(),
   });
 
-  console.log('[Reflecta] Label bubble inserted:', label);
+  // ✅ 7. Session lezárása (időbélyeg)
+  await supabase.from('sessions').update({
+    closed_at: new Date().toISOString(),
+  }).eq('id', sessionId);
 
   return { label, closureEntry: closureReply };
 }
