@@ -5,7 +5,6 @@ import { matchReactions } from '@/lib/matchReactions';
 import { matchRecommendations } from '@/lib/matchRecommendations';
 import { extractContext } from '@/lib/contextExtractor';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
- 
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
@@ -95,7 +94,13 @@ export async function generateResponse(sessionId: string): Promise<{
     };
   }
 
-  const systemPrompt = buildSystemPrompt(
+  const languageTonePrefix = [
+    "Kérlek, minden válaszodat magyar nyelven írd.",
+    "Beszélj finoman, természetes ritmusban, ne legyél túl gépies.",
+    "Használj tiszteletteljes, de tegező hangnemet, ahogyan egy érzékeny önreflexiós naplóasszisztens tenné."
+  ].join(' ');
+
+  const basePrompt = buildSystemPrompt(
     {
       name: profile.name,
       prompt_core: profile.prompt_core,
@@ -107,14 +112,15 @@ export async function generateResponse(sessionId: string): Promise<{
     sessionMeta
   );
 
-  const messages: ChatCompletionMessageParam[] = [
-  { role: 'system', content: systemPrompt },
-  ...entries.map((e) => ({
-    role: e.role as 'user' | 'assistant',
-    content: e.content
-  }))
-];
+  const systemPrompt = `${languageTonePrefix}\n\n${basePrompt}`;
 
+  const messages: ChatCompletionMessageParam[] = [
+    { role: 'system', content: systemPrompt },
+    ...entries.map((e) => ({
+      role: e.role as 'user' | 'assistant',
+      content: e.content
+    }))
+  ];
 
   const chat = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
