@@ -71,6 +71,7 @@ export default function ChatPage() {
       const profileRes = await fetch(`/api/profile?name=${profile}`);
       const profileData = await profileRes.json();
       setStartingPrompts(profileData?.starting_prompts || []);
+      setClosingTrigger(profileData?.closing_trigger || ''); // 🔧 javítás
       setSessionId(sessionData.session.id);
       setSessionIsFresh(true);
     } catch (err) {
@@ -167,6 +168,8 @@ export default function ChatPage() {
     };
     setEntries(prev => [...prev, newEntry]);
     setMessage('');
+    const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null; // 🔧 reset
+    if (textarea) textarea.style.height = 'auto';
     await fetch('/api/entries', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

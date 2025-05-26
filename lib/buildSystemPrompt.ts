@@ -148,5 +148,12 @@ export function buildSystemPrompt(
     lines.push('If the user seems introspective, respond in a soft and meditative rhythm.');
   }
 
+  // 🔧 ÚJ: Mély értelmezés és strukturált válasz
+  lines.push('');
+  lines.push('Always interpret the user input deeply. Pay attention to emotional tone, corrections, and underlying meaning.');
+  lines.push('Structure your response in two parts:');
+  lines.push('- First: a short, reflective response connecting to the user’s inner experience.');
+  lines.push('- Second: ask a soft, open-ended question that invites continuation without pressure.');
+
   return lines.join('\n');
 }
