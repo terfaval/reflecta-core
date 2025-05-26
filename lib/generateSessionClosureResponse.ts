@@ -32,7 +32,9 @@ export async function generateSessionClosureResponse(sessionId: string): Promise
     .eq('session_id', sessionId)
     .order('created_at', { ascending: true });
 
-  const userEntries = entries?.filter(e => e.role === 'user') || [];
+  const userEntries = entries
+    ?.filter((e) => e.role === 'user')
+    .map((e) => ({ role: 'user' as const, content: e.content })) || [];
 
   if (userEntries.length < 2)
     return 'Köszönöm a megosztásaidat. Ezzel a szakasz most lezárul.';
@@ -64,10 +66,7 @@ ${formatHint}
 
   const messages: { role: 'system' | 'user'; content: string }[] = [
     { role: 'system', content: systemPrompt },
-    ...userEntries.map((e) => ({
-      role: 'user' as const,
-      content: e.content,
-    })),
+    ...userEntries,
   ];
 
   const chat = await openai.chat.completions.create({

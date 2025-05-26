@@ -11,28 +11,30 @@ export async function labelSession(sessionId: string): Promise<string> {
     .order('created_at', { ascending: true })
     .limit(40); // nagyobb minta
 
-  if (!entries || entries.filter(e => e.role === 'user').length < 2)
-    return 'Általános naplózás';
-
   const userMessages = entries
-    .filter(e => e.role === 'user')
-    .map((e) => ({ role: 'user' as const, content: e.content }));
+    ?.filter((e) => e.role === 'user')
+    .map((e) => ({
+      role: 'user' as const,
+      content: e.content,
+    })) || [];
 
-  const messages = [
+  if (userMessages.length < 2) return 'Általános naplózás';
+
+  const messages: { role: 'system' | 'user'; content: string }[] = [
     {
       role: 'system',
       content: `You are a helpful assistant that summarizes self-reflection sessions in 1–4 words.
 Return a compact and intuitive label for the emotional or thematic content of the conversation.
-Respond with a short phrase in Hungarian. Do not explain.`
+Respond with a short phrase in Hungarian. Do not explain.`,
     },
-    ...userMessages
+    ...userMessages,
   ];
 
   const chat = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
     messages,
     temperature: 0.5,
-    max_tokens: 20
+    max_tokens: 20,
   });
 
   const label = chat.choices[0].message.content?.trim();
