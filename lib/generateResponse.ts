@@ -1,3 +1,5 @@
+// File: lib/generateResponse.ts
+
 import supabase from '@/lib/supabase-admin';
 import { buildSystemPrompt } from './buildSystemPrompt';
 import { OpenAI } from 'openai';
@@ -15,9 +17,10 @@ export async function generateResponse(sessionId: string): Promise<{
 }> {
   const { data: session } = await supabase
     .from('sessions')
-    .select('id, profile, user_id, conversation_id')
+    .select('id, profile, user_id, conversation_id, ended_at') // 🔧 ended_at be
     .eq('id', sessionId)
     .maybeSingle();
+
   if (!session) throw new Error('Session not found');
 
   const { data: profile } = await supabase
@@ -77,9 +80,14 @@ export async function generateResponse(sessionId: string): Promise<{
 
   const entries = Array.from(allEntriesMap.values());
 
-  // 🔥 Zárási trigger felismerése azonnal
+  // 🔒 Zárás ellenőrzés: ha trigger egyezik és még nincs lezárva
   const lastEntry = entries[entries.length - 1];
-  if (closingTrigger && lastEntry?.role === 'user' && lastEntry.content.trim() === closingTrigger) {
+  if (
+    closingTrigger &&
+    lastEntry?.role === 'user' &&
+    lastEntry.content.trim() === closingTrigger &&
+    !session.ended_at
+  ) {
     const { sessionCloseEnhanced } = await import('./sessionCloseEnhanced');
     const closure = await sessionCloseEnhanced(sessionId);
 
@@ -90,7 +98,7 @@ export async function generateResponse(sessionId: string): Promise<{
     };
   }
 
-  // 🔎 Maradék logika csak akkor fut le, ha nem zárás
+  // 🔎 Normál válaszlogika
   const lastUserEntry = [...entries]
     .reverse()
     .find(e =>
