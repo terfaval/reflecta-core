@@ -28,7 +28,8 @@ export default function ChatPage() {
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [startingPrompts, setStartingPrompts] = useState<{ label: string; message: string }[]>([]);
   const [sessionIsFresh, setSessionIsFresh] = useState(false);
-  const [page, setPage] = useState(0);
+const [page, setPage] = useState(0);
+const [isClosing, setIsClosing] = useState(false); // ⬅️ IDE
 const limit = 20; // ✅ ezt add be
 const isFetchingRef = useRef(false);
 const bottomRef = useRef<HTMLDivElement | null>(null);
