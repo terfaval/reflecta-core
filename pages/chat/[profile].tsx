@@ -166,43 +166,62 @@ const bottomRef = useRef<HTMLDivElement | null>(null);
   }, [loading]);
 
   const handleSend = async (override?: string) => {
-    const text = override || message;
-    if (!text.trim() || !sessionId) return;
-    setLoading(true);
-    setSessionIsFresh(false);
-    const newEntry: Entry = {
-      id: `${Date.now()}`,
-      role: 'user',
-      content: text,
-      created_at: new Date().toISOString(),
-    };
-    setEntries(prev => [...prev, newEntry]);
-    setMessage('');
-    const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
-    if (textarea) textarea.style.height = 'auto';
-    await fetch('/api/entries', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId, entry: newEntry }),
-    });
-    const thinkingId = `${Date.now()}-thinking`;
-    setEntries(prev => [...prev, {
+  const text = override || message;
+  if (!text.trim() || !sessionId) return;
+
+  setLoading(true);
+  setSessionIsFresh(false);
+
+  const newEntry: Entry = {
+    id: `${Date.now()}`,
+    role: 'user',
+    content: text,
+    created_at: new Date().toISOString(),
+  };
+
+  setEntries(prev => [...prev, newEntry]);
+  setMessage('');
+
+  const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
+  if (textarea) textarea.style.height = 'auto';
+
+  await fetch('/api/entries', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId, entry: newEntry }),
+  });
+
+  const thinkingId = `${Date.now()}-thinking`;
+  setEntries(prev => [
+    ...prev,
+    {
       id: thinkingId,
       role: 'assistant',
       content: '__thinking__',
       created_at: new Date().toISOString(),
-    }]);
-    const res = await fetch('/api/respond', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId }),
-    });
-    const { content } = await res.json();
-    setEntries(prev =>
-      prev.map(e => (e.id === thinkingId ? { ...e, content } : e))
-    );
-    setLoading(false);
-  };
+    }
+  ]);
+
+  const res = await fetch('/api/respond', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId }),
+  });
+
+  const { content } = await res.json();
+
+  setEntries(prev =>
+    prev.map(e => (e.id === thinkingId ? { ...e, content } : e))
+  );
+
+  // ⬇️ Ha zárási trigger volt, újra lekérjük a friss entry-ket (assistant válasz + system címke)
+  if (text.trim() === closingTrigger.trim()) {
+    await fetchMoreEntries(0);
+  }
+
+  setLoading(false);
+};
+
 
   return (
     <div className="reflecta-chat" style={{ ...currentStyle, display: 'flex', flexDirection: 'column', height: '100vh' }}>
