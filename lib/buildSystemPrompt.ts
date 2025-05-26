@@ -13,7 +13,9 @@ interface SessionMeta {
   isShortEntry?: boolean;
   isQuestion?: boolean;
   isReflective?: boolean;
+  isClosing?: boolean; // ✅ EZ KELL
 }
+
 
 interface ProfileMetadata {
   domain: string;
