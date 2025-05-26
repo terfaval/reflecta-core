@@ -148,14 +148,21 @@ export function buildSystemPrompt(
     lines.push('If the user seems introspective, respond in a soft and meditative rhythm.');
   }
 
-  // 🔧 ÚJ: Mély értelmezés és strukturált válasz
+  // 🔧 Zárás-specifikus utasítás (ha van isClosing meta)
+if (sessionMeta?.isClosing) {
+  lines.push('');
+  lines.push('This is a session closure. Do not ask follow-up questions.');
+  lines.push('Offer a short, symbolic, emotionally resonant closing reflection.');
+  lines.push('Use a warm and slow tone, and avoid prompting continuation.');
+  lines.push('Use line breaks for inner shifts. 2–3 paragraphs are enough.');
+} else {
   lines.push('');
   lines.push('Always interpret the user input deeply. Pay attention to emotional tone, corrections, and underlying meaning.');
   lines.push('Structure your response in two parts:');
   lines.push('- First: a short, reflective response connecting to the user’s inner experience.');
   lines.push('- Second: ask a soft, open-ended question that invites continuation without pressure.');
   lines.push('Format your reply in 2–3 clear paragraphs. Use line breaks to make transitions and inner shifts visible.');
-
+}
 
   return lines.join('\n');
 }

@@ -248,7 +248,7 @@ const bottomRef = useRef<HTMLDivElement | null>(null);
             </svg>
           </button>
 
-          {closingTrigger && (
+          {closingTrigger && repliesAreShrinking && (
             <button
               onClick={async () => {
                 if (!sessionId || isClosing) return;
@@ -267,6 +267,7 @@ const bottomRef = useRef<HTMLDivElement | null>(null);
   color: '#fff',
   opacity: isClosing ? 0.6 : repliesAreShrinking ? 1 : 0.6,
   cursor: repliesAreShrinking ? 'pointer' : 'not-allowed',
+  disabled={!repliesAreShrinking || isClosing},
   pointerEvents: repliesAreShrinking ? 'auto' : 'none', // 💥 hover OFF ha disabled
 }}
 

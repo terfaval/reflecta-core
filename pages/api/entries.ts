@@ -90,17 +90,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // 3. ha closing_trigger szerepel a bejegyzésben → session teljes zárása
-    if (
-      trigger &&
-      entry.content.trim().toLowerCase() === trigger.trim().toLowerCase()
-    ) {
-      console.log('[Reflecta] Trigger match. Closing session with enhanced logic.');
-      try {
-        await sessionCloseEnhanced(sessionId);
-      } catch (e) {
-        console.warn('[Reflecta] Enhanced session close failed:', e);
-      }
-    }
+if (
+  trigger &&
+  entry.content.trim().toLowerCase().includes(trigger.trim().toLowerCase())
+) {
+  console.log('[Reflecta] Trigger match (soft match). Closing session with enhanced logic.');
+  try {
+    await sessionCloseEnhanced(sessionId);
+  } catch (e) {
+    console.warn('[Reflecta] Enhanced session close failed:', e);
+  }
+}
+
 
     return res.status(200).json({ success: true });
   }
