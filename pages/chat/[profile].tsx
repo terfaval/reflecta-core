@@ -1,6 +1,6 @@
 // ✅ Reflecta ChatPage with session label bubble integration
 import { useRouter } from 'next/router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { profileStyles } from '../../styles/profileStyles';
 import SpiralLoader from '../../components/SpiralLoader';
 import ThinkingDots from '../../components/ThinkingDots';
@@ -36,7 +36,9 @@ export default function ChatPage() {
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const currentStyle = profileStyles[profile as string] || {};
 
-  const assistantReplyCount = entries.filter(e => e.role === 'assistant' && e.content !== '__thinking__').length;
+  const assistantReplyCount = useMemo(() => {
+    return entries.filter(e => e.role === 'assistant' && e.content !== '__thinking__').length;
+  }, [entries]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
