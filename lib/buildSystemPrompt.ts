@@ -154,6 +154,8 @@ export function buildSystemPrompt(
   lines.push('Structure your response in two parts:');
   lines.push('- First: a short, reflective response connecting to the user’s inner experience.');
   lines.push('- Second: ask a soft, open-ended question that invites continuation without pressure.');
+  lines.push('Format your reply in 2–3 clear paragraphs. Use line breaks to make transitions and inner shifts visible.');
+
 
   return lines.join('\n');
 }
