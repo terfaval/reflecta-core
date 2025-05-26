@@ -231,7 +231,14 @@ export default function ChatPage() {
       <div className="reflecta-input">
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Írd be, amit meg szeretnél osztani..." disabled={loading} />
         <div className="reflecta-input-buttons">
-          {closingTrigger && (
+          <button className={`reflecta-send-button ${loading ? 'reflecta-send-loading' : ''}`} onClick={() => handleSend()} disabled={loading} aria-label="Küldés">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
+          </button>
+
+ {closingTrigger && (
             <button onClick={async () => {
               if (!closingTrigger || !sessionId) return;
               await handleSend(closingTrigger);
@@ -248,12 +255,6 @@ export default function ChatPage() {
               <span className="reflecta-close-label">Mára elég volt</span>
             </button>
           )}
-          <button className={`reflecta-send-button ${loading ? 'reflecta-send-loading' : ''}`} onClick={() => handleSend()} disabled={loading} aria-label="Küldés">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13" />
-              <polygon points="22 2 15 22 11 13 2 9 22 2" />
-            </svg>
-          </button>
         </div>
       </div>
     </div>
