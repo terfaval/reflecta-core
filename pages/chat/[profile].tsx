@@ -267,7 +267,7 @@ const bottomRef = useRef<HTMLDivElement | null>(null);
             </svg>
           </button>
 
-          {closingTrigger && repliesAreShrinking && (
+          {closingTrigger && (
             <button
   onClick={async () => {
     if (!sessionId || isClosing) return;

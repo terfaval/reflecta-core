@@ -52,10 +52,21 @@ export async function sessionCloseEnhanced(sessionId: string) {
   });
 
   // ✅ 7. Session lezárása
-await supabase.from('sessions').update({
-  closed_at: new Date().toISOString(),
-  ended_at: new Date().toISOString(), // <-- EZ KELL A useSession-hez
-}).eq('id', sessionId);
+const { error: sessionUpdateError, data: updated } = await supabase
+  .from('sessions')
+  .update({
+    closed_at: new Date().toISOString(),
+    ended_at: new Date().toISOString(),
+  })
+  .eq('id', sessionId)
+  .select(); // ⬅️ fontos, hogy visszaadja az eredményt
+
+if (sessionUpdateError) {
+  console.error('[sessionCloseEnhanced] ❌ Session update failed:', sessionUpdateError.message);
+} else {
+  console.log('[sessionCloseEnhanced] ✅ Session updated:', updated);
+}
+
 
   return { label, closureEntry: closureReply };
 }
