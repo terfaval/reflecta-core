@@ -51,10 +51,11 @@ export async function sessionCloseEnhanced(sessionId: string) {
     created_at: new Date().toISOString(),
   });
 
-  // ✅ 7. Session lezárása (időbélyeg)
-  await supabase.from('sessions').update({
-    closed_at: new Date().toISOString(),
-  }).eq('id', sessionId);
+  // ✅ 7. Session lezárása
+await supabase.from('sessions').update({
+  closed_at: new Date().toISOString(),
+  ended_at: new Date().toISOString(), // <-- EZ KELL A useSession-hez
+}).eq('id', sessionId);
 
   return { label, closureEntry: closureReply };
 }
