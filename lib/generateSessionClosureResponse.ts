@@ -7,7 +7,6 @@ import { OpenAI } from 'openai';
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
 export async function generateSessionClosureResponse(sessionId: string): Promise<string> {
-  // 1. Session és profiladatok lekérése
   const { data: session } = await supabase
     .from('sessions')
     .select('id, profile')
@@ -33,15 +32,23 @@ export async function generateSessionClosureResponse(sessionId: string): Promise
     .eq('session_id', sessionId)
     .order('created_at', { ascending: true });
 
-  if (!entries || entries.length < 3)
+  const userEntries = entries?.filter(e => e.role === 'user') || [];
+
+  if (userEntries.length < 2)
     return 'Köszönöm a megosztásaidat. Ezzel a szakasz most lezárul.';
 
-  // 2. Prompt összeállítása
   const languageTonePrefix = [
     'Kérlek, magyar nyelven fogalmazz.',
     'Hangnemed legyen természetes, lágy, és a naplózás teréhez illeszkedő.',
     'Ne magyarázz, ne zárd le túl direkt módon – inkább csak tükrözd vissza a belső ívet.',
   ].join(' ');
+
+  const formatHint = (() => {
+    const style = metadata?.closing_style?.toLowerCase() || '';
+    if (style.includes('pontszerű')) return 'Prefer bullet point structure with short reflective insights.';
+    if (style.includes('képi')) return 'Use gentle, symbolic and metaphorical imagery to close the session.';
+    return 'Use natural narrative to summarise in a few sentences.';
+  })();
 
   const systemPrompt = `
 ${languageTonePrefix}
@@ -52,20 +59,17 @@ Adapt the tone based on the profile metadata. If the session was longer, you may
 Do not summarize assistant replies, only user thoughts.
 
 Style hint: ${metadata?.closing_style || 'összegző, támogató'}
+${formatHint}
 `;
 
-  // Manuális típusdefiníció (helyettesíti a ChatCompletionMessageParam-t)
-  const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
+  const messages: { role: 'system' | 'user'; content: string }[] = [
     { role: 'system', content: systemPrompt },
-    ...entries
-      .filter((e) => e.role === 'user' || e.role === 'assistant')
-      .map((e) => ({
-        role: e.role as 'user' | 'assistant',
-        content: e.content,
-      })),
+    ...userEntries.map((e) => ({
+      role: 'user' as const,
+      content: e.content,
+    })),
   ];
 
-  // 3. OpenAI hívás
   const chat = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
     messages,

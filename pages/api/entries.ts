@@ -2,7 +2,6 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import supabase from '@/lib/supabase-admin';
-import { labelSession } from '../../lib/labelSession';
 import { sessionCloseEnhanced } from '@/lib/sessionCloseEnhanced';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -90,8 +89,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await supabase.from('system_events').insert(events);
     }
 
-    // 3. ha closing_trigger → session teljes zárása
-    if (trigger && entry.content.trim() === trigger.trim()) {
+    // 3. ha closing_trigger szerepel a bejegyzésben → session teljes zárása
+    if (
+      trigger &&
+      entry.content.trim().toLowerCase() === trigger.trim().toLowerCase()
+    ) {
+      console.log('[Reflecta] Trigger match. Closing session with enhanced logic.');
       try {
         await sessionCloseEnhanced(sessionId);
       } catch (e) {

@@ -53,5 +53,7 @@ export async function sessionCloseEnhanced(sessionId: string) {
     created_at: new Date().toISOString(),
   });
 
+  console.log('[Reflecta] Label bubble inserted:', label);
+
   return { label, closureEntry: closureReply };
 }

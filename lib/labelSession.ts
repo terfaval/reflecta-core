@@ -9,9 +9,14 @@ export async function labelSession(sessionId: string): Promise<string> {
     .select('role, content')
     .eq('session_id', sessionId)
     .order('created_at', { ascending: true })
-    .limit(25);
+    .limit(40); // nagyobb minta
 
-  if (!entries || entries.length < 2) return 'Általános naplózás';
+  if (!entries || entries.filter(e => e.role === 'user').length < 2)
+    return 'Általános naplózás';
+
+  const userMessages = entries
+    .filter(e => e.role === 'user')
+    .map((e) => ({ role: 'user' as const, content: e.content }));
 
   const messages = [
     {
@@ -20,7 +25,7 @@ export async function labelSession(sessionId: string): Promise<string> {
 Return a compact and intuitive label for the emotional or thematic content of the conversation.
 Respond with a short phrase in Hungarian. Do not explain.`
     },
-    ...entries.map((e) => ({ role: e.role, content: e.content }))
+    ...userMessages
   ];
 
   const chat = await openai.chat.completions.create({
