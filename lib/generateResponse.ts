@@ -77,12 +77,25 @@ export async function generateResponse(sessionId: string): Promise<{
 
   const entries = Array.from(allEntriesMap.values());
 
-  const lastUserEntry = [...entries]
-    .reverse()
-    .find(e =>
-      e.role === 'user' &&
-      (!closingTrigger || e.content.trim() !== closingTrigger)
-    );
+   const lastUserEntry = [...entries]
+  .reverse()
+  .find(e =>
+    e.role === 'user' &&
+    (!closingTrigger || e.content.trim() !== closingTrigger)
+  );
+
+// ⬇⬇⬇ Add ezt a blokkot az `entries` után ⬇⬇⬇
+const lastEntry = entries[entries.length - 1];
+if (closingTrigger && lastEntry?.role === 'user' && lastEntry.content.trim() === closingTrigger) {
+  const { sessionCloseEnhanced } = await import('./sessionCloseEnhanced');
+  const closure = await sessionCloseEnhanced(sessionId);
+
+  return {
+    reply: closure.closureEntry,
+    reaction_tag: undefined,
+    recommendation_tag: undefined
+  };
+}
 
   let sessionMeta = {};
   if (lastUserEntry) {

@@ -29,12 +29,23 @@ export default function ChatPage() {
   const [startingPrompts, setStartingPrompts] = useState<{ label: string; message: string }[]>([]);
   const [sessionIsFresh, setSessionIsFresh] = useState(false);
   const [page, setPage] = useState(0);
+  const [isClosing, setIsClosing] = useState(false);
   const limit = 20;
   const isFetchingRef = useRef(false);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const currentStyle = profileStyles[profile as string] || {};
+
+  const lastAssistantReplies = entries
+    .filter(e => e.role === 'assistant' && e.content !== '__thinking__')
+    .slice(-3)
+    .map(e => e.content.length);
+
+  const repliesAreShrinking =
+    lastAssistantReplies.length === 3 &&
+    lastAssistantReplies[0] > lastAssistantReplies[1] &&
+    lastAssistantReplies[1] > lastAssistantReplies[2];
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -71,7 +82,7 @@ export default function ChatPage() {
       const profileRes = await fetch(`/api/profile?name=${profile}`);
       const profileData = await profileRes.json();
       setStartingPrompts(profileData?.starting_prompts || []);
-      setClosingTrigger(profileData?.closing_trigger || ''); // 🔧 javítás
+      setClosingTrigger(profileData?.closing_trigger || '');
       setSessionId(sessionData.session.id);
       setSessionIsFresh(true);
     } catch (err) {
@@ -168,7 +179,7 @@ export default function ChatPage() {
     };
     setEntries(prev => [...prev, newEntry]);
     setMessage('');
-    const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null; // 🔧 reset
+    const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
     if (textarea) textarea.style.height = 'auto';
     await fetch('/api/entries', {
       method: 'POST',
@@ -238,23 +249,33 @@ export default function ChatPage() {
             </svg>
           </button>
 
- {closingTrigger && (
-  <button onClick={async () => {
-    if (!sessionId) return;
-    await fetch('/api/session/close', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId }),
-    });
-  }} className="reflecta-close-animated" aria-label="Zárás">
-    <svg className="reflecta-close-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 6L6 18" />
-      <path d="M6 6l12 12" />
-    </svg>
-    <span className="reflecta-close-label">Mára elég volt</span>
-  </button>
-)}
-
+          {closingTrigger && (
+            <button
+              onClick={async () => {
+                if (!sessionId || isClosing) return;
+                setIsClosing(true);
+                await handleSend(closingTrigger);
+                setIsClosing(false);
+              }}
+              disabled={isClosing}
+              className="reflecta-close-animated"
+              aria-label="Zárás"
+              style={{
+                backgroundColor: repliesAreShrinking
+                  ? currentStyle['--ai-color'] || '#4CAF50'
+                  : currentStyle['--bg-color'] || '#ccc',
+                color: '#fff',
+                opacity: isClosing ? 0.6 : 1,
+                cursor: isClosing ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <svg className="reflecta-close-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6L6 18" />
+                <path d="M6 6l12 12" />
+              </svg>
+              <span className="reflecta-close-label">{isClosing ? 'Zárás folyamatban...' : 'Mára elég volt'}</span>
+            </button>
+          )}
         </div>
       </div>
     </div>
