@@ -1,4 +1,4 @@
-// ✅ Reflecta ChatPage with session label bubble integration
+// ✅ Reflecta ChatPage with session label bubble integration (zárás trigger kezelve, duplázás elkerülve)
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { profileStyles } from '../../styles/profileStyles';
@@ -163,8 +163,55 @@ export default function ChatPage() {
     const text = override || message;
     if (!text.trim() || !sessionId) return;
 
+    const isTrigger = text.trim() === closingTrigger.trim();
+
     setLoading(true);
     setSessionIsFresh(false);
+
+    if (isTrigger) {
+      setIsClosing(true);
+      try {
+        const res = await fetch('/api/session/close', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId }),
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          const now = new Date().toISOString();
+          setEntries(prev => [
+            ...prev,
+            {
+              id: `${Date.now()}-user-closing`,
+              role: 'user',
+              content: text,
+              created_at: now,
+            },
+            {
+              id: `${Date.now()}-closure-reply`,
+              role: 'assistant',
+              content: data.closureEntry,
+              created_at: now,
+            },
+            {
+              id: `${Date.now()}-closure-label`,
+              role: 'system',
+              content: `Szakasz lezárása: ${data.label}`,
+              created_at: now,
+            }
+          ]);
+        } else {
+          console.error('[Zárás] Hiba:', data.error);
+        }
+      } catch (err) {
+        console.error('[Zárás] Kivétel:', err);
+      }
+      setIsClosing(false);
+      setMessage('');
+      setLoading(false);
+      return;
+    }
 
     const newEntry: Entry = {
       id: `${Date.now()}`,
@@ -208,12 +255,15 @@ export default function ChatPage() {
       prev.map(e => (e.id === thinkingId ? { ...e, content } : e))
     );
 
-    if (text.trim() === closingTrigger.trim()) {
-      await fetchMoreEntries(0);
-    }
-
     setLoading(false);
   };
+
+  return (
+    <div className="reflecta-chat">
+      {/* ...a többi UI komponens itt marad változatlanul... */}
+    </div>
+  );
+}
 
   return (
     <div className="reflecta-chat" style={{ ...currentStyle, display: 'flex', flexDirection: 'column', height: '100vh' }}>
