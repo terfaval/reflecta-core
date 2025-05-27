@@ -1,3 +1,5 @@
+// File: lib/sessionCloseEnhanced.ts
+
 import supabase from '@/lib/supabase-admin';
 import { labelSession } from './labelSession';
 import { generateSessionClosureResponse } from './generateSessionClosureResponse';
@@ -20,7 +22,7 @@ export async function sessionCloseEnhanced(sessionId: string) {
     return { label: '[már lezárt]', closureEntry: '' };
   }
 
-  // 1. Lekérjük az összes entry-t időrendben
+  // 1. Entry-k lekérése időrendben
   const { data: entries, error: entryError } = await supabase
     .from('entries')
     .select('id, role, content, created_at')
@@ -35,8 +37,8 @@ export async function sessionCloseEnhanced(sessionId: string) {
   // 2. Label generálása (OpenAI)
   const label = await labelSession(sessionId);
 
-  // 3. System events: első és utolsó entry megjelölése
-  await supabase.from('system_events').insert([
+  // 3. System events: első és utolsó entry rögzítése
+  const { error: eventsErr } = await supabase.from('system_events').insert([
     {
       session_id: sessionId,
       event_type: 'session_first_entry',
@@ -48,25 +50,32 @@ export async function sessionCloseEnhanced(sessionId: string) {
       note: `Utolsó bejegyzés ID: ${lastEntry.id}`,
     },
   ]);
+  if (eventsErr) {
+    console.error('[sessionCloseEnhanced] ⚠️ System events insert error:', eventsErr.message);
+  }
 
   // 4. Záróreflexió generálása
   const closureReply = await generateSessionClosureResponse(sessionId);
 
-  // 5. Assistant válaszként mentés
-  await supabase.from('entries').insert({
-    session_id: sessionId,
-    role: 'assistant',
-    content: closureReply,
-    created_at: new Date().toISOString(),
-  });
-
-  // 6. Label felirat (system-style entry)
-  await supabase.from('entries').insert({
-    session_id: sessionId,
-    role: 'system',
-    content: `Szakasz lezárása: ${label}`,
-    created_at: new Date().toISOString(),
-  });
+  // 5–6. Assistant + System entries mentése
+  const { error: entryInsertErr } = await supabase.from('entries').insert([
+    {
+      session_id: sessionId,
+      role: 'assistant',
+      content: closureReply,
+      created_at: new Date().toISOString(),
+    },
+    {
+      session_id: sessionId,
+      role: 'system',
+      content: `Szakasz lezárása: ${label}`,
+      created_at: new Date().toISOString(),
+    },
+  ]);
+  if (entryInsertErr) {
+    console.error('[sessionCloseEnhanced] ❌ Entry insert error:', entryInsertErr.message);
+    throw new Error('Nem sikerült a záró bejegyzések mentése');
+  }
 
   // 7. Session lezárása
   const { error: sessionUpdateError, data: updated } = await supabase
@@ -74,13 +83,19 @@ export async function sessionCloseEnhanced(sessionId: string) {
     .update({
       closed_at: new Date().toISOString(),
       ended_at: new Date().toISOString(),
+      label,
+      label_confidence: 0.9,
     })
     .eq('id', sessionId)
     .select();
 
-  if (sessionUpdateError || !updated?.length) {
-    console.error('[sessionCloseEnhanced] ❌ Session update failed or empty result:', sessionUpdateError?.message);
+  if (sessionUpdateError) {
+    console.error('[sessionCloseEnhanced] ❌ Session update failed:', sessionUpdateError.message);
     throw new Error('Session lezárása sikertelen');
+  }
+  if (!updated || updated.length === 0) {
+    console.error('[sessionCloseEnhanced] ❌ Session update returned empty result set.');
+    throw new Error('Session lezárása nem hozott eredményt');
   } else {
     console.log('[sessionCloseEnhanced] ✅ Session updated:', updated);
   }
