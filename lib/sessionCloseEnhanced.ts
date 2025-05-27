@@ -3,7 +3,6 @@ import { labelSession } from './labelSession';
 import { generateSessionClosureResponse } from './generateSessionClosureResponse';
 
 export async function sessionCloseEnhanced(sessionId: string) {
-  // 0. Ellenőrizzük, hogy már le van-e zárva
   const { data: sessionMeta, error: sessionErr } = await supabase
     .from('sessions')
     .select('ended_at')
@@ -20,7 +19,6 @@ export async function sessionCloseEnhanced(sessionId: string) {
     return { label: '[már lezárt]', closureEntry: '' };
   }
 
-  // 1. Entry-k lekérése időrendben
   const { data: entries, error: entryError } = await supabase
     .from('entries')
     .select('id, role, content, created_at')
@@ -32,14 +30,12 @@ export async function sessionCloseEnhanced(sessionId: string) {
   const firstEntry = entries[0];
   const lastEntry = entries[entries.length - 1];
 
-  // 2. Label generálása (OpenAI)
   const label = await labelSession(sessionId);
   if (!label || label.length < 2) {
     console.error('[sessionCloseEnhanced] ❌ Label is too short or undefined');
     throw new Error('Nem sikerült megfelelő címkét generálni');
   }
 
-  // 3. System events: első és utolsó entry rögzítése
   const { error: eventsErr } = await supabase.from('system_events').insert([
     {
       session_id: sessionId,
@@ -56,66 +52,63 @@ export async function sessionCloseEnhanced(sessionId: string) {
     console.error('[sessionCloseEnhanced] ⚠️ System events insert error:', eventsErr.message);
   }
 
-  // 4. Záróreflexió generálása
   const closureReply = await generateSessionClosureResponse(sessionId);
   if (!closureReply || closureReply.trim().length < 8) {
     console.error('[sessionCloseEnhanced] ❌ Closure reply is empty or too short');
     throw new Error('A lezáró válasz nem megfelelő');
   }
 
-  // Lekérjük a closingTrigger értékét a profilból
-const { data: session } = await supabase
-  .from('sessions')
-  .select('profile')
-  .eq('id', sessionId)
-  .maybeSingle();
+  const { data: session } = await supabase
+    .from('sessions')
+    .select('profile')
+    .eq('id', sessionId)
+    .maybeSingle();
 
-const { data: metadata } = await supabase
-  .from('profile_metadata')
-  .select('closing_trigger')
-  .eq('profile', session.profile)
-  .maybeSingle();
+  const { data: metadata } = await supabase
+    .from('profile_metadata')
+    .select('closing_trigger')
+    .eq('profile', session.profile)
+    .maybeSingle();
 
-const closingTrigger = metadata?.closing_trigger?.trim() || '';
+  const closingTrigger = metadata?.closing_trigger?.trim() || '';
+  const now = new Date().toISOString();
 
-// 5–6. User closing + Assistant + System entries mentése
-const { error: entryInsertErr } = await supabase.from('entries').insert([
-  {
-    session_id: sessionId,
-    role: 'user',
-    content: closingTrigger,
-    created_at: new Date().toISOString(),
-  },
-  {
-    session_id: sessionId,
-    role: 'assistant',
-    content: closureReply,
-    created_at: new Date().toISOString(),
-  },
-  {
-    session_id: sessionId,
-    role: 'system',
-    content: `Szakasz lezárása: ${label}`,
-    created_at: new Date().toISOString(),
-  },
-]);
+  const { error: entryInsertErr } = await supabase.from('entries').insert([
+    {
+      session_id: sessionId,
+      role: 'user',
+      content: closingTrigger,
+      created_at: now,
+    },
+    {
+      session_id: sessionId,
+      role: 'assistant',
+      content: closureReply,
+      created_at: now,
+    },
+    {
+      session_id: sessionId,
+      role: 'system',
+      content: `Szakasz lezárása: ${label}`,
+      created_at: now,
+    },
+  ]);
 
-if (entryInsertErr) {
-  console.error('[sessionCloseEnhanced] ❌ Entry insert error:', {
-    message: entryInsertErr.message,
-    details: entryInsertErr.details,
-    hint: entryInsertErr.hint,
-    code: entryInsertErr.code,
-  });
+  if (entryInsertErr) {
+    console.error('[sessionCloseEnhanced] ❌ Entry insert error:', {
+      message: entryInsertErr.message,
+      details: entryInsertErr.details,
+      hint: entryInsertErr.hint,
+      code: entryInsertErr.code,
+    });
 
-  throw new Error('Nem sikerült a záró bejegyzések mentése');
-}
+    throw new Error('Nem sikerült a záró bejegyzések mentése');
+  }
 
-  // 7. Session lezárása
   const { error: sessionUpdateError, data: updated } = await supabase
     .from('sessions')
     .update({
-      ended_at: new Date().toISOString(),
+      ended_at: now,
       label,
       label_confidence: 0.9,
     })
