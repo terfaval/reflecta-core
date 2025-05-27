@@ -63,21 +63,43 @@ export async function sessionCloseEnhanced(sessionId: string) {
     throw new Error('A lezáró válasz nem megfelelő');
   }
 
-  // 5–6. Assistant + System entries mentése
-  const { error: entryInsertErr } = await supabase.from('entries').insert([
-    {
-      session_id: sessionId,
-      role: 'assistant',
-      content: closureReply,
-      created_at: new Date().toISOString(),
-    },
-    {
-      session_id: sessionId,
-      role: 'system',
-      content: `Szakasz lezárása: ${label}`,
-      created_at: new Date().toISOString(),
-    },
-  ]);
+  // Lekérjük a closingTrigger értékét a profilból
+const { data: session } = await supabase
+  .from('sessions')
+  .select('profile')
+  .eq('id', sessionId)
+  .maybeSingle();
+
+const { data: metadata } = await supabase
+  .from('profile_metadata')
+  .select('closing_trigger')
+  .eq('profile', session.profile)
+  .maybeSingle();
+
+const closingTrigger = metadata?.closing_trigger?.trim() || '';
+
+// 5–6. User closing + Assistant + System entries mentése
+await supabase.from('entries').insert([
+  {
+    session_id: sessionId,
+    role: 'user',
+    content: closingTrigger,
+    created_at: new Date().toISOString(),
+  },
+  {
+    session_id: sessionId,
+    role: 'assistant',
+    content: closureReply,
+    created_at: new Date().toISOString(),
+  },
+  {
+    session_id: sessionId,
+    role: 'system',
+    content: `Szakasz lezárása: ${label}`,
+    created_at: new Date().toISOString(),
+  },
+]);
+
   if (entryInsertErr) {
     console.error('[sessionCloseEnhanced] ❌ Entry insert error:', {
   message: entryInsertErr.message,
