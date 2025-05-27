@@ -79,7 +79,13 @@ export async function sessionCloseEnhanced(sessionId: string) {
     },
   ]);
   if (entryInsertErr) {
-    console.error('[sessionCloseEnhanced] ❌ Entry insert error:', entryInsertErr.message);
+    console.error('[sessionCloseEnhanced] ❌ Entry insert error:', {
+  message: entryInsertErr.message,
+  details: entryInsertErr.details,
+  hint: entryInsertErr.hint,
+  code: entryInsertErr.code,
+});
+
     throw new Error('Nem sikerült a záró bejegyzések mentése');
   }
 

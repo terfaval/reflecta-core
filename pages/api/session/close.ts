@@ -19,7 +19,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       label: result.label,
     });
   } catch (err: any) {
-    console.error('[Reflecta] sessionCloseEnhanced hiba:', err.message || err);
-    return res.status(500).json({ error: err.message || 'Unknown error' });
-  }
+  console.error('[Reflecta] ❌ sessionCloseEnhanced teljes hiba:', {
+    message: err.message,
+    stack: err.stack,
+    ...err,
+  });
+  return res.status(500).json({
+    error: err.message || 'Unknown error',
+    details: err,
+  });
+}
+
 }
