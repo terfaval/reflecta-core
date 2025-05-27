@@ -82,10 +82,13 @@ export function buildSystemPrompt(
   lines.push(`If the user input matches exactly: "${profile.metadata.closing_trigger}", treat this as a signal to close the session.`);
   lines.push(`Do not include this phrase in your response. Respond with a final reflection in the "${profile.metadata.closing_style}" style.`);
   if (sessionMeta?.isClosing) {
-    lines.push('This is a closure. Do not ask follow-up questions.');
-    lines.push('Offer short, symbolic, emotionally resonant final reflection.');
-    lines.push('Avoid prompting continuation.');
-  }
+  lines.push('This is a closure. Do not ask follow-up questions.');
+  lines.push('Offer a short, symbolic, emotionally resonant final reflection.');
+  lines.push('Avoid prompting continuation or exploration.');
+  lines.push('Do not end your message with a question or ellipsis.');
+  lines.push('Do not include open-ended or suggestive phrasing.');
+}
+
 
   lines.push('\n# DEFAULT REPLY STRUCTURE');
   lines.push('Always interpret deeply. Pay attention to emotional tone.');
