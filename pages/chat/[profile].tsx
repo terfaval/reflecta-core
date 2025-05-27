@@ -263,7 +263,7 @@ export default function ChatPage() {
       {/* ...a többi UI komponens itt marad változatlanul... */}
     </div>
   );
-}
+};
 
   return (
     <div className="reflecta-chat" style={{ ...currentStyle, display: 'flex', flexDirection: 'column', height: '100vh' }}>
