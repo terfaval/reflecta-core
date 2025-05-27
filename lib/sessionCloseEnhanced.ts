@@ -3,6 +3,23 @@ import { labelSession } from './labelSession';
 import { generateSessionClosureResponse } from './generateSessionClosureResponse';
 
 export async function sessionCloseEnhanced(sessionId: string) {
+  // 0. Ellenőrizzük, hogy már le van-e zárva
+  const { data: sessionMeta, error: sessionErr } = await supabase
+    .from('sessions')
+    .select('ended_at')
+    .eq('id', sessionId)
+    .maybeSingle();
+
+  if (sessionErr) {
+    console.error('[sessionCloseEnhanced] ❌ Session fetch error:', sessionErr.message);
+    throw new Error('Session lekérési hiba');
+  }
+
+  if (sessionMeta?.ended_at) {
+    console.warn('[sessionCloseEnhanced] ⚠️ Session already closed. Skipping.');
+    return { label: '[már lezárt]', closureEntry: '' };
+  }
+
   // 1. Lekérjük az összes entry-t időrendben
   const { data: entries, error: entryError } = await supabase
     .from('entries')
@@ -51,22 +68,22 @@ export async function sessionCloseEnhanced(sessionId: string) {
     created_at: new Date().toISOString(),
   });
 
-  // ✅ 7. Session lezárása
-const { error: sessionUpdateError, data: updated } = await supabase
-  .from('sessions')
-  .update({
-    closed_at: new Date().toISOString(),
-    ended_at: new Date().toISOString(),
-  })
-  .eq('id', sessionId)
-  .select(); // ⬅️ fontos, hogy visszaadja az eredményt
+  // 7. Session lezárása
+  const { error: sessionUpdateError, data: updated } = await supabase
+    .from('sessions')
+    .update({
+      closed_at: new Date().toISOString(),
+      ended_at: new Date().toISOString(),
+    })
+    .eq('id', sessionId)
+    .select();
 
-if (sessionUpdateError) {
-  console.error('[sessionCloseEnhanced] ❌ Session update failed:', sessionUpdateError.message);
-} else {
-  console.log('[sessionCloseEnhanced] ✅ Session updated:', updated);
-}
-
+  if (sessionUpdateError || !updated?.length) {
+    console.error('[sessionCloseEnhanced] ❌ Session update failed or empty result:', sessionUpdateError?.message);
+    throw new Error('Session lezárása sikertelen');
+  } else {
+    console.log('[sessionCloseEnhanced] ✅ Session updated:', updated);
+  }
 
   return { label, closureEntry: closureReply };
 }
