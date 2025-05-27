@@ -93,7 +93,6 @@ export async function sessionCloseEnhanced(sessionId: string) {
   const { error: sessionUpdateError, data: updated } = await supabase
     .from('sessions')
     .update({
-      closed_at: new Date().toISOString(),
       ended_at: new Date().toISOString(),
       label,
       label_confidence: 0.9,
