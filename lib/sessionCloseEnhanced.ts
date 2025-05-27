@@ -79,7 +79,7 @@ const { data: metadata } = await supabase
 const closingTrigger = metadata?.closing_trigger?.trim() || '';
 
 // 5–6. User closing + Assistant + System entries mentése
-await supabase.from('entries').insert([
+const { error: entryInsertErr } = await supabase.from('entries').insert([
   {
     session_id: sessionId,
     role: 'user',
@@ -100,16 +100,16 @@ await supabase.from('entries').insert([
   },
 ]);
 
-  if (entryInsertErr) {
-    console.error('[sessionCloseEnhanced] ❌ Entry insert error:', {
-  message: entryInsertErr.message,
-  details: entryInsertErr.details,
-  hint: entryInsertErr.hint,
-  code: entryInsertErr.code,
-});
+if (entryInsertErr) {
+  console.error('[sessionCloseEnhanced] ❌ Entry insert error:', {
+    message: entryInsertErr.message,
+    details: entryInsertErr.details,
+    hint: entryInsertErr.hint,
+    code: entryInsertErr.code,
+  });
 
-    throw new Error('Nem sikerült a záró bejegyzések mentése');
-  }
+  throw new Error('Nem sikerült a záró bejegyzések mentése');
+}
 
   // 7. Session lezárása
   const { error: sessionUpdateError, data: updated } = await supabase
