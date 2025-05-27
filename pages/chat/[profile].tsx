@@ -316,23 +316,30 @@ export default function ChatPage() {
   const data = await res.json();
 
   if (res.ok) {
-    const now = new Date().toISOString();
-    setEntries(prev => [
-      ...prev,
-      {
-        id: `${Date.now()}-closure-reply`,
-        role: 'assistant',
-        content: data.closureEntry,
-        created_at: now,
-      },
-      {
-        id: `${Date.now()}-closure-label`,
-        role: 'system',
-        content: `Szakasz lezárása: ${data.label}`,
-        created_at: now,
-      }
-    ]);
-  } else {
+  const now = new Date().toISOString();
+  setEntries(prev => [
+    ...prev,
+    {
+      id: `${Date.now()}-user-closing`,
+      role: 'user',
+      content: closingTrigger, // ⬅️ ez eddig hiányzott!
+      created_at: now,
+    },
+    {
+      id: `${Date.now()}-closure-reply`,
+      role: 'assistant',
+      content: data.closureEntry,
+      created_at: now,
+    },
+    {
+      id: `${Date.now()}-closure-label`,
+      role: 'system',
+      content: `Szakasz lezárása: ${data.label}`,
+      created_at: now,
+    }
+  ]);
+}
+ else {
     console.error('[Zárás] Hiba:', data.error);
   }
 } catch (err) {
