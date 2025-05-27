@@ -259,13 +259,6 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="reflecta-chat">
-      {/* ...a többi UI komponens itt marad változatlanul... */}
-    </div>
-  );
-};
-
-  return (
     <div className="reflecta-chat" style={{ ...currentStyle, display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <div className="reflecta-messages" ref={messagesRef} style={{ flex: 1, overflowY: 'auto', padding: '1rem', position: 'relative' }}>
         {loadingEntries && !entries.length ? (
