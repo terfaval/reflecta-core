@@ -1,6 +1,8 @@
 import supabase from '@/lib/supabase-admin';
-import { buildSystemPrompt } from './buildSystemPrompt';
+import { getCachedSystemPrompt } from './cachedPrompt';
+import { logTokenUsage } from './logTokenUsage';
 import { OpenAI } from 'openai';
+import type { Profile } from './types';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
@@ -37,21 +39,22 @@ export async function generateSessionClosureResponse(sessionId: string): Promise
   if (userEntries.length < 2)
     return 'Köszönöm a megosztásaidat. Ezzel a szakasz most lezárul.';
 
-  // 👉 Build prompt using full logic and metadata
-  const fullPrompt = buildSystemPrompt(
-    {
-      name: profile.name,
-      prompt_core: profile.prompt_core,
-      description: profile.description,
-      metadata,
-      reactions: {
-        common: [],
-        typical: [],
-        rare: [],
-      },
+  const profileObject: Profile = {
+    name: profile.name,
+    prompt_core: profile.prompt_core,
+    description: profile.description,
+    metadata,
+    reactions: {
+      common: [],
+      typical: [],
+      rare: [],
     },
+  };
+
+  const fullPrompt = getCachedSystemPrompt(
+    profileObject,
     undefined,
-    { isClosing: true } // 🔧 átadjuk, hogy zárásról van szó
+    { isClosing: true }
   );
 
   const messages: { role: 'system' | 'user'; content: string }[] = [
@@ -67,6 +70,16 @@ export async function generateSessionClosureResponse(sessionId: string): Promise
   });
 
   const closure = chat.choices[0].message.content?.trim();
+
+  if (chat.usage) {
+    logTokenUsage({
+      sessionId,
+      model: chat.model || 'gpt-3.5-turbo',
+      promptTokens: chat.usage.prompt_tokens,
+      completionTokens: chat.usage.completion_tokens,
+    });
+  }
+
   if (!closure || closure.length < 10)
     return 'Köszönöm, hogy itt voltál. A szakasz most lezárult.';
 

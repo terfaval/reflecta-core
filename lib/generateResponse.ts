@@ -1,7 +1,6 @@
-// File: lib/generateResponse.ts
-
 import supabase from '@/lib/supabase-admin';
-import { buildSystemPrompt } from './buildSystemPrompt';
+import { getCachedSystemPrompt } from './cachedPrompt';
+import { logTokenUsage } from './logTokenUsage';
 import { OpenAI } from 'openai';
 import { matchReactions } from '@/lib/matchReactions';
 import { matchRecommendations } from '@/lib/matchRecommendations';
@@ -14,10 +13,11 @@ export async function generateResponse(sessionId: string): Promise<{
   reply: string;
   reaction_tag?: string;
   recommendation_tag?: string;
+  warning?: string;
 }> {
   const { data: session } = await supabase
     .from('sessions')
-    .select('id, profile, user_id, conversation_id, ended_at') // 🔧 ended_at be
+    .select('id, profile, user_id, conversation_id, ended_at')
     .eq('id', sessionId)
     .maybeSingle();
 
@@ -80,7 +80,6 @@ export async function generateResponse(sessionId: string): Promise<{
 
   const entries = Array.from(allEntriesMap.values());
 
-  // 🔒 Zárás ellenőrzés: ha trigger egyezik és még nincs lezárva
   const lastEntry = entries[entries.length - 1];
   if (
     closingTrigger &&
@@ -88,17 +87,14 @@ export async function generateResponse(sessionId: string): Promise<{
     lastEntry.content.trim() === closingTrigger &&
     !session.ended_at
   ) {
-    const { sessionCloseEnhanced } = await import('./sessionCloseEnhanced');
-    const closure = await sessionCloseEnhanced(sessionId);
-
     return {
-      reply: closure.closureEntry,
+      reply: '',
       reaction_tag: undefined,
-      recommendation_tag: undefined
+      recommendation_tag: undefined,
+      warning: 'Session closure detected — please call /api/session/close to complete.'
     };
   }
 
-  // 🔎 Normál válaszlogika
   const lastUserEntry = [...entries]
     .reverse()
     .find(e =>
@@ -122,7 +118,7 @@ export async function generateResponse(sessionId: string): Promise<{
     "Használj tiszteletteljes, de tegező hangnemet, ahogyan egy érzékeny önreflexiós naplóasszisztens tenné."
   ].join(' ');
 
-  const basePrompt = buildSystemPrompt(
+  const basePrompt = getCachedSystemPrompt(
     {
       name: profile.name,
       prompt_core: profile.prompt_core,
@@ -152,6 +148,15 @@ export async function generateResponse(sessionId: string): Promise<{
 
   const reply = chat.choices[0].message.content;
   if (!reply) throw new Error('No reply generated');
+
+  if (chat.usage) {
+    logTokenUsage({
+      sessionId,
+      model: chat.model || 'gpt-3.5-turbo',
+      promptTokens: chat.usage.prompt_tokens,
+      completionTokens: chat.usage.completion_tokens,
+    });
+  }
 
   let reaction_tag = undefined;
   let recommendation_tag = undefined;

@@ -264,8 +264,38 @@ export default function ChatPage() {
               onClick={async () => {
                 if (!sessionId || isClosing || assistantReplyCount < 3) return;
                 setIsClosing(true);
-                await handleSend(closingTrigger);
-                await fetchMoreEntries(0);
+                try {
+  const res = await fetch('/api/session/close', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sessionId }),
+  });
+  const data = await res.json();
+
+  if (res.ok) {
+    const now = new Date().toISOString();
+    setEntries(prev => [
+      ...prev,
+      {
+        id: `${Date.now()}-closure-reply`,
+        role: 'assistant',
+        content: data.closureEntry,
+        created_at: now,
+      },
+      {
+        id: `${Date.now()}-closure-label`,
+        role: 'system',
+        content: `Szakasz lezárása: ${data.label}`,
+        created_at: now,
+      }
+    ]);
+  } else {
+    console.error('[Zárás] Hiba:', data.error);
+  }
+} catch (err) {
+  console.error('[Zárás] Kivétel:', err);
+}
+
                 setIsClosing(false);
               }}
               disabled={assistantReplyCount < 3 || isClosing}
@@ -280,10 +310,7 @@ export default function ChatPage() {
                 transition: 'opacity 0.3s ease, background-color 0.3s ease',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.4rem 1rem',
-                borderRadius: '1.5rem',
-                border: 'none',
+                border: `1px solid ${currentStyle['--user-color'] || '#ffffff'}`,
               }}
             >
               <svg

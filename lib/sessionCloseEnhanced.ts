@@ -1,5 +1,3 @@
-// File: lib/sessionCloseEnhanced.ts
-
 import supabase from '@/lib/supabase-admin';
 import { labelSession } from './labelSession';
 import { generateSessionClosureResponse } from './generateSessionClosureResponse';
@@ -36,6 +34,10 @@ export async function sessionCloseEnhanced(sessionId: string) {
 
   // 2. Label generálása (OpenAI)
   const label = await labelSession(sessionId);
+  if (!label || label.length < 2) {
+    console.error('[sessionCloseEnhanced] ❌ Label is too short or undefined');
+    throw new Error('Nem sikerült megfelelő címkét generálni');
+  }
 
   // 3. System events: első és utolsó entry rögzítése
   const { error: eventsErr } = await supabase.from('system_events').insert([
@@ -56,6 +58,10 @@ export async function sessionCloseEnhanced(sessionId: string) {
 
   // 4. Záróreflexió generálása
   const closureReply = await generateSessionClosureResponse(sessionId);
+  if (!closureReply || closureReply.trim().length < 8) {
+    console.error('[sessionCloseEnhanced] ❌ Closure reply is empty or too short');
+    throw new Error('A lezáró válasz nem megfelelő');
+  }
 
   // 5–6. Assistant + System entries mentése
   const { error: entryInsertErr } = await supabase.from('entries').insert([
@@ -96,9 +102,9 @@ export async function sessionCloseEnhanced(sessionId: string) {
   if (!updated || updated.length === 0) {
     console.error('[sessionCloseEnhanced] ❌ Session update returned empty result set.');
     throw new Error('Session lezárása nem hozott eredményt');
-  } else {
-    console.log('[sessionCloseEnhanced] ✅ Session updated:', updated);
   }
+
+  console.log('[sessionCloseEnhanced] ✅ Session closed:', updated[0].id);
 
   return { label, closureEntry: closureReply };
 }

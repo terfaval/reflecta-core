@@ -11,7 +11,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const { reply, reaction_tag, recommendation_tag } = await generateResponse(sessionId);
 
-    // 🔒 Ha mindkettő undefined, akkor ez zárás volt → már mentve
     const isClosure = reaction_tag === undefined && recommendation_tag === undefined;
 
     if (!isClosure) {
