@@ -50,12 +50,14 @@ export default function ChatPage() {
   }, [entries]);
 
   useEffect(() => {
-    const refs = scrollAnchors.map(anchor => ({
-      ...anchor,
-      ref: React.createRef<HTMLDivElement>()
-    }));
-    setScrollRefs(refs);
-  }, [scrollAnchors]);
+  const refs = scrollAnchors.map(anchor => ({
+    id: anchor.entry_id,       // 👈 ID mező biztosítása
+    entry_id: anchor.entry_id,
+    label: anchor.label,
+    ref: React.createRef<HTMLDivElement>()
+  }));
+  setScrollRefs(refs);
+}, [scrollAnchors]);
 
   const scrollTo = (ref: React.RefObject<HTMLDivElement>) => {
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
