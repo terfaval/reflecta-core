@@ -5,12 +5,17 @@ import styles from './SessionLabelBubble.module.css';
 
 interface SessionLabelBubbleProps {
   initialLabel: string;
-  sessionId: string;
+  entryId: string;
   userColor: string;
   aiColor: string;
 }
 
-export default function SessionLabelBubble({ initialLabel, sessionId, userColor, aiColor }: SessionLabelBubbleProps) {
+export default function SessionLabelBubble({
+  initialLabel,
+  entryId,
+  userColor,
+  aiColor
+}: SessionLabelBubbleProps) {
   const [label, setLabel] = useState(initialLabel);
   const [editing, setEditing] = useState(false);
   const [tempLabel, setTempLabel] = useState(label);
@@ -23,7 +28,7 @@ export default function SessionLabelBubble({ initialLabel, sessionId, userColor,
     const res = await fetch('/api/session/updateLabel', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId, label: tempLabel })
+      body: JSON.stringify({ entryId, label: tempLabel })
     });
 
     if (res.ok) {

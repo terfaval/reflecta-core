@@ -246,7 +246,12 @@ export default function ChatPage() {
                 {entry.content === '__thinking__' ? (
                   <ThinkingDots />
                 ) : entry.role === 'system' && entry.content.startsWith('Szakasz lezárása:') ? (
-                  <SessionLabelBubble initialLabel={entry.content.replace('Szakasz lezárása:', '').trim()} sessionId={sessionId!} userColor={currentStyle['--user-color']} aiColor={currentStyle['--ai-color']} />
+                  <SessionLabelBubble
+  entryId={entry.id} // ⬅️ fontos váltás!
+  initialLabel={entry.content.replace('Szakasz lezárása:', '').trim()}
+  userColor={currentStyle['--user-color']}
+  aiColor={currentStyle['--ai-color']}
+/>
                 ) : (
                   <p>{entry.content}</p>
                 )}
