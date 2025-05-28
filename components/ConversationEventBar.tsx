@@ -43,31 +43,30 @@ const ConversationEventBar: React.FC<Props> = ({ containerRef, events, scrollTo,
   }, [events, containerRef]);
 
   return (
-    <div className={styles.eventBarContainer}>
+    <div
+      className={styles.eventBarContainer}
+      style={{ background: 'rgba(0, 255, 0, 0.05)', zIndex: 1000 }} // debug háttér, hogy lásd
+    >
       {events.map(event => (
         <button
           key={event.id}
-          className={styles.eventButton}
           onClick={() => scrollTo(event.ref)}
           style={{
+            position: 'absolute',
             top: `${positions[event.id] || 0}%`,
-            backgroundColor: colors.aiColor,
-            borderColor: colors.userColor,
+            right: '0px',
+            zIndex: 1001,
+            background: colors.aiColor,
             color: colors.userColor,
+            border: `2px solid ${colors.userColor}`,
+            padding: '4px 8px',
+            fontSize: '12px',
+            borderRadius: '4px',
+            pointerEvents: 'auto',
+            transition: 'opacity 0.2s',
           }}
         >
-          <svg className={styles.icon} xmlns="http://www.w3.org/2000/svg" width="16" height="16" stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="4" />
-          </svg>
-          <span
-            className={styles.label}
-            style={{
-              backgroundColor: colors.userColor,
-              color: colors.bgColor,
-            }}
-          >
-            {event.label}
-          </span>
+          ⬤ {event.label}
         </button>
       ))}
     </div>

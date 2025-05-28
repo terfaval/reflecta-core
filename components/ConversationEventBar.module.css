@@ -11,6 +11,11 @@
   right: 0px;  /* vagy: right: -1px ha beljebb kell */
 }
 
+.reflecta-messages {
+  position: relative;
+}
+
+
 .eventButton {
   all: unset;
   position: absolute;
