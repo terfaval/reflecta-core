@@ -30,7 +30,7 @@ export default function ChatPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [closingTrigger, setClosingTrigger] = useState<string>('');
   const [scrollAnchors, setScrollAnchors] = useState<ScrollAnchor[]>([]);
-  const [scrollRefs, setScrollRefs] = useState<{ entry_id: string; label: string; ref: React.RefObject<HTMLDivElement> }[]>([]);
+  const [scrollRefs, setScrollRefs] = useState<{ id: string; label: string; ref: React.RefObject<HTMLDivElement> }[]>([]);
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [loadingEntries, setLoadingEntries] = useState(true);
