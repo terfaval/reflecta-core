@@ -1,51 +1,38 @@
-// File: /lib/useSession.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+import supabase from '@/lib/supabase-admin';
 
-import supabase from '../lib/supabase-admin';
-
-export async function getOrCreateConversationAndSession(userId: string, profile: string) {
-  // 1. Keresünk aktív conversation-t
-  const { data: conversation, error: convErr } = await supabase
-    .from('conversations')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('profile', profile)
-    .eq('is_archived', false)
-    .order('started_at', { ascending: false })
-    .maybeSingle();
-
-  let conversationId: string;
-
-  if (conversation && !convErr) {
-    conversationId = conversation.id;
-  } else {
-    // 2. Létrehozunk egy új conversation-t
-    const { data: createdConv, error: createConvErr } = await supabase
-      .from('conversations')
-      .insert({ user_id: userId, profile })
-      .select()
-      .maybeSingle();
-
-    if (createConvErr || !createdConv) throw new Error('Failed to create conversation.');
-    conversationId = createdConv.id;
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // 3. Nyitott session keresése az adott conversation-höz
-  const { data: existingSession } = await supabase
-    .from('sessions')
-    .select('*')
-    .eq('conversation_id', conversationId)
-    .is('ended_at', null)
+  const { entryId, label } = req.body;
+
+  if (!entryId || !label) {
+    return res.status(400).json({ error: 'Missing entryId or label' });
+  }
+
+  // 1. Megkeressük az entry alapján a hozzá tartozó session-t
+  const { data: entry, error: entryError } = await supabase
+    .from('entries')
+    .select('session_id')
+    .eq('id', entryId)
     .maybeSingle();
 
-  if (existingSession) return { conversationId, session: existingSession };
+  if (entryError || !entry?.session_id) {
+    return res.status(404).json({ error: 'Entry not found or session_id missing' });
+  }
 
-  // 4. Új session létrehozása
-  const { data: newSession, error: sessionErr } = await supabase
+  // 2. Update a label mező
+  const { error: updateError } = await supabase
     .from('sessions')
-    .insert({ user_id: userId, profile, conversation_id: conversationId })
-    .select()
-    .maybeSingle();
+    .update({ label })
+    .eq('id', entry.session_id);
 
-  if (sessionErr || !newSession) throw new Error('Failed to create session.');
-  return { conversationId, session: newSession };
+  if (updateError) {
+    console.error('[updateLabel] error:', updateError.message);
+    return res.status(500).json({ error: updateError.message });
+  }
+
+  return res.status(200).json({ success: true });
 }
