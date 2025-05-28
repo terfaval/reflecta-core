@@ -29,6 +29,7 @@ export default function ChatPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [closingTrigger, setClosingTrigger] = useState<string>('');
   const [scrollAnchors, setScrollAnchors] = useState<ScrollAnchor[]>([]);
+  const [scrollRefs, setScrollRefs] = useState<{ entry_id: string; label: string; ref: React.RefObject<HTMLDivElement> }[]>([]);
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [loadingEntries, setLoadingEntries] = useState(true);
@@ -47,11 +48,13 @@ export default function ChatPage() {
     return entries.filter(e => e.role === 'assistant' && e.content !== '__thinking__').length;
   }, [entries]);
 
-  const scrollRefs = useMemo(() =>
-    scrollAnchors.map(anchor => ({
+  useEffect(() => {
+    const refs = scrollAnchors.map(anchor => ({
       ...anchor,
-      ref: useRef<HTMLDivElement>(null),
-    })), [scrollAnchors]);
+      ref: React.createRef<HTMLDivElement>()
+    }));
+    setScrollRefs(refs);
+  }, [scrollAnchors]);
 
   const scrollTo = (ref: React.RefObject<HTMLDivElement>) => {
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -176,7 +179,6 @@ export default function ChatPage() {
     el.addEventListener('scroll', handleScroll);
     return () => el.removeEventListener('scroll', handleScroll);
   }, [loading]);
-
 
 
   const handleSend = async (override?: string) => {
