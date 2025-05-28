@@ -1,5 +1,7 @@
 // File: /styles/profileStyles.ts
 
+import buttonStyles from '../components/buttons.module.css'; // 💡 ez az új sor
+
 export const profileStyles: Record<string, React.CSSProperties & Record<string, string>> = {
   Akasza: {
     '--bg-color': '#ffffff',
@@ -37,3 +39,6 @@ export const profileStyles: Record<string, React.CSSProperties & Record<string, 
     '--ai-color': '#BEB5CF',
   },
 };
+
+// 💡 CSS modul exportálva, hogy máshonnan is elérhető legyen
+export { buttonStyles };

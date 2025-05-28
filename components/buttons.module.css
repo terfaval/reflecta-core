@@ -1,0 +1,73 @@
+/* File: styles/components/buttons.module.css */
+
+/* Általános gombstílus */
+.buttonBase {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Küldés gomb */
+.sendButton {
+  background-color: var(--user-color);
+  border-color: var(--user-color);
+  color: white;
+}
+
+.sendButtonLoading {
+  background-color: white;
+  border-color: var(--user-color);
+  color: var(--user-color);
+}
+
+/* Zárás gomb */
+.closeAnimated {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  height: 44px;
+  border-radius: 22px;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 44px;
+  background-color: white;
+  border: 1px solid var(--user-color);
+  color: var(--user-color);
+  cursor: pointer;
+  transition: max-width 0.3s ease, background-color 0.3s ease;
+}
+
+.closeAnimated:hover {
+  max-width: 180px;
+}
+
+.closeLabel {
+  opacity: 0;
+  margin-left: 8px;
+  font-size: 14px;
+  font-family: 'Raleway', sans-serif;
+  color: var(--user-color);
+  white-space: nowrap;
+  transition: opacity 0.2s ease 0.1s;
+}
+
+.closeAnimated:hover .closeLabel {
+  opacity: 1;
+}
+
+.closeIcon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  stroke: var(--user-color);
+  transition: stroke 0.2s ease;
+}

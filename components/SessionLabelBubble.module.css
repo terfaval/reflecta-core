@@ -1,0 +1,48 @@
+.bubbleWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  width: 100%;
+  position: relative;
+}
+
+.line {
+  height: 1px;
+  flex: 1;
+  background-color: currentColor;
+}
+
+.labelBox {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 6px 12px;
+  border-radius: 24px;
+  font-weight: 600;
+  font-size: 14px;
+  gap: 10px;
+  color: currentColor;
+}
+
+.input {
+  border: none;
+  background: transparent;
+  border-bottom: 1px solid currentColor;
+  outline: none;
+  font-size: 14px;
+  color: currentColor;
+}
+
+.circleButton {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
