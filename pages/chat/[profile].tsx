@@ -1,4 +1,5 @@
 // ✅ Reflecta ChatPage with scrollAnchors from system_events
+import React from 'react'; 
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { profileStyles, buttonStyles } from '../../styles/profileStyles';
