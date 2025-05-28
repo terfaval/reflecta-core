@@ -27,13 +27,14 @@
 
 /* Üzenet kártyák */
 .reflecta-message {
-  max-width: 75%;
+  max-width: 100%;
   border-radius: 25px;
   word-wrap: break-word;
 }
 
 .reflecta-message.user {
   background-color: var(--ai-color);
+  max-width: 75%;
   color: black;
   padding: 5px 20px 5px 40px;
   align-self: flex-end;
@@ -42,10 +43,17 @@
 
 .reflecta-message.assistant {
   background-color: var(--user-color);
+  max-width: 75%;
   color: white;
   padding: 5px 40px 5px 20px;
   align-self: flex-start;
   border-bottom-left-radius: 2px;
+}
+
+.reflecta-message-system {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
 }
 
 /* Beviteli szekció */

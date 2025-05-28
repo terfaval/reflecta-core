@@ -23,7 +23,7 @@ export default function SessionLabelBubble({ initialLabel, sessionId, userColor,
     const res = await fetch('/api/session/updateLabel', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId, newLabel: tempLabel })
+      body: JSON.stringify({ sessionId, label: tempLabel })
     });
 
     if (res.ok) {
