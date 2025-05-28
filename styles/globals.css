@@ -23,6 +23,8 @@
   padding-right: 4px;
   scroll-behavior: smooth;
   padding-bottom: 80px;
+  position: relative;
+
 }
 
 /* Üzenet kártyák */
