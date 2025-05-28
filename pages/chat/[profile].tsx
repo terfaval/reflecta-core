@@ -258,7 +258,18 @@ export default function ChatPage() {
   return (
     <div className="reflecta-chat" style={{ ...currentStyle, display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <div className="reflecta-messages" ref={messagesRef} style={{ flex: 1, overflowY: 'auto', padding: '1rem', position: 'relative' }}>
-        {loadingEntries && !entries.length ? (
+<ConversationEventBar
+  containerRef={messagesRef}
+  events={scrollRefs}
+  scrollTo={scrollTo}
+  colors={{
+    userColor: currentStyle['--user-color'] || '#7A4DFF',
+    aiColor: currentStyle['--ai-color'] || '#FFB347',
+    bgColor: currentStyle['--bg-color'] || '#ffffff',
+  }}
+/>
+        
+{loadingEntries && !entries.length ? (
           <SpiralLoader userColor={currentStyle['--user-color'] || '#7A4DFF'} aiColor={currentStyle['--ai-color'] || '#FFB347'} />
         ) : (
           entries.length === 0 && sessionIsFresh ? (
