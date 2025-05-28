@@ -49,10 +49,9 @@ export default function ChatPage() {
     return entries.filter(e => e.role === 'assistant' && e.content !== '__thinking__').length;
   }, [entries]);
 
-  useEffect(() => {
+useEffect(() => {
   const refs = scrollAnchors.map(anchor => ({
-    id: anchor.entry_id,       // 👈 ID mező biztosítása
-    entry_id: anchor.entry_id,
+    id: anchor.entry_id, // 👈 ez a mező kötelező az EventItem típushoz
     label: anchor.label,
     ref: React.createRef<HTMLDivElement>()
   }));
