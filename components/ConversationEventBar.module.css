@@ -12,7 +12,7 @@
   pointer-events: none; /* sáv maga ne blokkolja az inputokat */
 }
 
-.reflecta-messages {
+.reflecta-chat {
   position: relative; /* szükséges az abszolút pozícionált gyerekhez */
   overflow-y: scroll; /* explicit beállítás, nem auto */
   scrollbar-width: none; /* Firefox scrollbar eltüntetés */
@@ -20,7 +20,7 @@
 }
 
 /* Chrome, Safari */
-.reflecta-messages::-webkit-scrollbar {
+.reflecta-chat::-webkit-scrollbar {
   display: none;
 }
 
