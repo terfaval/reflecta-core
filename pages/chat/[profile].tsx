@@ -9,6 +9,7 @@ import ScrollToBottomButton from '../../components/ScrollToBottomButton';
 import StartingPromptSelector from '../../components/StartingPromptSelector';
 import SessionLabelBubble from '../../components/SessionLabelBubble';
 import { useUserSession } from '../../hooks/useUserSession';
+import { useAutoTextareaResize } from '../../hooks/useAutoTextareaResize';
 
 
 interface Entry {
@@ -50,6 +51,7 @@ export default function ChatPage() {
   },
 });
 
+  useAutoTextareaResize();
 
   const assistantReplyCount = useMemo(() => {
     return entries.filter(e => e.role === 'assistant' && e.content !== '__thinking__').length;
@@ -65,17 +67,6 @@ export default function ChatPage() {
     });
     if (bottomRef.current) observer.observe(bottomRef.current);
     return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
-    if (!textarea) return;
-    const handleInput = () => {
-      textarea.style.height = 'auto';
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    };
-    textarea.addEventListener('input', handleInput);
-    return () => textarea.removeEventListener('input', handleInput);
   }, []);
 
   const fetchMoreEntries = async (pageIndex: number) => {
