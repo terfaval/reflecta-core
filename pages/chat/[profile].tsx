@@ -8,6 +8,8 @@ import ThinkingDots from '../../components/ThinkingDots';
 import ScrollToBottomButton from '../../components/ScrollToBottomButton';
 import StartingPromptSelector from '../../components/StartingPromptSelector';
 import SessionLabelBubble from '../../components/SessionLabelBubble';
+import { useUserSession } from '../../hooks/useUserSession';
+
 
 interface Entry {
   id: string;
@@ -37,6 +39,18 @@ export default function ChatPage() {
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const currentStyle = profileStyles[profile as string] || {};
 
+  useUserSession({
+  profile,
+  onReady: ({ userId, sessionId, startingPrompts, closingTrigger }) => {
+    setUserId(userId);
+    setSessionId(sessionId);
+    setStartingPrompts(startingPrompts);
+    setClosingTrigger(closingTrigger);
+    setSessionIsFresh(true);
+  },
+});
+
+
   const assistantReplyCount = useMemo(() => {
     return entries.filter(e => e.role === 'assistant' && e.content !== '__thinking__').length;
   }, [entries]);
@@ -63,48 +77,6 @@ export default function ChatPage() {
     textarea.addEventListener('input', handleInput);
     return () => textarea.removeEventListener('input', handleInput);
   }, []);
-
-  const loadInitialData = async (user_id: string, profile: string) => {
-    try {
-      const sessionRes = await fetch('/api/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user_id, profile }),
-      });
-      const sessionData = await sessionRes.json();
-      if (!sessionData?.session?.id) return;
-      const profileRes = await fetch(`/api/profile?name=${profile}`);
-      const profileData = await profileRes.json();
-      setStartingPrompts(profileData?.starting_prompts || []);
-      setClosingTrigger(profileData?.closing_trigger || '');
-      setSessionId(sessionData.session.id);
-      setSessionIsFresh(true);
-    } catch (err) {
-      console.error('[loadInitialData] error:', err);
-    }
-  };
-
-  useEffect(() => {
-    const handleWPUser = (event: MessageEvent) => {
-      if (event.data?.type === 'wp_user') {
-        const { wp_user_id, email } = event.data;
-        if (!wp_user_id || !email) return;
-        fetch('/api/user', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ wp_user_id, email }),
-        })
-          .then(res => res.json())
-          .then(async ({ user_id }) => {
-            setUserId(user_id);
-            await loadInitialData(user_id, profile as string);
-          })
-          .catch(console.error);
-      }
-    };
-    window.addEventListener('message', handleWPUser);
-    return () => window.removeEventListener('message', handleWPUser);
-  }, [profile]);
 
   const fetchMoreEntries = async (pageIndex: number) => {
     if (!userId || !profile || isFetchingRef.current) return;
