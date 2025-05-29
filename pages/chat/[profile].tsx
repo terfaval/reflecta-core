@@ -258,7 +258,7 @@ useEffect(() => {
 
   return (
     <div className="reflecta-chat" style={{ ...currentStyle, display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <div className="reflecta-messages" ref={messagesRef} style={{ flex: 1, overflowY: 'auto', padding: '1rem', position: 'relative' }}>
+      <div className="reflecta-chat" ref={messagesRef} style={{ flex: 1, overflowY: 'auto', padding: '1rem', position: 'relative' }}>
 <ConversationEventBar
   containerRef={messagesRef}
   events={scrollRefs}
