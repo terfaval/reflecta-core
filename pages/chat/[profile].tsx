@@ -276,8 +276,15 @@ useEffect(() => {
           entries.length === 0 && sessionIsFresh ? (
             <StartingPromptSelector prompts={startingPrompts} onSelectPrompt={handleSend} aiColor={currentStyle['--ai-color']} userColor={currentStyle['--user-color']} />
           ) : (
-            entries.map(entry => (
-              <div key={entry.id} className={`reflecta-message ${entry.role}`}>
+            entries.map(entry => {
+  const anchorRef = scrollRefs.find(a => a.id === entry.id)?.ref;
+  return (
+    <div
+      key={entry.id}
+      className={`reflecta-message ${entry.role}`}
+      ref={anchorRef || undefined}
+    >
+
                 {entry.content === '__thinking__' ? (
                   <ThinkingDots />
                 ) : entry.role === 'system' && entry.content.startsWith('Szakasz lezárása:') ? (
