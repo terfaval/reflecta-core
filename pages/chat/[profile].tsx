@@ -16,11 +16,6 @@ interface Entry {
   created_at: string;
 }
 
-interface ScrollAnchor {
-  entry_id: string;
-  label: string;
-}
-
 export default function ChatPage() {
   const router = useRouter();
   const { profile } = router.query;
@@ -28,8 +23,6 @@ export default function ChatPage() {
   const [message, setMessage] = useState('');
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [closingTrigger, setClosingTrigger] = useState<string>('');
-  const [scrollAnchors, setScrollAnchors] = useState<ScrollAnchor[]>([]);
-  const [scrollRefs, setScrollRefs] = useState<{ id: string; label: string; ref: React.RefObject<HTMLDivElement> }[]>([]);
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [loadingEntries, setLoadingEntries] = useState(true);
@@ -47,19 +40,6 @@ export default function ChatPage() {
   const assistantReplyCount = useMemo(() => {
     return entries.filter(e => e.role === 'assistant' && e.content !== '__thinking__').length;
   }, [entries]);
-
-useEffect(() => {
-  const refs = scrollAnchors.map(anchor => ({
-    id: anchor.entry_id, // 👈 ez a mező kötelező az EventItem típushoz
-    label: anchor.label,
-    ref: React.createRef<HTMLDivElement>()
-  }));
-  setScrollRefs(refs);
-}, [scrollAnchors]);
-
-  const scrollTo = (ref: React.RefObject<HTMLDivElement>) => {
-    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -139,7 +119,6 @@ useEffect(() => {
       if (data?.entries?.length) {
         setSessionIsFresh(false);
         setClosingTrigger(data.closingTrigger);
-        setScrollAnchors(data.scrollAnchors || []);
         setEntries(prev => {
           const existingIds = new Set(prev.map(e => e.id));
           const newOnes = data.entries.filter(e => !existingIds.has(e.id));
@@ -269,7 +248,6 @@ useEffect(() => {
   />
 ) : (
   entries.map(entry => {
-    const anchorRef = scrollRefs.find(a => a.id === entry.id)?.ref;
     return (
       <div key={entry.id} className={`reflecta-message ${entry.role}`} ref={anchorRef || undefined}>
         {entry.content === '__thinking__' ? (
