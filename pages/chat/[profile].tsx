@@ -271,36 +271,37 @@ useEffect(() => {
 />
         
 {loadingEntries && !entries.length ? (
-          <SpiralLoader userColor={currentStyle['--user-color'] || '#7A4DFF'} aiColor={currentStyle['--ai-color'] || '#FFB347'} />
+  <SpiralLoader userColor={currentStyle['--user-color'] || '#7A4DFF'} aiColor={currentStyle['--ai-color'] || '#FFB347'} />
+) : entries.length === 0 && sessionIsFresh ? (
+  <StartingPromptSelector
+    prompts={startingPrompts}
+    onSelectPrompt={handleSend}
+    aiColor={currentStyle['--ai-color']}
+    userColor={currentStyle['--user-color']}
+  />
+) : (
+  entries.map(entry => {
+    const anchorRef = scrollRefs.find(a => a.id === entry.id)?.ref;
+    return (
+      <div key={entry.id} className={`reflecta-message ${entry.role}`} ref={anchorRef || undefined}>
+        {entry.content === '__thinking__' ? (
+          <ThinkingDots />
+        ) : entry.role === 'system' && entry.content.startsWith('Szakasz lezárása:') ? (
+          <SessionLabelBubble
+            entryId={entry.id}
+            initialLabel={entry.content.replace('Szakasz lezárása:', '').trim()}
+            userColor={currentStyle['--user-color']}
+            aiColor={currentStyle['--ai-color']}
+          />
         ) : (
-          entries.length === 0 && sessionIsFresh ? (
-            <StartingPromptSelector prompts={startingPrompts} onSelectPrompt={handleSend} aiColor={currentStyle['--ai-color']} userColor={currentStyle['--user-color']} />
-          ) : (
-            entries.map(entry => {
-  const anchorRef = scrollRefs.find(a => a.id === entry.id)?.ref;
-  return (
-    <div
-      key={entry.id}
-      className={`reflecta-message ${entry.role}`}
-      ref={anchorRef || undefined}
-    >
-
-                {entry.content === '__thinking__' ? (
-                  <ThinkingDots />
-                ) : entry.role === 'system' && entry.content.startsWith('Szakasz lezárása:') ? (
-                  <SessionLabelBubble
-  entryId={entry.id} // ⬅️ fontos váltás!
-  initialLabel={entry.content.replace('Szakasz lezárása:', '').trim()}
-  userColor={currentStyle['--user-color']}
-  aiColor={currentStyle['--ai-color']}
-/>
-                ) : (
-                  <p>{entry.content}</p>
-                )}
-              </div>
-            ))
-          )
+          <p>{entry.content}</p>
         )}
+      </div>
+    );
+  })
+)}
+
+
         <div ref={bottomRef} style={{ scrollMarginBottom: '60px' }} />
         {showScrollDown && (
           <div style={{ position: 'sticky', bottom: '-10px', display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
