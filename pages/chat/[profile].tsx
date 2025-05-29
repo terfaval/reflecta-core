@@ -235,48 +235,46 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="reflecta-chat" style={{ ...currentStyle, display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        
-{loadingEntries && !entries.length ? (
-  <SpiralLoader userColor={currentStyle['--user-color'] || '#7A4DFF'} aiColor={currentStyle['--ai-color'] || '#FFB347'} />
-) : entries.length === 0 && sessionIsFresh ? (
-  <StartingPromptSelector
-    prompts={startingPrompts}
-    onSelectPrompt={handleSend}
-    aiColor={currentStyle['--ai-color']}
-    userColor={currentStyle['--user-color']}
-  />
-) : (
-  entries.map(entry => {
-    return (
-      <div key={entry.id} className={`reflecta-message ${entry.role}`} ref={anchorRef || undefined}>
-        {entry.content === '__thinking__' ? (
-          <ThinkingDots />
-        ) : entry.role === 'system' && entry.content.startsWith('Szakasz lezárása:') ? (
-          <SessionLabelBubble
-            entryId={entry.id}
-            initialLabel={entry.content.replace('Szakasz lezárása:', '').trim()}
-            userColor={currentStyle['--user-color']}
-            aiColor={currentStyle['--ai-color']}
-          />
-        ) : (
-          <p>{entry.content}</p>
-        )}
-      </div>
-    );
-  })
-)}
-
-
-        <div ref={bottomRef} style={{ scrollMarginBottom: '60px' }} />
-        {showScrollDown && (
-          <div style={{ position: 'sticky', bottom: '-10px', display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
-            <div style={{ pointerEvents: 'auto' }}>
-              <ScrollToBottomButton onClick={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })} color={currentStyle['--ai-color'] || '#444'} />
-            </div>
+  <div className="reflecta-chat" style={{ ...currentStyle, display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <div className="reflecta-messages" ref={messagesRef} style={{ flex: 1, overflowY: 'auto', padding: '1rem', position: 'relative' }}>
+      {loadingEntries && !entries.length ? (
+        <SpiralLoader userColor={currentStyle['--user-color'] || '#7A4DFF'} aiColor={currentStyle['--ai-color'] || '#FFB347'} />
+      ) : entries.length === 0 && sessionIsFresh ? (
+        <StartingPromptSelector
+          prompts={startingPrompts}
+          onSelectPrompt={handleSend}
+          aiColor={currentStyle['--ai-color']}
+          userColor={currentStyle['--user-color']}
+        />
+      ) : (
+        entries.map(entry => (
+          <div key={entry.id} className={`reflecta-message ${entry.role}`}>
+            {entry.content === '__thinking__' ? (
+              <ThinkingDots />
+            ) : entry.role === 'system' && entry.content.startsWith('Szakasz lezárása:') ? (
+              <SessionLabelBubble
+                entryId={entry.id}
+                initialLabel={entry.content.replace('Szakasz lezárása:', '').trim()}
+                userColor={currentStyle['--user-color']}
+                aiColor={currentStyle['--ai-color']}
+              />
+            ) : (
+              <p>{entry.content}</p>
+            )}
           </div>
-        )}
-      </div>
+        ))
+      )}
+
+      <div ref={bottomRef} style={{ scrollMarginBottom: '60px' }} />
+      {showScrollDown && (
+        <div style={{ position: 'sticky', bottom: '-10px', display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
+          <div style={{ pointerEvents: 'auto' }}>
+            <ScrollToBottomButton onClick={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })} color={currentStyle['--ai-color'] || '#444'} />
+          </div>
+        </div>
+      )}
+    </div>
+
       <div className="reflecta-input">
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Írd be, amit meg szeretnél osztani..." disabled={loading} />
         <div className="reflecta-input-buttons">
