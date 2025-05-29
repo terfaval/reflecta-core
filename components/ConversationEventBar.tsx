@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import styles from './conversationEventBar.module.css';
+import styles from './ConversationEventBar.module.css';
 
 interface EventItem {
   id: string;
