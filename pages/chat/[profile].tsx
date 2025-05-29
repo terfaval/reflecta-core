@@ -8,7 +8,6 @@ import ThinkingDots from '../../components/ThinkingDots';
 import ScrollToBottomButton from '../../components/ScrollToBottomButton';
 import StartingPromptSelector from '../../components/StartingPromptSelector';
 import SessionLabelBubble from '../../components/SessionLabelBubble';
-import ConversationEventBar from '../../components/ConversationEventBar';
 
 interface Entry {
   id: string;
@@ -258,17 +257,6 @@ useEffect(() => {
 
   return (
     <div className="reflecta-chat" style={{ ...currentStyle, display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <div className="reflecta-chat" ref={messagesRef} style={{ flex: 1, overflowY: 'auto', padding: '1rem', position: 'relative' }}>
-<ConversationEventBar
-  containerRef={messagesRef}
-  events={scrollRefs}
-  scrollTo={scrollTo}
-  colors={{
-    userColor: currentStyle['--user-color'] || '#7A4DFF',
-    aiColor: currentStyle['--ai-color'] || '#FFB347',
-    bgColor: currentStyle['--bg-color'] || '#ffffff',
-  }}
-/>
         
 {loadingEntries && !entries.length ? (
   <SpiralLoader userColor={currentStyle['--user-color'] || '#7A4DFF'} aiColor={currentStyle['--ai-color'] || '#FFB347'} />
