@@ -4,6 +4,8 @@ import SpiralLoader from './SpiralLoader';
 import ThinkingDots from './ThinkingDots';
 import StartingPromptSelector from './StartingPromptSelector';
 import SessionLabelBubble from './SessionLabelBubble';
+import ScrollToBottomButton from './ScrollToBottomButton';
+
 
 interface Entry {
   id: string;
