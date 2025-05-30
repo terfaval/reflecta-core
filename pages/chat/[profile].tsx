@@ -12,6 +12,7 @@ import { useUserSession } from '../../hooks/useUserSession';
 import { useAutoTextareaResize } from '../../hooks/useAutoTextareaResize';
 import { ChatFooter } from '../../components/ChatFooter';
 import { ChatMessagesList } from '../../components/ChatMessagesList';
+import { useScrollHandler } from '../../hooks/useScrollHandler';
 
 
 interface Entry {
@@ -54,6 +55,19 @@ export default function ChatPage() {
 });
 
   useAutoTextareaResize();
+
+  useScrollHandler({
+  ref: messagesRef,
+  loading,
+  onNearTop: () => {
+    setPage(prev => {
+      const nextPage = prev + 1;
+      fetchMoreEntries(nextPage);
+      return nextPage;
+    });
+  },
+  onScrollBottomStateChange: setShowScrollDown,
+});
 
   const assistantReplyCount = useMemo(() => {
     return entries.filter(e => e.role === 'assistant' && e.content !== '__thinking__').length;
@@ -105,26 +119,6 @@ export default function ChatPage() {
     setEntries([]);
     fetchMoreEntries(0);
   }, [profile, userId, sessionId]);
-
-  useEffect(() => {
-    const el = messagesRef.current;
-    if (!el) return;
-    const handleScroll = () => {
-      const nearTop = el.scrollTop < 50;
-      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
-      setShowScrollDown(!nearBottom);
-      if (nearTop && !loading) {
-        setPage(prev => {
-          const nextPage = prev + 1;
-          fetchMoreEntries(nextPage);
-          return nextPage;
-        });
-      }
-    };
-    el.addEventListener('scroll', handleScroll);
-    return () => el.removeEventListener('scroll', handleScroll);
-  }, [loading]);
-
 
   const handleSend = async (override?: string) => {
     const text = override || message;
