@@ -64,7 +64,6 @@ export function ChatMessagesList({
               <SessionLabelBubble
                 entryId={entry.id}
                 initialLabel={entry.content.replace('Szakasz lezárása:', '').trim()}
-                sessionId={sessionId!}
                 userColor={currentStyle['--user-color']}
                 aiColor={currentStyle['--ai-color']}
               />
