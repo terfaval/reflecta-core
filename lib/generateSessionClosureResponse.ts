@@ -9,9 +9,10 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 export async function generateSessionClosureResponse(sessionId: string): Promise<string> {
   const { data: session } = await supabase
     .from('sessions')
-    .select('id, profile')
+    .select('id, profile, user_id')
     .eq('id', sessionId)
     .maybeSingle();
+
   if (!session) throw new Error('Session not found');
 
   const { data: profile } = await supabase
@@ -39,21 +40,40 @@ export async function generateSessionClosureResponse(sessionId: string): Promise
   if (userEntries.length < 2)
     return 'Köszönöm a megosztásaidat. Ezzel a szakasz most lezárul.';
 
+  const { data: prefs } = await supabase
+    .from('user_preferences')
+    .select('*')
+    .eq('user_id', session.user_id)
+    .maybeSingle();
+
+  const { data: reactionsRaw } = await supabase
+    .from('profile_reactions')
+    .select('reaction, rarity')
+    .eq('profile', session.profile);
+
+  const reactions = {
+    common: [] as string[],
+    typical: [] as string[],
+    rare: [] as string[],
+  };
+
+  for (const r of reactionsRaw || []) {
+    if (r.rarity in reactions) {
+      reactions[r.rarity].push(r.reaction);
+    }
+  }
+
   const profileObject: Profile = {
     name: profile.name,
     prompt_core: profile.prompt_core,
     description: profile.description,
     metadata,
-    reactions: {
-      common: [],
-      typical: [],
-      rare: [],
-    },
+    reactions,
   };
 
   const fullPrompt = getCachedSystemPrompt(
     profileObject,
-    undefined,
+    prefs || undefined,
     { isClosing: true }
   );
 
