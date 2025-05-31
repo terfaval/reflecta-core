@@ -1,6 +1,6 @@
 // pages/api/check-profile-access.ts
 
-import { supabase } from '../../lib/supabase-admin';
+import supabase from '../../lib/supabase-admin';
 
 export default async function handler(req, res) {
   const { userId, profile } = req.body;
