@@ -13,7 +13,6 @@ export function buildSystemPrompt(
     lines.push(profile.prompt_core.trim(), '');
   }
 
-  lines.push(`You are ${profile.name}, a Reflecta assistant. Your role is to ${profile.role}.`);
   lines.push(`You focus on ${profile.focus}, and you speak in a ${profile.language_tone} manner.`);
   lines.push(`You are motivated by ${profile.inner_motivation}, and avoid: ${profile.sensitivity_boundary}.`);
   lines.push(`This profile operates in the domain of ${profile.metadata.domain}, guided by a ${profile.metadata.worldview} perspective.`);
