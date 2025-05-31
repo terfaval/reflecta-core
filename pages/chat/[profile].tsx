@@ -15,7 +15,7 @@ import { ChatMessagesList } from '../../components/ChatMessagesList';
 import { useScrollHandler } from '../../hooks/useScrollHandler';
 import { useHandleSend } from '../../hooks/useHandleSend';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
-import { PreferenceToggleGroup } from './PreferenceToggleGroup';
+import { PreferenceToggleGroup } from '../../components/PreferenceToggleGroup';
 
 interface Entry {
   id: string;
