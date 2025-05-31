@@ -1,7 +1,7 @@
 // components/ChatFooter.tsx
 import React from 'react';
 import { buttonStyles } from '../styles/profileStyles';
-import { PreferenceToggleGroup } from './PreferenceToggleGroup';
+import { ThreeStateSwitch } from './ThreeStateSwitch';
 import type { UserPreferences } from '@/lib/types';
 
 interface ChatFooterProps {
@@ -45,39 +45,55 @@ export function ChatFooter({
       />
 
       {/* Preferences bar */}
-      <div className="reflecta-preference-bar mt-2 mb-1 flex flex-wrap gap-3">
-        <PreferenceToggleGroup
-          label="Válasz hossza"
-          options={[
-            { label: 'Rövid', value: 'short' },
-            { label: 'Alap', value: undefined },
-            { label: 'Hosszabb', value: 'long' },
-          ]}
-          value={userPreferences.answer_length}
-          onChange={(val) => setUserPreferences({ ...userPreferences, answer_length: val })}
+      <div className="reflecta-preference-bar mt-2 mb-1 flex items-end justify-start gap-3">
+        <ThreeStateSwitch
+          value={userPreferences.answer_length === 'short' ? 'left' : userPreferences.answer_length === 'long' ? 'right' : null}
+          onChange={(val) => setUserPreferences({ ...userPreferences, answer_length: val === 'left' ? 'short' : val === 'right' ? 'long' : undefined })}
+          leftIcon={<span style={{ fontSize: 14 }}>⤓</span>}
+          rightIcon={<span style={{ fontSize: 14 }}>⤒</span>}
+          leftLabel="Rövid"
+          rightLabel="Hosszabb"
+          styleVars={currentStyle}
+        />
+        <ThreeStateSwitch
+          value={userPreferences.style_mode === 'simple' ? 'left' : userPreferences.style_mode === 'symbolic' ? 'right' : null}
+          onChange={(val) => setUserPreferences({ ...userPreferences, style_mode: val === 'left' ? 'simple' : val === 'right' ? 'symbolic' : undefined })}
+          leftIcon={<span style={{ fontSize: 14 }}>⇄</span>}
+          rightIcon={<span style={{ fontSize: 14 }}>✷</span>}
+          leftLabel="Egyszerű"
+          rightLabel="Szimbolikus"
+          styleVars={currentStyle}
+        />
+        <ThreeStateSwitch
+          value={userPreferences.guidance_mode === 'free' ? 'left' : userPreferences.guidance_mode === 'guided' ? 'right' : null}
+          onChange={(val) => setUserPreferences({ ...userPreferences, guidance_mode: val === 'left' ? 'free' : val === 'right' ? 'guided' : undefined })}
+          leftIcon={<span style={{ fontSize: 14 }}>↻</span>}
+          rightIcon={<span style={{ fontSize: 14 }}>→</span>}
+          leftLabel="Szabad"
+          rightLabel="Irányított"
+          styleVars={currentStyle}
         />
 
-        <PreferenceToggleGroup
-          label="Stílus"
-          options={[
-            { label: 'Egyszerű', value: 'simple' },
-            { label: 'Alap', value: undefined },
-            { label: 'Szimbolikus', value: 'symbolic' },
-          ]}
-          value={userPreferences.style_mode}
-          onChange={(val) => setUserPreferences({ ...userPreferences, style_mode: val })}
-        />
-
-        <PreferenceToggleGroup
-          label="Vezetés"
-          options={[
-            { label: 'Szabad', value: 'free' },
-            { label: 'Alap', value: undefined },
-            { label: 'Irányított', value: 'guided' },
-          ]}
-          value={userPreferences.guidance_mode}
-          onChange={(val) => setUserPreferences({ ...userPreferences, guidance_mode: val })}
-        />
+        {/* Reset button */}
+        <button
+          onClick={() => setUserPreferences({})}
+          style={{
+            background: 'transparent',
+            color: currentStyle['--user-color'],
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: 'none',
+            padding: 4,
+            cursor: 'pointer',
+          }}
+          aria-label="Beállítások visszaállítása"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-rotate-ccw">
+            <polyline points="1 4 1 10 7 10" />
+            <path d="M3.51 15a9 9 0 1 1 2.13 3.13" />
+          </svg>
+        </button>
       </div>
 
       <div className="reflecta-input-buttons">
