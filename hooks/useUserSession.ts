@@ -1,5 +1,5 @@
-// hooks/useUserSession.ts
 import { useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 type UseUserSessionParams = {
   profile: string | string[] | undefined;
@@ -12,6 +12,8 @@ type UseUserSessionParams = {
 };
 
 export function useUserSession({ profile, onReady }: UseUserSessionParams) {
+  const router = useRouter();
+
   useEffect(() => {
     const handleWPUser = (event: MessageEvent) => {
       if (event.data?.type === 'wp_user') {
@@ -25,18 +27,31 @@ export function useUserSession({ profile, onReady }: UseUserSessionParams) {
         })
           .then(res => res.json())
           .then(async ({ user_id }) => {
+            // 🔐 Hozzáférés ellenőrzése
+            const profileRes = await fetch('/api/profile', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: profile, userId: user_id }),
+            });
+
+            if (profileRes.status === 403) {
+              router.push('/not-authorized'); // vagy mutass hibát
+              return;
+            }
+
+            const profileData = await profileRes.json();
+            const prompts = profileData?.starting_prompts || [];
+            const closingTrigger = profileData?.closing_trigger || '';
+
+            // 🌀 Session indítása csak ezután
             const sessionRes = await fetch('/api/session', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ userId: user_id, profile }),
             });
+
             const sessionData = await sessionRes.json();
             if (!sessionData?.session?.id) return;
-
-            const profileRes = await fetch(`/api/profile?name=${profile}`);
-            const profileData = await profileRes.json();
-            const prompts = profileData?.starting_prompts || [];
-            const closingTrigger = profileData?.closing_trigger || '';
 
             onReady({
               userId: user_id,

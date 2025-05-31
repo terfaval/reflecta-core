@@ -1,16 +1,27 @@
 // File: /pages/api/profile.ts
-
 import type { NextApiRequest, NextApiResponse } from 'next';
 import supabase from '../../lib/supabase-admin';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const raw = req.query.name;
-  if (!raw || typeof raw !== 'string') {
-    return res.status(400).json({ error: 'Missing profile name' });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const { name, userId } = req.body;
+  if (!name || !userId) {
+    return res.status(400).json({ error: 'Missing profile name or userId' });
   }
 
-  const name = decodeURIComponent(raw);
+  // Hozzáférés-ellenőrzés
+  const { data: access } = await supabase
+    .from('profile_access')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('profile_name', name);
 
+  if (!access || access.length === 0) {
+    return res.status(403).json({ error: 'Access denied to this profile.' });
+  }
+
+  // Profil adatok lekérése
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('name, prompt_core, description, color, tone_instructions, style_profile, is_active')
