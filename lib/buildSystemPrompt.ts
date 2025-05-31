@@ -13,8 +13,7 @@ export function buildSystemPrompt(
     lines.push(profile.prompt_core.trim(), '');
   }
 
-  lines.push(`You focus on ${profile.focus}, and you speak in a ${profile.language_tone} manner.`);
-  lines.push(`You are motivated by ${profile.inner_motivation}, and avoid: ${profile.sensitivity_boundary}.`);
+  lines.push(`You are ${profile.name}, a Reflecta assistant.`);
   lines.push(`This profile operates in the domain of ${profile.metadata.domain}, guided by a ${profile.metadata.worldview} perspective.`);
 
   if (profile.metadata.inspirations?.length) {
@@ -39,24 +38,24 @@ export function buildSystemPrompt(
     ...((profile as any).style_profile ?? {})
   };
 
-  if (style.style_tone)
-    lines.push(`Your style should be ${style.style_tone}.`);
-  if (style.style_symbol_density && style.style_rhythm)
-    lines.push(`Use ${style.style_symbol_density} symbolic imagery in a ${style.style_rhythm} rhythm.`);
-  if (style.style_structure)
-    lines.push(`Structure your replies in a ${style.style_structure} manner.`);
-  if (style.style_sentence_length)
-    lines.push(`Use ${style.style_sentence_length} sentence lengths.`);
-  if (style.style_visuality)
-    lines.push(`Your visuality level should be ${style.style_visuality}.`);
-  if (style.style_directiveness)
-    lines.push(`Use a ${style.style_directiveness} guiding approach.`);
-  if (style.style_pace)
-    lines.push(`Maintain a ${style.style_pace} interaction pace.`);
-  if (style.style_absorption_style)
-    lines.push(`Favor ${style.style_absorption_style} absorption.`);
-  if (style.style_humor && style.style_humor !== 'none')
-    lines.push(`Humor may be used in a ${style.style_humor} way.`);
+  if (profile.metadata.style_tone)
+    lines.push(`Your tone should be: ${profile.metadata.style_tone}.`);
+  if (profile.metadata.style_symbol_density && profile.metadata.style_rhythm)
+    lines.push(`Use ${profile.metadata.style_symbol_density} symbolic imagery in a ${profile.metadata.style_rhythm} rhythm.`);
+  if (profile.metadata.style_structure)
+    lines.push(`Structure your responses in a ${profile.metadata.style_structure} way.`);
+  if (profile.metadata.style_sentence_length)
+    lines.push(`Use ${profile.metadata.style_sentence_length} sentence lengths.`);
+  if (profile.metadata.style_visuality)
+    lines.push(`Maintain a ${profile.metadata.style_visuality} level of visual expression.`);
+  if (profile.metadata.style_directiveness)
+    lines.push(`Adopt a ${profile.metadata.style_directiveness} guiding mode.`);
+  if (profile.metadata.style_pace)
+    lines.push(`Speak at a ${profile.metadata.style_pace} pace.`);
+  if (profile.metadata.style_absorption_style)
+    lines.push(`Favor ${profile.metadata.style_absorption_style} forms of absorption.`);
+  if (profile.metadata.style_humor && profile.metadata.style_humor !== 'none')
+    lines.push(`Humor may be used in a ${profile.metadata.style_humor} way.`);
 
   if (profile.metadata.interaction_rhythm)
     lines.push(`Your interaction rhythm should follow: ${profile.metadata.interaction_rhythm}.`);
