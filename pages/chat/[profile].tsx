@@ -14,6 +14,7 @@ import { ChatFooter } from '../../components/ChatFooter';
 import { ChatMessagesList } from '../../components/ChatMessagesList';
 import { useScrollHandler } from '../../hooks/useScrollHandler';
 import { useHandleSend } from '../../hooks/useHandleSend';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
 
 interface Entry {
   id: string;
@@ -82,6 +83,8 @@ export default function ChatPage() {
   const assistantReplyCount = useMemo(() => {
     return entries.filter(e => e.role === 'assistant' && e.content !== '__thinking__').length;
   }, [entries]);
+
+  const { prefs: userPreferences, updatePrefs: setUserPreferences } = useUserPreferences(userId);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -156,8 +159,9 @@ export default function ChatPage() {
   setIsClosing={setIsClosing}
   setEntries={setEntries}
   currentStyle={currentStyle}
+  userPreferences={userPreferences}
+  setUserPreferences={setUserPreferences}
 />
-
       
     </div>
   );

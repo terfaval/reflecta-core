@@ -1,6 +1,8 @@
 // components/ChatFooter.tsx
 import React from 'react';
 import { buttonStyles } from '../styles/profileStyles';
+import { PreferenceToggleGroup } from './PreferenceToggleGroup';
+import type { UserPreferences } from '@/lib/types';
 
 interface ChatFooterProps {
   message: string;
@@ -14,6 +16,8 @@ interface ChatFooterProps {
   setIsClosing: (v: boolean) => void;
   setEntries: (fn: (prev: any[]) => any[]) => void;
   currentStyle: Record<string, string>;
+  userPreferences: UserPreferences;
+  setUserPreferences: (prefs: UserPreferences) => void;
 }
 
 export function ChatFooter({
@@ -28,6 +32,8 @@ export function ChatFooter({
   setIsClosing,
   setEntries,
   currentStyle,
+  userPreferences,
+  setUserPreferences,
 }: ChatFooterProps) {
   return (
     <div className="reflecta-input">
@@ -37,6 +43,43 @@ export function ChatFooter({
         placeholder="Írd be, amit meg szeretnél osztani..."
         disabled={loading}
       />
+
+      {/* Preferences bar */}
+      <div className="reflecta-preference-bar mt-2 mb-1 flex flex-wrap gap-3">
+        <PreferenceToggleGroup
+          label="Válasz hossza"
+          options={[
+            { label: 'Rövid', value: 'short' },
+            { label: 'Alap', value: undefined },
+            { label: 'Hosszabb', value: 'long' },
+          ]}
+          value={userPreferences.answer_length}
+          onChange={(val) => setUserPreferences({ ...userPreferences, answer_length: val })}
+        />
+
+        <PreferenceToggleGroup
+          label="Stílus"
+          options={[
+            { label: 'Egyszerű', value: 'simple' },
+            { label: 'Alap', value: undefined },
+            { label: 'Szimbolikus', value: 'symbolic' },
+          ]}
+          value={userPreferences.style_mode}
+          onChange={(val) => setUserPreferences({ ...userPreferences, style_mode: val })}
+        />
+
+        <PreferenceToggleGroup
+          label="Vezetés"
+          options={[
+            { label: 'Szabad', value: 'free' },
+            { label: 'Alap', value: undefined },
+            { label: 'Irányított', value: 'guided' },
+          ]}
+          value={userPreferences.guidance_mode}
+          onChange={(val) => setUserPreferences({ ...userPreferences, guidance_mode: val })}
+        />
+      </div>
+
       <div className="reflecta-input-buttons">
         <button
           className={`reflecta-send-button ${loading ? 'reflecta-send-loading' : ''} ${buttonStyles.buttonBase} ${loading ? buttonStyles.sendButtonLoading : buttonStyles.sendButton}`}
