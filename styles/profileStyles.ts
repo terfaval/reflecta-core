@@ -38,6 +38,16 @@ export const profileStyles: Record<string, React.CSSProperties & Record<string, 
     '--user-color': '#9484B0',
     '--ai-color': '#BEB5CF',
   },
+  Solun: {
+    '--bg-color': '#ffffff',
+    '--user-color': '#424E76',
+    '--ai-color': '#6E7DAE',
+  },
+  Oneiros: {
+    '--bg-color': '#ffffff',
+    '--user-color': '#4D73BF',
+    '--ai-color': '#839ED3',
+  },
 };
 
 // 💡 CSS modul exportálva, hogy máshonnan is elérhető legyen
