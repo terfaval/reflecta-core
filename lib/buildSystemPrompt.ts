@@ -1,4 +1,4 @@
-import type { Profile, UserPreferences, SessionMeta } from './types';
+import type { Profile, UserPreferences, SessionMeta, StyleProfile } from './types';
 
 export function buildSystemPrompt(
   profile: Profile,
@@ -7,95 +7,112 @@ export function buildSystemPrompt(
 ): string {
   const lines: string[] = [];
 
-  lines.push(profile.prompt_core.trim());
-  lines.push('');
+  // 👤 IDENTITY
   lines.push(`# IDENTITY`);
-  lines.push(`Worldview: ${profile.metadata.worldview}`);
-  lines.push(`Domain: ${profile.metadata.domain}`);
-  lines.push(`Inspirations: ${profile.metadata.inspirations.join(', ')}`);
-  lines.push(`Avoid if: ${profile.metadata.not_suitable_for}`);
-  if (profile.metadata.preferred_context)
-    lines.push(`Preferred context: ${profile.metadata.preferred_context}`);
-  if (profile.metadata.response_focus)
-    lines.push(`Response focus: ${profile.metadata.response_focus}`);
-
-  lines.push('\n# STYLE');
-  const metaStyle =
-    typeof profile.metadata.style_options === 'string'
-      ? JSON.parse(profile.metadata.style_options)
-      : profile.metadata.style_options || {};
-
-  const coreStyle =
-    typeof (profile as any).style_profile === 'string'
-      ? JSON.parse((profile as any).style_profile)
-      : (profile as any).style_profile || {};
-
-  const styleConfig = { ...metaStyle, ...coreStyle };
-  if (Object.keys(styleConfig).length > 0) {
-    const styleDesc = Object.entries(styleConfig)
-      .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
-      .join('; ');
-    lines.push(`Style configuration: ${styleDesc}`);
+  if (profile.prompt_core?.trim()) {
+    lines.push(profile.prompt_core.trim(), '');
   }
+
+  lines.push(`You are ${profile.name}, a Reflecta assistant. Your role is to ${profile.role}.`);
+  lines.push(`You focus on ${profile.focus}, and you speak in a ${profile.language_tone} manner.`);
+  lines.push(`You are motivated by ${profile.inner_motivation}, and avoid: ${profile.sensitivity_boundary}.`);
+  lines.push(`This profile operates in the domain of ${profile.metadata.domain}, guided by a ${profile.metadata.worldview} perspective.`);
+
+  if (profile.metadata.inspirations?.length) {
+    lines.push(`You are inspired by: ${profile.metadata.inspirations.join(', ')}.`);
+  }
+  if (profile.metadata.not_suitable_for?.length) {
+    lines.push(`Avoid activation for: ${profile.metadata.not_suitable_for.join(', ')}.`);
+  }
+  if (profile.metadata.avoidance_logic) {
+    lines.push(`Avoid activation when: ${profile.metadata.avoidance_logic}.`);
+    lines.push(`If user's input matches your avoidance logic, gently indicate that the topic may fall outside your suitable range, and propose a soft redirection.`);
+  }
+  if (profile.metadata.preferred_context?.length) {
+    lines.push(`You are particularly effective in contexts like: ${profile.metadata.preferred_context.join(', ')}.`);
+  }
+
+  // ✨ STYLE & STRUCTURE
+  lines.push('\n# STYLE & STRUCTURE');
+
+  const style: StyleProfile = {
+    ...(profile.metadata.style_options ?? {}),
+    ...((profile as any).style_profile ?? {})
+  };
+
+  if (style.style_tone)
+    lines.push(`Your style should be ${style.style_tone}.`);
+  if (style.style_symbol_density && style.style_rhythm)
+    lines.push(`Use ${style.style_symbol_density} symbolic imagery in a ${style.style_rhythm} rhythm.`);
+  if (style.style_structure)
+    lines.push(`Structure your replies in a ${style.style_structure} manner.`);
+  if (style.style_sentence_length)
+    lines.push(`Use ${style.style_sentence_length} sentence lengths.`);
+  if (style.style_visuality)
+    lines.push(`Your visuality level should be ${style.style_visuality}.`);
+  if (style.style_directiveness)
+    lines.push(`Use a ${style.style_directiveness} guiding approach.`);
+  if (style.style_pace)
+    lines.push(`Maintain a ${style.style_pace} interaction pace.`);
+  if (style.style_absorption_style)
+    lines.push(`Favor ${style.style_absorption_style} absorption.`);
+  if (style.style_humor && style.style_humor !== 'none')
+    lines.push(`Humor may be used in a ${style.style_humor} way.`);
+
   if (profile.metadata.interaction_rhythm)
-    lines.push(`Interaction rhythm: ${profile.metadata.interaction_rhythm}`);
+    lines.push(`Your interaction rhythm should follow: ${profile.metadata.interaction_rhythm}.`);
 
-  lines.push('\n# REACTIONS');
-  lines.push(`- Common: ${profile.reactions.common.join(' | ')}`);
-  lines.push(`- Typical: ${profile.reactions.typical.join(' | ')}`);
-  lines.push(`- Rare: ${profile.reactions.rare.join(' | ')}`);
+  // 🧠 CONTENT & QUESTIONING
+  lines.push('\n# RESPONSE STRATEGY');
 
-  lines.push('\n# STRUCTURE & CONTENT');
-  if (profile.metadata.question_archetypes?.length)
-    lines.push(`Use question archetypes: ${profile.metadata.question_archetypes.join(', ')}`);
+  if (profile.metadata.response_focus)
+    lines.push(`Focus your responses on: ${profile.metadata.response_focus}.`);
   if (profile.metadata.primary_metaphors?.length)
-    lines.push(`Use metaphors: ${profile.metadata.primary_metaphors.join(', ')}`);
-  if (profile.metadata.avoidance_logic)
-    lines.push(`Avoid logic: ${profile.metadata.avoidance_logic}`);
+    lines.push(`Draw from metaphors such as: ${profile.metadata.primary_metaphors.join(', ')}.`);
+  if (profile.metadata.question_archetypes?.length)
+    lines.push(`Frame your questions in the style of: ${profile.metadata.question_archetypes.join(', ')}.`);
 
-  if (userPreferences) {
-    lines.push('\n# USER PREFERENCES');
-    const prefs: string[] = [];
-    if (userPreferences.answer_length)
-      prefs.push(`prefer ${userPreferences.answer_length} responses`);
-    if (userPreferences.style_mode)
-      prefs.push(`use ${userPreferences.style_mode} language`);
-    if (userPreferences.guidance_mode)
-      prefs.push(`be more ${userPreferences.guidance_mode}`);
-    if (userPreferences.tone_preference)
-      prefs.push(`maintain a ${userPreferences.tone_preference} tone`);
-    if (prefs.length)
-      lines.push(`Adjust to user preferences: ${prefs.join('; ')}.`);
+  // 🎛️ USER PREFERENCES – Only if present
+  const hasUserPrefs = userPreferences && Object.values(userPreferences).some(Boolean);
+  if (hasUserPrefs) {
+    lines.push('\n# USER PREFERENCES – Active');
+    if (userPreferences?.answer_length)
+      lines.push(`Adjust your response length to: ${userPreferences.answer_length}.`);
+    if (userPreferences?.style_mode)
+      lines.push(`Use ${userPreferences.style_mode} language style.`);
+    if (userPreferences?.guidance_mode)
+      lines.push(`Adopt a more ${userPreferences.guidance_mode} tone.`);
+    if (userPreferences?.tone_preference)
+      lines.push(`Maintain a ${userPreferences.tone_preference} tone.`);
   }
 
+  // 🧾 SESSION META – Contextual adjustments
   if (sessionMeta?.hasRecentSilence || sessionMeta?.showsRepetition) {
-    lines.push('If user shows silence or repetition, gently acknowledge the pause.');
+    lines.push('If user shows silence or repetition, gently acknowledge the pause or pattern.');
   }
   if (sessionMeta?.isShortEntry)
     lines.push('Short input → reply concisely and softly.');
   if (sessionMeta?.isQuestion)
-    lines.push('If question → answer directly first, then elaborate.');
+    lines.push('If question → answer clearly first, then expand reflectively.');
   if (sessionMeta?.isReflective)
-    lines.push('If introspective → respond in meditative rhythm.');
+    lines.push('If introspective → respond in a meditative rhythm.');
 
-  lines.push('\n# CLOSING');
-  lines.push(`If the user input matches exactly: "${profile.metadata.closing_trigger}", treat this as a signal to close the session.`);
-  lines.push(`Do not include this phrase in your response. Respond with a final reflection in the "${profile.metadata.closing_style}" style.`);
+  // 🔚 CLOSURE STRATEGY
+  lines.push('\n# CLOSURE STRATEGY');
+  lines.push(`If user input is exactly: "${profile.metadata.closing_trigger}", treat this as session closure.`);
+  lines.push(`Do not include this phrase in your reply. Respond with a final reflection in "${profile.metadata.closing_style}" style.`);
   if (sessionMeta?.isClosing) {
-  lines.push('This is a closure. Do not ask follow-up questions.');
-  lines.push('Offer a short, symbolic, emotionally resonant final reflection.');
-  lines.push('Avoid prompting continuation or exploration.');
-  lines.push('Do not end your message with a question or ellipsis.');
-  lines.push('Do not include open-ended or suggestive phrasing.');
-}
+    lines.push('This is a closure. Do not ask follow-up questions.');
+    lines.push('Offer a short, symbolic, emotionally resonant final reflection.');
+    lines.push('Avoid prompting continuation.');
+  }
 
-
-  lines.push('\n# DEFAULT REPLY STRUCTURE');
-  lines.push('Always interpret deeply. Pay attention to emotional tone.');
-  lines.push('Respond in two parts:');
+  // 📐 REPLY TEMPLATE
+  lines.push('\n# REPLY TEMPLATE');
+  lines.push('Each response should have two parts:');
   lines.push('- 1. Reflective inner mirroring');
-  lines.push('- 2. Soft open-ended continuation prompt');
-  lines.push('Use line breaks to separate transitions. Keep length moderate.');
+  lines.push('- 2. Soft, open-ended continuation prompt');
+  lines.push('Separate sections with a line break. Keep response moderate in length.');
 
   return lines.join('\n');
 }

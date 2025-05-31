@@ -41,12 +41,12 @@ export const profileStyles: Record<string, React.CSSProperties & Record<string, 
   Solun: {
     '--bg-color': '#ffffff',
     '--user-color': '#424E76',
-    '--ai-color': '#6E7DAE',
+    '--ai-color': '#BFC6DB',
   },
   Oneiros: {
     '--bg-color': '#ffffff',
     '--user-color': '#4D73BF',
-    '--ai-color': '#839ED3',
+    '--ai-color': '#BECCE8',
   },
 };
 

@@ -38,7 +38,7 @@ export async function generateSessionClosureResponse(sessionId: string): Promise
     .map((e) => ({ role: 'user' as const, content: e.content })) || [];
 
   if (userEntries.length < 2)
-    return 'Köszönöm a megosztásaidat. Ezzel a szakasz most lezárul.';
+    return 'Köszönöm a megosztásaidat. Mint egy csendes sóhaj a térben, ez a szakasz most lezárul.';
 
   const { data: prefs } = await supabase
     .from('user_preferences')
@@ -71,14 +71,22 @@ export async function generateSessionClosureResponse(sessionId: string): Promise
     reactions,
   };
 
+  const languageTonePrefix = [
+    "Kérlek, minden válaszodat magyar nyelven írd.",
+    "Beszélj finoman, természetes ritmusban, ne legyél túl gépies.",
+    "Használj tiszteletteljes, de tegező hangnemet, ahogyan egy érzékeny önreflexiós naplóasszisztens tenné."
+  ].join(' ');
+
   const fullPrompt = getCachedSystemPrompt(
     profileObject,
     prefs || undefined,
     { isClosing: true }
   );
 
+  const systemPrompt = `${languageTonePrefix}\n\n${fullPrompt}`;
+
   const messages: { role: 'system' | 'user'; content: string }[] = [
-    { role: 'system', content: fullPrompt },
+    { role: 'system', content: systemPrompt },
     ...userEntries,
   ];
 
@@ -101,7 +109,7 @@ export async function generateSessionClosureResponse(sessionId: string): Promise
   }
 
   if (!closure || closure.length < 10)
-    return 'Köszönöm, hogy itt voltál. A szakasz most lezárult.';
+    return 'Köszönöm, hogy itt voltál. Ez a találkozás most lecsendesül.';
 
   return closure;
 }

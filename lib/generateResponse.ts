@@ -6,6 +6,7 @@ import { matchReactions } from '@/lib/matchReactions';
 import { matchRecommendations } from '@/lib/matchRecommendations';
 import { extractContext } from '@/lib/contextExtractor';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
+import type { Profile, SessionMeta } from './types';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
@@ -79,8 +80,8 @@ export async function generateResponse(sessionId: string): Promise<{
   });
 
   const entries = Array.from(allEntriesMap.values());
-
   const lastEntry = entries[entries.length - 1];
+
   if (
     closingTrigger &&
     lastEntry?.role === 'user' &&
@@ -95,14 +96,11 @@ export async function generateResponse(sessionId: string): Promise<{
     };
   }
 
-  const lastUserEntry = [...entries]
-    .reverse()
-    .find(e =>
-      e.role === 'user' &&
-      (!closingTrigger || e.content.trim() !== closingTrigger)
-    );
+  const lastUserEntry = [...entries].reverse().find(e =>
+    e.role === 'user' && (!closingTrigger || e.content.trim() !== closingTrigger)
+  );
 
-  let sessionMeta = {};
+  let sessionMeta: SessionMeta = {};
   if (lastUserEntry) {
     const content = lastUserEntry.content.trim();
     sessionMeta = {
@@ -112,24 +110,34 @@ export async function generateResponse(sessionId: string): Promise<{
     };
   }
 
+  // 🔒 Avoidance logic active check
+  if (metadata?.avoidance_logic) {
+    const pattern = new RegExp(metadata.avoidance_logic, 'i');
+    if (lastUserEntry?.content && pattern.test(lastUserEntry.content)) {
+      return {
+        reply: `Ez a téma kívül esik azon a térségen, ahol autentikusan tudlak kísérni. Javaslom, térjünk át egy másik irányra vagy tartsunk egy pillanatnyi szünetet.`,
+        reaction_tag: undefined,
+        recommendation_tag: undefined,
+      };
+    }
+  }
+
+  // 🌐 System prompt generation
+  const profileObject: Profile = {
+    name: profile.name,
+    prompt_core: profile.prompt_core,
+    description: profile.description,
+    metadata,
+    reactions,
+  };
+
   const languageTonePrefix = [
     "Kérlek, minden válaszodat magyar nyelven írd.",
     "Beszélj finoman, természetes ritmusban, ne legyél túl gépies.",
     "Használj tiszteletteljes, de tegező hangnemet, ahogyan egy érzékeny önreflexiós naplóasszisztens tenné."
   ].join(' ');
 
-  const basePrompt = getCachedSystemPrompt(
-    {
-      name: profile.name,
-      prompt_core: profile.prompt_core,
-      description: profile.description,
-      metadata,
-      reactions,
-    },
-    undefined,
-    sessionMeta
-  );
-
+  const basePrompt = getCachedSystemPrompt(profileObject, undefined, sessionMeta);
   const systemPrompt = `${languageTonePrefix}\n\n${basePrompt}`;
 
   const messages: ChatCompletionMessageParam[] = [
