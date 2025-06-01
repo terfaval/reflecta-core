@@ -20,56 +20,68 @@ export function ThreeStateSwitch({
   rightLabel,
   styleVars
 }: ThreeStateSwitchProps) {
-  const active = value !== null;
   const isLeft = value === 'left';
   const isRight = value === 'right';
+  const isNeutral = value === null;
+
+  const handleToggle = (side: 'left' | 'right') => {
+    onChange(value === side ? null : side);
+  };
 
   return (
     <div
-      className="three-state-toggle flex items-center rounded-full px-1 py-1 gap-1"
+      className="relative flex items-center justify-between w-[96px] h-[36px] px-1 py-1 rounded-full"
       style={{
-        backgroundColor: active ? styleVars['--user-color'] : styleVars['--ai-color'],
+        backgroundColor: value ? styleVars['--user-color'] : styleVars['--ai-color'],
         transition: 'background-color 0.3s ease',
       }}
     >
-      {/* LEFT ICON */}
+      {/* DOT */}
       <div
-        onClick={() => onChange(isLeft ? null : 'left')}
-        className="cursor-pointer relative flex items-center justify-center"
-        style={{ color: styleVars['--user-color'] }}
-      >
-        {leftIcon}
-        {isLeft && (
-          <div className="absolute -bottom-5 text-xs rounded px-2 py-0.5"
-            style={{ color: styleVars['--bg-color'] }}
-          >{leftLabel}</div>
-        )}
-      </div>
-
-      {/* TOGGLE DOT */}
-      <div
-        className="rounded-full transition-all duration-300"
+        className="absolute top-1 left-1 w-6 h-6 rounded-full z-0 transition-all duration-300"
         style={{
           backgroundColor: styleVars['--bg-color'],
-          width: 22,
-          height: 22,
-          transform: isLeft ? 'translateX(-1.5rem)' : isRight ? 'translateX(1.5rem)' : 'translateX(0)',
+          transform: isLeft
+            ? 'translateX(0)' // left side
+            : isRight
+            ? 'translateX(60px)' // right side
+            : 'translateX(30px)', // center
         }}
       />
 
+      {/* LEFT ICON */}
+      <button
+        onClick={() => handleToggle('left')}
+        className="relative z-10 flex flex-col items-center justify-center w-6 h-6 cursor-pointer"
+        style={{ color: styleVars['--user-color'], background: 'transparent' }}
+      >
+        {leftIcon}
+        {isLeft && (
+          <span
+            className="absolute top-[36px] text-[10px] font-medium"
+            style={{ color: styleVars['--bg-color'] }}
+          >
+            {leftLabel}
+          </span>
+        )}
+      </button>
+
       {/* RIGHT ICON */}
-      <div
-        onClick={() => onChange(isRight ? null : 'right')}
-        className="cursor-pointer relative flex items-center justify-center"
-        style={{ color: styleVars['--user-color'] }}
+      <button
+        onClick={() => handleToggle('right')}
+        className="relative z-10 flex flex-col items-center justify-center w-6 h-6 cursor-pointer"
+        style={{ color: styleVars['--user-color'], background: 'transparent' }}
       >
         {rightIcon}
         {isRight && (
-          <div className="absolute -bottom-5 text-xs rounded px-2 py-0.5"
+          <span
+            className="absolute top-[36px] text-[10px] font-medium"
             style={{ color: styleVars['--bg-color'] }}
-          >{rightLabel}</div>
+          >
+            {rightLabel}
+          </span>
         )}
-      </div>
+      </button>
     </div>
   );
 }
