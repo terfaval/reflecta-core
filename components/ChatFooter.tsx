@@ -18,6 +18,7 @@ interface ChatFooterProps {
   currentStyle: Record<string, string>;
   userPreferences: UserPreferences;
   setUserPreferences: (prefs: UserPreferences) => void;
+  userId: string | null;
 }
 
 export function ChatFooter({
