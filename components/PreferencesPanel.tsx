@@ -61,7 +61,7 @@ export function PreferencesPanel({
     return 2;
   };
 
-  const toneOptions: { key: string; icon: JSX.Element; value: UserPreferences['tone_preference'] }[] = [
+  const toneOptions: { key: string; icon: React.ReactNode; value: UserPreferences['tone_preference'] }[] = [
     {
       key: 'supportive',
       icon: (
