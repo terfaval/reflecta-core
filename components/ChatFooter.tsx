@@ -41,12 +41,13 @@ export function ChatFooter({
     <>
       {/* Preferences panel rendered independently */}
       <PreferencesPanel
-        open={openPreferences}
-        onClose={() => setOpenPreferences(false)}
-        preferences={userPreferences}
-        setPreferences={setUserPreferences}
-        styleVars={currentStyle}
-      />
+  open={openPreferences}
+  onClose={() => setOpenPreferences(false)}
+  preferences={userPreferences}
+  setPreferences={setUserPreferences}
+  styleVars={currentStyle}
+  userId={userId!}
+/>
 
       <div className="reflecta-input relative">
         <textarea
