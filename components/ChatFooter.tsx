@@ -18,7 +18,7 @@ interface ChatFooterProps {
   currentStyle: Record<string, string>;
   userPreferences: UserPreferences;
   setUserPreferences: (prefs: UserPreferences) => void;
-  userId: string | null;
+  userId: string;
 }
 
 export function ChatFooter({
@@ -35,6 +35,7 @@ export function ChatFooter({
   currentStyle,
   userPreferences,
   setUserPreferences,
+  userId,
 }: ChatFooterProps) {
   const [openPreferences, setOpenPreferences] = useState(false);
 
@@ -42,13 +43,13 @@ export function ChatFooter({
     <>
       {/* Preferences panel rendered independently */}
       <PreferencesPanel
-  open={openPreferences}
-  onClose={() => setOpenPreferences(false)}
-  preferences={userPreferences}
-  setPreferences={setUserPreferences}
-  styleVars={currentStyle}
-  userId={userId!}
-/>
+        open={openPreferences}
+        onClose={() => setOpenPreferences(false)}
+        preferences={userPreferences}
+        setPreferences={setUserPreferences}
+        styleVars={currentStyle}
+        userId={userId!}
+      />
 
       <div className="reflecta-input relative">
         <textarea
