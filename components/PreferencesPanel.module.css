@@ -1,0 +1,92 @@
+/* styles/preferencesPanel.module.css */
+
+.preferences-panel-container {
+  background-color: white;
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  position: fixed;
+  bottom: 6rem;
+  left: 1rem;
+  width: 280px;
+  border: 1px solid var(--user-color);
+  color: var(--user-color);
+}
+
+.preferences-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.preferences-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.slider-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.slider-group label {
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.slider-group input[type="range"] {
+  accent-color: var(--user-color);
+  width: 100%;
+}
+
+.tone-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding-top: 0.5rem;
+}
+
+.tone-button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+  background: transparent;
+  color: var(--user-color);
+  border: none;
+  cursor: pointer;
+}
+
+.tone-button:hover {
+  background-color: var(--user-color);
+  color: var(--bg-color);
+}
+
+.tone-button svg {
+  stroke: currentColor;
+  fill: currentColor;
+}
+
+.preferences-reset {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.75rem;
+}
+
+.preferences-reset button {
+  font-size: 0.75rem;
+  color: var(--user-color);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}

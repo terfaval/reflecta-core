@@ -1,5 +1,5 @@
 // components/PreferencesPanel.tsx
-import React, { useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import type { UserPreferences } from '@/lib/types';
 
 interface PreferencesPanelProps {
@@ -17,7 +17,7 @@ export function PreferencesPanel({
   preferences,
   setPreferences,
   styleVars,
-  userId,
+  userId
 }: PreferencesPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -29,6 +29,8 @@ export function PreferencesPanel({
     };
     if (open) {
       document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [open, onClose]);
@@ -49,51 +51,54 @@ export function PreferencesPanel({
     return 2;
   };
 
-  const toneOptions = [
+  const toneOptions: { key: string; label: string; value: UserPreferences['tone_preference']; icon: JSX.Element }[] = [
     {
       key: 'supportive',
+      label: 'Támogató',
+      value: 'supportive',
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"
-             strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-          <path d="M12 21C12 21 4 13.5 4 8.5C4 5.5 6.5 3 9.5 3C11 3 12 4 12 4C12 4 13 3 14.5 3C17.5 3 20 5.5 20 8.5C20 13.5 12 21 12 21Z"/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
         </svg>
-      ),
-      value: 'supportive' as const
+      )
     },
     {
       key: 'confronting',
+      label: 'Konfrontáló',
+      value: 'confronting',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M13 2l.018.001...z" />
+          <path d="M13 2l8 11h-6l2 9-8-11h6l-2-9z" />
         </svg>
-      ),
-      value: 'confronting' as const
+      )
     },
     {
       key: 'soothing',
+      label: 'Csendesítő',
+      value: 'soothing',
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"
-             strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="3" />
-          <path d="M12 16.5A4.5 4.5..." />
+          <path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5" />
+          <path d="M12 7.5V9" /><path d="M7.5 12H9" /><path d="M16.5 12H15" /><path d="M12 16.5V15" />
+          <path d="m8 8 1.88 1.88" /><path d="M14.12 9.88 16 8" /><path d="m8 16 1.88-1.88" /><path d="M14.12 14.12 16 16" />
         </svg>
-      ),
-      value: 'soothing' as const
-    }
-  ] as const;
+      )
+    },
+  ];
 
   if (!open) return null;
 
   return (
     <div
       ref={panelRef}
-      className="fixed bottom-[100px] left-[20px] bg-white rounded-lg shadow-xl p-4 z-[999] w-[280px]"
-      style={{ border: `1px solid ${styleVars['--user-color']}`, color: styleVars['--user-color'] }}
+      className="preferences-panel-container fixed bottom-24 left-4 bg-white rounded-xl shadow-2xl p-4 z-[1000] w-[280px] border"
+      style={{ borderColor: styleVars['--user-color'], color: styleVars['--user-color'] }}
     >
-      <div className="flex justify-between items-center mb-3">
+      <div className="preferences-panel-header flex justify-between items-center mb-3">
         <span className="font-semibold text-sm">Válasz finomhangolása</span>
         <button
-          className="text-sm px-2 py-0.5 rounded"
+          className="preferences-close-button text-sm px-2 py-0.5 rounded"
           onClick={onClose}
           style={{ background: 'transparent', color: styleVars['--user-color'] }}
         >
@@ -101,54 +106,78 @@ export function PreferencesPanel({
         </button>
       </div>
 
-      <div className="space-y-4">
-        {(['answer_length', 'style_mode', 'guidance_mode'] as const).map((key) => (
-          <div key={key} className="space-y-1">
-            <label className="text-sm font-medium">
-              {key === 'answer_length' ? 'Válasz hossza' : key === 'style_mode' ? 'Nyelvi stílus' : 'Vezetés'}
-            </label>
-            <div className="flex items-center justify-between text-xs text-[var(--user-color)]">
-              <span>{key === 'answer_length' ? 'Rövidebb' : key === 'style_mode' ? 'Egyszerűbb' : 'Szabadabb'}</span>
-              <input
-                type="range"
-                min={0}
-                max={4}
-                step={1}
-                value={getSliderValue(key)}
-                onChange={(e) => updateSlider(key, Number(e.target.value))}
-                className="mx-2 w-full accent-[var(--user-color)]"
-              />
-              <span>{key === 'answer_length' ? 'Hosszabb' : key === 'style_mode' ? 'Szimbolikusabb' : 'Vezetettebb'}</span>
-            </div>
+      <div className="preferences-body space-y-5">
+        <div className="slider-group">
+          <label className="text-xs block mb-1">Válasz hossza</label>
+          <div className="flex items-center justify-between text-[11px] mb-0.5 px-1">
+            <span>Rövidebb</span>
+            <span>Hosszabb</span>
           </div>
-        ))}
+          <input
+            type="range"
+            min={0}
+            max={4}
+            step={1}
+            value={getSliderValue('answer_length')}
+            onChange={(e) => updateSlider('answer_length', Number(e.target.value))}
+            className="w-full accent-current"
+          />
+        </div>
+        <div className="slider-group">
+          <label className="text-xs block mb-1">Nyelvi stílus</label>
+          <div className="flex items-center justify-between text-[11px] mb-0.5 px-1">
+            <span>Egyszerűbb</span>
+            <span>Szimbolikusabb</span>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={4}
+            step={1}
+            value={getSliderValue('style_mode')}
+            onChange={(e) => updateSlider('style_mode', Number(e.target.value))}
+            className="w-full accent-current"
+          />
+        </div>
+        <div className="slider-group">
+          <label className="text-xs block mb-1">Vezetés</label>
+          <div className="flex items-center justify-between text-[11px] mb-0.5 px-1">
+            <span>Szabadabb</span>
+            <span>Irányítottabb</span>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={4}
+            step={1}
+            value={getSliderValue('guidance_mode')}
+            onChange={(e) => updateSlider('guidance_mode', Number(e.target.value))}
+            className="w-full accent-current"
+          />
+        </div>
 
-        <div className="flex gap-2 items-center justify-start pt-2">
+        <div className="tone-buttons flex gap-2 items-center justify-start pt-2">
           {toneOptions.map((opt) => {
             const isActive = preferences.tone_preference === opt.value;
             return (
               <button
                 key={opt.key}
                 onClick={() =>
-                  setPreferences({
-                    ...preferences,
-                    tone_preference: isActive ? undefined : opt.value,
-                  })
+                  setPreferences({ ...preferences, tone_preference: isActive ? undefined : opt.value })
                 }
-                className={`px-2 py-1 rounded-full text-sm flex items-center gap-1 transition-all ${
-                  isActive
-                    ? 'bg-[var(--user-color)] text-[var(--bg-color)]'
-                    : 'bg-transparent text-[var(--user-color)]'
+                className={`tone-button px-2 py-1 rounded-full text-sm flex items-center gap-1 transition-all ${
+                  isActive ? 'bg-[var(--user-color)] text-[var(--bg-color)]' : 'bg-transparent'
                 }`}
+                title={opt.label}
               >
                 {opt.icon}
-                {isActive && <span className="text-xs capitalize">{opt.key}</span>}
+                {isActive && <span className="text-xs">{opt.label}</span>}
               </button>
             );
           })}
         </div>
 
-        <div className="flex justify-end pt-3">
+        <div className="preferences-reset flex justify-end pt-3">
           <button
             onClick={async () => {
               try {
@@ -157,7 +186,6 @@ export function PreferencesPanel({
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ user_id: userId }),
                 });
-
                 if (res.ok) {
                   setPreferences({});
                 } else {
@@ -170,8 +198,17 @@ export function PreferencesPanel({
             className="text-xs underline flex items-center gap-1"
             style={{ color: styleVars['--user-color'] }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="1 4 1 10 7 10" />
               <path d="M3.51 15a9 9 0 1 1 2.13 3.13" />
             </svg>
