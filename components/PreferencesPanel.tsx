@@ -1,6 +1,7 @@
 // components/PreferencesPanel.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import type { UserPreferences } from '@/lib/types';
+import type { JSX } from 'react';
 
 interface PreferencesPanelProps {
   open: boolean;
@@ -51,7 +52,7 @@ export function PreferencesPanel({
     return 2;
   };
 
-  const toneOptions: { key: string; label: string; value: UserPreferences['tone_preference']; icon: JSX.Element }[] = [
+  const toneOptions: { key: string; label: string; value: UserPreferences['tone_preference']; icon: React.ReactElement }[] = [
     {
       key: 'supportive',
       label: 'Támogató',
