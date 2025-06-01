@@ -1,92 +1,121 @@
-/* styles/preferencesPanel.module.css */
+/* components/preferencesPanel.module.css */
 
-.preferences-panel-container {
-  background-color: white;
-  border-radius: 1rem;
-  padding: 1rem;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
+.preferencesPanel {
   position: fixed;
-  bottom: 6rem;
-  left: 1rem;
+  bottom: 90px;
+  left: 16px;
+  z-index: 1000;
+  background-color: white;
   width: 280px;
-  border: 1px solid var(--user-color);
-  color: var(--user-color);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  border: 1px solid;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.preferences-panel-header {
+.panelHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.75rem;
 }
 
-.preferences-body {
+.panelTitle {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  color: inherit;
+  padding: 0 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.panelBody {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
 
-.slider-group {
+.sliderGroup {
   display: flex;
   flex-direction: column;
 }
 
-.slider-group label {
+.sliderLabel {
   font-size: 0.75rem;
   margin-bottom: 0.25rem;
-  font-weight: 500;
 }
 
-.slider-group input[type="range"] {
-  accent-color: var(--user-color);
+.sliderRange {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.6875rem;
+  padding: 0 0.25rem;
+  margin-bottom: 0.25rem;
+  color: inherit;
+}
+
+.slider {
   width: 100%;
+  accent-color: currentColor;
 }
 
-.tone-buttons {
+.toneButtons {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  justify-content: flex-start;
   padding-top: 0.5rem;
 }
 
-.tone-button {
+.toneButton {
   padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
   font-size: 0.875rem;
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  border-radius: 9999px;
   transition: all 0.2s ease;
   background: transparent;
-  color: var(--user-color);
+  color: inherit;
   border: none;
   cursor: pointer;
 }
 
-.tone-button:hover {
+.toneActive {
   background-color: var(--user-color);
   color: var(--bg-color);
 }
 
-.tone-button svg {
-  stroke: currentColor;
-  fill: currentColor;
+.toneIcon {
+  font-size: 1rem;
+  line-height: 1;
 }
 
-.preferences-reset {
+.toneLabel {
+  font-size: 0.75rem;
+}
+
+.resetRow {
   display: flex;
   justify-content: flex-end;
   padding-top: 0.75rem;
 }
 
-.preferences-reset button {
+.resetButton {
   font-size: 0.75rem;
-  color: var(--user-color);
+  text-decoration: underline;
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  background: transparent;
+  background: none;
   border: none;
+  color: var(--user-color);
   cursor: pointer;
 }
