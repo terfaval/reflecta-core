@@ -60,9 +60,9 @@ export interface Profile {
 
 // --- User preferences set via UI toggle
 export interface UserPreferences {
-  answer_length?: 'short' | 'long';
-  style_mode?: 'simple' | 'symbolic';
-  guidance_mode?: 'free' | 'guided';
+  answer_length?: 'very short' | 'short' | 'long' | 'very long';
+  style_mode?: 'minimal' | 'simple' | 'symbolic' | 'mythic';
+  guidance_mode?: 'open' | 'free' | 'guided' | 'directed';
   tone_preference?: 'supportive' | 'confronting' | 'soothing';
 }
 

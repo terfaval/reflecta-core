@@ -73,16 +73,42 @@ export function buildSystemPrompt(
   // 🎛️ USER PREFERENCES – Only if present
   const hasUserPrefs = userPreferences && Object.values(userPreferences).some(Boolean);
   if (hasUserPrefs) {
-    lines.push('\n# USER PREFERENCES – Active');
-    if (userPreferences?.answer_length)
-      lines.push(`Adjust your response length to: ${userPreferences.answer_length}.`);
-    if (userPreferences?.style_mode)
-      lines.push(`Use ${userPreferences.style_mode} language style.`);
-    if (userPreferences?.guidance_mode)
-      lines.push(`Adopt a more ${userPreferences.guidance_mode} tone.`);
-    if (userPreferences?.tone_preference)
-      lines.push(`Maintain a ${userPreferences.tone_preference} tone.`);
-  }
+  lines.push('\n# USER PREFERENCES – Active');
+
+  const mapAnswerLength = {
+    very_short: 'very short',
+    short: 'short',
+    long: 'longer',
+    very_long: 'very long'
+  } as const;
+
+  const mapStyleMode = {
+    minimal: 'minimalist',
+    simple: 'simple',
+    symbolic: 'symbolic',
+    mythic: 'mythic'
+  } as const;
+
+  const mapGuidance = {
+    open: 'open-ended',
+    free: 'gentle',
+    guided: 'structured',
+    directed: 'directive'
+  } as const;
+
+  if (userPreferences?.answer_length)
+    lines.push(`Adjust your response length to a ${mapAnswerLength[userPreferences.answer_length] ?? 'moderate'} tone.`);
+
+  if (userPreferences?.style_mode)
+    lines.push(`Use a ${mapStyleMode[userPreferences.style_mode] ?? 'balanced'} language style.`);
+
+  if (userPreferences?.guidance_mode)
+    lines.push(`Adopt a ${mapGuidance[userPreferences.guidance_mode] ?? 'balanced'} guidance approach.`);
+
+  if (userPreferences?.tone_preference)
+    lines.push(`Maintain a ${userPreferences.tone_preference} tone.`);
+}
+
 
   // 🧾 SESSION META – Contextual adjustments
   if (sessionMeta?.hasRecentSilence || sessionMeta?.showsRepetition) {

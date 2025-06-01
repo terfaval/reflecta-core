@@ -1,7 +1,17 @@
+// lib/cachedprompts.ts
 import { buildSystemPrompt } from './buildSystemPrompt';
 import type { Profile, UserPreferences, SessionMeta } from './types';
 
 const promptCache = new Map<string, string>();
+
+function normalizeUserPreferences(prefs?: UserPreferences) {
+  return {
+    answer_length: prefs?.answer_length ?? null,
+    style_mode: prefs?.style_mode ?? null,
+    guidance_mode: prefs?.guidance_mode ?? null,
+    tone_preference: prefs?.tone_preference ?? null,
+  };
+}
 
 export function getCachedSystemPrompt(
   profile: Profile,
@@ -12,7 +22,7 @@ export function getCachedSystemPrompt(
     profile: profile.name,
     prompt_core: profile.prompt_core,
     style: profile.metadata?.style_options,
-    prefs: userPreferences ?? null,
+    prefs: normalizeUserPreferences(userPreferences),
     meta: sessionMeta ?? null,
   });
 
