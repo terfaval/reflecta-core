@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { UserPreferences } from '@/lib/types';
 import type { JSX } from 'react';
-import styles from './preferencesPanel.module.css';
+import styles from './PreferencesPanel.module.css';
 
 interface PreferencesPanelProps {
   open: boolean;
