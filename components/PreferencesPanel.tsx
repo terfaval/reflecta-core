@@ -192,8 +192,8 @@ export function PreferencesPanel({
               <button
                 key={opt.key}
                 onClick={() => {
-                  const updatedTone = isActive ? undefined : opt.value;
-                  const updated = { ...preferences, tone_preference: updatedTone };
+                  const updatedTone: UserPreferences['tone_preference'] = isActive ? undefined : opt.value;
+                  const updated: UserPreferences = { ...preferences, tone_preference: updatedTone };
                   setPreferences(updated);
                   saveUserPreferences(userId, updated);
                 }}
