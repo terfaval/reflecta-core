@@ -48,7 +48,7 @@ export function ChatFooter({
         preferences={userPreferences}
         setPreferences={setUserPreferences}
         styleVars={currentStyle}
-        userId={userId!}
+        userId={userId}
       />
 
       <div className="reflecta-input relative">
