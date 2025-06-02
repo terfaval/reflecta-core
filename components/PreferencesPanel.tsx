@@ -24,7 +24,6 @@ export function PreferencesPanel({
   const panelRef = useRef<HTMLDivElement>(null);
   const [localPrefs, setLocalPrefs] = useState<UserPreferences>(preferences);
 
-  // Handle click outside to close
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
@@ -39,7 +38,6 @@ export function PreferencesPanel({
     };
   }, [open, onClose]);
 
-  // Sync local prefs to external changes (e.g. reset)
   useEffect(() => {
     setLocalPrefs(preferences);
   }, [preferences]);
@@ -69,6 +67,7 @@ export function PreferencesPanel({
 
     const updatedPrefs = { ...preferences, [key]: mapped };
     setPreferences(updatedPrefs);
+    setLocalPrefs(updatedPrefs);
     saveUserPreferences(userId, updatedPrefs);
   };
 
@@ -93,6 +92,25 @@ export function PreferencesPanel({
              val === 'directed' ? 4 : 2;
     }
     return 2;
+  };
+
+  const displayValue = (key: keyof UserPreferences) => {
+    const val = localPrefs[key];
+    const labels: Record<string, string> = {
+      'very short': 'nagyon rövid',
+      short: 'rövid',
+      long: 'hosszú',
+      'very long': 'nagyon hosszú',
+      minimal: 'minimál',
+      simple: 'egyszerű',
+      symbolic: 'szimbolikus',
+      mythic: 'mítikus',
+      open: 'nyitott',
+      free: 'szabad',
+      guided: 'irányított',
+      directed: 'erősen vezetett'
+    };
+    return val ? labels[val] || val : 'közepes';
   };
 
   const toneOptions = [
@@ -121,7 +139,7 @@ export function PreferencesPanel({
       label: 'Csendesítő',
       value: 'soothing',
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="3" />
           <path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5" />
           <path d="M12 7.5V9" /><path d="M7.5 12H9" /><path d="M16.5 12H15" /><path d="M12 16.5V15" />
@@ -145,42 +163,24 @@ export function PreferencesPanel({
       </div>
 
       <div className={styles.panelBody}>
-        {[
-          {
-            key: 'answer_length',
-            label: 'Válasz hossza',
-            range: ['Rövidebb', 'Hosszabb']
-          },
-          {
-            key: 'style_mode',
-            label: 'Nyelvi stílus',
-            range: ['Minimál', 'Mítikus']
-          },
-          {
-            key: 'guidance_mode',
-            label: 'Vezetés',
-            range: ['Nyitott', 'Irányított']
-          },
-        ].map(({ key, label, range }) => (
+        {[ 'answer_length', 'style_mode', 'guidance_mode' ].map((key) => (
           <div key={key} className={styles.sliderGroup}>
-            <label className={styles.sliderLabel}>{label}</label>
-            <div className={styles.sliderLabelRow}>
-              <span>{range[0]}</span>
-              <span>{range[1]}</span>
-            </div>
-            <input
-              type="range"
-              min={0}
-              max={4}
-              step={1}
-              value={getSliderValue(key as keyof UserPreferences, localPrefs)}
-              onChange={(e) => updateSlider(key as keyof UserPreferences, Number(e.target.value))}
-              className={styles.slider}
-            />
-            <div className={styles.sliderTicks}>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i} />
-              ))}
+            <label className={styles.sliderLabel}>{displayValue(key as keyof UserPreferences)}</label>
+            <div style={{ position: 'relative', width: '100%' }}>
+              <input
+                type="range"
+                min={0}
+                max={4}
+                step={1}
+                value={getSliderValue(key as keyof UserPreferences, localPrefs)}
+                onChange={(e) => updateSlider(key as keyof UserPreferences, Number(e.target.value))}
+                className={styles.slider}
+              />
+              <div className={styles.sliderTicks}>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span key={i} />
+                ))}
+              </div>
             </div>
           </div>
         ))}
@@ -192,16 +192,17 @@ export function PreferencesPanel({
               <button
                 key={opt.key}
                 onClick={() => {
-                  const updatedTone = isActive ? undefined : opt.value as UserPreferences['tone_preference'];
+                  const updatedTone = isActive ? undefined : opt.value;
                   const updated: UserPreferences = { ...preferences, tone_preference: updatedTone };
                   setPreferences(updated);
+                  setLocalPrefs(updated);
                   saveUserPreferences(userId, updated);
                 }}
                 className={`${styles.toneButton} ${isActive ? styles.toneActive : ''}`}
                 title={opt.label}
               >
                 {opt.icon}
-                {isActive && <span className={styles.toneLabel}>{opt.label}</span>}
+                <span className={styles.toneLabel}>{opt.label}</span>
               </button>
             );
           })}
@@ -219,6 +220,7 @@ export function PreferencesPanel({
                 if (res.ok) {
                   const defaultPrefs: UserPreferences = {};
                   setPreferences(defaultPrefs);
+                  setLocalPrefs(defaultPrefs);
                   saveUserPreferences(userId, defaultPrefs);
                 } else {
                   console.error('[Reset] Hiba a válaszban:', await res.json());

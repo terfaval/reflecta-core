@@ -10,6 +10,20 @@ const supabase = createClient(
 export async function saveUserPreferences(user_id: string, prefs: UserPreferences) {
   if (!user_id) return;
 
+  if (Object.keys(prefs).length === 0) {
+    // Reset esetén törlés
+    const { error } = await supabase
+      .from('user_preferences')
+      .delete()
+      .eq('user_id', user_id);
+
+    if (error) {
+      console.error('[Save Prefs - RESET] Hiba:', error);
+    }
+    return;
+  }
+
+  // Normál mentés
   const { error } = await supabase
     .from('user_preferences')
     .upsert({ user_id, ...prefs }, { onConflict: 'user_id' });
@@ -18,3 +32,4 @@ export async function saveUserPreferences(user_id: string, prefs: UserPreference
     console.error('[Save Prefs] Hiba:', error);
   }
 }
+

@@ -44,24 +44,16 @@
 
 .sliderGroup {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.sliderLabelRow {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  font-size: 11px;
-  padding: 0 4px;
-  color: var(--user-color);
-  margin-top: -2px;
+  gap: 8px;
 }
 
 .sliderLabel {
   font-size: 0.75rem;
   font-weight: 500;
-  margin-bottom: 0;
+  min-width: 80px;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 .slider {
@@ -104,34 +96,23 @@
   border-radius: 6px;
 }
 
-.slider::before,
-.slider::after {
-  content: "";
+.sliderTicks {
   position: absolute;
   top: 50%;
-  transform: translate(-50%, -50%);
-  width: 2px;
-  height: 10px;
-  background-color: var(--user-color);
-}
-
-
-.sliderTicks {
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: space-between;
-  margin-top: 4px;
-  padding: 0 1px;
-  position: relative;
-  height: 8px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  padding: 0 7px;
 }
 
 .sliderTicks span {
   width: 2px;
-  height: 8px;
+  height: 12px;
   background-color: var(--user-color);
-  display: inline-block;
 }
-
 
 .toneButtons {
   display: flex;
@@ -156,13 +137,13 @@
   position: relative;
 }
 
-.toneButton:hover .toneLabel {
-  display: inline;
+.toneButton:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--user-color);
 }
 
-.toneButton:hover {
-  background: transparent;
-  color: var(--user-color);
+.toneButton:hover .toneLabel {
+  display: inline;
 }
 
 .toneActive {
@@ -182,7 +163,7 @@
 
 .toneLabel {
   font-size: 0.75rem;
-  display: none;
+  display: inline;
 }
 
 .resetRow {
