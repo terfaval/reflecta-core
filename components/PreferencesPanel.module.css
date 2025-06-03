@@ -109,6 +109,7 @@
   display: flex;
   justify-content: space-between;
   pointer-events: none;
+  transform: translateY(-50%);
 }
 
 .sliderTicks span {
