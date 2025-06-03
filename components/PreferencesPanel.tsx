@@ -94,32 +94,13 @@ export function PreferencesPanel({
     return 2;
   };
 
-  const displayValue = (key: keyof UserPreferences) => {
-    const val = localPrefs[key];
-    const labels: Record<string, string> = {
-      'very short': 'nagyon rövid',
-      short: 'rövid',
-      long: 'hosszú',
-      'very long': 'nagyon hosszú',
-      minimal: 'minimál',
-      simple: 'egyszerű',
-      symbolic: 'szimbolikus',
-      mythic: 'mítikus',
-      open: 'nyitott',
-      free: 'szabad',
-      guided: 'irányított',
-      directed: 'erősen vezetett'
-    };
-    return val ? labels[val] || val : 'közepes';
-  };
-
   const toneOptions = [
     {
       key: 'supportive',
       label: 'Támogató',
       value: 'supportive',
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
         </svg>
       )
@@ -129,7 +110,7 @@ export function PreferencesPanel({
       label: 'Konfrontáló',
       value: 'confronting',
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
           <path d="M13 2l8 11h-6l2 9-8-11h6l-2-9z" />
         </svg>
       )
@@ -139,7 +120,7 @@ export function PreferencesPanel({
       label: 'Csendesítő',
       value: 'soothing',
       icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="3" />
           <path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5" />
           <path d="M12 7.5V9" /><path d="M7.5 12H9" /><path d="M16.5 12H15" /><path d="M12 16.5V15" />
@@ -163,10 +144,26 @@ export function PreferencesPanel({
       </div>
 
       <div className={styles.panelBody}>
-        {[ 'answer_length', 'style_mode', 'guidance_mode' ].map((key) => (
+        {[
+          {
+            key: 'answer_length',
+            label: 'Válasz hossza',
+            range: ['Rövidebb', 'Hosszabb']
+          },
+          {
+            key: 'style_mode',
+            label: 'Nyelvi stílus',
+            range: ['Minimál', 'Mítikus']
+          },
+          {
+            key: 'guidance_mode',
+            label: 'Vezetés',
+            range: ['Nyitott', 'Irányított']
+          },
+        ].map(({ key, label }) => (
           <div key={key} className={styles.sliderGroup}>
-            <label className={styles.sliderLabel}>{displayValue(key as keyof UserPreferences)}</label>
-            <div style={{ position: 'relative', width: '100%' }}>
+            <label className={styles.sliderLabel}>{label}</label>
+            <div className={styles.sliderRow}>
               <input
                 type="range"
                 min={0}
@@ -176,6 +173,7 @@ export function PreferencesPanel({
                 onChange={(e) => updateSlider(key as keyof UserPreferences, Number(e.target.value))}
                 className={styles.slider}
               />
+              <span className={styles.sliderValue}>{localPrefs[key as keyof UserPreferences] ?? 'alap'}</span>
               <div className={styles.sliderTicks}>
                 {Array.from({ length: 5 }).map((_, i) => (
                   <span key={i} />
@@ -192,7 +190,7 @@ export function PreferencesPanel({
               <button
                 key={opt.key}
                 onClick={() => {
-                  const updatedTone: UserPreferences['tone_preference'] = isActive ? undefined : opt.value as UserPreferences['tone_preference'];
+                  const updatedTone = isActive ? undefined : opt.value as UserPreferences['tone_preference'];
                   const updated: UserPreferences = { ...preferences, tone_preference: updatedTone };
                   setPreferences(updated);
                   setLocalPrefs(updated);

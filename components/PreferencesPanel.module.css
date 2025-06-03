@@ -44,16 +44,27 @@
 
 .sliderGroup {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .sliderLabel {
   font-size: 0.75rem;
   font-weight: 500;
-  min-width: 80px;
-  text-align: right;
-  flex-shrink: 0;
+  margin-bottom: 2px;
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.sliderValue {
+  margin-left: 8px;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--user-color);
 }
 
 .slider {
@@ -63,6 +74,7 @@
   background: #ddd;
   border-radius: 6px;
   position: relative;
+  flex: 1;
 }
 
 .slider::-webkit-slider-thumb {
@@ -89,13 +101,6 @@
   z-index: 10;
 }
 
-.slider::-webkit-slider-runnable-track,
-.slider::-moz-range-track {
-  background: #ddd;
-  height: 4px;
-  border-radius: 6px;
-}
-
 .sliderTicks {
   position: absolute;
   top: 50%;
@@ -105,12 +110,12 @@
   justify-content: space-between;
   transform: translateY(-50%);
   pointer-events: none;
-  padding: 0 7px;
+  padding: 0 1px;
 }
 
 .sliderTicks span {
   width: 2px;
-  height: 12px;
+  height: 10px;
   background-color: var(--user-color);
 }
 
@@ -138,11 +143,16 @@
 }
 
 .toneButton:hover {
-  background: rgba(0, 0, 0, 0.05);
-  color: var(--user-color);
+  background: var(--user-color);
+  color: var(--bg-color);
 }
 
 .toneButton:hover .toneLabel {
+  display: inline;
+}
+
+.toneLabel {
+  font-size: 0.75rem;
   display: inline;
 }
 
@@ -153,17 +163,12 @@
 
 .toneActive svg {
   stroke: var(--bg-color);
-  fill: var(--bg-color);
+  fill: none;
 }
 
 .toneButton svg {
   stroke: currentColor;
-  fill: currentColor;
-}
-
-.toneLabel {
-  font-size: 0.75rem;
-  display: inline;
+  fill: none;
 }
 
 .resetRow {
