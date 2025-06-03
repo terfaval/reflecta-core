@@ -109,7 +109,6 @@
   display: flex;
   justify-content: space-between;
   pointer-events: none;
-  padding: 0 6px;
 }
 
 .sliderTicks span {
