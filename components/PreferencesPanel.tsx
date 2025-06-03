@@ -1,4 +1,4 @@
-// PreferencesPanel.tsx (teljes, véglegesített változat)
+// PreferencesPanel.tsx (véglegesített változat)
 import React, { useRef, useEffect, useState } from 'react';
 import type { UserPreferences } from '@/lib/types';
 import styles from './PreferencesPanel.module.css';
@@ -170,11 +170,11 @@ export function PreferencesPanel({
         <div className={styles.toneButtons}>
           {toneOptions.map((opt) => {
             const isActive = localPrefs.tone_preference === opt.value;
-            const updatedTone: UserPreferences['tone_preference'] = isActive ? undefined : opt.value as UserPreferences['tone_preference'];
             return (
               <button
                 key={opt.key}
                 onClick={() => {
+                  const updatedTone: UserPreferences['tone_preference'] = isActive ? undefined : opt.value as UserPreferences['tone_preference'];
                   const updated: UserPreferences = { ...preferences, tone_preference: updatedTone };
                   setPreferences(updated);
                   setLocalPrefs(updated);
@@ -222,19 +222,6 @@ export function PreferencesPanel({
           </button>
         </div>
       </div>
-
-      <style jsx>{`
-        :global(input[type='range'])::-webkit-slider-thumb {
-          transform: translateY(-5px);
-        }
-        :global(.${styles.sliderValue}) {
-          min-height: 1.2em;
-          display: inline-block;
-        }
-        :global(.${styles.toneButton} svg) {
-          stroke: currentColor;
-        }
-      `}</style>
     </div>
   );
 }

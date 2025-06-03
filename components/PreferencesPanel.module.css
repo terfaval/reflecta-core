@@ -1,3 +1,5 @@
+/* PreferencesPanel.module.css (véglegesített stílusok) */
+
 .preferencesPanel {
   position: fixed;
   bottom: 90px;
@@ -70,7 +72,7 @@
   width: 100%;
   appearance: none;
   height: 4px;
-  background: #ddd;
+  background: var(--user-color);
   border-radius: 6px;
   position: relative;
   z-index: 5;
@@ -86,7 +88,6 @@
   cursor: pointer;
   position: relative;
   z-index: 10;
-  margin-top: -5px; /* slider vertical center fix */
 }
 
 .slider::-moz-range-thumb {
@@ -108,7 +109,6 @@
   height: 0;
   display: flex;
   justify-content: space-between;
-  transform: translateY(-50%);
   pointer-events: none;
   padding: 0 6px;
 }
@@ -120,10 +120,10 @@
 }
 
 .sliderValueWrapper {
-  min-width: 48px;
-  text-align: left;
   display: flex;
   align-items: center;
+  min-width: 50px;
+  text-align: left;
 }
 
 .sliderValue {
@@ -131,8 +131,6 @@
   font-style: italic;
   color: var(--user-color);
   white-space: nowrap;
-  min-height: 1.2em;
-  display: inline-block;
 }
 
 .toneButtons {
@@ -167,16 +165,6 @@
   width: auto;
   padding: 6px 10px;
   justify-content: start;
-  background: var(--user-color);
-  color: var(--bg-color);
-}
-
-.toneButton svg {
-  stroke: currentColor;
-}
-
-.toneActive svg {
-  stroke: var(--bg-color);
 }
 
 .toneLabel {
@@ -188,6 +176,20 @@
 .toneButton:hover .toneLabel,
 .toneActive .toneLabel {
   opacity: 1;
+}
+
+.toneButton svg {
+  stroke: var(--user-color);
+  fill: none;
+}
+
+.toneActive {
+  background: var(--user-color);
+  color: var(--bg-color);
+}
+
+.toneActive svg {
+  stroke: var(--bg-color);
 }
 
 .resetRow {
