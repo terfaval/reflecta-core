@@ -1,5 +1,3 @@
-/* PreferencesPanel.module.css (véglegesített stílusok) */
-
 .preferencesPanel {
   position: fixed;
   bottom: 90px;
@@ -88,7 +86,7 @@
   cursor: pointer;
   position: relative;
   z-index: 10;
-  margin-top: -5px;
+  margin-top: -5px; /* slider vertical center fix */
 }
 
 .slider::-moz-range-thumb {
@@ -122,10 +120,10 @@
 }
 
 .sliderValueWrapper {
-  display: flex;
-  align-items: center;
   min-width: 48px;
   text-align: left;
+  display: flex;
+  align-items: center;
 }
 
 .sliderValue {
@@ -133,6 +131,8 @@
   font-style: italic;
   color: var(--user-color);
   white-space: nowrap;
+  min-height: 1.2em;
+  display: inline-block;
 }
 
 .toneButtons {
@@ -167,6 +167,16 @@
   width: auto;
   padding: 6px 10px;
   justify-content: start;
+  background: var(--user-color);
+  color: var(--bg-color);
+}
+
+.toneButton svg {
+  stroke: currentColor;
+}
+
+.toneActive svg {
+  stroke: var(--bg-color);
 }
 
 .toneLabel {
@@ -178,20 +188,6 @@
 .toneButton:hover .toneLabel,
 .toneActive .toneLabel {
   opacity: 1;
-}
-
-.toneButton svg {
-  stroke: currentColor;
-  fill: none;
-}
-
-.toneActive {
-  background: var(--user-color);
-  color: var(--bg-color);
-}
-
-.toneActive svg {
-  stroke: var(--bg-color);
 }
 
 .resetRow {
