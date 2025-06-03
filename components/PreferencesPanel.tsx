@@ -47,49 +47,40 @@ export function PreferencesPanel({
 
     if (key === 'answer_length') {
       mapped = value === 0 ? 'very short'
-             : value === 1 ? 'short'
-             : value === 3 ? 'long'
-             : value === 4 ? 'very long'
-             : undefined;
+        : value === 1 ? 'short'
+        : value === 3 ? 'long'
+        : value === 4 ? 'very long'
+        : undefined;
     } else if (key === 'style_mode') {
       mapped = value === 0 ? 'minimal'
-             : value === 1 ? 'simple'
-             : value === 3 ? 'symbolic'
-             : value === 4 ? 'mythic'
-             : undefined;
+        : value === 1 ? 'simple'
+        : value === 3 ? 'symbolic'
+        : value === 4 ? 'mythic'
+        : undefined;
     } else if (key === 'guidance_mode') {
       mapped = value === 0 ? 'open'
-             : value === 1 ? 'free'
-             : value === 3 ? 'guided'
-             : value === 4 ? 'directed'
-             : undefined;
+        : value === 1 ? 'free'
+        : value === 3 ? 'guided'
+        : value === 4 ? 'directed'
+        : undefined;
     }
 
-    const updatedPrefs = { ...preferences, [key]: mapped };
-    setPreferences(updatedPrefs);
-    setLocalPrefs(updatedPrefs);
-    saveUserPreferences(userId, updatedPrefs);
+    const updated = { ...preferences, [key]: mapped };
+    setPreferences(updated);
+    setLocalPrefs(updated);
+    saveUserPreferences(userId, updated);
   };
 
   const getSliderValue = (key: keyof UserPreferences, source: UserPreferences) => {
     const val = source[key];
     if (key === 'answer_length') {
-      return val === 'very short' ? 0 :
-             val === 'short' ? 1 :
-             val === 'long' ? 3 :
-             val === 'very long' ? 4 : 2;
+      return val === 'very short' ? 0 : val === 'short' ? 1 : val === 'long' ? 3 : val === 'very long' ? 4 : 2;
     }
     if (key === 'style_mode') {
-      return val === 'minimal' ? 0 :
-             val === 'simple' ? 1 :
-             val === 'symbolic' ? 3 :
-             val === 'mythic' ? 4 : 2;
+      return val === 'minimal' ? 0 : val === 'simple' ? 1 : val === 'symbolic' ? 3 : val === 'mythic' ? 4 : 2;
     }
     if (key === 'guidance_mode') {
-      return val === 'open' ? 0 :
-             val === 'free' ? 1 :
-             val === 'guided' ? 3 :
-             val === 'directed' ? 4 : 2;
+      return val === 'open' ? 0 : val === 'free' ? 1 : val === 'guided' ? 3 : val === 'directed' ? 4 : 2;
     }
     return 2;
   };
@@ -145,39 +136,31 @@ export function PreferencesPanel({
 
       <div className={styles.panelBody}>
         {[
-          {
-            key: 'answer_length',
-            label: 'Válasz hossza',
-            range: ['Rövidebb', 'Hosszabb']
-          },
-          {
-            key: 'style_mode',
-            label: 'Nyelvi stílus',
-            range: ['Minimál', 'Mítikus']
-          },
-          {
-            key: 'guidance_mode',
-            label: 'Vezetés',
-            range: ['Nyitott', 'Irányított']
-          },
+          { key: 'answer_length', label: 'Válasz hossza' },
+          { key: 'style_mode', label: 'Nyelvi stílus' },
+          { key: 'guidance_mode', label: 'Vezetés' }
         ].map(({ key, label }) => (
           <div key={key} className={styles.sliderGroup}>
             <label className={styles.sliderLabel}>{label}</label>
             <div className={styles.sliderRow}>
-              <input
-                type="range"
-                min={0}
-                max={4}
-                step={1}
-                value={getSliderValue(key as keyof UserPreferences, localPrefs)}
-                onChange={(e) => updateSlider(key as keyof UserPreferences, Number(e.target.value))}
-                className={styles.slider}
-              />
-              <span className={styles.sliderValue}>{localPrefs[key as keyof UserPreferences] ?? 'alap'}</span>
-              <div className={styles.sliderTicks}>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <span key={i} />
-                ))}
+              <div className={styles.sliderTrackWrapper}>
+                <input
+                  type="range"
+                  min={0}
+                  max={4}
+                  step={1}
+                  value={getSliderValue(key as keyof UserPreferences, localPrefs)}
+                  onChange={(e) => updateSlider(key as keyof UserPreferences, Number(e.target.value))}
+                  className={styles.slider}
+                />
+                <div className={styles.sliderTicks}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span key={i} />
+                  ))}
+                </div>
+              </div>
+              <div className={styles.sliderValueWrapper}>
+                <span className={styles.sliderValue}>{localPrefs[key as keyof UserPreferences] ?? 'alap'}</span>
               </div>
             </div>
           </div>

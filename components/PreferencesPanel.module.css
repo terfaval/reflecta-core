@@ -45,26 +45,27 @@
 .sliderGroup {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .sliderLabel {
   font-size: 0.75rem;
   font-weight: 500;
   margin-bottom: 2px;
+  color: var(--user-color);
 }
 
 .sliderRow {
   display: flex;
   align-items: center;
-  position: relative;
+  gap: 10px;
 }
 
-.sliderValue {
-  margin-left: 8px;
-  font-size: 0.75rem;
-  font-style: italic;
-  color: var(--user-color);
+.sliderTrackWrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .slider {
@@ -74,7 +75,7 @@
   background: #ddd;
   border-radius: 6px;
   position: relative;
-  flex: 1;
+  z-index: 5;
 }
 
 .slider::-webkit-slider-thumb {
@@ -106,11 +107,12 @@
   top: 50%;
   left: 0;
   right: 0;
+  height: 0;
   display: flex;
   justify-content: space-between;
   transform: translateY(-50%);
   pointer-events: none;
-  padding: 0 1px;
+  padding: 0 6px;
 }
 
 .sliderTicks span {
@@ -119,18 +121,31 @@
   background-color: var(--user-color);
 }
 
+.sliderValueWrapper {
+  min-width: 48px;
+  text-align: left;
+}
+
+.sliderValue {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--user-color);
+  white-space: nowrap;
+}
+
 .toneButtons {
   display: flex;
   gap: 8px;
   align-items: center;
   justify-content: flex-start;
   padding-top: 8px;
+  flex-wrap: wrap;
 }
 
 .toneButton {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   padding: 6px 10px;
   font-size: 0.75rem;
   border-radius: 9999px;
@@ -139,7 +154,6 @@
   color: var(--user-color);
   transition: all 0.2s ease-in-out;
   cursor: pointer;
-  position: relative;
 }
 
 .toneButton:hover {
@@ -147,13 +161,19 @@
   color: var(--bg-color);
 }
 
-.toneButton:hover .toneLabel {
-  display: inline;
+.toneLabel {
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-.toneLabel {
-  font-size: 0.75rem;
-  display: inline;
+.toneButton:hover .toneLabel,
+.toneActive .toneLabel {
+  opacity: 1;
+}
+
+.toneButton svg {
+  stroke: currentColor;
+  fill: none;
 }
 
 .toneActive {
@@ -163,12 +183,6 @@
 
 .toneActive svg {
   stroke: var(--bg-color);
-  fill: none;
-}
-
-.toneButton svg {
-  stroke: currentColor;
-  fill: none;
 }
 
 .resetRow {
