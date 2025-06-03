@@ -109,13 +109,13 @@
   display: flex;
   justify-content: space-between;
   pointer-events: none;
-  transform: translateY(-50%);
 }
 
 .sliderTicks span {
   width: 2px;
   height: 10px;
   background-color: var(--user-color);
+  transform: translateY(-50%);
 }
 
 .sliderValueWrapper {
