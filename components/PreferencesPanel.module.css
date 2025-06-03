@@ -1,4 +1,4 @@
-/* preferencesPanel.module.css */
+/* PreferencesPanel.module.css (véglegesített stílusok) */
 
 .preferencesPanel {
   position: fixed;
@@ -122,6 +122,8 @@
 }
 
 .sliderValueWrapper {
+  display: flex;
+  align-items: center;
   min-width: 48px;
   text-align: left;
 }
@@ -143,26 +145,33 @@
 }
 
 .toneButton {
+  width: 34px;
+  height: 34px;
+  overflow: hidden;
+  padding: 0;
+  justify-content: center;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px;
   font-size: 0.75rem;
   border-radius: 9999px;
   border: 1px solid var(--user-color);
   background: transparent;
   color: var(--user-color);
-  transition: all 0.2s ease-in-out;
   cursor: pointer;
 }
 
-.toneButton:hover {
-  background: var(--user-color);
-  color: var(--bg-color);
+.toneButton:hover,
+.toneActive {
+  width: auto;
+  padding: 6px 10px;
+  justify-content: start;
 }
 
 .toneLabel {
   opacity: 0;
+  white-space: nowrap;
   transition: opacity 0.2s ease;
 }
 
