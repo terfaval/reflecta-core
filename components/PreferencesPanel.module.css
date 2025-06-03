@@ -103,12 +103,11 @@
 
 .sliderTicks {
   position: absolute;
-  top: 50%;
   left: 0;
   right: 0;
   height: 0;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   pointer-events: none;
   padding: 0 6px;
 }
@@ -122,7 +121,7 @@
 .sliderValueWrapper {
   display: flex;
   align-items: center;
-  min-width: 60px;
+  min-width: 70px;
   text-align: left;
 }
 
@@ -180,6 +179,7 @@
 
 .toneButton svg {
   stroke: var(--user-color);
+  color: var(--user-color);
   fill: none;
 }
 
