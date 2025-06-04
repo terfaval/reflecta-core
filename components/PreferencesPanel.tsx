@@ -258,5 +258,6 @@ export function PreferencesPanel({
         </button>
       </div>
     </div>
-  </div>
-);
+      </div>
+  );
+}
