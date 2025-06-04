@@ -1,4 +1,4 @@
-// PreferencesPanel.tsx (véglegesített változat)
+// PreferencesPanel.tsx (frissített reset logikával és Supabase preferences lekérdezéssel)
 import React, { useRef, useEffect, useState } from 'react';
 import type { UserPreferences } from '@/lib/types';
 import styles from './PreferencesPanel.module.css';
@@ -37,7 +37,8 @@ export function PreferencesPanel({
     'open': 'nyitott',
     'free': 'szabad',
     'guided': 'vezetett',
-    'directed': 'irányított'
+    'directed': 'irányított',
+    undefined: 'nincs'
   };
 
   useEffect(() => {
@@ -51,6 +52,24 @@ export function PreferencesPanel({
   }, [open, onClose]);
 
   useEffect(() => {
+    // lekérés Supabase-ből minden megnyitáskor
+    const fetchPreferences = async () => {
+  if (!userId) return;
+  try {
+    const res = await fetch(`/api/preferences/get?user_id=${userId}`);
+    const data = await res.json();
+    if (data) {
+      setPreferences(data);
+      setLocalPrefs(data);
+    }
+  } catch (err) {
+    console.error('[fetchPreferences] Hiba:', err);
+  }
+};
+    if (open) fetchPreferences();
+  }, [open, userId, setPreferences]);
+
+  useEffect(() => {
     setLocalPrefs(preferences);
   }, [preferences]);
 
@@ -59,18 +78,21 @@ export function PreferencesPanel({
     if (key === 'answer_length') {
       mapped = value === 0 ? 'very short'
         : value === 1 ? 'short'
+        : value === 2 ? undefined
         : value === 3 ? 'long'
         : value === 4 ? 'very long'
         : undefined;
     } else if (key === 'style_mode') {
       mapped = value === 0 ? 'minimal'
         : value === 1 ? 'simple'
+        : value === 2 ? undefined
         : value === 3 ? 'symbolic'
         : value === 4 ? 'mythic'
         : undefined;
     } else if (key === 'guidance_mode') {
       mapped = value === 0 ? 'open'
         : value === 1 ? 'free'
+        : value === 2 ? undefined
         : value === 3 ? 'guided'
         : value === 4 ? 'directed'
         : undefined;
@@ -94,6 +116,8 @@ export function PreferencesPanel({
     }
     return 2;
   };
+
+  const getSliderTicks = () => [0, 1, 2, 3, 4];
 
   const toneOptions = [
     {
@@ -134,94 +158,105 @@ export function PreferencesPanel({
   if (!open) return <></>;
 
   return (
-    <div
-      ref={panelRef}
-      className={styles.preferencesPanel}
-      style={{ borderColor: styleVars['--user-color'], color: styleVars['--user-color'] }}>
-      <div className={styles.panelHeader}>
-        <span className={styles.panelTitle}>Válasz finomhangolása</span>
-        <button className={styles.closeButton} onClick={onClose}>✕</button>
-      </div>
+  <div
+    ref={panelRef}
+    className={styles.preferencesPanel}
+    style={{ borderColor: styleVars['--user-color'], color: styleVars['--user-color'] }}
+  >
+    <div className={styles.panelHeader}>
+      <span className={styles.panelTitle}>Válasz finomhangolása</span>
+      <button className={styles.closeButton} onClick={onClose}>✕</button>
+    </div>
 
-      <div className={styles.panelBody}>
-        {[{ key: 'answer_length', label: 'Válasz hossza' }, { key: 'style_mode', label: 'Nyelvi stílus' }, { key: 'guidance_mode', label: 'Vezetés' }].map(({ key, label }) => (
-          <div key={key} className={styles.sliderGroup}>
-            <label className={styles.sliderLabel}>{label}</label>
-            <div className={styles.sliderRow}>
-              <div className={styles.sliderTrackWrapper}>
-                <input
-                  type="range"
-                  min={0}
-                  max={4}
-                  step={1}
-                  value={getSliderValue(key as keyof UserPreferences, localPrefs)}
-                  onChange={(e) => updateSlider(key as keyof UserPreferences, Number(e.target.value))}
-                  className={styles.slider}
-                />
-                <div className={styles.sliderTicks}>{Array.from({ length: 5 }).map((_, i) => <span key={i} />)}</div>
-              </div>
-              <div className={styles.sliderValueWrapper}>
-                <span className={styles.sliderValue}>{huLabelMap[localPrefs[key as keyof UserPreferences] as string] ?? 'alap'}</span>
+    <div className={styles.panelBody}>
+      {[{ key: 'answer_length', label: 'Válasz hossza' }, { key: 'style_mode', label: 'Nyelvi stílus' }, { key: 'guidance_mode', label: 'Vezetés' }].map(({ key, label }) => (
+        <div key={key} className={styles.sliderGroup}>
+          <label className={styles.sliderLabel}>{label}</label>
+          <div className={styles.sliderRow}>
+            <div className={styles.sliderTrackWrapper}>
+              <input
+                type="range"
+                min={0}
+                max={4}
+                step={1}
+                value={getSliderValue(key as keyof UserPreferences, localPrefs)}
+                onChange={(e) => updateSlider(key as keyof UserPreferences, Number(e.target.value))}
+                className={styles.slider}
+              />
+              <div className={styles.sliderTicks}>
+                {getSliderTicks().map((i) => (
+                  <span key={i} style={{ left: `${(i / 4) * 100}%` }} />
+                ))}
               </div>
             </div>
+            <div className={styles.sliderValueWrapper}>
+              <span className={styles.sliderValue}>
+                {huLabelMap[localPrefs[key as keyof UserPreferences] as string] ?? 'nincs'}
+              </span>
+            </div>
           </div>
-        ))}
-
-        <div className={styles.toneButtons}>
-          {toneOptions.map((opt) => {
-            const isActive = localPrefs.tone_preference === opt.value;
-            return (
-              <button
-                key={opt.key}
-                onClick={() => {
-                  const updatedTone: UserPreferences['tone_preference'] = isActive ? undefined : opt.value as UserPreferences['tone_preference'];
-                  const updated: UserPreferences = { ...preferences, tone_preference: updatedTone };
-                  setPreferences(updated);
-                  setLocalPrefs(updated);
-                  saveUserPreferences(userId, updated);
-                }}
-                className={`${styles.toneButton} ${isActive ? styles.toneActive : ''}`}
-                title={opt.label}
-                aria-label={opt.label}
-              >
-                {opt.icon}
-                <span className={styles.toneLabel}>{opt.label}</span>
-              </button>
-            );
-          })}
         </div>
+      ))}
 
-        <div className={styles.resetRow}>
-          <button
-            onClick={async () => {
-              try {
-                const res = await fetch('/api/preferences/reset', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ user_id: userId })
-                });
-                if (res.ok) {
-                  const defaultPrefs: UserPreferences = {};
-                  setPreferences(defaultPrefs);
-                  setLocalPrefs(defaultPrefs);
-                  saveUserPreferences(userId, defaultPrefs);
-                } else {
-                  console.error('[Reset] Hiba a válaszban:', await res.json());
-                }
-              } catch (err) {
-                console.error('[Reset] Kivétel:', err);
+      <div className={styles.toneButtons}>
+        {toneOptions.map((opt) => {
+          const isActive = localPrefs.tone_preference === opt.value;
+          return (
+            <button
+              key={opt.key}
+              onClick={() => {
+                const updatedTone: UserPreferences['tone_preference'] = isActive ? undefined : opt.value;
+                const updated: UserPreferences = { ...preferences, tone_preference: updatedTone };
+                setPreferences(updated);
+                setLocalPrefs(updated);
+                saveUserPreferences(userId, updated);
+              }}
+              className={`${styles.toneButton} ${isActive ? styles.toneActive : ''}`}
+              title={opt.label}
+              aria-label={opt.label}
+            >
+              {opt.icon}
+              <span className={styles.toneLabel}>{opt.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className={styles.resetRow}>
+        <button
+          onClick={async () => {
+            try {
+              const defaultPrefs: UserPreferences = {
+                answer_length: undefined,
+                style_mode: undefined,
+                guidance_mode: undefined,
+                tone_preference: undefined
+              };
+              setPreferences(defaultPrefs);
+              setLocalPrefs(defaultPrefs);
+              saveUserPreferences(userId, defaultPrefs);
+
+              const res = await fetch('/api/preferences/reset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId })
+              });
+              if (!res.ok) {
+                console.error('[Reset] Hiba a válaszban:', await res.json());
               }
-            }}
-            className={styles.resetButton}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="1 4 1 10 7 10" />
-              <path d="M3.51 15a9 9 0 1 1 2.13 3.13" />
-            </svg>
-            Visszaállítás
-          </button>
-        </div>
+            } catch (err) {
+              console.error('[Reset] Kivétel:', err);
+            }
+          }}
+          className={styles.resetButton}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="1 4 1 10 7 10" />
+            <path d="M3.51 15a9 9 0 1 1 2.13 3.13" />
+          </svg>
+          Visszaállítás
+        </button>
       </div>
     </div>
-  );
-}
+  </div>
+);
