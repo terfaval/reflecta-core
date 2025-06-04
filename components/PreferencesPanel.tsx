@@ -189,7 +189,7 @@ export function PreferencesPanel({
                 className={styles.slider}
               />
               <div className={styles.sliderTicks}>
-                {getSliderTicks().map((i) => (
+                {[0, 1, 2, 3, 4].map((i) => (
   <span key={i} style={{ left: getTickPosition(i) }} />
 ))}
 
