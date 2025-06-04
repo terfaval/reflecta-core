@@ -165,6 +165,7 @@
   border: 1px solid var(--user-color);
   background: transparent;
   color: var(--user-color);
+  stroke: var(--user-color);
   cursor: pointer;
 }
 
