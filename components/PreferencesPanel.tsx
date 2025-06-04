@@ -117,7 +117,12 @@ export function PreferencesPanel({
     return 2;
   };
 
-  const getSliderTicks = () => [0, 1, 2, 3, 4];
+  const getTickPosition = (i: number, count = 4) => {
+  const offsetPx = 7;
+  const base = (i / count) * 100;
+  const adjustment = offsetPx - (i / count) * (offsetPx * 2);
+  return `calc(${base}% + ${adjustment}px)`;
+};
 
   const toneOptions = [
     {
@@ -185,8 +190,9 @@ export function PreferencesPanel({
               />
               <div className={styles.sliderTicks}>
                 {getSliderTicks().map((i) => (
-                  <span key={i} style={{ left: `${(i / 4) * 100}%` }} />
-                ))}
+  <span key={i} style={{ left: getTickPosition(i) }} />
+))}
+
               </div>
             </div>
             <div className={styles.sliderValueWrapper}>
