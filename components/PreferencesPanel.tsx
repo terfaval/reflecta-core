@@ -1,4 +1,4 @@
-// PreferencesPanel.tsx (frissített tick pozicionálással és Supabase lekérdezéssel)
+// PreferencesPanel.tsx (tickek pozíciója pixelesen, pontosan a thumb helyére számolva)
 import React, { useRef, useEffect, useState } from 'react';
 import type { UserPreferences } from '@/lib/types';
 import styles from './PreferencesPanel.module.css';
@@ -22,6 +22,8 @@ export function PreferencesPanel({
   userId
 }: PreferencesPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const sliderRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [sliderWidth, setSliderWidth] = useState<Record<string, number>>({});
   const [localPrefs, setLocalPrefs] = useState<UserPreferences>(preferences);
 
   const huLabelMap: Record<string, string> = {
@@ -71,6 +73,14 @@ export function PreferencesPanel({
   useEffect(() => {
     setLocalPrefs(preferences);
   }, [preferences]);
+
+  useEffect(() => {
+    const widths: Record<string, number> = {};
+    Object.entries(sliderRefs.current).forEach(([key, el]) => {
+      if (el) widths[key] = el.offsetWidth;
+    });
+    setSliderWidth(widths);
+  }, [open]);
 
   const updateSlider = (key: keyof UserPreferences, value: number) => {
     let mapped: UserPreferences[typeof key] | undefined;
