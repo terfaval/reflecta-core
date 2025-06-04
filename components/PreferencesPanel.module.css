@@ -1,4 +1,4 @@
-/* PreferencesPanel.module.css (véglegesített stílusok) */
+/* PreferencesPanel.module.css (precíziós tick elhelyezés javítva TSX alapján) */
 
 .preferencesPanel {
   position: fixed;
@@ -103,15 +103,24 @@
 
 .sliderTicks {
   position: absolute;
+  top: 50%;
   left: 0;
   right: 0;
   height: 0;
-  display: flex;
-  justify-content: space-between;
+  display: block;
   pointer-events: none;
 }
 
+/* pontos bal pozíciók px-ben, 5 lépcsőre méretezve */
+.sliderTicks span[data-pos='0'] { left: 0px; }
+.sliderTicks span[data-pos='1'] { left: 25%; }
+.sliderTicks span[data-pos='2'] { left: 50%; }
+.sliderTicks span[data-pos='3'] { left: 75%; }
+.sliderTicks span[data-pos='4'] { left: 100% }
+
 .sliderTicks span {
+  position: absolute;
+  top: 50%;
   width: 2px;
   height: 10px;
   background-color: var(--user-color);
