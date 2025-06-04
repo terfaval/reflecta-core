@@ -40,7 +40,7 @@ export function PreferencesPanel({
     'free': 'szabad',
     'guided': 'vezetett',
     'directed': 'irányított',
-    undefined: 'nincs'
+    undefined: 'alap'
   };
 
   useEffect(() => {
@@ -148,18 +148,15 @@ export function PreferencesPanel({
       )
     },
     {
-      key: 'soothing',
-      label: 'Csendesítő',
-      value: 'soothing',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="3" />
-          <path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5" />
-          <path d="M12 7.5V9" /><path d="M7.5 12H9" /><path d="M16.5 12H15" /><path d="M12 16.5V15" />
-          <path d="m8 8 1.88 1.88" /><path d="M14.12 9.88 16 8" /><path d="m8 16 1.88-1.88" /><path d="M14.12 14.12 16 16" />
-        </svg>
-      )
-    }
+  key: 'soothing',
+  label: 'Csendesítő',
+  value: 'soothing',
+  icon: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2c0 3.5-2 5-2 5s-2-1.5-2-5c-3.5 3-3 7-3 7s-3 0-3 3c0 4 8 9 10 9s10-5 10-9c0-3-3-3-3-3s.5-4-3-7c0 3.5-2 5-2 5s-2-1.5-2-5z" />
+    </svg>
+  )
+}
   ];
 
   if (!open) return <></>;
@@ -199,7 +196,7 @@ export function PreferencesPanel({
               </div>
               <div className={styles.sliderValueWrapper}>
                 <span className={styles.sliderValue}>
-                  {huLabelMap[localPrefs[key as keyof UserPreferences] as string] ?? 'nincs'}
+                  {huLabelMap[localPrefs[key as keyof UserPreferences] as string] ?? 'alap'}
                 </span>
               </div>
             </div>
@@ -259,9 +256,9 @@ export function PreferencesPanel({
             className={styles.resetButton}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="1 4 1 10 7 10" />
-              <path d="M3.51 15a9 9 0 1 1 2.13 3.13" />
-            </svg>
+  <path d="M3 12h18" />
+  <path d="M9 6l-6 6 6 6" />
+</svg>
             Visszaállítás
           </button>
         </div>

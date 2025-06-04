@@ -112,11 +112,11 @@
 }
 
 /* pontos bal pozíciók px-ben, 5 lépcsőre méretezve */
-.sliderTicks span[data-pos='0'] { left: 5%; }
+.sliderTicks span[data-pos='0'] { left: 3%; }
 .sliderTicks span[data-pos='1'] { left: 27%; }
 .sliderTicks span[data-pos='2'] { left: 50%; }
 .sliderTicks span[data-pos='3'] { left: 73%; }
-.sliderTicks span[data-pos='4'] { left: 90%; }
+.sliderTicks span[data-pos='4'] { left: 97%; }
 
 .sliderTicks span {
   position: absolute;
@@ -173,6 +173,13 @@
   width: auto;
   padding: 6px 10px;
   justify-content: start;
+  background: var(--user-color);
+  color: var(--bg-color);
+}
+
+.toneButton:hover .toneLabel,
+.toneActive .toneLabel {
+  opacity: 1;
 }
 
 .toneLabel {
@@ -181,24 +188,15 @@
   transition: opacity 0.2s ease;
 }
 
-.toneButton:hover .toneLabel,
-.toneActive .toneLabel {
-  opacity: 1;
-}
-
 .toneButton svg {
-  stroke: var(--user-color);
-  color: var(--user-color);
+  stroke: currentColor;
+  color: currentColor;
   fill: none;
-}
-
-.toneActive {
-  background: var(--user-color);
-  color: var(--bg-color);
 }
 
 .toneActive svg {
   stroke: var(--bg-color);
+  color: var(--bg-color);
 }
 
 .resetRow {
