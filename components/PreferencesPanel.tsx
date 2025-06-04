@@ -191,10 +191,11 @@ export function PreferencesPanel({
                   className={styles.slider}
                 />
                 <div className={styles.sliderTicks}>
-                  {[0, 1, 2, 3, 4].map((val) => (
-                    <span key={val} style={{ left: `${(val / 4) * 100}%` }} />
-                  ))}
-                </div>
+  {[0, 1, 2, 3, 4].map((i) => (
+    <span key={i} data-pos={i} />
+  ))}
+</div>
+
               </div>
               <div className={styles.sliderValueWrapper}>
                 <span className={styles.sliderValue}>

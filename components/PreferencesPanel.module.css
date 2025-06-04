@@ -116,7 +116,7 @@
 .sliderTicks span[data-pos='1'] { left: 27%; }
 .sliderTicks span[data-pos='2'] { left: 50%; }
 .sliderTicks span[data-pos='3'] { left: 73%; }
-.sliderTicks span[data-pos='4'] { left: 95% }
+.sliderTicks span[data-pos='4'] { left: 90%; }
 
 .sliderTicks span {
   position: absolute;
