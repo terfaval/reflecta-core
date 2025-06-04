@@ -205,7 +205,7 @@ export function PreferencesPanel({
             <button
               key={opt.key}
               onClick={() => {
-                const updatedTone: UserPreferences['tone_preference'] = isActive ? undefined : opt.value;
+                const updatedTone = isActive ? undefined : (opt.value as 'supportive' | 'confronting' | 'soothing');
                 const updated: UserPreferences = { ...preferences, tone_preference: updatedTone };
                 setPreferences(updated);
                 setLocalPrefs(updated);
