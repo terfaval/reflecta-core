@@ -195,6 +195,7 @@
   stroke: var(--user-color);
   color: var(--user-color);
   fill: none;
+  opacity: 1;
 }
 
 .toneButton:hover svg {
