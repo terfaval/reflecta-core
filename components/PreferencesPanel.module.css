@@ -151,60 +151,59 @@
 }
 
 .toneButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 34px;
   height: 34px;
   padding: 0;
+  justify-content: center;
+  display: flex;
+  align-items: center;
   gap: 6px;
+  font-size: 0.75rem;
   border-radius: 9999px;
   border: 1px solid var(--user-color);
   background: transparent;
-  color: var(--user-color);
-  stroke: var(--user-color);
+  color: var(--user-color) !important;
   cursor: pointer;
   transition: all 0.3s ease;
-  overflow: hidden;
 }
 
 .toneButton svg {
-  display: block;
   width: 16px;
   height: 16px;
-  stroke: var(--user-color);
+  stroke: var(--user-color) !important;
   fill: none;
-  color: var(--user-color);
-  opacity: 1;
-  transition: stroke 0.3s ease, color 0.3s ease;
+  transition: stroke 0.2s ease;
 }
 
-.toneButton:hover svg {
-  stroke: var(--bg-color);
-  color: var(--bg-color);
+/* Aktív vagy hover: bővül a gomb és invertálódik */
+.toneButton:hover,
+.toneButton.toneActive {
+  width: auto;
+  padding: 6px 10px;
+  background: var(--user-color) !important;
+  color: var(--bg-color) !important;
+  border-color: var(--user-color) !important;
 }
 
-.toneActive svg {
-  stroke: var(--bg-color);
-  color: var(--bg-color);
+/* Itt az ikon is fehér lesz (ha sötét a háttér) */
+.toneButton:hover svg,
+.toneButton.toneActive svg {
+  stroke: var(--bg-color) !important;
 }
 
-
+/* A label csak hoverre vagy aktívra jelenik meg */
 .toneLabel {
   opacity: 0;
   white-space: nowrap;
-  font-size: 0.75rem;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.2s ease;
 }
 
-/* Hover és aktív: megnyílás + színváltás */
-.toneButton:hover,
-.toneActive {
-  width: auto;
-  padding: 6px 10px;
-  background: var(--user-color);
-  color: var(--bg-color);
+.toneButton:hover .toneLabel,
+.toneButton.toneActive .toneLabel {
+  opacity: 1;
+  color: var(--bg-color) !important;
 }
+
 
 .resetRow {
   display: flex;
