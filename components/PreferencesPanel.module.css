@@ -154,7 +154,7 @@
   width: 34px;
   height: 34px;
   padding: 0;
-  justify-content: center;
+  justify-content: flex-start;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -196,7 +196,6 @@
   opacity: 0;
   white-space: nowrap;
   transition: opacity 0.2s ease;
-  display: none;
 }
 
 .toneButton:hover .toneLabel,
