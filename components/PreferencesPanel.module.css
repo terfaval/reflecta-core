@@ -196,6 +196,7 @@
   opacity: 0;
   white-space: nowrap;
   transition: opacity 0.2s ease;
+  display: none;
 }
 
 .toneButton:hover .toneLabel,
