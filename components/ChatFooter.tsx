@@ -34,7 +34,6 @@ export function ChatFooter({
   currentStyle,
   userPreferences,
   setUserPreferences,
-  userId,
 }: ChatFooterProps) {
   const [openPreferences, setOpenPreferences] = useState(false);
 

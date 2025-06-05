@@ -190,12 +190,15 @@
 }
 
 .toneButton svg {
-  stroke: var(--user-color);
+  stroke: currentColor;
+  color: var(--user-color);
   fill: none;
+  background: red;
 }
 
 .toneActive svg {
-  stroke: var(--bg-color);
+  stroke: currentColor;
+  color: var(--bg-color);
 }
 
 .resetRow {
