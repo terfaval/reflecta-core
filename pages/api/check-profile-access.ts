@@ -3,29 +3,22 @@ import supabase from '../../lib/supabase-admin';
 export default async function handler(req, res) {
   const { userId, profile } = req.body;
 
-  const { data, error } = await supabase
+  // 1. Lekérjük, hogy korlátozott-e ez a profil bárkinek is
+  const { data: restrictedAccess, error } = await supabase
     .from('profile_access')
-    .select('id')
-    .eq('user_id', userId)
+    .select('user_id')
     .eq('profile_name', profile);
 
   if (error) return res.status(500).json({ error: error.message });
 
-  // 💡 Ha nincs ilyen entry, nézzük meg, hogy van-e bármilyen korlátozás egyáltalán
-  if (data.length === 0) {
-    const { count, error: countError } = await supabase
-      .from('profile_access')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId);
-
-    if (countError) return res.status(500).json({ error: countError.message });
-
-    if (count === 0) {
-      return res.status(200).json({ allowed: true });
-    }
-
-    return res.status(200).json({ allowed: false });
+  // 2. Ha a profil nincs korlátozva (nincs bejegyzés), mindenki elérheti
+  if (!restrictedAccess || restrictedAccess.length === 0) {
+    return res.status(200).json({ allowed: true });
   }
 
-  return res.status(200).json({ allowed: true });
+  // 3. Ha van bejegyzés → csak azok érhetik el, akiknek ott van a user_id
+  const allowedUserIds = restrictedAccess.map(row => row.user_id);
+  const isAllowed = allowedUserIds.includes(userId);
+
+  return res.status(200).json({ allowed: isAllowed });
 }

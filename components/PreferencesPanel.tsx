@@ -24,6 +24,9 @@ export function PreferencesPanel({
   const sliderRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const [sliderWidth, setSliderWidth] = useState<Record<string, number>>({});
   const [localPrefs, setLocalPrefs] = useState<UserPreferences>(preferences);
+  const hasInteracted = useRef(false);
+  const [fetchedOnce, setFetchedOnce] = useState(false);
+
 
   const huLabelMap: Record<string, string> = {
     'very short': 'rövidebb',
@@ -53,21 +56,22 @@ export function PreferencesPanel({
   }, [open, onClose]);
 
   useEffect(() => {
-    const fetchPreferences = async () => {
-      if (!userId) return;
-      try {
-        const res = await fetch(`/api/preferences/get?user_id=${userId}`);
-        const data = await res.json();
-        if (data) {
-          setPreferences(data);
-          setLocalPrefs(data);
-        }
-      } catch (err) {
-        console.error('[fetchPreferences] Hiba:', err);
+  const fetchPreferences = async () => {
+    if (!userId || fetchedOnce) return;
+    try {
+      const res = await fetch(`/api/preferences/get?user_id=${userId}`);
+      const data = await res.json();
+      if (!hasInteracted.current && data) {
+        setPreferences(data);
+        setLocalPrefs(data);
       }
-    };
-    if (open) fetchPreferences();
-  }, [open, userId, setPreferences]);
+      setFetchedOnce(true);
+    } catch (err) {
+      console.error('[fetchPreferences] Hiba:', err);
+    }
+  };
+  if (open) fetchPreferences();
+}, [open, userId, fetchedOnce, setPreferences]);
 
   useEffect(() => {
     setLocalPrefs(preferences);
@@ -101,9 +105,9 @@ export function PreferencesPanel({
   };
 
   const updateSlider = async (key: keyof UserPreferences, value: number) => {
+    hasInteracted.current = true;
     const mapped = mapSliderValue(key, value);
-    if (localPrefs[key] === mapped) return; // no change
-
+    if (localPrefs[key] === mapped) return;
     const updated = { ...localPrefs, [key]: mapped };
     setPreferences(updated);
     setLocalPrefs(updated);
@@ -111,9 +115,9 @@ export function PreferencesPanel({
   };
 
   const handleToneClick = async (tone: 'supportive' | 'confronting' | 'soothing') => {
+    hasInteracted.current = true;
     const updatedTone = localPrefs.tone_preference === tone ? undefined : tone;
     if (localPrefs.tone_preference === updatedTone) return;
-
     const updated = { ...localPrefs, tone_preference: updatedTone };
     setPreferences(updated);
     setLocalPrefs(updated);
@@ -121,6 +125,7 @@ export function PreferencesPanel({
   };
 
   const handleReset = async () => {
+    hasInteracted.current = true;
     const defaultPrefs: UserPreferences = {
       answer_length: undefined,
       style_mode: undefined,
@@ -146,12 +151,39 @@ export function PreferencesPanel({
   };
 
   const toneOptions = [
-    { key: 'supportive', label: 'Támogató' },
-    { key: 'confronting', label: 'Konfrontáló' },
-    { key: 'soothing', label: 'Csendesítő' },
+    {
+      key: 'supportive',
+      label: 'Támogató',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+        </svg>
+      ),
+    },
+    {
+      key: 'confronting',
+      label: 'Konfrontáló',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+          <path d="M13 2l8 11h-6l2 9-8-11h6l-2-9z" />
+        </svg>
+      ),
+    },
+    {
+      key: 'soothing',
+      label: 'Csendesítő',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5" />
+          <path d="M12 7.5V9" /><path d="M7.5 12H9" /><path d="M16.5 12H15" /><path d="M12 16.5V15" />
+          <path d="m8 8 1.88 1.88" /><path d="M14.12 9.88 16 8" /><path d="m8 16 1.88-1.88" /><path d="M14.12 14.12 16 16" />
+        </svg>
+      ),
+    },
   ];
 
-  if (!open) return <></>;
+  if (!open) return null;
 
   return (
     <div
@@ -205,6 +237,7 @@ export function PreferencesPanel({
                 title={opt.label}
                 aria-label={opt.label}
               >
+                {opt.icon}
                 <span className={styles.toneLabel}>{opt.label}</span>
               </button>
             );
