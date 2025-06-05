@@ -168,26 +168,6 @@
   gap: 6px;
 }
 
-.toneButton:hover,
-.toneActive {
-  width: auto;
-  padding: 6px 10px;
-  justify-content: start;
-  background: var(--user-color);
-  color: var(--bg-color);
-}
-
-.toneButton:hover .toneLabel,
-.toneActive .toneLabel {
-  opacity: 1;
-}
-
-.toneLabel {
-  opacity: 0;
-  white-space: nowrap;
-  transition: opacity 0.2s ease;
-}
-
 .toneButton svg {
   width: 16px;
   height: 16px;
@@ -207,6 +187,19 @@
   stroke: var(--bg-color) !important;
   color: var(--bg-color) !important;
 }
+
+.toneLabel {
+  opacity: 0;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+  font-size: 0.75rem;
+}
+
+.toneButton:hover .toneLabel,
+.toneActive .toneLabel {
+  opacity: 1;
+}
+
 
 .resetRow {
   display: flex;
