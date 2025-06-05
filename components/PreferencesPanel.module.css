@@ -157,6 +157,7 @@
   width: 34px;
   height: 34px;
   padding: 0;
+  gap: 6px;
   border-radius: 9999px;
   border: 1px solid var(--user-color);
   background: transparent;
@@ -165,7 +166,6 @@
   cursor: pointer;
   transition: all 0.3s ease;
   overflow: hidden;
-  gap: 6px;
 }
 
 .toneButton svg {
@@ -173,26 +173,32 @@
   height: 16px;
   flex-shrink: 0;
   display: block;
-}
-
-.toneButton svg * {
-  stroke: var(--user-color) !important;
-  fill: none !important;
-  color: var(--user-color) !important;
-  opacity: 1 !important;
-}
-
-.toneButton:hover svg *,
-.toneActive svg * {
-  stroke: var(--bg-color) !important;
-  color: var(--bg-color) !important;
+  stroke: var(--user-color);
+  color: var(--user-color);
+  fill: none;
+  transition: stroke 0.3s ease;
 }
 
 .toneLabel {
   opacity: 0;
   white-space: nowrap;
-  transition: opacity 0.2s ease;
   font-size: 0.75rem;
+  transition: opacity 0.3s ease;
+}
+
+/* Hover és aktív: megnyílás + színváltás */
+.toneButton:hover,
+.toneActive {
+  width: auto;
+  padding: 6px 10px;
+  background: var(--user-color);
+  color: var(--bg-color);
+}
+
+.toneButton:hover svg,
+.toneActive svg {
+  stroke: var(--bg-color);
+  color: var(--bg-color);
 }
 
 .toneButton:hover .toneLabel,
