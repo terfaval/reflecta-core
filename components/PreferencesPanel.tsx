@@ -1,4 +1,3 @@
-// PreferencesPanel.tsx (tickek pozíciója pixelesen, pontosan a thumb helyére számolva)
 import React, { useRef, useEffect, useState } from 'react';
 import type { UserPreferences } from '@/lib/types';
 import styles from './PreferencesPanel.module.css';
@@ -40,7 +39,7 @@ export function PreferencesPanel({
     'free': 'szabad',
     'guided': 'vezetett',
     'directed': 'irányított',
-    undefined: 'alap'
+    undefined: 'alap',
   };
 
   useEffect(() => {
@@ -82,84 +81,74 @@ export function PreferencesPanel({
     setSliderWidth(widths);
   }, [open]);
 
-  const updateSlider = (key: keyof UserPreferences, value: number) => {
-    let mapped: UserPreferences[typeof key] | undefined;
-    if (key === 'answer_length') {
-      mapped = value === 0 ? 'very short'
-        : value === 1 ? 'short'
-        : value === 2 ? undefined
-        : value === 3 ? 'long'
-        : value === 4 ? 'very long'
-        : undefined;
-    } else if (key === 'style_mode') {
-      mapped = value === 0 ? 'minimal'
-        : value === 1 ? 'simple'
-        : value === 2 ? undefined
-        : value === 3 ? 'symbolic'
-        : value === 4 ? 'mythic'
-        : undefined;
-    } else if (key === 'guidance_mode') {
-      mapped = value === 0 ? 'open'
-        : value === 1 ? 'free'
-        : value === 2 ? undefined
-        : value === 3 ? 'guided'
-        : value === 4 ? 'directed'
-        : undefined;
-    }
+  const mapSliderValue = (key: keyof UserPreferences, value: number): UserPreferences[typeof key] | undefined => {
+    const map = {
+      answer_length: ['very short', 'short', undefined, 'long', 'very long'],
+      style_mode: ['minimal', 'simple', undefined, 'symbolic', 'mythic'],
+      guidance_mode: ['open', 'free', undefined, 'guided', 'directed'],
+    }[key];
+    return map?.[value] as any;
+  };
+
+  const getSliderValue = (key: keyof UserPreferences, prefs: UserPreferences) => {
+    const val = prefs[key];
+    const options = {
+      answer_length: ['very short', 'short', undefined, 'long', 'very long'],
+      style_mode: ['minimal', 'simple', undefined, 'symbolic', 'mythic'],
+      guidance_mode: ['open', 'free', undefined, 'guided', 'directed'],
+    }[key];
+    return options?.findIndex((o) => o === val) ?? 2;
+  };
+
+  const updateSlider = async (key: keyof UserPreferences, value: number) => {
+    const mapped = mapSliderValue(key, value);
+    if (localPrefs[key] === mapped) return; // no change
+
     const updated = { ...localPrefs, [key]: mapped };
     setPreferences(updated);
     setLocalPrefs(updated);
-    saveUserPreferences(userId, updated);
+    await saveUserPreferences(userId, updated);
   };
 
-  const getSliderValue = (key: keyof UserPreferences, source: UserPreferences) => {
-    const val = source[key];
-    if (key === 'answer_length') {
-      return val === 'very short' ? 0 : val === 'short' ? 1 : val === 'long' ? 3 : val === 'very long' ? 4 : 2;
+  const handleToneClick = async (tone: 'supportive' | 'confronting' | 'soothing') => {
+    const updatedTone = localPrefs.tone_preference === tone ? undefined : tone;
+    if (localPrefs.tone_preference === updatedTone) return;
+
+    const updated = { ...localPrefs, tone_preference: updatedTone };
+    setPreferences(updated);
+    setLocalPrefs(updated);
+    await saveUserPreferences(userId, updated);
+  };
+
+  const handleReset = async () => {
+    const defaultPrefs: UserPreferences = {
+      answer_length: undefined,
+      style_mode: undefined,
+      guidance_mode: undefined,
+      tone_preference: undefined,
+    };
+    setPreferences(defaultPrefs);
+    setLocalPrefs(defaultPrefs);
+    await saveUserPreferences(userId, defaultPrefs);
+
+    try {
+      const res = await fetch('/api/preferences/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId }),
+      });
+      if (!res.ok) {
+        console.error('[Reset] Hiba a válaszban:', await res.json());
+      }
+    } catch (err) {
+      console.error('[Reset] Kivétel:', err);
     }
-    if (key === 'style_mode') {
-      return val === 'minimal' ? 0 : val === 'simple' ? 1 : val === 'symbolic' ? 3 : val === 'mythic' ? 4 : 2;
-    }
-    if (key === 'guidance_mode') {
-      return val === 'open' ? 0 : val === 'free' ? 1 : val === 'guided' ? 3 : val === 'directed' ? 4 : 2;
-    }
-    return 2;
   };
 
   const toneOptions = [
-    {
-      key: 'supportive',
-      label: 'Támogató',
-      value: 'supportive',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-        </svg>
-      )
-    },
-    {
-      key: 'confronting',
-      label: 'Konfrontáló',
-      value: 'confronting',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-          <path d="M13 2l8 11h-6l2 9-8-11h6l-2-9z" />
-        </svg>
-      )
-    },
-    {
-  key: 'soothing',
-  label: 'Csendesítő',
-  value: 'soothing',
-  icon: (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 16.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 1 1 4.5 4.5 4.5 4.5 0 1 1-4.5 4.5" />
-      <path d="M12 7.5V9" /><path d="M7.5 12H9" /><path d="M16.5 12H15" /><path d="M12 16.5V15" />
-      <path d="m8 8 1.88 1.88" /><path d="M14.12 9.88 16 8" /><path d="m8 16 1.88-1.88" /><path d="M14.12 14.12 16 16" />
-    </svg>
-  )
-}
+    { key: 'supportive', label: 'Támogató' },
+    { key: 'confronting', label: 'Konfrontáló' },
+    { key: 'soothing', label: 'Csendesítő' },
   ];
 
   if (!open) return <></>;
@@ -191,11 +180,10 @@ export function PreferencesPanel({
                   className={styles.slider}
                 />
                 <div className={styles.sliderTicks}>
-  {[0, 1, 2, 3, 4].map((i) => (
-    <span key={i} data-pos={i} />
-  ))}
-</div>
-
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <span key={i} data-pos={i} />
+                  ))}
+                </div>
               </div>
               <div className={styles.sliderValueWrapper}>
                 <span className={styles.sliderValue}>
@@ -208,22 +196,15 @@ export function PreferencesPanel({
 
         <div className={styles.toneButtons}>
           {toneOptions.map((opt) => {
-            const isActive = localPrefs.tone_preference === opt.value;
+            const isActive = localPrefs.tone_preference === opt.key;
             return (
               <button
                 key={opt.key}
-                onClick={() => {
-                  const updatedTone = isActive ? undefined : (opt.value as 'supportive' | 'confronting' | 'soothing');
-                  const updated: UserPreferences = { ...localPrefs, tone_preference: updatedTone };
-                  setPreferences(updated);
-                  setLocalPrefs(updated);
-                  saveUserPreferences(userId, updated);
-                }}
+                onClick={() => handleToneClick(opt.key as any)}
                 className={`${styles.toneButton} ${isActive ? styles.toneActive : ''}`}
                 title={opt.label}
                 aria-label={opt.label}
               >
-                {opt.icon}
                 <span className={styles.toneLabel}>{opt.label}</span>
               </button>
             );
@@ -231,37 +212,11 @@ export function PreferencesPanel({
         </div>
 
         <div className={styles.resetRow}>
-          <button
-            onClick={async () => {
-              try {
-                const defaultPrefs: UserPreferences = {
-                  answer_length: undefined,
-                  style_mode: undefined,
-                  guidance_mode: undefined,
-                  tone_preference: undefined
-                };
-                setPreferences(defaultPrefs);
-                setLocalPrefs(defaultPrefs);
-                saveUserPreferences(userId, defaultPrefs);
-
-                const res = await fetch('/api/preferences/reset', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ user_id: userId })
-                });
-                if (!res.ok) {
-                  console.error('[Reset] Hiba a válaszban:', await res.json());
-                }
-              } catch (err) {
-                console.error('[Reset] Kivétel:', err);
-              }
-            }}
-            className={styles.resetButton}
-          >
+          <button onClick={handleReset} className={styles.resetButton}>
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-  <polyline points="1 4 1 10 7 10" />
-  <path d="M3.51 15a9 9 0 1 1 2.13 3.13" />
-</svg>
+              <polyline points="1 4 1 10 7 10" />
+              <path d="M3.51 15a9 9 0 1 1 2.13 3.13" />
+            </svg>
             Visszaállítás
           </button>
         </div>

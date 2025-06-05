@@ -153,7 +153,6 @@
 .toneButton {
   width: 34px;
   height: 34px;
-  overflow: hidden;
   padding: 0;
   justify-content: center;
   transition: all 0.3s ease;
@@ -193,8 +192,14 @@
   display: block;
   width: 16px;
   height: 16px;
-  stroke: currentColor;
+  stroke: var(--user-color);
   color: var(--user-color);
+  fill: none;
+}
+
+.toneButton:hover svg {
+  stroke: var(--bg-color);
+  color: var(--bg-color);
   fill: none;
 }
 
