@@ -188,27 +188,29 @@
   transition: opacity 0.2s ease;
 }
 
-.toneButton svg * {
-  display: block;
+.toneButton svg {
   width: 16px;
   height: 16px;
-  stroke: var(--user-color);
-  color: var(--user-color);
-  fill: none;
-  opacity: 1;
+  flex-shrink: 0;
 }
 
+.toneButton svg * {
+  stroke: var(--user-color) !important;
+  fill: none !important;
+  color: var(--user-color) !important;
+  opacity: 1 !important;
+}
 
 .toneButton:hover svg * {
-  stroke: var(--bg-color);
-  color: var(--bg-color);
-  fill: none;
+  stroke: var(--bg-color) !important;
+  color: var(--bg-color) !important;
 }
 
 .toneActive svg * {
-  stroke: currentColor;
-  color: var(--bg-color);
+  stroke: var(--bg-color) !important;
+  color: var(--bg-color) !important;
 }
+
 
 .resetRow {
   display: flex;
