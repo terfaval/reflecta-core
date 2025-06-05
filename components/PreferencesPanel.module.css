@@ -190,10 +190,12 @@
 }
 
 .toneButton svg {
+  display: block;
+  width: 16px;
+  height: 16px;
   stroke: currentColor;
   color: var(--user-color);
   fill: none;
-  background: red;
 }
 
 .toneActive svg {

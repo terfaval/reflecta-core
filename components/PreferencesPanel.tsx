@@ -106,7 +106,7 @@ export function PreferencesPanel({
         : value === 4 ? 'directed'
         : undefined;
     }
-    const updated = { ...preferences, [key]: mapped };
+    const updated = { ...localPrefs, [key]: mapped };
     setPreferences(updated);
     setLocalPrefs(updated);
     saveUserPreferences(userId, updated);
@@ -214,7 +214,7 @@ export function PreferencesPanel({
                 key={opt.key}
                 onClick={() => {
                   const updatedTone = isActive ? undefined : (opt.value as 'supportive' | 'confronting' | 'soothing');
-                  const updated: UserPreferences = { ...preferences, tone_preference: updatedTone };
+                  const updated: UserPreferences = { ...localPrefs, tone_preference: updatedTone };
                   setPreferences(updated);
                   setLocalPrefs(updated);
                   saveUserPreferences(userId, updated);

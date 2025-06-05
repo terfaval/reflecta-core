@@ -26,7 +26,14 @@ export async function saveUserPreferences(user_id: string, prefs: UserPreference
   // Normál mentés
   const { error } = await supabase
     .from('user_preferences')
-    .upsert({ user_id, ...prefs }, { onConflict: 'user_id' });
+.upsert({
+  user_id,
+  answer_length: prefs.answer_length ?? null,
+  style_mode: prefs.style_mode ?? null,
+  guidance_mode: prefs.guidance_mode ?? null,
+  tone_preference: prefs.tone_preference ?? null,
+}, { onConflict: 'user_id' });
+
 
   if (error) {
     console.error('[Save Prefs] Hiba:', error);
