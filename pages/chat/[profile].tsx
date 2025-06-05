@@ -162,7 +162,6 @@ export default function ChatPage() {
   currentStyle={currentStyle}
   userPreferences={userPreferences}
   setUserPreferences={setUserPreferences}
-  userId={userId}
 />
       
     </div>
