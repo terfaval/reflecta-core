@@ -10,16 +10,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Missing profile name or userId' });
   }
 
-  // Hozzáférés-ellenőrzés
-  const { data: access } = await supabase
-    .from('profile_access')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('profile_name', name);
+  // Hozzáférés-ellenőrzés: ha a profil szerepel a profile_access táblában,
+// akkor csak azok érhetik el, akiknek ott van a user_id-juk.
+const { data: restrictedList, error: accessError } = await supabase
+  .from('profile_access')
+  .select('user_id')
+  .eq('profile_name', name);
 
-  if (!access || access.length === 0) {
+if (accessError) {
+  return res.status(500).json({ error: 'Access check failed: ' + accessError.message });
+}
+
+if (restrictedList && restrictedList.length > 0) {
+  const allowedUserIds = restrictedList.map(row => row.user_id);
+  if (!allowedUserIds.includes(userId)) {
     return res.status(403).json({ error: 'Access denied to this profile.' });
   }
+}
 
   // Profil adatok lekérése
   const { data: profile, error: profileError } = await supabase

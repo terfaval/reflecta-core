@@ -198,6 +198,14 @@
   opacity: 1;
 }
 
+.toneButton svg path {
+  stroke: var(--user-color);
+  fill: none;
+  opacity: 1;
+  transition: stroke 0.3s ease, fill 0.3s ease;
+}
+
+
 .toneButton:hover svg {
   stroke: var(--bg-color);
   color: var(--bg-color);
