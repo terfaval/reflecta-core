@@ -190,7 +190,7 @@
 }
 
 .toneButton svg {
-  stroke: currentColor;
+  stroke: var(--user-color);
   fill: none;
 }
 

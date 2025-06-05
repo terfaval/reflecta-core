@@ -18,7 +18,6 @@ interface ChatFooterProps {
   currentStyle: Record<string, string>;
   userPreferences: UserPreferences;
   setUserPreferences: (prefs: UserPreferences) => void;
-  userId: string;
 }
 
 export function ChatFooter({
@@ -48,7 +47,6 @@ export function ChatFooter({
         preferences={userPreferences}
         setPreferences={setUserPreferences}
         styleVars={currentStyle}
-        userId={userId}
       />
 
       <div className="reflecta-input relative">

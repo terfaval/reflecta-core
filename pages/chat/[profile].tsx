@@ -15,6 +15,7 @@ import { ChatMessagesList } from '../../components/ChatMessagesList';
 import { useScrollHandler } from '../../hooks/useScrollHandler';
 import { useHandleSend } from '../../hooks/useHandleSend';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { useUserContext } from '@/contexts/UserContext';
 
 interface Entry {
   id: string;
@@ -31,7 +32,7 @@ export default function ChatPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [closingTrigger, setClosingTrigger] = useState<string>('');
   const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
+  const { userId, setUserId } = useUserContext();
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [startingPrompts, setStartingPrompts] = useState<{ label: string; message: string }[]>([]);
@@ -84,7 +85,7 @@ export default function ChatPage() {
     return entries.filter(e => e.role === 'assistant' && e.content !== '__thinking__').length;
   }, [entries]);
 
-  const { prefs: userPreferences, updatePrefs: setUserPreferences } = useUserPreferences(userId);
+  const { prefs: userPreferences, updatePrefs: setUserPreferences } = useUserPreferences();
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });

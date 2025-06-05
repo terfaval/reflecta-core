@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import type { UserPreferences } from '@/lib/types';
 import styles from './PreferencesPanel.module.css';
 import { saveUserPreferences } from '@/lib/saveUserPreferences';
+import { useUserContext } from '@/contexts/UserContext';
 
 interface PreferencesPanelProps {
   open: boolean;
@@ -10,7 +11,6 @@ interface PreferencesPanelProps {
   preferences: UserPreferences;
   setPreferences: (prefs: UserPreferences) => void;
   styleVars: Record<string, string>;
-  userId: string;
 }
 
 export function PreferencesPanel({
@@ -19,8 +19,8 @@ export function PreferencesPanel({
   preferences,
   setPreferences,
   styleVars,
-  userId
 }: PreferencesPanelProps) {
+  const { userId } = useUserContext();
   const panelRef = useRef<HTMLDivElement>(null);
   const sliderRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const [sliderWidth, setSliderWidth] = useState<Record<string, number>>({});

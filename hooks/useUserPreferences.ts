@@ -1,8 +1,9 @@
-// hooks/useUserPreferences.ts
 import { useEffect, useState } from 'react';
+import { useUserContext } from '@/contexts/UserContext';
 import type { UserPreferences } from '@/lib/types';
 
-export function useUserPreferences(userId: string | null) {
+export function useUserPreferences() {
+  const { userId } = useUserContext();
   const [prefs, setPrefs] = useState<UserPreferences>({});
   const [loading, setLoading] = useState(true);
 
@@ -16,13 +17,14 @@ export function useUserPreferences(userId: string | null) {
   }, [userId]);
 
   const updatePrefs = async (updates: Partial<UserPreferences>) => {
+    if (!userId) return;
     const newPrefs = { ...prefs, ...updates };
     setPrefs(newPrefs);
 
     await fetch('/api/preferences/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, preferences: newPrefs })
+      body: JSON.stringify({ user_id: userId, preferences: newPrefs }),
     });
   };
 
