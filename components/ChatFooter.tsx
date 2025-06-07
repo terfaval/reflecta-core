@@ -72,7 +72,7 @@ export function ChatFooter({
         <div className="reflecta-input-buttons">
           <button
             className={`reflecta-send-button ${loading ? 'reflecta-send-loading' : ''} ${buttonStyles.buttonBase} ${loading ? buttonStyles.sendButtonLoading : buttonStyles.sendButton}`}
-            onClick={() => handleSend()}
+            onClick={() => handleSend(message)}
             disabled={loading}
             aria-label="Küldés"
           >
