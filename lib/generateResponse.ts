@@ -137,6 +137,12 @@ export async function generateResponse(sessionId: string): Promise<{
     "Használj tiszteletteljes, de tegező hangnemet, ahogyan egy érzékeny önreflexiós naplóasszisztens tenné."
   ].join(' ');
 
+  const { data: prefs } = await supabase
+    .from('user_preferences')
+    .select('*')
+    .eq('user_id', session.user_id)
+    .maybeSingle();
+
   const fullPrompt = getCachedSystemPrompt(
     profileObject,
     prefs || undefined,
