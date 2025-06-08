@@ -137,7 +137,11 @@ export async function generateResponse(sessionId: string): Promise<{
     "Használj tiszteletteljes, de tegező hangnemet, ahogyan egy érzékeny önreflexiós naplóasszisztens tenné."
   ].join(' ');
 
-  const basePrompt = getCachedSystemPrompt(profileObject, undefined, sessionMeta);
+  const fullPrompt = getCachedSystemPrompt(
+    profileObject,
+    prefs || undefined,
+    { isClosing: true }
+  );
   const systemPrompt = `${languageTonePrefix}\n\n${basePrompt}`;
 
   const messages: ChatCompletionMessageParam[] = [
