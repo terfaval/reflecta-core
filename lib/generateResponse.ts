@@ -148,6 +148,7 @@ export async function generateResponse(sessionId: string): Promise<{
     prefs || undefined,
     { isClosing: true }
   );
+
   const systemPrompt = `${languageTonePrefix}\n\n${basePrompt}`;
 
   const messages: ChatCompletionMessageParam[] = [
