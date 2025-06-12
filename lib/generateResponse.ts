@@ -163,7 +163,7 @@ if (Array.isArray(patterns) && lastUserEntry?.content) {
     });
   }
 
-  // let reaction_tag = undefined;
+// let reaction_tag = undefined;
 // let recommendation_tag = undefined;
 //
 // if (lastUserEntry) {
@@ -197,5 +197,4 @@ if (Array.isArray(patterns) && lastUserEntry?.content) {
     reply,
     reaction_tag: undefined,
     recommendation_tag: undefined,
-};
-
+}
