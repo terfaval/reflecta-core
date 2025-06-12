@@ -94,7 +94,16 @@ const lastUserEntry = [...entries]
 const sessionMeta = deriveSessionMeta(entries, closingTrigger);
 
 // 🔒 Avoidance logic active check
-const logic = profileObject.metadata?.avoidance_logic?.trim();
+let logic: string | undefined;
+
+const rawLogic = profileObject.metadata?.avoidance_logic;
+if (typeof rawLogic === 'string') {
+  logic = rawLogic.trim();
+} else if (Array.isArray(rawLogic)) {
+  // Egyelőre ne használjuk, ha tömb
+  console.warn('⚠️ avoidance_logic is array – skipping for now');
+}
+
 
 if (logic && lastUserEntry?.content) {
   try {
