@@ -32,19 +32,6 @@ export interface ProfileMetadata {
   connects_well_before?: string[];
   avoidance_logic?: string;
 
-  // Direct access to individual style fields
-  style_tone?: string;
-  style_symbol_density?: string;
-  style_rhythm?: string;
-  style_structure?: string;
-  style_sentence_length?: string;
-  style_visuality?: string;
-  style_directiveness?: string;
-  style_pace?: string;
-  style_absorption_style?: string;
-  style_humor?: string;
-}
-
 // --- Full profile object
 export interface Profile {
   name: string;

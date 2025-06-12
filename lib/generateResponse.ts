@@ -5,10 +5,14 @@ import { OpenAI } from 'openai';
 import { matchReactions } from '@/lib/matchReactions';
 import { matchRecommendations } from '@/lib/matchRecommendations';
 import { extractContext } from '@/lib/contextExtractor';
+import { prepareProfile } from './prepareProfile';
+import { deriveSessionMeta } from './deriveSessionMeta';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import type { Profile, SessionMeta } from './types';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+
+// SESSION SEARCH OR CREATION
 
 export async function generateResponse(sessionId: string): Promise<{
   reply: string;
@@ -24,117 +28,94 @@ export async function generateResponse(sessionId: string): Promise<{
 
   if (!session) throw new Error('Session not found');
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('name, prompt_core, description')
-    .eq('name', session.profile)
-    .maybeSingle();
+  // PROFILE LOADING
 
-  const { data: metadata } = await supabase
-    .from('profile_metadata')
-    .select('*')
-    .eq('profile', session.profile)
-    .maybeSingle();
+  const profileObject = await prepareProfile(session.profile);
+  const closingTrigger = profileObject.metadata.closing_trigger?.trim();
 
-  const closingTrigger = metadata?.closing_trigger?.trim();
+  // 🔄 Adatok betöltése
+const { data: recentEntries } = await supabase
+  .from('entries')
+  .select('role, content, reaction_tag, created_at')
+  .eq('session_id', sessionId)
+  .order('created_at', { ascending: true })
+  .limit(30);
 
-  const reactionTypes = ['common', 'typical', 'rare'] as const;
-  const reactions: { [key in (typeof reactionTypes)[number]]: string[] } = {
-    common: [],
-    typical: [],
-    rare: [],
+const { data: highlightedEntries } = await supabase
+  .from('entries')
+  .select('role, content, reaction_tag, created_at')
+  .eq('session_id', sessionId)
+  .not('reaction_tag', 'is', null)
+  .order('created_at', { ascending: true })
+  .limit(10);
+
+// 🧠 Map kulcsként role + content (de a highlight előzze meg!)
+const entriesMap = new Map<string, { role: string; content: string; reaction_tag?: string }>();
+
+// 🟡 Először a highlight-okat rakjuk be, hogy azok reaction_tag-je megmaradjon
+(highlightedEntries || []).forEach(entry => {
+  const key = `${entry.role}-${entry.content}`;
+  entriesMap.set(key, entry);
+});
+
+// 🔵 Majd hozzáadjuk a többi elemet, ha még nincs ilyen kulcs
+(recentEntries || []).forEach(entry => {
+  const key = `${entry.role}-${entry.content}`;
+  if (!entriesMap.has(key)) {
+    entriesMap.set(key, entry);
+  }
+});
+
+// ✅ Ebből lesz a végső, sorrendben használt lista
+const entries = Array.from(entriesMap.values());
+const lastEntry = entries[entries.length - 1];
+
+  // 🔚 Manuális lezárás ellenőrzése
+if (
+  closingTrigger &&
+  lastEntry?.role === 'user' &&
+  lastEntry.content.trim() === closingTrigger &&
+  !session.ended_at
+) {
+  return {
+    reply: '',
+    reaction_tag: undefined,
+    recommendation_tag: undefined,
+    warning: 'Session closure detected — please call /api/session/close to complete.'
   };
+}
 
-  for (const type of reactionTypes) {
-    const { data } = await supabase
-      .from('profile_reactions')
-      .select('reaction')
-      .eq('profile', session.profile)
-      .eq('rarity', type);
-    reactions[type] = data?.map((r) => r.reaction) || [];
-  }
+// 🔎 Utolsó érvényes user üzenet keresése (nem closingTrigger)
+const lastUserEntry = [...entries]
+  .reverse()
+  .find(e => e.role === 'user' && e.content.trim() !== closingTrigger);
 
-  const { data: recommendations } = await supabase
-    .from('recommendations')
-    .select('name, trigger')
-    .eq('profile', session.profile);
+// 🧾 SessionMeta származtatása a user üzenet alapján
+const sessionMeta = deriveSessionMeta(entries, closingTrigger);
 
-  const { data: recentEntries } = await supabase
-    .from('entries')
-    .select('role, content, reaction_tag')
-    .eq('session_id', sessionId)
-    .order('created_at', { ascending: true })
-    .limit(30);
+// 🔒 Avoidance logic active check
+const logic = profileObject.metadata?.avoidance_logic?.trim();
 
-  const { data: highlightedEntries } = await supabase
-    .from('entries')
-    .select('role, content, reaction_tag')
-    .eq('session_id', sessionId)
-    .not('reaction_tag', 'is', null)
-    .order('created_at', { ascending: true })
-    .limit(10);
-
-  const allEntriesMap = new Map<string, { role: string; content: string; reaction_tag?: string }>();
-  [...(highlightedEntries || []), ...(recentEntries || [])].forEach(entry => {
-    allEntriesMap.set(`${entry.role}-${entry.content}`, entry);
-  });
-
-  const entries = Array.from(allEntriesMap.values());
-  const lastEntry = entries[entries.length - 1];
-
-  if (
-    closingTrigger &&
-    lastEntry?.role === 'user' &&
-    lastEntry.content.trim() === closingTrigger &&
-    !session.ended_at
-  ) {
-    return {
-      reply: '',
-      reaction_tag: undefined,
-      recommendation_tag: undefined,
-      warning: 'Session closure detected — please call /api/session/close to complete.'
-    };
-  }
-
-  const lastUserEntry = [...entries].reverse().find(e =>
-    e.role === 'user' && (!closingTrigger || e.content.trim() !== closingTrigger)
-  );
-
-  let sessionMeta: SessionMeta = {};
-  if (lastUserEntry) {
-    const content = lastUserEntry.content.trim();
-    sessionMeta = {
-      isShortEntry: content.length < 50,
-      isQuestion: content.endsWith('?'),
-      isReflective: /érzem|gondolom|hiszem|talán|nem tudom/i.test(content),
-    };
-  }
-
-  // 🔒 Avoidance logic active check
-  if (metadata?.avoidance_logic) {
-    const pattern = new RegExp(metadata.avoidance_logic, 'i');
-    if (lastUserEntry?.content && pattern.test(lastUserEntry.content)) {
+if (logic && lastUserEntry?.content) {
+  try {
+    const pattern = new RegExp(logic, 'i');
+    if (pattern.test(lastUserEntry.content)) {
       return {
-        reply: `Ez a téma kívül esik azon a térségen, ahol autentikusan tudlak kísérni. Javaslom, térjünk át egy másik irányra vagy tartsunk egy pillanatnyi szünetet.`,
+        reply: `Ez a téma úgy tűnik, kívül esik azon a térségen, ahol igazán hitelesen tudlak kísérni. Talán válthatnánk irányt, vagy hagyhatunk egy kis csendet, ha most arra van szükséged.`,
         reaction_tag: undefined,
         recommendation_tag: undefined,
       };
     }
+  } catch (err) {
+    console.warn(`Invalid avoidance_logic RegExp: "${logic}"`, err);
   }
-
-  // 🌐 System prompt generation
-  const profileObject: Profile = {
-    name: profile.name,
-    prompt_core: profile.prompt_core,
-    description: profile.description,
-    metadata,
-    reactions,
-  };
+}
 
   const languageTonePrefix = [
-    "Kérlek, minden válaszodat magyar nyelven írd.",
-    "Beszélj finoman, természetes ritmusban, ne legyél túl gépies.",
-    "Használj tiszteletteljes, de tegező hangnemet, ahogyan egy érzékeny önreflexiós naplóasszisztens tenné."
+    "Minden válaszodat magyar nyelven add.",
+    "Fogalmazz természetes ritmusban, finoman, mellőzve a gépies hangzást.",
+    "Tartsd meg a tiszteletteljes, de tegező hangnemet — úgy, ahogy egy érzékeny önreflexiós naplóasszisztens szólna hozzád.",
+    "Ügyelj a helyesírásra, nyelvtani pontosságra és gördülékeny stílusra."
   ].join(' ');
 
   const { data: prefs } = await supabase
@@ -149,7 +130,7 @@ export async function generateResponse(sessionId: string): Promise<{
     { isClosing: true }
   );
 
-  const systemPrompt = `${languageTonePrefix}`;
+  const systemPrompt = `${languageTonePrefix}\n\n${fullPrompt}`;
 
   const messages: ChatCompletionMessageParam[] = [
     { role: 'system', content: systemPrompt },
