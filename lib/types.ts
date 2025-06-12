@@ -31,6 +31,7 @@ export interface ProfileMetadata {
   connects_well_after?: string[];
   connects_well_before?: string[];
   avoidance_logic?: string[];
+}
 
 // --- Full profile object
 export interface Profile {
