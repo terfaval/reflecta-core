@@ -36,12 +36,7 @@ export interface ProfileMetadata {
 export interface Profile {
   name: string;
   prompt_core: string;
-  description: string;
   metadata: ProfileMetadata;
-  reactions: {
-    common: string[];
-    typical: string[];
-    rare: string[];
   };
 }
 
