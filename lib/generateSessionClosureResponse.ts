@@ -66,15 +66,14 @@ export async function generateSessionClosureResponse(sessionId: string): Promise
   const profileObject: Profile = {
     name: profile.name,
     prompt_core: profile.prompt_core,
-    description: profile.description,
     metadata,
-    reactions,
   };
 
   const languageTonePrefix = [
     "Kérlek, minden válaszodat magyar nyelven írd.",
     "Beszélj finoman, természetes ritmusban, ne legyél túl gépies.",
     "Használj tiszteletteljes, de tegező hangnemet, ahogyan egy érzékeny önreflexiós naplóasszisztens tenné."
+    "Ügyelj a helyesírásra, nyelvtani pontosságra és gördülékeny stílusra."
   ].join(' ');
 
   const fullPrompt = getCachedSystemPrompt(
