@@ -196,5 +196,5 @@ if (Array.isArray(patterns) && lastUserEntry?.content) {
   return {
     reply,
     reaction_tag: undefined,
-    recommendation_tag: undefined,
+    recommendation_tag: undefined,}
 }
