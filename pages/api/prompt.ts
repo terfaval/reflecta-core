@@ -2,14 +2,9 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import supabase from '@/lib/supabase-admin';
-import { buildSystemPrompt } from '../../lib/buildSystemPrompt';
-
-type UserPreferences = {
-  answer_length?: 'short' | 'long';
-  style_mode?: 'simple' | 'symbolic';
-  guidance_mode?: 'free' | 'guided';
-  tone_preference?: 'supportive' | 'confronting' | 'soothing';
-};
+import { buildSystemPrompt } from '@/lib/buildSystemPrompt';
+import { prepareProfile } from '@/lib/prepareProfile';
+import type { UserPreferences, SessionMeta } from '@/lib/types';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end();
@@ -18,59 +13,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     profileName: string;
     userId: string;
     preferences: UserPreferences;
-    sessionMeta: Record<string, any>;
+    sessionMeta: SessionMeta;
   };
 
   if (!profileName || !userId) {
     return res.status(400).json({ error: 'Missing profileName or userId' });
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('name, prompt_core, description')
-    .eq('name', profileName)
-    .maybeSingle();
-
-  if (!profile) {
+  // 🎭 Profil betöltése teljes struktúrával
+  const profileObject = await prepareProfile(profileName);
+  if (!profileObject) {
     return res.status(404).json({ error: 'Profile not found' });
   }
 
-  const { data: metadata } = await supabase
-    .from('profile_metadata')
-    .select('*')
-    .eq('profile', profileName)
-    .maybeSingle();
+  // 🧠 Prompt generálása a profil, preferenciák és sessionMeta alapján
+  const systemPrompt = buildSystemPrompt(profileObject, preferences, sessionMeta);
 
-  const { data: allReactions } = await supabase
-    .from('profile_reactions')
-    .select('rarity, reaction')
-    .eq('profile', profileName);
-
-  const reactionTypes = ['common', 'typical', 'rare'] as const;
-  const reactions: { [key in (typeof reactionTypes)[number]]: string[] } = {
-    common: [],
-    typical: [],
-    rare: [],
-  };
-
-  for (const type of reactionTypes) {
-    reactions[type] = allReactions
-      ?.filter((r) => r.rarity === type)
-      .map((r) => r.reaction) || [];
-  }
-
+  // 🎯 Ajánlások lekérése (ha a frontendnek szüksége van rá)
   const { data: recommendations } = await supabase
     .from('recommendations')
     .select('name, trigger, type, intensity, guidance_direction, style_keywords, target_mode')
     .eq('profile', profileName);
-
-  const systemPrompt = buildSystemPrompt({
-    name: profile.name,
-    prompt_core: profile.prompt_core,
-    description: profile.description,
-    metadata,
-    reactions,
-  }, preferences, sessionMeta);
 
   return res.status(200).json({ systemPrompt, recommendations });
 }
