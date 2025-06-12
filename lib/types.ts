@@ -37,7 +37,6 @@ export interface Profile {
   name: string;
   prompt_core: string;
   metadata: ProfileMetadata;
-  };
 }
 
 // --- User preferences set via UI toggle
