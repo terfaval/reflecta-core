@@ -1,3 +1,5 @@
+import type { SessionMeta } from './types';
+
 export function deriveSessionMeta(
   entries: { role: string; content: string; created_at?: string }[],
   closingTrigger?: string
