@@ -94,31 +94,28 @@ const lastUserEntry = [...entries]
 const sessionMeta = deriveSessionMeta(entries, closingTrigger);
 
 // 🔒 Avoidance logic active check
-let logic: string | undefined;
+const patterns = profileObject.metadata?.avoidance_logic ?? [];
 
-const rawLogic = profileObject.metadata?.avoidance_logic;
-if (typeof rawLogic === 'string') {
-  logic = rawLogic.trim();
-} else if (Array.isArray(rawLogic)) {
-  // Egyelőre ne használjuk, ha tömb
-  console.warn('⚠️ avoidance_logic is array – skipping for now');
-}
-
-
-if (logic && lastUserEntry?.content) {
-  try {
-    const pattern = new RegExp(logic, 'i');
-    if (pattern.test(lastUserEntry.content)) {
-      return {
-        reply: `Ez a téma úgy tűnik, kívül esik azon a térségen, ahol igazán hitelesen tudlak kísérni. Talán válthatnánk irányt, vagy hagyhatunk egy kis csendet, ha most arra van szükséged.`,
-        reaction_tag: undefined,
-        recommendation_tag: undefined,
-      };
+if (Array.isArray(patterns) && lastUserEntry?.content) {
+  const matches = patterns.some((patternStr) => {
+    try {
+      const regex = new RegExp(patternStr, 'i');
+      return regex.test(lastUserEntry.content);
+    } catch (err) {
+      console.warn(`⚠️ Invalid avoidance_logic pattern: "${patternStr}"`, err);
+      return false;
     }
-  } catch (err) {
-    console.warn(`Invalid avoidance_logic RegExp: "${logic}"`, err);
+  });
+
+  if (matches) {
+    return {
+      reply: `Ez a téma úgy tűnik, kívül esik azon a térségen, ahol igazán hitelesen tudlak kísérni. Talán válthatnánk irányt, vagy hagyhatunk egy kis csendet, ha most arra van szükséged.`,
+      reaction_tag: undefined,
+      recommendation_tag: undefined,
+    };
   }
 }
+
 
   const languageTonePrefix = [
     "Minden válaszodat magyar nyelven add.",
