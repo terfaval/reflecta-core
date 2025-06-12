@@ -116,7 +116,6 @@ if (Array.isArray(patterns) && lastUserEntry?.content) {
   }
 }
 
-
   const languageTonePrefix = [
     "Minden válaszodat magyar nyelven add.",
     "Fogalmazz természetes ritmusban, finoman, mellőzve a gépies hangzást.",
@@ -164,35 +163,35 @@ if (Array.isArray(patterns) && lastUserEntry?.content) {
     });
   }
 
-  let reaction_tag = undefined;
-  let recommendation_tag = undefined;
+  // let reaction_tag = undefined;
+// let recommendation_tag = undefined;
+//
+// if (lastUserEntry) {
+//   const content = lastUserEntry.content.trim();
+//   const context = extractContext(content);
+//
+//   reaction_tag = await matchReactions(profileObject.name, content, context);
+//   recommendation_tag = await matchRecommendations(profileObject.name, content, context);
+// }
 
-  if (lastUserEntry) {
-    const content = lastUserEntry.content.trim();
-    const context = extractContext(content);
-
-    reaction_tag = await matchReactions(profile.name, content, context);
-    recommendation_tag = await matchRecommendations(profile.name, content, context);
-  }
-
-  if (reaction_tag || recommendation_tag) {
-    const events = [];
-    if (reaction_tag) {
-      events.push({
-        session_id: sessionId,
-        event_type: 'reaction_triggered',
-        note: `Reakció aktiválódott: ${reaction_tag}`,
-      });
-    }
-    if (recommendation_tag) {
-      events.push({
-        session_id: sessionId,
-        event_type: 'recommendation_triggered',
-        note: `Ajánlás aktiválódott: ${recommendation_tag}`,
-      });
-    }
-    await supabase.from('system_events').insert(events);
-  }
+//  if (reaction_tag || recommendation_tag) {
+//    const events = [];
+//    if (reaction_tag) {
+//      events.push({
+//        session_id: sessionId,
+//        event_type: 'reaction_triggered',
+//        note: `Reakció aktiválódott: ${reaction_tag}`,
+//      });
+//    }
+//    if (recommendation_tag) {
+//      events.push({
+//        session_id: sessionId,
+//        event_type: 'recommendation_triggered',
+//        note: `Ajánlás aktiválódott: ${recommendation_tag}`,
+//      });
+//    }
+//    await supabase.from('system_events').insert(events);
+//  }
 
   return {
     reply,
