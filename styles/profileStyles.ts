@@ -48,6 +48,11 @@ export const profileStyles: Record<string, React.CSSProperties & Record<string, 
     '--user-color': '#4D73BF',
     '--ai-color': '#BECCE8',
   },
+  Preceptor: {
+    '--bg-color': '#ffffff',
+    '--user-color': '#234F8C',
+    '--ai-color': '#CADBF2',
+  },
 };
 
 // 💡 CSS modul exportálva, hogy máshonnan is elérhető legyen
