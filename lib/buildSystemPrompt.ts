@@ -160,10 +160,10 @@ if (rhythmLabel) {
   const prefsFragments: string[] = [];
 
   const mapAnswerLength = {
-    very_short: 'keep things very brief',
+    'very short': 'keep things very brief',
     short: 'stay concise',
     long: 'feel free to expand your thoughts',
-    very_long: 'let your ideas unfold fully'
+    'very long': 'let your ideas unfold fully'
   };
 
   const mapStyleMode = {

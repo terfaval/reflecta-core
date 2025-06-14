@@ -132,7 +132,7 @@ if (Array.isArray(patterns) && lastUserEntry?.content) {
   const fullPrompt = getCachedSystemPrompt(
     profileObject,
     prefs || undefined,
-    { isClosing: true }
+    sessionMeta
   );
 
   const systemPrompt = `${languageTonePrefix}\n\n${fullPrompt}`;
