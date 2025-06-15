@@ -4,14 +4,15 @@ import supabase from '../lib/supabase-admin';
 
 export async function getOrCreateConversationAndSession(userId: string, profile: string) {
   // 1. Keresünk aktív conversation-t
-  const { data: conversation, error: convErr } = await supabase
-    .from('conversations')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('profile', profile)
-    .eq('is_archived', false)
-    .order('started_at', { ascending: false })
-    .maybeSingle();
+   const { data: conversation, error: convErr } = await supabase
+     .from('conversations')
+     .select('*')
+     .eq('user_id', userId)
+     .eq('profile', profile)
+     .eq('is_archived', false)
+     .order('started_at', { ascending: false })
+     .limit(1)          // new line
+     .maybeSingle();
 
   let conversationId: string;
 
@@ -35,6 +36,7 @@ export async function getOrCreateConversationAndSession(userId: string, profile:
     .select('*')
     .eq('conversation_id', conversationId)
     .is('ended_at', null)
+    .limit(1)
     .maybeSingle();
 
   if (existingSession) return { conversationId, session: existingSession };
