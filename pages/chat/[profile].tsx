@@ -1,7 +1,7 @@
 // ✅ Reflecta ChatPage with scrollAnchors from system_events
 import React from 'react'; 
 import { useRouter } from 'next/router';
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { profileStyles, buttonStyles } from '../../styles/profileStyles';
 import SpiralLoader from '../../components/SpiralLoader';
 import ThinkingDots from '../../components/ThinkingDots';
@@ -45,15 +45,20 @@ export default function ChatPage() {
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const currentStyle = profileStyles[profile as string] || {};
 
+  const handleReady = useCallback(
+    ({ userId, sessionId, startingPrompts, closingTrigger }) => {
+      setUserId(userId);
+      setSessionId(sessionId);
+      setStartingPrompts(startingPrompts);
+      setClosingTrigger(closingTrigger);
+      setSessionIsFresh(true);
+    },
+    [setUserId, setSessionId, setStartingPrompts, setClosingTrigger, setSessionIsFresh]
+  );
+
   useUserSession({
   profile,
-  onReady: ({ userId, sessionId, startingPrompts, closingTrigger }) => {
-    setUserId(userId);
-    setSessionId(sessionId);
-    setStartingPrompts(startingPrompts);
-    setClosingTrigger(closingTrigger);
-    setSessionIsFresh(true);
-  },
+  onReady: handleReady,
 });
 
   useAutoTextareaResize();
