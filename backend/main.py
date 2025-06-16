@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from supabase_client import get_user_by_id
+from backend.supabase_client import get_user_by_id
 
 app = FastAPI()
 
@@ -20,3 +20,4 @@ def get_user(user_id: str):
         raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+    
