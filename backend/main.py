@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
-from backend.supabase_client import get_user_by_id
+from .supabase_client import get_user_by_id
+from typing import Optional, Dict, Any
 
 app = FastAPI()
 
@@ -9,15 +10,16 @@ def read_root():
 
 
 @app.get("/user/{user_id}")
-def get_user(user_id: str):
-    """Retrieve a user by their id."""
+def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
+    """Return a user record by id or None if not found."""
     try:
-        user = get_user_by_id(user_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        return user
-    except HTTPException:
-        raise
+        response = (
+            supabase.table("users")
+            .select("*")
+            .eq("id", user_id)
+            .maybe_single()
+            .execute()
+        )
+        return response.data  # Lehet None, ha nincs ilyen user
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
-    
+        raise RuntimeError(f"Failed to fetch user: {exc}") from exc

@@ -1,23 +1,23 @@
 import os
-from pathlib import Path
+
 from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
-from supabase import Client, create_client
+from pathlib import Path
+from supabase import create_client, Client
 
-# Load environment variables from the project's .env.local if present.
-ROOT_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(ROOT_DIR / ".env.local", override=False)
+env_path = Path(__file__).resolve().parents[1] / ".env.local"
+load_dotenv(dotenv_path=env_path)
 
 _supabase: Optional[Client] = None
 
 
 def _init_supabase() -> Client:
-    """Initialize and return a Supabase client using env variables."""
+    
     global _supabase
     if _supabase is None:
         url = os.getenv("SUPABASE_URL")
-        key = os.getenv("SUPABASE_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+        key = os.getenv("SUPABASE_KEY")
         if not url or not key:
             raise RuntimeError("SUPABASE_URL or SUPABASE_KEY not set")
         _supabase = create_client(url, key)
@@ -46,7 +46,7 @@ def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
         if error:
             message = getattr(error, "message", str(error))
             raise RuntimeError(message)
-        return response.data
+        return data
     except Exception as exc:
         raise RuntimeError(f"Failed to fetch user: {exc}") from exc
 
@@ -69,7 +69,7 @@ def insert_log_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
         if error:
             message = getattr(error, "message", str(error))
             raise RuntimeError(message)
-        return response.data
+        return data
     except Exception as exc:
         raise RuntimeError(f"Failed to insert log entry: {exc}") from exc
 
@@ -93,6 +93,6 @@ def get_session(session_id: str) -> Optional[Dict[str, Any]]:
         if error:
             message = getattr(error, "message", str(error))
             raise RuntimeError(message)
-        return response.data
+        return data
     except Exception as exc:
         raise RuntimeError(f"Failed to fetch session: {exc}") from exc
