@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 
 type UseUserSessionParams = {
@@ -13,10 +13,12 @@ type UseUserSessionParams = {
 
 export function useUserSession({ profile, onReady }: UseUserSessionParams) {
   const router = useRouter();
+  const initialized = useRef(false);
 
   useEffect(() => {
     const handleWPUser = (event: MessageEvent) => {
       if (event.data?.type === 'wp_user') {
+       if (initialized.current) return;
         const { wp_user_id, email } = event.data;
         if (!wp_user_id || !email || typeof profile !== 'string') return;
 
@@ -52,6 +54,7 @@ export function useUserSession({ profile, onReady }: UseUserSessionParams) {
 
             const sessionData = await sessionRes.json();
             if (!sessionData?.session?.id) return;
+            initialized.current = true;
 
             onReady({
               userId: user_id,
