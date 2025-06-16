@@ -30,15 +30,22 @@ supabase: Client = _init_supabase()
 def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
     """Return a user record by id or None if not found."""
     try:
-        response  = (
+        result  = (
             supabase.table("users")
             .select("*")
             .eq("id", user_id)
             .maybe_single()
             .execute()
         )
-        if response.error:
-            raise RuntimeError(response.error.message)
+        
+        if isinstance(result, tuple):
+            data, error = result
+        else:
+            data, error = result.data, result.error
+
+        if error:
+            message = getattr(error, "message", str(error))
+            raise RuntimeError(message)
         return response.data
     except Exception as exc:
         raise RuntimeError(f"Failed to fetch user: {exc}") from exc
@@ -47,14 +54,21 @@ def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
 def insert_log_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
     """Insert a log entry into the `entries` table and return the created row."""
     try:
-        response = (
+        result = (
             supabase.table("entries")
             .insert(entry)
             .single()
             .execute()
         )
-        if response.error:
-            raise RuntimeError(response.error.message)
+
+        if isinstance(result, tuple):
+            data, error = result
+        else:
+            data, error = result.data, result.error
+
+        if error:
+            message = getattr(error, "message", str(error))
+            raise RuntimeError(message)
         return response.data
     except Exception as exc:
         raise RuntimeError(f"Failed to insert log entry: {exc}") from exc
@@ -63,15 +77,22 @@ def insert_log_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
 def get_session(session_id: str) -> Optional[Dict[str, Any]]:
     """Retrieve a session by id."""
     try:
-        response = (
+        result = (
             supabase.table("sessions")
             .select("*")
             .eq("id", session_id)
             .maybe_single()
             .execute()
         )
-        if response.error:
-            raise RuntimeError(response.error.message)
+        
+        if isinstance(result, tuple):
+            data, error = result
+        else:
+            data, error = result.data, result.error
+
+        if error:
+            message = getattr(error, "message", str(error))
+            raise RuntimeError(message)
         return response.data
     except Exception as exc:
         raise RuntimeError(f"Failed to fetch session: {exc}") from exc
