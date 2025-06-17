@@ -49,6 +49,16 @@ def build_system_prompt(
 
     lines: List[str] = []
 
+    core_essence_prompt: List[str] = [
+        "You accompany the user with presence, clarity, and care.",
+        "Each reply should deepen their self-awareness.",
+        "Avoid empty sympathy — offer quiet mirrors and brave questions.",
+        "Ask what they dare not ask themselves.",
+        "Reflect the shape of their pain, not its excuse.",
+        "Let your words breathe — then guide gently.",
+    ]
+    lines.extend(core_essence_prompt)
+
     core = profile.get("prompt_core", "").strip()
     if core:
         lines.append(core)
