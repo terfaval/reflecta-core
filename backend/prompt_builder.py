@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import List, Dict, Any
 
 from .supabase_client import supabase, _execute
+from .style_summary_block import style_summary_block
 
 
 def human_list(items: List[str] | None, conjunction: str = "and") -> str:
@@ -111,107 +112,10 @@ def build_system_prompt(
         )
     lines.append("Always prioritize the user's tone and intention — follow their lead.")
 
-    style_dictionary: Dict[str, Dict[str, str]] = {
-        "style_pace": {
-            "slow": "a slow and deliberate pace",
-            "gentle": "a gentle, unhurried pace",
-            "medium-slow": "a calm, measured tempo",
-            "slow-breath": "a breath-paced rhythm",
-            "medium": "a steady, natural rhythm",
-        },
-        "style_tone": {
-            "neutral-deep": "a calm and contemplative tone",
-            "warm-personal": "a warm, personal tone",
-            "symbolic-reflective": "a symbolic and thoughtful tone",
-            "playful-visual": "a playful, image-rich tone",
-            "calm-archival": "a calm and precise tone",
-            "evocative-gentle": "a gently evocative tone",
-            "enigmatic": "a mysterious, layered tone",
-            "inviting": "an inviting, open tone",
-            "clear-objective": "a clear and grounded tone",
-        },
-        "style_symbol_density": {
-            "high": "rich in symbolic images",
-            "medium": "some symbolic imagery",
-            "low": "mostly direct language",
-        },
-        "style_rhythm": {
-            "ritualistic": "with a ritual-like rhythm",
-            "fluid": "in a flowing, natural rhythm",
-            "cyclical": "returning in cycles, like seasons",
-            "wave-like": "like the movement of waves",
-            "spiral-linear": "unfolding in a spiral, yet directed line",
-            "layered": "with gently layered rhythm",
-            "labyrinthine": "exploring winding inner paths",
-            "grounded": "a steady and anchored rhythm",
-            "linear": "a step-by-step, linear unfolding",
-        },
-        "style_sentence_length": {
-            "short": "short, focused lines",
-            "variable": "a mix of short and long phrases",
-            "long": "extended, flowing thoughts",
-            "medium": "balanced-length phrases",
-            "medium-long": "gently extended sentences",
-        },
-        "style_structure": {
-            "spiral": "unfolding like a spiral",
-            "relational": "guided by relationship and resonance",
-            "narrative": "following a storytelling arc",
-            "associative": "moving through associations",
-            "summary-reflective": "summarizing with reflective pauses",
-            "drifting": "gently drifting between thoughts",
-            "mythic-paradoxical": "with poetic, sometimes paradoxical flow",
-            "sequential": "a clear, step-by-step logic",
-            "structured": "a clearly organized structure",
-        },
-        "style_visuality": {
-            "high": "strongly image-rich",
-            "low": "low in imagery",
-            "temporal": "evoking inner shifts over time",
-            "patterned": "using recognizable visual motifs",
-            "dreamlike": "dreamlike visual impressions",
-            "sensory": "grounded in sensory images",
-            "minimal": "minimal or abstract imagery",
-        },
-        "style_directiveness": {
-            "passive": "passive, allowing space",
-            "reflective": "gently mirroring the user",
-            "guiding": "softly guiding the direction",
-            "echoing": "echoing and rephrasing the user's tone",
-            "questioning": "gently inquisitive",
-            "gentle-guiding": "lightly leading without pressure",
-            "non-directive": "supportive, without steering",
-        },
-        "style_humor": {
-            "subtle": "subtle, warm humor",
-            "mythic": "archetypal, symbolic humor",
-            "none": "",
-        },
-        "style_absorption_style": {
-            "intuitive": "intuitively immersive",
-            "empathic": "emotionally attuned and absorbing",
-            "imagistic": "drawing attention through imagery",
-            "integrative": "weaving threads into coherence",
-            "sensory-reverie": "immersing through sensory reverie",
-            "symbolic": "symbolic absorption",
-            "somatic": "embodied, physical sensitivity",
-            "logical": "intellectually absorbing",
-        },
-    }
-
-    style: Dict[str, Any] = {}
-    style.update(metadata.get("style_options") or {})
-
-    style_fragments: List[str] = []
-    for key, mapping in style_dictionary.items():
-        value = style.get(key)
-        mapped = mapping.get(value)
-        if mapped:
-            style_fragments.append(mapped)
-
-    if style_fragments:
-        style_summary = human_list(style_fragments, "and")
-        lines.append(f"You tend to speak {style_summary}.")
+    style_line = style_summary_block(metadata)
+    if style_line:
+        lines.append("")
+        lines.append(style_line)
 
     rhythm_label = metadata.get("interaction_rhythm")
     if rhythm_label:
