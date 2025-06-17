@@ -1,8 +1,10 @@
 from __future__ import annotations
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from .supabase_client import supabase, _execute
 from .style_summary_block import style_summary_block
+from .strategy_detector import detect_strategy
+from .strategy_prompt_map import get_structure_hint
 
 
 def human_list(items: List[str] | None, conjunction: str = "and") -> str:
@@ -43,10 +45,14 @@ def fetch_profile_metadata(profile_name: str) -> Dict[str, Any]:
 def build_system_prompt(
     user_id: str,
     profile_name: str,
-    strategy: str,
+    user_input: str,
+    strategy: Optional[str] = None,
 ) -> str:
     profile = fetch_profile(profile_name)
     metadata = fetch_profile_metadata(profile_name)
+
+    if not strategy:
+        strategy = detect_strategy(user_input)
 
     lines: List[str] = []
 
@@ -80,10 +86,10 @@ def build_system_prompt(
         'Prefer direct questions such as: "Mi az, amit valójában szeretnél kimondani, de visszatartod?"'
     )
 
-    if strategy:
-        lines.append(
-            f"The reflective focus for this conversation is: {strategy}. Let this guide the depth and direction of your responses."
-        )
+    lines.append(f"The active reflective strategy is: {strategy}.")
+    structure_hint = get_structure_hint(strategy)
+    if structure_hint:
+        lines.append(f"When responding: {structure_hint}")
 
     inspiration_list = human_list(metadata.get("inspirations"), "and")
     if inspiration_list:
