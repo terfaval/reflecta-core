@@ -74,12 +74,13 @@ THEME_PATTERNS: Dict[str, Iterable[str]] = {
 # Form patterns capture structural hints such as tense, question marks or
 # enumeration styles.
 FORM_PATTERNS: Dict[str, Iterable[str]] = {
-    "analytical": [r"\d+\.", r"^-\s"],  # list or enumeration
+    "analytical": [r"\d+\.", r"^\s*[-*]\s"],  # list or enumeration
     "inquisitive": [r"\?"],
     "deconstructive": [r"!"],
     "concluding": [r"\b(\w*(tam|tem|tuk|tunk))\b", r"\b[öo]sszegzem\b"],
     "contemplative": [r"\.\.\."],
     "transformative": [r"d[öo]nt[öo]ttem", r"[áa]tfordult"],
+    "integrative": [r"\bmindkett[őo]\b", r"egy[üu]tt"],
 }
 
 
@@ -89,6 +90,8 @@ TONE_PATTERNS: Dict[str, Iterable[str]] = {
     "affirmative": [r"k[ée]pes vagyok", r"er[őo]s voltam"],
     "deconstructive": [r"mi [ée]rtelme"],
     "concluding": [r"[öo]sszegzem"],
+    "explorative": [r"k[íi]v[áa]ncsi", r"érdekes"],
+    "integrative": [r"összhang", r"kapcsol[oó]dik"],
 }
 
 
@@ -119,7 +122,7 @@ def _match_count(patterns: Iterable[str], text: str) -> int:
     """Return how many of the given regex patterns match the text."""
     count = 0
     for pattern in patterns:
-        if re.search(pattern, text):
+        if re.search(pattern, text, flags=re.MULTILINE):
             count += 1
     return count
 
