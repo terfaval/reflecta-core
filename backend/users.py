@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, status
 
-from .supabase_client import get_user_by_id as _db_get_user_by_id
+from supabase_client import get_user_by_id as _db_get_user_by_id
 
 router = APIRouter()
 

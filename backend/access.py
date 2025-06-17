@@ -2,7 +2,7 @@ from typing import List, Callable, Dict
 
 from fastapi import Depends, Header, HTTPException, status
 
-from .users import get_user_role
+from users import get_user_role
 
 FEATURE_MATRIX: Dict[str, List[str]] = {
     "create_custom_profile": ["premium", "admin", "developer"],
