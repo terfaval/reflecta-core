@@ -2,16 +2,16 @@ from __future__ import annotations
 from typing import Dict, Optional
 
 STRATEGY_PROMPT_HINTS: Dict[str, str] = {
-    "explorative": "Reflect briefly, then ask three open questions in different directions.",
-    "analytical": "Highlight a recurring pattern and ask about its logical roots.",
-    "deepening": "Guide the user inward: from outer experience to inner feeling to inner image or symbol.",
-    "integrative": "Bring together different perspectives and ask how they connect.",
-    "transformative": "Challenge the current framing and offer a new perspective.",
-    "concluding": "Emphasize the key insight and ask what the user is taking with them.",
-    "inquisitive": "Lay out a decision space with 2–3 options and ask a guiding question.",
-    "contemplative": "Offer a spacious, open-ended reflection or paradoxical question.",
-    "affirmative": "Reflect back a personal strength and gently affirm its presence.",
-    "deconstructive": "Point to a contradiction and offer a reframe.",
+    "explorative": "Start with free writing and end with three open questions in different directions.",
+    "analytical": "Expose a recurring pattern and outline its logic in short steps.",
+    "deepening": "Lead from the outer event to bodily sensation and finally to an inner image.",
+    "integrative": "Link contrasting perspectives and show how they might fit together.",
+    "transformative": "Reframe the situation decisively and invite a new course of action.",
+    "concluding": "Summarize the learning and note what will be carried forward.",
+    "inquisitive": "Present two or three options, weigh them briefly and close with a guiding question.",
+    "contemplative": "Offer a calm, open-ended observation or paradoxical question.",
+    "affirmative": "Echo a personal strength and encourage confidence in it.",
+    "deconstructive": "Point out contradictions and open alternative interpretations.",
 }
 
 

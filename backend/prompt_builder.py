@@ -47,12 +47,13 @@ def build_system_prompt(
     profile_name: str,
     user_input: str,
     strategy: Optional[str] = None,
+    session_position: Optional[str] = None,
 ) -> str:
     profile = fetch_profile(profile_name)
     metadata = fetch_profile_metadata(profile_name)
 
     if not strategy:
-        strategy = detect_strategy(user_input)
+        strategy = detect_strategy(user_input, session_position)
 
     lines: List[str] = []
 
