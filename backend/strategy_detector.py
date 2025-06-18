@@ -177,3 +177,52 @@ def detect_strategy(entry_text: str, session_position: str | None = None) -> str
 
     # Fallback in the unlikely event none of the priority keys matched
     return candidates[0]
+
+
+def detect_top_strategies(
+    entry_text: str, session_position: str | None = None, top_n: int = 2
+) -> list[str]:
+    """Return the highest scoring strategies in priority order."""
+
+    if top_n < 1:
+        return []
+
+    if session_position == "start":
+        return ["explorative"]
+    if session_position == "end":
+        return ["session_closure"]
+
+    text = entry_text.lower()
+
+    strategies = list(THEME_PATTERNS.keys())
+
+    theme_scores: Dict[str, int] = {}
+    form_scores: Dict[str, int] = {}
+    tone_scores: Dict[str, int] = {}
+
+    for strat in strategies:
+        theme_scores[strat] = _match_count(THEME_PATTERNS.get(strat, []), text)
+        form_scores[strat] = _match_count(FORM_PATTERNS.get(strat, []), text)
+        tone_scores[strat] = _match_count(TONE_PATTERNS.get(strat, []), text)
+
+    scores: Dict[str, float] = {}
+    for strat in strategies:
+        total = (
+            theme_scores[strat] * SCORING_WEIGHTS["theme"]
+            + form_scores[strat] * SCORING_WEIGHTS["form"]
+            + tone_scores[strat] * SCORING_WEIGHTS["tone"]
+        )
+        scores[strat] = total
+
+    if max(scores.values()) == 0:
+        return ["explorative"]
+
+    ranked = sorted(
+        scores.items(),
+        key=lambda item: (
+            -item[1],
+            PRIORITY.index(item[0]) if item[0] in PRIORITY else len(PRIORITY),
+        ),
+    )
+
+    return [s for s, _ in ranked[:top_n]]

@@ -3,8 +3,9 @@ from typing import List, Dict, Any, Optional
 
 from .supabase_client import supabase, _execute
 from .style_summary_block import style_summary_block
-from .strategy_detector import detect_strategy
+from .strategy_detector import detect_strategy, detect_top_strategies
 from .strategy_prompt_map import get_structure_hint
+from .strategy_response_templates import get_strategy_template
 
 
 def human_list(items: List[str] | None, conjunction: str = "and") -> str:
@@ -53,7 +54,10 @@ def build_system_prompt(
     metadata = fetch_profile_metadata(profile_name)
 
     if not strategy:
-        strategy = detect_strategy(user_input, session_position)
+        strategies = detect_top_strategies(user_input, session_position, top_n=2)
+        strategy = strategies[0]
+    else:
+        strategies = [strategy]
 
     lines: List[str] = []
 
@@ -88,10 +92,17 @@ def build_system_prompt(
     )
 
     lines.append(f"The active reflective strategy is: {strategy}.")
+    if len(strategies) > 1:
+        lines.append(f"A secondary strategy might be: {strategies[1]}.")
+
     structure_hint = get_structure_hint(strategy)
     if structure_hint:
         lines.append(f"When responding: {structure_hint}")
 
+        template = get_strategy_template(strategy)
+    if template and template.get("structure_description"):
+        lines.append(template["structure_description"])
+    
     inspiration_list = human_list(metadata.get("inspirations"), "and")
     if inspiration_list:
         lines.append(

@@ -12,7 +12,8 @@ STRATEGY_RESPONSE_TEMPLATES: Dict[str, Dict[str, Any]] = {
         "layout": "paragraph + bullet",
         "structure_description": (
             "Start with a short reflective sentence summarizing what the user shared. "
-            "Then offer three open-ended questions pointing in different directions, ideally in bullet points."
+            "Then offer up to three open-ended questions pointing in different directions. "
+            "If the user's entry is brief, one or two questions may be enough, ideally in bullet points."
         ),
         "preferred_tone": "open and mirroring",
         "use_bullet_style": True,
@@ -30,8 +31,8 @@ STRATEGY_RESPONSE_TEMPLATES: Dict[str, Dict[str, Any]] = {
         "layout": "paragraph + bullet",
         "structure_description": (
             "Begin with a short observation about a pattern, repetition, or reasoning the user expressed. "
-            "Then unfold two to three follow-up questions that examine the causes, consequences, or assumptions behind it. "
-            "Present these questions as a bulleted list to support clarity and logical flow."
+            "Then unfold one to three follow-up questions that examine the causes, consequences, or assumptions behind it. "
+            "Use a bulleted list for clarity when several questions are offered."
         ),
         "preferred_tone": "structured and curious",
         "use_bullet_style": True,
@@ -49,8 +50,8 @@ STRATEGY_RESPONSE_TEMPLATES: Dict[str, Dict[str, Any]] = {
         "layout": "three-paragraph",
         "structure_description": (
             "Start with a gentle sensory or emotional mirroring of what the user expressed. "
-            "Then guide them through a progressive deepening sequence — from outer experience to inner feeling to symbolic or archetypal imagery. "
-            "Each stage can be its own short paragraph, with space between them."
+            "Then guide them through a progressive deepening sequence—from outer experience to inner feeling to symbolic or archetypal imagery. "
+            "Use as many short paragraphs as feel natural; two or three layers are often enough."
         ),
         "preferred_tone": "slow and contemplative",
         "use_bullet_style": False,
@@ -66,9 +67,10 @@ STRATEGY_RESPONSE_TEMPLATES: Dict[str, Dict[str, Any]] = {
         "body_type": "connection mapping",
         "layout": "contrast + synthesis",
         "structure_description": (
-            "Begin by highlighting two seemingly distinct aspects or perspectives the user has mentioned. "
-            "Then invite the user to explore a possible connection or deeper relationship between them. "
-            "Present the contrast first, then a bridging or integrative question."
+            "Begin by highlighting two distinct aspects or perspectives the user has mentioned, if both are present. "
+            "Invite them to explore a possible connection or deeper relationship between these angles. "
+            "Present the contrast first, then a bridging or integrative question." 
+            "If only one aspect is explicit, gently suggest a complementary viewpoint."
         ),
         "preferred_tone": "synthesizing and steady",
         "use_bullet_style": False,
@@ -118,7 +120,7 @@ STRATEGY_RESPONSE_TEMPLATES: Dict[str, Dict[str, Any]] = {
         "layout": "bullet + closing question",
         "structure_description": (
             "Begin by acknowledging the presence of a dilemma or internal conflict. "
-            "Then lay out two or three contrasting perspectives or factors the user seems to be weighing. "
+            "Then lay out up to three contrasting perspectives or factors the user seems to be weighing. "
             "Close with a single integrative question that helps clarify their direction."
         ),
         "preferred_tone": "neutral and structured",
