@@ -136,7 +136,7 @@ def detect_strategy(entry_text: str, session_position: str | None = None) -> str
     if session_position == "start":
         return "explorative"
     if session_position == "end":
-        return "concluding"
+        return "session_closure"
 
     text = entry_text.lower()
 
