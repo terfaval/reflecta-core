@@ -1,0 +1,25 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.fireworks {
+  font-size: 4rem;
+}
+
+.startButton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 1rem;
+  background-color: #234F8C;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
