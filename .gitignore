@@ -1,5 +1,6 @@
 .env.local
 node_modules
 __pycache__/
+.next
 *.pyc
 tsconfig.tsbuildinfo
