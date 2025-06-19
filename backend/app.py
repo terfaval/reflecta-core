@@ -6,6 +6,7 @@ from .session import router as session_router
 from .chatload import router as chatload_router
 from .conversation_new import router as conversation_router
 from .entries import router as entries_router
+from .session_close import router as session_close_router
 
 app = FastAPI(title="Reflecta API")
 
@@ -15,3 +16,4 @@ app.include_router(session_router)
 app.include_router(chatload_router)
 app.include_router(conversation_router)
 app.include_router(entries_router)
+app.include_router(session_close_router)
