@@ -22,3 +22,9 @@ def get_user_role(user_id: str) -> str:
     """Return the role of the given user or raise 404 if the user does not exist."""
     user = get_user_by_id(user_id)
     return user.get("role", "basic")
+
+
+@router.get("/user")
+def user_get(user_id: str) -> Dict[str, Any]:
+    """Return user details for the given ``user_id`` query parameter."""
+    return get_user_by_id(user_id)
