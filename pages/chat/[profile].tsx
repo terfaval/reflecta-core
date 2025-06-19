@@ -8,6 +8,7 @@ import ThinkingDots from '../../components/ThinkingDots';
 import ScrollToBottomButton from '../../components/ScrollToBottomButton';
 import StartingPromptSelector from '../../components/StartingPromptSelector';
 import SessionLabelBubble from '../../components/SessionLabelBubble';
+import ReflectiveMemoryPanel from '../../components/ReflectiveMemoryPanel';
 import { useUserSession } from '../../hooks/useUserSession';
 import { useAutoTextareaResize } from '../../hooks/useAutoTextareaResize';
 import { ChatFooter } from '../../components/ChatFooter';
@@ -137,34 +138,52 @@ export default function ChatPage() {
   }, [profile, userId, sessionId]);
 
   return (
-  <div className="reflecta-chat" style={{ ...currentStyle, display: 'flex', flexDirection: 'column', height: '100vh' }}>
-  <ChatMessagesList
-  entries={entries}
-  loadingEntries={loadingEntries}
-  sessionIsFresh={sessionIsFresh}
-  startingPrompts={startingPrompts}
-  onSelectPrompt={handleSend}
-  onTweak={handleSend}
-  currentStyle={currentStyle}
-  sessionId={sessionId}
-  bottomRef={bottomRef}
-  showScrollDown={showScrollDown}
-  messagesRef={messagesRef}
-/>
-     <ChatFooter
-  message={message}
-  setMessage={setMessage}
-  loading={loading}
-  handleSend={handleSend}
-  closingTrigger={closingTrigger}
-  sessionId={sessionId}
-  isClosing={isClosing}
-  assistantReplyCount={assistantReplyCount}
-  setIsClosing={setIsClosing}
-  setEntries={setEntries}
-  currentStyle={currentStyle}
-/>
-      
+  <div
+      className="reflecta-chat"
+      style={{ ...currentStyle, display: 'flex', height: '100vh' }}
+    >
+      <div style={{ flex: '1 1 70%', display: 'flex', flexDirection: 'column' }}>
+        <ChatMessagesList
+          entries={entries}
+          loadingEntries={loadingEntries}
+          sessionIsFresh={sessionIsFresh}
+          startingPrompts={startingPrompts}
+          onSelectPrompt={handleSend}
+          onTweak={handleSend}
+          currentStyle={currentStyle}
+          sessionId={sessionId}
+          bottomRef={bottomRef}
+          showScrollDown={showScrollDown}
+          messagesRef={messagesRef}
+        />
+        <ChatFooter
+          message={message}
+          setMessage={setMessage}
+          loading={loading}
+          handleSend={handleSend}
+          closingTrigger={closingTrigger}
+          sessionId={sessionId}
+          isClosing={isClosing}
+          assistantReplyCount={assistantReplyCount}
+          setIsClosing={setIsClosing}
+          setEntries={setEntries}
+          currentStyle={currentStyle}
+        />
+      </div>
+      <div
+        style={{
+          flex: '0 0 30%',
+          overflowY: 'auto',
+          background: '#f7f7f7',
+          borderLeft: '1px solid #ddd',
+          padding: '1rem',
+        }}
+      >
+        <ReflectiveMemoryPanel
+          sessionId={sessionId}
+          handleSend={handleSend}
+        />
+      </div>
     </div>
   );
 }
