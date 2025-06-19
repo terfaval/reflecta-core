@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { LucidePlusCircle } from 'lucide-react';
 import { useUserContext } from '@/contexts/UserContext';
+import { useProfileContext } from '@/contexts/ProfileContext';
 
 interface ProfileMeta {
   name: string;
@@ -25,6 +26,7 @@ const DEFAULT_PROFILES: { name: string; icon: string }[] = [
 export default function ProfileSelectorSidebar() {
   const router = useRouter();
   const { userId } = useUserContext();
+  const { setProfile } = useProfileContext();
   const [profiles, setProfiles] = useState<ProfileMeta[]>([]);
   const [personal, setPersonal] = useState<ProfileMeta | null>(null);
   const [role, setRole] = useState<string>('basic');
@@ -74,7 +76,8 @@ export default function ProfileSelectorSidebar() {
   }, [userId]);
 
   const goto = (name: string) => {
-    router.push(`/chat/${encodeURIComponent(name)}`);
+    setProfile(name);
+    router.push('/chat');
   };
 
   return (

@@ -3,6 +3,7 @@ import SurveySlide from '@/components/SurveySlide';
 import SurveySuccess from '@/components/SurveySuccess';
 import { useUserContext } from '@/contexts/UserContext';
 import { useRouter } from 'next/router';
+import { useProfileContext } from '@/contexts/ProfileContext';
 
 const QUESTIONS = [
   {
@@ -29,6 +30,7 @@ const QUESTIONS = [
 
 export default function ProfileBuilder() {
   const { userId, setUserId } = useUserContext();
+  const { setProfile } = useProfileContext();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<string[]>(['', '', '', '', '']);
   const [profileName, setProfileName] = useState('Személyes profil');
@@ -112,7 +114,8 @@ export default function ProfileBuilder() {
         });
         const data = await res.json();
         if (res.ok) {
-          router.push(`/chat/${encodeURIComponent(profileName)}?conversation=${data.conversation_id}&session=${data.session_id}`);
+          setProfile(profileName);
+          router.push(`/chat?conversation=${data.conversation_id}&session=${data.session_id}`);
         } else {
           console.error(data.error);
           setStartLoading(false);

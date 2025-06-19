@@ -1,22 +1,22 @@
-// ✅ Reflecta ChatPage with scrollAnchors from system_events
 import React from 'react'; 
-import { useRouter } from 'next/router';
+
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { profileStyles, buttonStyles } from '../../styles/profileStyles';
-import SpiralLoader from '../../components/SpiralLoader';
-import ThinkingDots from '../../components/ThinkingDots';
-import ScrollToBottomButton from '../../components/ScrollToBottomButton';
-import StartingPromptSelector from '../../components/StartingPromptSelector';
-import SessionLabelBubble from '../../components/SessionLabelBubble';
-import ReflectiveMemoryPanel from '../../components/ReflectiveMemoryPanel';
-import ProfileSelectorSidebar from '../../components/ProfileSelectorSidebar';
-import { useUserSession } from '../../hooks/useUserSession';
-import { useAutoTextareaResize } from '../../hooks/useAutoTextareaResize';
-import { ChatFooter } from '../../components/ChatFooter';
-import { ChatMessagesList } from '../../components/ChatMessagesList';
-import { useScrollHandler } from '../../hooks/useScrollHandler';
-import { useHandleSend } from '../../hooks/useHandleSend';
+import { profileStyles, buttonStyles } from '../styles/profileStyles';
+import SpiralLoader from '../components/SpiralLoader';
+import ThinkingDots from '../components/ThinkingDots';
+import ScrollToBottomButton from '../components/ScrollToBottomButton';
+import StartingPromptSelector from '../components/StartingPromptSelector';
+import SessionLabelBubble from '../components/SessionLabelBubble';
+import ReflectiveMemoryPanel from '../components/ReflectiveMemoryPanel';
+import ProfileSelectorSidebar from '../components/ProfileSelectorSidebar';
+import { useUserSession } from '../hooks/useUserSession';
+import { useAutoTextareaResize } from '../hooks/useAutoTextareaResize';
+import { ChatFooter } from '../components/ChatFooter';
+import { ChatMessagesList } from '../components/ChatMessagesList';
+import { useScrollHandler } from '../hooks/useScrollHandler';
+import { useHandleSend } from '../hooks/useHandleSend';
 import { useUserContext } from '@/contexts/UserContext';
+import { useProfileContext } from '@/contexts/ProfileContext';
 
 interface Entry {
   id: string;
@@ -26,8 +26,7 @@ interface Entry {
 }
 
 export default function ChatPage() {
-  const router = useRouter();
-  const { profile } = router.query;
+  const { profile } = useProfileContext();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [message, setMessage] = useState('');
   const [sessionId, setSessionId] = useState<string | null>(null);
