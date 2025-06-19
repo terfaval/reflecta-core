@@ -9,6 +9,7 @@ import ScrollToBottomButton from '../../components/ScrollToBottomButton';
 import StartingPromptSelector from '../../components/StartingPromptSelector';
 import SessionLabelBubble from '../../components/SessionLabelBubble';
 import ReflectiveMemoryPanel from '../../components/ReflectiveMemoryPanel';
+import ProfileSelectorSidebar from '../../components/ProfileSelectorSidebar';
 import { useUserSession } from '../../hooks/useUserSession';
 import { useAutoTextareaResize } from '../../hooks/useAutoTextareaResize';
 import { ChatFooter } from '../../components/ChatFooter';
@@ -142,7 +143,8 @@ export default function ChatPage() {
       className="reflecta-chat"
       style={{ ...currentStyle, display: 'flex', height: '100vh' }}
     >
-      <div style={{ flex: '1 1 70%', display: 'flex', flexDirection: 'column' }}>
+      <ProfileSelectorSidebar />
+      <div style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column' }}>
         <ChatMessagesList
           entries={entries}
           loadingEntries={loadingEntries}
