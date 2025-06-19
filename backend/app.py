@@ -13,6 +13,7 @@ from .profile_handler import router as profile_router
 from .profile_list import router as profile_list_router
 from .profile_from_survey import router as profile_from_survey_router
 from .prompt import router as prompt_router
+from .check_profile_access import router as check_profile_access_router
 
 app = FastAPI(title="Reflecta API")
 
@@ -29,3 +30,4 @@ app.include_router(profile_router)
 app.include_router(profile_list_router)
 app.include_router(profile_from_survey_router)
 app.include_router(prompt_router)
+app.include_router(check_profile_access_router)
