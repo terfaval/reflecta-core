@@ -14,7 +14,6 @@ import { ChatFooter } from '../../components/ChatFooter';
 import { ChatMessagesList } from '../../components/ChatMessagesList';
 import { useScrollHandler } from '../../hooks/useScrollHandler';
 import { useHandleSend } from '../../hooks/useHandleSend';
-import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { useUserContext } from '@/contexts/UserContext';
 
 interface Entry {
@@ -90,8 +89,6 @@ export default function ChatPage() {
     return entries.filter(e => e.role === 'assistant' && e.content !== '__thinking__').length;
   }, [entries]);
 
-  const { prefs: userPreferences, updatePrefs: setUserPreferences } = useUserPreferences();
-
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [entries]);
@@ -166,8 +163,6 @@ export default function ChatPage() {
   setIsClosing={setIsClosing}
   setEntries={setEntries}
   currentStyle={currentStyle}
-  userPreferences={userPreferences}
-  setUserPreferences={setUserPreferences}
 />
       
     </div>

@@ -1,8 +1,7 @@
 // components/ChatFooter.tsx
-import React, { useState } from 'react';
+import React from 'react';
 import { buttonStyles } from '../styles/profileStyles';
-import { PreferencesPanel } from './PreferencesPanel';
-import type { UserPreferences } from '@/lib/types';
+
 
 interface ChatFooterProps {
   message: string;
@@ -16,8 +15,6 @@ interface ChatFooterProps {
   setIsClosing: (v: boolean) => void;
   setEntries: (fn: (prev: any[]) => any[]) => void;
   currentStyle: Record<string, string>;
-  userPreferences: UserPreferences;
-  setUserPreferences: (prefs: UserPreferences) => void;
 }
 
 export function ChatFooter({
@@ -32,21 +29,12 @@ export function ChatFooter({
   setIsClosing,
   setEntries,
   currentStyle,
-  userPreferences,
-  setUserPreferences,
+
 }: ChatFooterProps) {
-  const [openPreferences, setOpenPreferences] = useState(false);
+
 
   return (
     <>
-      {/* Preferences panel rendered independently */}
-      <PreferencesPanel
-        open={openPreferences}
-        onClose={() => setOpenPreferences(false)}
-        preferences={userPreferences}
-        setPreferences={setUserPreferences}
-        styleVars={currentStyle}
-      />
 
       <div className="reflecta-input relative">
         <textarea
@@ -55,19 +43,7 @@ export function ChatFooter({
           placeholder="Írd be, amit meg szeretnél osztani..."
           disabled={loading}
         />
-
-        {/* Fogaskerék gomb */}
-        <button
-          onClick={() => setOpenPreferences((v) => !v)}
-          className="absolute bottom-3 left-3 p-1 rounded-full"
-          style={{ background: 'transparent', color: currentStyle['--user-color'], border: 'none' }}
-          aria-label="Válaszstílus beállítások"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-          </svg>
-        </button>
+        
 
         <div className="reflecta-input-buttons">
           <button
