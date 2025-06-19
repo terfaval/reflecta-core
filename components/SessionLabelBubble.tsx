@@ -25,7 +25,7 @@ export default function SessionLabelBubble({
     if (!tempLabel.trim()) return;
     setLoading(true);
 
-    const res = await fetch('/api/session/updateLabel', {
+    const res = await fetch('/session/update-label', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ entryId, label: tempLabel })

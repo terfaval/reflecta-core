@@ -23,7 +23,7 @@ export function useUserSession({ profile, onReady }: UseUserSessionParams) {
         const { wp_user_id, email } = event.data;
         if (!wp_user_id || !email || typeof profile !== 'string') return;
 
-        fetch('/api/user', {
+        fetch('/user', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ wp_user_id, email }),
@@ -31,7 +31,7 @@ export function useUserSession({ profile, onReady }: UseUserSessionParams) {
           .then(res => res.json())
           .then(async ({ user_id }) => {
             // 🔐 Hozzáférés ellenőrzése
-            const profileRes = await fetch('/api/profile', {
+            const profileRes = await fetch('/profile', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ name: profile, userId: user_id }),
@@ -58,7 +58,7 @@ export function useUserSession({ profile, onReady }: UseUserSessionParams) {
             }
 
             // 🌀 Session indítása csak ezután
-            const sessionRes = await fetch('/api/session', {
+            const sessionRes = await fetch('/session', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ userId: user_id, profile }),

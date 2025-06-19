@@ -40,7 +40,7 @@ export default function ProfileBuilder() {
     const handleWPUser = (event: MessageEvent) => {
       if (event.data?.type === 'wp_user') {
         const { wp_user_id, email } = event.data;
-        fetch('/api/user', {
+        fetch('/user', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ wp_user_id, email })
@@ -56,7 +56,7 @@ export default function ProfileBuilder() {
 
   useEffect(() => {
     if (!userId) return;
-    fetch('/api/profile-list', {
+    fetch('/profile-list', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId })
@@ -87,7 +87,7 @@ export default function ProfileBuilder() {
   const submit = async () => {
     if (!userId) return;
     try {
-      const res = await fetch('/api/profile/from-survey', {
+      const res = await fetch('/profile/from-survey', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, name: profileName, answers })
@@ -105,7 +105,7 @@ export default function ProfileBuilder() {
       if (!userId || startLoading) return;
       setStartLoading(true);
       try {
-        const res = await fetch('/api/conversation/new', {
+        const res = await fetch('/conversation/new', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user_id: userId, profile_name: profileName }),

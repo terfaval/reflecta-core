@@ -38,7 +38,7 @@ export function useHandleSend({
     if (isTrigger) {
       setIsClosing(true);
       try {
-        const res = await fetch('/api/session/close', {
+        const res = await fetch('/session/close', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId }),
@@ -77,7 +77,7 @@ export function useHandleSend({
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
     if (textarea) textarea.style.height = 'auto';
 
-    await fetch('/api/entries', {
+    await fetch('/entries', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId, entry: userEntry }),
@@ -91,7 +91,7 @@ export function useHandleSend({
       created_at: new Date().toISOString(),
     }]);
 
-    const res = await fetch('/api/respond', {
+    const res = await fetch('/respond', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId }),

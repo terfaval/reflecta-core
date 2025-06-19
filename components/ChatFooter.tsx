@@ -64,7 +64,7 @@ export function ChatFooter({
                 if (!sessionId || isClosing || assistantReplyCount < 3) return;
                 setIsClosing(true);
                 try {
-                  const res = await fetch('/api/session/close', {
+                  const res = await fetch('/session/close', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sessionId }),

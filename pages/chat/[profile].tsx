@@ -107,7 +107,7 @@ export default function ChatPage() {
     if (!userId || !profile || isFetchingRef.current) return;
     isFetchingRef.current = true;
     try {
-      const res = await fetch('/api/chatload', {
+      const res = await fetch('/chatload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, profile, offset: pageIndex * limit, limit }),
