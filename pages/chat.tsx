@@ -140,7 +140,7 @@ export default function ChatPage() {
   return (
   <div
       className="reflecta-chat"
-      style={{ ...currentStyle, display: 'flex', height: '100vh' }}
+      style={{ ...currentStyle, display: 'flex', height: '100vh', flexDirection: 'row' }}
     >
       <ProfileSelectorSidebar />
       <div style={{ flex: '1 1 auto', display: 'flex', flexDirection: 'column' }}>
