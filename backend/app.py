@@ -10,6 +10,7 @@ from .session_close import router as session_close_router
 from .session_update_label import router as session_update_label_router
 from .profile_handler import router as profile_router
 from .profile_list import router as profile_list_router
+from .profile_from_survey import router as profile_from_survey_router
 
 app = FastAPI(title="Reflecta API")
 
@@ -23,3 +24,4 @@ app.include_router(session_close_router)
 app.include_router(session_update_label_router)
 app.include_router(profile_router)
 app.include_router(profile_list_router)
+app.include_router(profile_from_survey_router)
