@@ -1,6 +1,7 @@
 import React from 'react'; 
 
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/router';
 import { profileStyles, buttonStyles } from '../styles/profileStyles';
 import SpiralLoader from '../components/SpiralLoader';
 import ThinkingDots from '../components/ThinkingDots';
@@ -27,6 +28,8 @@ interface Entry {
 
 export default function ChatPage() {
   const { profile } = useProfileContext();
+  const router = useRouter();
+  const debug = 'debug' in (router.query || {});
   const [entries, setEntries] = useState<Entry[]>([]);
   const [message, setMessage] = useState('');
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -45,8 +48,29 @@ export default function ChatPage() {
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const currentStyle = profileStyles[profile as string] || {};
 
+  useEffect(() => {
+    if (debug) console.log('[Debug] profile', profile);
+  }, [debug, profile]);
+
+  useEffect(() => {
+    if (debug) console.log('[Debug] userId', userId);
+  }, [debug, userId]);
+
+  useEffect(() => {
+    if (debug) console.log('[Debug] sessionId', sessionId);
+  }, [debug, sessionId]);
+
+  useEffect(() => {
+    if (debug) console.log('[Debug] entries', entries.length);
+  }, [debug, entries]);
+
   const handleReady = useCallback(
     ({ userId, sessionId, startingPrompts, closingTrigger }) => {
+
+            if (debug) {
+        console.log('[Debug] session ready', { userId, sessionId });
+      }
+
       setUserId(userId);
       setSessionId(sessionId);
       setStartingPrompts(startingPrompts);
@@ -86,6 +110,14 @@ export default function ChatPage() {
   setIsClosing,
 });
 
+useEffect(() => {
+    if (debug) console.log('[Debug] ChatPage render');
+  });
+
+  useEffect(() => {
+    if (debug) console.log('[Debug] loadingEntries', loadingEntries);
+  }, [debug, loadingEntries]);
+
   const assistantReplyCount = useMemo(() => {
     return entries.filter(e => e.role === 'assistant' && e.content !== '__thinking__').length;
   }, [entries]);
@@ -104,6 +136,9 @@ export default function ChatPage() {
 
   const fetchMoreEntries = async (pageIndex: number) => {
     if (!userId || !profile || isFetchingRef.current) return;
+
+if (debug) console.log('[Debug] fetching page', pageIndex);
+
     isFetchingRef.current = true;
     try {
       const res = await fetch('/chatload', {
@@ -112,6 +147,9 @@ export default function ChatPage() {
         body: JSON.stringify({ userId, profile, offset: pageIndex * limit, limit }),
       });
       const data = await res.json();
+
+      if (debug) console.log('[Debug] fetchMoreEntries result', data);
+
       if (data?.entries?.length) {
         setSessionIsFresh(false);
         setClosingTrigger(data.closingTrigger);
@@ -127,8 +165,14 @@ export default function ChatPage() {
       setLoadingEntries(false);
     } finally {
       isFetchingRef.current = false;
+
+      if (debug) console.log('[Debug] fetch complete');
     }
   };
+
+  useEffect(() => {
+    if (debug) console.log('[Debug] fetchMoreEntries called. Page:', page);
+  }, [debug, page]);
 
   useEffect(() => {
     if (!profile || typeof profile !== 'string' || !userId || !sessionId) return;
