@@ -1,0 +1,61 @@
+.tweakButtons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.tweakButton {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  border-radius: 9999px;
+  border: 1px solid var(--user-color);
+  background: transparent;
+  color: var(--user-color) !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tweakButton svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--user-color) !important;
+  fill: none;
+  transition: stroke 0.2s ease;
+}
+
+.tweakButton:hover {
+  width: auto;
+  padding: 4px 8px;
+  background: var(--user-color) !important;
+  color: var(--bg-color) !important;
+  border-color: var(--user-color) !important;
+}
+
+.tweakButton:hover svg {
+  stroke: var(--bg-color) !important;
+}
+
+.tweakLabel {
+  opacity: 0;
+  visibility: hidden;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+.tweakButton:hover .tweakLabel {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tweakButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
