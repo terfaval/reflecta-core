@@ -5,7 +5,7 @@ import ThinkingDots from './ThinkingDots';
 import StartingPromptSelector from './StartingPromptSelector';
 import SessionLabelBubble from './SessionLabelBubble';
 import ScrollToBottomButton from './ScrollToBottomButton';
-
+import ResponseTweakButtons from './ResponseTweakButtons';
 
 interface Entry {
   id: string;
@@ -20,6 +20,7 @@ interface ChatMessagesListProps {
   sessionIsFresh: boolean;
   startingPrompts: { label: string; message: string }[];
   onSelectPrompt: (prompt: string) => void;
+  onTweak: (prompt: string) => void;
   currentStyle: Record<string, string>;
   sessionId: string | null;
   bottomRef: React.RefObject<HTMLDivElement>;
@@ -33,6 +34,7 @@ export function ChatMessagesList({
   sessionIsFresh,
   startingPrompts,
   onSelectPrompt,
+  onTweak,
   currentStyle,
   sessionId,
   bottomRef,
@@ -70,7 +72,15 @@ export function ChatMessagesList({
                 aiColor={currentStyle['--ai-color']}
               />
             ) : (
-              <p>{entry.content}</p>
+              <>
+                <p>{entry.content}</p>
+                {entry.role === 'assistant' && (
+                  <div style={{ marginTop: '4px' }}>
+                    <ResponseTweakButtons onTweak={onTweak} />
+                    {/* TODO: pass disabled or loading props when available */}
+                  </div>
+                )}
+              </>
             )}
           </div>
         ))
