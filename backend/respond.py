@@ -19,7 +19,7 @@ from .strategy_detector import detect_strategy
 router = APIRouter()
 
 
-_openai_client = openai.AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+_openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 async def _fetch_session(client: Any, session_id: str) -> Dict[str, Any]:

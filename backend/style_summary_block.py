@@ -23,6 +23,9 @@ def style_summary_block(metadata: Dict[str, Dict[str, str]] | dict) -> str:
             "medium-slow": "a calm, measured tempo",
             "slow-breath": "a breath-paced rhythm",
             "medium": "a steady, natural rhythm",
+            "micro-paused": "with micro-pauses inviting silence",
+            "flow-paused": "alternating flow and reflective stillness",
+            "hovering": "with a hovering, lingering rhythm"
         },
         "style_tone": {
             "neutral-deep": "a calm and contemplative tone",
@@ -34,6 +37,10 @@ def style_summary_block(metadata: Dict[str, Dict[str, str]] | dict) -> str:
             "enigmatic": "a mysterious, layered tone",
             "inviting": "an inviting, open tone",
             "clear-objective": "a clear and grounded tone",
+            "tender-honest": "a tender, yet honest tone",
+            "contemplative-vast": "a vast and contemplative tone",
+            "humble-curious": "a humble, curious tone, open to discovery",
+            "quiet-revealing": "a quiet tone that subtly reveals depth"
         },
         "style_rhythm": {
             "ritualistic": "with a ritual-like rhythm",
@@ -45,6 +52,9 @@ def style_summary_block(metadata: Dict[str, Dict[str, str]] | dict) -> str:
             "labyrinthine": "exploring winding inner paths",
             "grounded": "a steady and anchored rhythm",
             "linear": "a step-by-step, linear unfolding",
+            "breath-linked": "linked to the natural rhythm of breath",
+            "echoing-layered": "with echoing, gradually layered rhythm",
+            "still-flow": "stillness flowing into motion, and back"
         },
         "style_structure": {
             "spiral": "unfolding like a spiral",
@@ -56,6 +66,9 @@ def style_summary_block(metadata: Dict[str, Dict[str, str]] | dict) -> str:
             "mythic-paradoxical": "with poetic, sometimes paradoxical flow",
             "sequential": "a clear, step-by-step logic",
             "structured": "a clearly organized structure",
+            "fractal": "with a self-similar, fractal unfolding",
+            "echo-looped": "echoing earlier thoughts in loops",
+            "anchored-expansive": "anchored in clarity, expanding gently outward"
         },
         "style_visuality": {
             "high": "strongly image-rich",
@@ -65,6 +78,9 @@ def style_summary_block(metadata: Dict[str, Dict[str, str]] | dict) -> str:
             "dreamlike": "dreamlike visual impressions",
             "sensory": "grounded in sensory images",
             "minimal": "minimal or abstract imagery",
+            "internal-gesture": "evoking inner gestures or postures",
+            "subtle-symbolic": "subtly woven symbolic imagery",
+            "elemental": "working with elemental images (earth, water, air, fire)"
         },
         "style_directiveness": {
             "passive": "passive, allowing space",
@@ -74,6 +90,9 @@ def style_summary_block(metadata: Dict[str, Dict[str, str]] | dict) -> str:
             "questioning": "gently inquisitive",
             "gentle-guiding": "lightly leading without pressure",
             "non-directive": "supportive, without steering",
+            "evocative-inviting": "evoking direction through invitation",
+            "spiral-guiding": "gently spiraling towards insight",
+            "intuitive-prompting": "intuitively prompting next inner steps"
         },
     }
 
