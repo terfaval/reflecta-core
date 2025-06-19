@@ -203,3 +203,32 @@ def generate_profile(user_id: str, name: str, answers: List[str], color: Optiona
     _execute(supabase.table("user_profiles").insert(user_profile_row).single().execute())
 
     return {"name": name, "color": color}
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
+router = APIRouter()
+
+
+class GenerateProfileRequest(BaseModel):
+    user_id: str
+    name: str
+    answers: List[str]
+    color: Optional[str] = None
+
+
+@router.post("/profile/generate")
+async def generate_profile_api(payload: GenerateProfileRequest):
+    if not payload.user_id or not payload.name or len(payload.answers) != 5:
+        raise HTTPException(status_code=400, detail="Invalid payload")
+
+    try:
+        profile = generate_profile(
+            payload.user_id, payload.name, payload.answers, payload.color
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    return profile
