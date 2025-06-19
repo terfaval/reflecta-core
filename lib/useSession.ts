@@ -51,3 +51,23 @@ export async function getOrCreateConversationAndSession(userId: string, profile:
   if (sessionErr || !newSession) throw new Error('Failed to create session.');
   return { conversationId, session: newSession };
 }
+
+export async function createConversationAndSession(userId: string, profile: string) {
+  const { data: createdConv, error: convErr } = await supabase
+    .from('conversations')
+    .insert({ user_id: userId, profile })
+    .select()
+    .maybeSingle();
+
+  if (convErr || !createdConv) throw new Error('Failed to create conversation.');
+
+  const { data: newSession, error: sessionErr } = await supabase
+    .from('sessions')
+    .insert({ user_id: userId, profile, conversation_id: createdConv.id })
+    .select()
+    .maybeSingle();
+
+  if (sessionErr || !newSession) throw new Error('Failed to create session.');
+
+  return { conversationId: createdConv.id, session: newSession };
+}

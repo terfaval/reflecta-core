@@ -14,6 +14,7 @@ type UseUserSessionParams = {
 export function useUserSession({ profile, onReady }: UseUserSessionParams) {
   const router = useRouter();
   const initialized = useRef(false);
+  const { session: sessionOverride } = router.query;
 
   useEffect(() => {
     const handleWPUser = (event: MessageEvent) => {
@@ -44,6 +45,17 @@ export function useUserSession({ profile, onReady }: UseUserSessionParams) {
             const profileData = await profileRes.json();
             const prompts = profileData?.starting_prompts || [];
             const closingTrigger = profileData?.closing_trigger || '';
+
+            if (typeof sessionOverride === 'string') {
+              initialized.current = true;
+              onReady({
+                userId: user_id,
+                sessionId: sessionOverride,
+                startingPrompts: prompts,
+                closingTrigger,
+              });
+              return;
+            }
 
             // 🌀 Session indítása csak ezután
             const sessionRes = await fetch('/api/session', {

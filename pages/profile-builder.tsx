@@ -33,6 +33,7 @@ export default function ProfileBuilder() {
   const [answers, setAnswers] = useState<string[]>(['', '', '', '', '']);
   const [profileName, setProfileName] = useState('Személyes profil');
   const [finished, setFinished] = useState(false);
+  const [startLoading, setStartLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -100,11 +101,30 @@ export default function ProfileBuilder() {
   };
 
   if (finished) {
+    const handleStart = async () => {
+      if (!userId || startLoading) return;
+      setStartLoading(true);
+      try {
+        const res = await fetch('/api/conversation/new', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, profile_name: profileName }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          router.push(`/chat/${encodeURIComponent(profileName)}?conversation=${data.conversation_id}&session=${data.session_id}`);
+        } else {
+          console.error(data.error);
+          setStartLoading(false);
+        }
+      } catch (err) {
+        console.error(err);
+        setStartLoading(false);
+      }
+    };
+
     return (
-      <SurveySuccess
-        profileName={profileName}
-        onStart={() => router.push(`/chat?profile=${encodeURIComponent(profileName)}`)}
-      />
+<SurveySuccess profileName={profileName} onStart={handleStart} loading={startLoading} />
     );
   }
 
