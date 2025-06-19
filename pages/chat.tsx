@@ -222,6 +222,7 @@ if (debug) console.log('[Debug] fetching page', pageIndex);
           background: '#f7f7f7',
           borderLeft: '1px solid #ddd',
           padding: '1rem',
+          height: '100vh',
         }}
       >
         <ReflectiveMemoryPanel

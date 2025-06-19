@@ -3,6 +3,7 @@
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
+  height: 100%;
 }
 
 .item {

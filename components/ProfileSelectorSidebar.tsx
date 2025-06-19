@@ -81,7 +81,7 @@ export default function ProfileSelectorSidebar() {
   };
 
   return (
-    <aside className="min-h-screen flex flex-col gap-2 w-[240px] py-4 px-3 bg-white shadow-inner overflow-y-auto">
+    <aside className="h-screen flex flex-col gap-2 w-[240px] flex-shrink-0 py-4 px-3 bg-white shadow-inner overflow-y-auto">
       {profiles.map(p => (
         <button
           key={p.name}
