@@ -41,6 +41,7 @@ export function ChatMessagesList({
   showScrollDown,
   messagesRef,
 }: ChatMessagesListProps) {
+  const lastAssistantIndex = entries.map((e) => e.role).lastIndexOf('assistant');
   return (
     <div
       className="reflecta-messages"
@@ -60,7 +61,7 @@ export function ChatMessagesList({
           userColor={currentStyle['--user-color']}
         />
       ) : (
-        entries.map((entry) => (
+        entries.map((entry, index) => (
           <div key={entry.id} className={`reflecta-message ${entry.role}`}>
             {entry.content === '__thinking__' ? (
               <ThinkingDots />
@@ -74,7 +75,7 @@ export function ChatMessagesList({
             ) : (
               <>
                 <p>{entry.content}</p>
-                {entry.role === 'assistant' && (
+                {entry.role === 'assistant' && index === lastAssistantIndex && (
                   <div style={{ marginTop: '4px' }}>
                     <ResponseTweakButtons onTweak={onTweak} />
                     {/* TODO: pass disabled or loading props when available */}
