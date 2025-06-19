@@ -14,6 +14,14 @@ router = APIRouter()
 
 _openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+def log_token_usage(session_id: str, model: str, prompt_tokens: int, completion_tokens: int) -> None:
+    """Print token usage statistics to the console."""
+    total = prompt_tokens + completion_tokens
+    print(f"[🧠 OpenAI] Model: {model}")
+    print(f"➡️ Prompt tokens: {prompt_tokens}")
+    print(f"⬅️ Completion tokens: {completion_tokens}")
+    print(f"📦 Total tokens: {total}")
+    print(f"📎 Session: {session_id}")
 
 def label_session(session_id: str) -> str:
     """Return the stored session label or a generic fallback."""
@@ -46,6 +54,22 @@ def generate_session_closure_response(session_id: str) -> str:
     )
     if not session:
         raise HTTPException(404, "Session not found")
+    
+    profile_row = _execute(
+        supabase.table("profiles")
+        .select("name, prompt_core, description")
+        .eq("name", session["profile"])
+        .maybe_single()
+        .execute()
+    )
+
+    metadata = _execute(
+        supabase.table("profile_metadata")
+        .select("*")
+        .eq("profile", session["profile"])
+        .maybe_single()
+        .execute()
+    )
 
     entries = _execute(
         supabase.table("entries")
@@ -55,20 +79,34 @@ def generate_session_closure_response(session_id: str) -> str:
         .execute()
     ) or []
 
-    user_entries = [e for e in entries if e.get("role") == "user"]
+    user_entries = [
+        {"role": "user", "content": e["content"]}
+        for e in entries
+        if e.get("role") == "user"
+    ]
+
     if len(user_entries) < 2:
         return (
             "Köszönöm a megosztásaidat. Mint egy csendes sóhaj a térben, ez a szakasz most lezárul."
         )
 
-    last_user = user_entries[-1]["content"].strip()
-    system_prompt = build_system_prompt(
-        session["user_id"], session["profile"], last_user, strategy="session_closure", session_position="end"
+    profile = {
+        "name": profile_row.get("name"),
+        "prompt_core": profile_row.get("prompt_core"),
+        "metadata": metadata,
+    }
+
+    language_tone_prefix = (
+        "Kérlek, minden válaszodat magyar nyelven írd. "
+        "Beszélj finoman, természetes ritmusban, ne legyél túl gépies. "
+        "Használj tiszteletteljes, de tegező hangnemet, ahogyan egy érzékeny önreflexiós naplóasszisztens tenné. "
+        "Ügyelj a helyesírásra, nyelvtani pontosságra és gördülékeny stílusra."
     )
 
-    messages = [{"role": "system", "content": system_prompt}] + [
-        {"role": "user", "content": e["content"]} for e in user_entries
-    ]
+    full_prompt = build_system_prompt(profile, {"isClosing": True})
+    system_prompt = f"{language_tone_prefix}\n\n{full_prompt}"
+
+    messages = [{"role": "system", "content": system_prompt}] + user_entries
 
     chat = _openai.chat.completions.create(
         model="gpt-3.5-turbo",
@@ -78,8 +116,18 @@ def generate_session_closure_response(session_id: str) -> str:
     )
 
     closure = (chat.choices[0].message.content or "").strip()
+
+    if chat.usage:
+        log_token_usage(
+            session_id,
+            chat.model or "gpt-3.5-turbo",
+            chat.usage.prompt_tokens,
+            chat.usage.completion_tokens,
+        )
+
     if not closure or len(closure) < 10:
         return "Köszönöm, hogy itt voltál. Ez a találkozás most lecsendesül."
+    
     return closure
 
 
