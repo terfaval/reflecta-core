@@ -141,12 +141,13 @@ export default function ChatPage() {
 
   return (
   <div className="reflecta-chat" style={{ ...currentStyle, display: 'flex', flexDirection: 'column', height: '100vh' }}>
-     <ChatMessagesList
+  <ChatMessagesList
   entries={entries}
   loadingEntries={loadingEntries}
   sessionIsFresh={sessionIsFresh}
   startingPrompts={startingPrompts}
   onSelectPrompt={handleSend}
+  onTweak={handleSend}
   currentStyle={currentStyle}
   sessionId={sessionId}
   bottomRef={bottomRef}
