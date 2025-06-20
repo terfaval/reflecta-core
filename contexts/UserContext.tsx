@@ -19,7 +19,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userError, setUserError] = useState<string | null>(null);
 
   useEffect(() => {
-    const rawOrigin = process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://reflecta-core.vercel.app/';
+    // WordPress sends postMessage from the parent iframe. Default to the
+    // production WP origin when the env variable is not provided so that
+    // origin checks do not silently fail during local development.
+    const rawOrigin =
+      process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://beenook.hu/reflecta'
     const WP_ORIGIN = (() => {
       try {
         return new URL(rawOrigin).origin;
@@ -54,8 +58,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
+    // Temporary debug block to trace incoming postMessage events.
+    const debugMessage = (event: MessageEvent) => {
+      // eslint-disable-next-line no-console
+      console.log('[postMessage]', event.origin, event.data);
+    };
+
     window.addEventListener('message', handleInitUser);
-    return () => window.removeEventListener('message', handleInitUser);
+    window.addEventListener('message', debugMessage);
+    return () => {
+      window.removeEventListener('message', handleInitUser);
+      window.removeEventListener('message', debugMessage);
+    };
   }, []);
 
   useEffect(() => {
