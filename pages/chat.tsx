@@ -3,6 +3,7 @@ import React from 'react';
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { profileStyles, buttonStyles } from '../styles/profileStyles';
+import UserErrorDisplay from '../components/UserErrorDisplay';
 import SpiralLoader from '../components/SpiralLoader';
 import ThinkingDots from '../components/ThinkingDots';
 import ScrollToBottomButton from '../components/ScrollToBottomButton';
@@ -261,12 +262,10 @@ if (debug) console.log('[Debug] fetching page', pageIndex);
 
   if (userError) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
-        <p className="mb-4">{userError}</p>
-        <button className={buttonStyles.primary} onClick={() => window.location.reload()}>
-          Újra próbálom
-        </button>
-      </div>
+       <UserErrorDisplay
+        message={userError}
+        onRetry={() => window.location.reload()}
+      />
     );
   }
 

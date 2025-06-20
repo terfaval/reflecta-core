@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import SurveySlide from '@/components/SurveySlide';
 import SurveySuccess from '@/components/SurveySuccess';
 import SpiralLoader from '@/components/SpiralLoader';
+import UserErrorDisplay from '@/components/UserErrorDisplay';
 import { useUserContext } from '@/contexts/UserContext';
 import { useRouter } from 'next/router';
 import { useProfileContext } from '@/contexts/ProfileContext';
@@ -89,12 +90,10 @@ export default function ProfileBuilder() {
 
   if (userError) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
-        <p className="mb-4">{userError}</p>
-        <button className="px-4 py-2 bg-purple-600 text-white rounded" onClick={() => window.location.reload()}>
-          Újra próbálom
-        </button>
-      </div>
+      <UserErrorDisplay
+        message={userError}
+        onRetry={() => window.location.reload()}
+      />
     );
   }
 

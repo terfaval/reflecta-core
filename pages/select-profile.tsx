@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import ProfileCarousel, { ProfileCard } from '@/components/ProfileCarousel';
 import SpiralLoader from '@/components/SpiralLoader';
+import UserErrorDisplay from '@/components/UserErrorDisplay';
 import { profileStyles } from '../styles/profileStyles';
 import { useUserContext } from '@/contexts/UserContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
@@ -80,12 +81,10 @@ export default function ProfileSelectorPage() {
 
   if (userError)
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
-        <p className="mb-4">{userError}</p>
-        <button className="px-4 py-2 bg-purple-600 text-white rounded" onClick={() => window.location.reload()}>
-          Újra próbálom
-        </button>
-      </div>
+      <UserErrorDisplay
+        message={userError}
+        onRetry={() => window.location.reload()}
+      />
     );
 
   if (!userInitialized)
