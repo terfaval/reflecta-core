@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
+import ProfileCardComponent, { ProfileCardProps } from './ProfileCard';
 
-export interface ProfileCard {
-  name: string;
-  description: string;
-  color: string;
-  icon: string;
-}
+export interface ProfileCard extends Omit<ProfileCardProps, 'onSelect'> {}
 
 interface Props {
   profiles: ProfileCard[];
@@ -30,28 +26,7 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
       </button>
       <div className="flex gap-4">
         {visible.map(p => (
-          <div
-            key={p.name}
-            onClick={() => onSelect(p)}
-            className="cursor-pointer border rounded-lg p-4 w-48 text-center transition-colors"
-            style={{
-              backgroundColor: p.color,
-              borderColor: p.color,
-              color: '#000',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = '#000';
-              e.currentTarget.style.color = p.color;
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = p.color;
-              e.currentTarget.style.color = '#000';
-            }}
-          >
-            <img src={p.icon} alt="" className="w-12 h-12 mx-auto mb-2" />
-            <h3 className="font-semibold mb-1">{p.name}</h3>
-            <p className="text-sm">{p.description}</p>
-          </div>
+          <ProfileCardComponent key={p.name} {...p} onSelect={() => onSelect(p)} />
         ))}
       </div>
       <button onClick={next} disabled={page >= totalPages - 1} className="px-2">

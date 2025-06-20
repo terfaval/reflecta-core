@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import ProfileCarousel, { ProfileCard } from '@/components/ProfileCarousel';
+import { profileStyles } from '../styles/profileStyles';
 import { useUserContext } from '@/contexts/UserContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
 
@@ -29,19 +30,19 @@ export default function ProfileSelectorPage() {
     if (!userId) return;
     const load = async () => {
       try {
-        const res = await fetch('/last-session', {
+        const res = await fetch('/has-history', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId }),
         });
         const data = await res.json();
-        if (res.ok && data.profile) {
-          setProfile(data.profile);
+        if (res.ok && data.hasHistory) {
+          if (data.profile) setProfile(data.profile);
           router.replace('/chat');
           return;
         }
       } catch (err) {
-        console.error('[last-session]', err);
+        console.error('[has-history]', err);
       }
 
       try {
@@ -62,6 +63,7 @@ export default function ProfileSelectorPage() {
               ...p,
               description: map[p.name]?.description || '',
               color: map[p.name]?.color || '#fff',
+              userColor: (profileStyles[p.name] || {})['--user-color'] || '#000',
             }))
           );
         } else {

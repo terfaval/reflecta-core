@@ -1,0 +1,27 @@
+.card {
+  border: 2px solid var(--user);
+  background-color: var(--bg);
+  color: #000;
+  text-align: center;
+  padding: 1rem;
+  width: 12rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.card:hover {
+  background-color: var(--user);
+  color: var(--bg);
+}
+.icon {
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 0.5rem auto;
+}
+.name {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+.desc {
+  font-size: 0.875rem;
+}

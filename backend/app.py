@@ -17,6 +17,7 @@ from .check_profile_access import router as check_profile_access_router
 from .memory_summary import router as memory_summary_router
 from .generate_personal_profile import router as generate_profile_router
 from .last_session import router as last_session_router
+from .has_history import router as has_history_router
 
 app = FastAPI(title="Reflecta API")
 
@@ -37,3 +38,4 @@ app.include_router(check_profile_access_router)
 app.include_router(memory_summary_router)
 app.include_router(generate_profile_router)
 app.include_router(last_session_router)
+app.include_router(has_history_router)

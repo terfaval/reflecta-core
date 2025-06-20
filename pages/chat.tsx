@@ -127,6 +127,7 @@ export default function ChatPage() {
               ...p,
               description: map[p.name]?.description || '',
               color: map[p.name]?.color || '#fff',
+              userColor: (profileStyles[p.name] || {})['--user-color'] || '#000',
             }))
           );
         } else {
