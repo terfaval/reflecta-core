@@ -64,3 +64,10 @@ async def user_create(payload: UserCreateRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail="User created, but not found")
 
     return {"user_id": user.get("id")}
+
+from fastapi import FastAPI
+
+app = FastAPI()
+app.include_router(router)
+
+handler = app

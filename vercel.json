@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "functions": {
+    "backend/*.py": { "runtime": "python3.9" }
+  },
+  "routes": [
+    { "src": "/api/user", "dest": "backend/user_create.py" },
+    { "src": "/api/session", "dest": "backend/session_create.py" }
+  ]
+}
