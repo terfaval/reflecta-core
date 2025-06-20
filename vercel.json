@@ -1,7 +1,7 @@
 {
   "version": 2,
   "functions": {
-    "backend/*.py": { "runtime": "python3.9" }
+    "backend/*.py": { "runtime": "@vercel/python" }
   },
   "routes": [
     { "src": "/api/user", "dest": "backend/user_create.py" },
