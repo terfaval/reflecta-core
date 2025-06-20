@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import SurveySlide from '@/components/SurveySlide';
 import SurveySuccess from '@/components/SurveySuccess';
+import SpiralLoader from '@/components/SpiralLoader';
 import { useUserContext } from '@/contexts/UserContext';
 import { useRouter } from 'next/router';
 import { useProfileContext } from '@/contexts/ProfileContext';
@@ -87,7 +88,9 @@ export default function ProfileBuilder() {
   };
 
   if (!userInitialized) {
-    return <div className="p-4">Betöltés...</div>;
+    return (
+      <SpiralLoader userColor="#7A4DFF" aiColor="#FFB347" />
+    );
   }
 
   if (finished) {

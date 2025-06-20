@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import ProfileCarousel, { ProfileCard } from '@/components/ProfileCarousel';
+import SpiralLoader from '@/components/SpiralLoader';
 import { profileStyles } from '../styles/profileStyles';
 import { useUserContext } from '@/contexts/UserContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
@@ -77,14 +78,16 @@ export default function ProfileSelectorPage() {
     load();
   }, [userId, router, setProfile]);
 
-  if (!userInitialized) return <div className="p-4">Betöltés...</div>;
+  if (!userInitialized)
+    return <SpiralLoader userColor="#7A4DFF" aiColor="#FFB347" />;
 
   const handleSelect = (p: Meta) => {
     setProfile(p.name);
     router.push('/chat');
   };
 
-  if (!loaded) return <div className="p-4">Betöltés...</div>;
+ if (!loaded)
+    return <SpiralLoader userColor="#7A4DFF" aiColor="#FFB347" />;
 
   return (
     <div className="min-h-screen flex items-center justify-center">

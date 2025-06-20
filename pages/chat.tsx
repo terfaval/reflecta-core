@@ -260,11 +260,22 @@ if (debug) console.log('[Debug] fetching page', pageIndex);
   }, [profile, userId, sessionId]);
 
   if (!userInitialized) {
-    return <div className="p-4">Betöltés...</div>;
+    return (
+      <SpiralLoader
+        userColor={currentStyle['--user-color'] || '#7A4DFF'}
+        aiColor={currentStyle['--ai-color'] || '#FFB347'}
+      />
+    );
   }
 
   if (showProfileSelect) {
-    if (loadingProfiles) return <div className="p-4">Betöltés...</div>;
+     if (loadingProfiles)
+      return (
+        <SpiralLoader
+          userColor={currentStyle['--user-color'] || '#7A4DFF'}
+          aiColor={currentStyle['--ai-color'] || '#FFB347'}
+        />
+      );
     return (
       <div className="min-h-screen flex items-center justify-center">
         <ProfileCarousel profiles={profiles} onSelect={handleSelectProfile} />
@@ -273,7 +284,12 @@ if (debug) console.log('[Debug] fetching page', pageIndex);
   }
 
   if (!sessionId) {
-    return <div className="p-4">Betöltés...</div>;
+    return (
+      <SpiralLoader
+        userColor={currentStyle['--user-color'] || '#7A4DFF'}
+        aiColor={currentStyle['--ai-color'] || '#FFB347'}
+      />
+    );
   }
 
   return (
