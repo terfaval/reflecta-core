@@ -2,6 +2,7 @@
 import React from 'react';
 import { buttonStyles } from '../styles/profileStyles';
 
+const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
 
 interface ChatFooterProps {
   message: string;
@@ -64,7 +65,7 @@ export function ChatFooter({
                 if (!sessionId || isClosing || assistantReplyCount < 3) return;
                 setIsClosing(true);
                 try {
-                  const res = await fetch('/session/close', {
+                  const res = await fetch(`${API_HOST}/session/close`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sessionId }),

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import styles from './ReflectiveMemoryPanel.module.css';
 
+const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+
 interface MemoryLabel {
   id: string;
   label: string;
@@ -20,7 +22,7 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
     if (!sessionId) return;
     const load = async () => {
       try {
-        const res = await fetch(`/memory/summary?sessionId=${sessionId}`);
+        const res = await fetch(`${API_HOST}/memory/summary?sessionId=${sessionId}`);
         if (!res.ok) return;
         const data = await res.json();
         // expecting { labels: MemoryLabel[] }

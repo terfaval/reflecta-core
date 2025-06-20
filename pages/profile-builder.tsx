@@ -30,6 +30,8 @@ const QUESTIONS = [
   }
 ];
 
+const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+
 export default function ProfileBuilder() {
   const { userId, userInitialized, userError } = useUserContext();
   const { setProfile } = useProfileContext();
@@ -44,7 +46,7 @@ export default function ProfileBuilder() {
 
   useEffect(() => {
     if (!userId) return;
-    fetch('/profile-list', {
+    fetch(`${API_HOST}/profile-list`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId })
@@ -75,7 +77,7 @@ export default function ProfileBuilder() {
   const submit = async () => {
     if (!userId) return;
     try {
-      const res = await fetch('/profile/from-survey', {
+      const res = await fetch(`${API_HOST}/profile/from-survey`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, name: profileName, answers })
@@ -108,7 +110,7 @@ export default function ProfileBuilder() {
       if (!userId || startLoading) return;
       setStartLoading(true);
       try {
-        const res = await fetch('/conversation/new', {
+        const res = await fetch(`${API_HOST}/conversation/new`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user_id: userId, profile_name: profileName }),

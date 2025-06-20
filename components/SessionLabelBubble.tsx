@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import styles from './SessionLabelBubble.module.css';
 
+const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+
 interface SessionLabelBubbleProps {
   initialLabel: string;
   entryId: string;
@@ -25,7 +27,7 @@ export default function SessionLabelBubble({
     if (!tempLabel.trim()) return;
     setLoading(true);
 
-    const res = await fetch('/session/update-label', {
+    const res = await fetch(`${API_HOST}/session/update-label`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ entryId, label: tempLabel })

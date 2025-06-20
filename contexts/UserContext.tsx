@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
+const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+
 interface UserContextType {
   userId: string | null;
   setUserId: (id: string | null) => void;
@@ -31,7 +33,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       if (event.data?.type === 'init_user' || event.data?.type === 'wp_user') {
         const { wp_user_id, email } = event.data;
         try {
-          const res = await fetch('/user', {
+          const res = await fetch(`${API_HOST}/user`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ wp_user_id, email })

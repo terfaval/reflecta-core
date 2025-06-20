@@ -7,6 +7,8 @@ import { profileStyles } from '../styles/profileStyles';
 import { useUserContext } from '@/contexts/UserContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
 
+const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+
 interface Meta extends ProfileCard {}
 
 const DEFAULT_PROFILES: { name: string; icon: string }[] = [
@@ -32,7 +34,7 @@ export default function ProfileSelectorPage() {
     if (!userId) return;
     const load = async () => {
       try {
-        const res = await fetch('/has-history', {
+        const res = await fetch(`${API_HOST}/has-history`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId }),
@@ -49,7 +51,7 @@ export default function ProfileSelectorPage() {
 
       try {
         const names = DEFAULT_PROFILES.map(p => p.name);
-        const resp = await fetch('/profile-list', {
+        const resp = await fetch(`${API_HOST}/profile-list`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, names }),

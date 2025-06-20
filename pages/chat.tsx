@@ -21,6 +21,8 @@ import { useHandleSend } from '../hooks/useHandleSend';
 import { useUserContext } from '@/contexts/UserContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
 
+const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+
 interface Entry {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -80,7 +82,7 @@ export default function ChatPage() {
     const load = async () => {
       setLoadingProfiles(true);
       try {
-        const res = await fetch('/last-session', {
+        const res = await fetch(`${API_HOST}/last-session`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId }),
@@ -97,7 +99,7 @@ export default function ChatPage() {
       }
       try {
         const names = DEFAULT_PROFILES.map(p => p.name);
-        const resp = await fetch('/profile-list', {
+        const resp = await fetch(`${API_HOST}/profile-list`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, names }),
@@ -220,7 +222,7 @@ if (debug) console.log('[Debug] fetching page', pageIndex);
 
     isFetchingRef.current = true;
     try {
-      const res = await fetch('/chatload', {
+      const res = await fetch(`${API_HOST}/chatload`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, profile, offset: pageIndex * limit, limit }),

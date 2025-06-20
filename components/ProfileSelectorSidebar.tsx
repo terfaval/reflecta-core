@@ -4,6 +4,8 @@ import { LucidePlusCircle } from 'lucide-react';
 import { useUserContext } from '@/contexts/UserContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
 
+const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+
 interface ProfileMeta {
   name: string;
   description: string;
@@ -36,7 +38,7 @@ export default function ProfileSelectorSidebar() {
       if (!userId) return;
       try {
         const names = DEFAULT_PROFILES.map(p => p.name);
-        const res = await fetch('/profile-list', {
+        const res = await fetch(`${API_HOST}/profile-list`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, names }),

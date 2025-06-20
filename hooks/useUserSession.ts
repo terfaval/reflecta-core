@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 
+const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+
 type UseUserSessionParams = {
   profile: string | string[] | undefined;
   onReady: (data: {
@@ -22,7 +24,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
     if (!enabled) return;
 
     const startSession = async (uid: string) => {
-      const profileRes = await fetch('/profile', {
+      const profileRes = await fetch(`${API_HOST}/profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: profile, userId: uid }),
@@ -48,7 +50,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
         return;
       }
 
-      const sessionRes = await fetch('/session', {
+      const sessionRes = await fetch(`${API_HOST}/session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: uid, profile }),

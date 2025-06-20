@@ -1,6 +1,8 @@
 // hooks/useHandleSend.ts
 import { useCallback } from 'react';
 
+const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+
 interface Entry {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -38,7 +40,7 @@ export function useHandleSend({
     if (isTrigger) {
       setIsClosing(true);
       try {
-        const res = await fetch('/session/close', {
+        const res = await fetch(`${API_HOST}/session/close`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId }),
@@ -77,7 +79,7 @@ export function useHandleSend({
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
     if (textarea) textarea.style.height = 'auto';
 
-    await fetch('/entries', {
+    await fetch(`${API_HOST}/entries`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId, entry: userEntry }),
@@ -91,7 +93,7 @@ export function useHandleSend({
       created_at: new Date().toISOString(),
     }]);
 
-    const res = await fetch('/respond', {
+    const res = await fetch(`${API_HOST}/respond`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId }),
