@@ -17,7 +17,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userError, setUserError] = useState<string | null>(null);
 
   useEffect(() => {
-    const rawOrigin = process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://beenook.hu/reflecta';
+    const rawOrigin = process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://reflecta-core.vercel.app/';
     const WP_ORIGIN = (() => {
       try {
         return new URL(rawOrigin).origin;
@@ -43,11 +43,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             window.parent.postMessage({ status: 'user_received' }, event.origin);
           } else {
             console.error('[init_user]', data);
-            setUserError('Hiba a bejelentkezés során. Kérlek frissítsd az oldalt vagy próbáld újra.');
+            setUserError('Hiba a beléptetés során. Kérlek frissítsd az oldalt vagy próbáld újra.');
           }
         } catch (err) {
           console.error(err);
-          setUserError('Hiba a bejelentkezés során. Kérlek frissítsd az oldalt vagy próbáld újra.');
+          setUserError('Hiba a beléptetés során. Kérlek frissítsd az oldalt vagy próbáld újra.');
         }
       }
     };
