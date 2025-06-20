@@ -10,6 +10,7 @@ import StartingPromptSelector from '../components/StartingPromptSelector';
 import SessionLabelBubble from '../components/SessionLabelBubble';
 import ReflectiveMemoryPanel from '../components/ReflectiveMemoryPanel';
 import ProfileSelectorSidebar from '../components/ProfileSelectorSidebar';
+import ProfileCarousel, { ProfileCard } from '@/components/ProfileCarousel';
 import { useUserSession } from '../hooks/useUserSession';
 import { useAutoTextareaResize } from '../hooks/useAutoTextareaResize';
 import { ChatFooter } from '../components/ChatFooter';
@@ -19,6 +20,7 @@ import { useHandleSend } from '../hooks/useHandleSend';
 import { useUserContext } from '@/contexts/UserContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
 
+
 interface Entry {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -26,8 +28,20 @@ interface Entry {
   created_at: string;
 }
 
+const DEFAULT_PROFILES: { name: string; icon: string }[] = [
+  { name: 'Reflecta', icon: 'https://beenook.hu/wp-content/uploads/2025/05/00_reflecta.svg' },
+  { name: 'Akasza', icon: 'https://beenook.hu/wp-content/uploads/2025/05/01_akasza.svg' },
+  { name: 'Éana', icon: 'https://beenook.hu/wp-content/uploads/2025/05/02_eana.svg' },
+  { name: 'Luma', icon: 'https://beenook.hu/wp-content/uploads/2025/05/03_luma.svg' },
+  { name: 'Sylva', icon: 'https://beenook.hu/wp-content/uploads/2025/05/04_sylva.svg' },
+  { name: 'Zentó', icon: 'https://beenook.hu/wp-content/uploads/2025/05/05_zento.svg' },
+  { name: 'Oneiros', icon: 'https://beenook.hu/wp-content/uploads/2025/05/09_oneiros.svg' },
+  { name: 'Kairos', icon: 'https://beenook.hu/wp-content/uploads/2025/05/06_kairos.svg' },
+  { name: 'Noe', icon: 'https://beenook.hu/wp-content/uploads/2025/05/07_noe.svg' },
+];
+
 export default function ChatPage() {
-  const { profile } = useProfileContext();
+  const { profile, setProfile } = useProfileContext();
   const router = useRouter();
   const debug = 'debug' in (router.query || {});
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -47,6 +61,27 @@ export default function ChatPage() {
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const currentStyle = profileStyles[profile as string] || {};
+  const [showProfileSelect, setShowProfileSelect] = useState(false);
+  const [profiles, setProfiles] = useState<ProfileCard[]>([]);
+  const [loadingProfiles, setLoadingProfiles] = useState(true);
+
+  useEffect(() => {
+    const handleWPUser = (event: MessageEvent) => {
+      if (event.data?.type === 'wp_user') {
+        const { wp_user_id, email } = event.data;
+        fetch('/user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wp_user_id, email }),
+        })
+          .then(res => res.json())
+          .then(({ user_id }) => setUserId(user_id))
+          .catch(console.error);
+      }
+    };
+    window.addEventListener('message', handleWPUser);
+    return () => window.removeEventListener('message', handleWPUser);
+  }, [setUserId]);
 
   useEffect(() => {
     if (debug) console.log('[Debug] profile', profile);
@@ -55,6 +90,56 @@ export default function ChatPage() {
   useEffect(() => {
     if (debug) console.log('[Debug] userId', userId);
   }, [debug, userId]);
+
+  useEffect(() => {
+    if (!userId || profile) return;
+    const load = async () => {
+      setLoadingProfiles(true);
+      try {
+        const res = await fetch('/last-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId }),
+        });
+        const data = await res.json();
+        if (res.ok && data.profile) {
+          setProfile(data.profile);
+          return;
+        }
+      } catch (err) {
+        console.error('[last-session]', err);
+      }
+      try {
+        const names = DEFAULT_PROFILES.map(p => p.name);
+        const resp = await fetch('/profile-list', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, names }),
+        });
+        const meta = await resp.json();
+        if (resp.ok) {
+          const map: Record<string, { description: string; color: string }> = {};
+          (meta.profiles || []).forEach((p: any) => {
+            map[p.name] = { description: p.description, color: p.color };
+          });
+          setProfiles(
+            DEFAULT_PROFILES.map(p => ({
+              ...p,
+              description: map[p.name]?.description || '',
+              color: map[p.name]?.color || '#fff',
+            }))
+          );
+        } else {
+          console.error('[profile-list]', meta.error);
+        }
+      } catch (err) {
+        console.error('[profile-list fetch]', err);
+      }
+      setLoadingProfiles(false);
+      setShowProfileSelect(true);
+    };
+    load();
+  }, [userId, profile, setProfile]);
 
   useEffect(() => {
     if (debug) console.log('[Debug] sessionId', sessionId);
@@ -109,6 +194,11 @@ export default function ChatPage() {
   setSessionIsFresh,
   setIsClosing,
 });
+
+const handleSelectProfile = (p: ProfileCard) => {
+    setProfile(p.name);
+    setShowProfileSelect(false);
+  };
 
 useEffect(() => {
     if (debug) console.log('[Debug] ChatPage render');
@@ -180,6 +270,15 @@ if (debug) console.log('[Debug] fetching page', pageIndex);
     setEntries([]);
     fetchMoreEntries(0);
   }, [profile, userId, sessionId]);
+
+  if (showProfileSelect) {
+    if (loadingProfiles) return <div className="p-4">Betöltés...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <ProfileCarousel profiles={profiles} onSelect={handleSelectProfile} />
+      </div>
+    );
+  }
 
   return (
   <div
