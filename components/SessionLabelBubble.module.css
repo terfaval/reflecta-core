@@ -21,6 +21,7 @@
   padding: 6px 12px;
   border-radius: 24px;
   font-weight: 600;
+  font-family: 'Raleway', sans-serif;
   font-size: 14px;
   gap: 10px;
   color: var(--user-color);
@@ -59,6 +60,7 @@
   height: 36px;
   border-radius: 50%;
   font-weight: bold;
+  font-family: 'Raleway', sans-serif;
   color: var(--bg-color);
   background: var(--user-color);
 }

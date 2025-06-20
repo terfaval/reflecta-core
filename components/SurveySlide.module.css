@@ -18,10 +18,12 @@
 
 .question {
   font-size: 1.25rem;
+  font-family: 'Raleway', sans-serif;
 }
 
 .instruction {
   font-size: 0.875rem;
+  font-family: 'Raleway', sans-serif;
   color: #666;
 }
 
@@ -29,6 +31,7 @@
   min-height: 100px;
   padding: 0.5rem;
   font-size: 1rem;
+  font-family: 'Raleway', sans-serif;
   border-radius: 0.5rem;
   border: 1px solid #ccc;
   resize: vertical;
@@ -36,6 +39,7 @@
 
 .buttons {
   display: flex;
+  font-family: 'Raleway', sans-serif;
   justify-content: space-between;
   margin-top: 1rem;
 }

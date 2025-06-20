@@ -3,6 +3,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  font-family: 'Raleway', sans-serif;
   gap: 1rem;
   text-align: center;
   margin-top: 3rem;
@@ -21,6 +22,7 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  font-family: 'Raleway', sans-serif;
   gap: 0.5rem;
 }
 
