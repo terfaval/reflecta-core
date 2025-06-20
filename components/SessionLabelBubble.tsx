@@ -3,7 +3,10 @@
 import { useState } from 'react';
 import styles from './SessionLabelBubble.module.css';
 
-const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+const API_HOST =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_HOST ||
+  '';
 
 interface SessionLabelBubbleProps {
   initialLabel: string;

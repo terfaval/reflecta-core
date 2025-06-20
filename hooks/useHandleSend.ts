@@ -1,7 +1,10 @@
 // hooks/useHandleSend.ts
 import { useCallback } from 'react';
 
-const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+const API_HOST =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_HOST ||
+  '';
 
 interface Entry {
   id: string;

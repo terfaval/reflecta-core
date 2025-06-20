@@ -30,7 +30,10 @@ const QUESTIONS = [
   }
 ];
 
-const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+const API_HOST =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_HOST ||
+  '';
 
 export default function ProfileBuilder() {
   const { userId, userInitialized, userError } = useUserContext();

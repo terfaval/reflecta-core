@@ -1,7 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 
-const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+const API_HOST =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_HOST ||
+  '';
 
 type UseUserSessionParams = {
   profile: string | string[] | undefined;

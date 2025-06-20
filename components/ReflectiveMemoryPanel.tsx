@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import styles from './ReflectiveMemoryPanel.module.css';
 
-const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+const API_HOST =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_HOST ||
+  '';
 
 interface MemoryLabel {
   id: string;

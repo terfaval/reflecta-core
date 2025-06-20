@@ -2,7 +2,10 @@
 import React from 'react';
 import { buttonStyles } from '../styles/profileStyles';
 
-const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+const API_HOST =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_HOST ||
+  '';
 
 interface ChatFooterProps {
   message: string;

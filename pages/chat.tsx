@@ -21,7 +21,10 @@ import { useHandleSend } from '../hooks/useHandleSend';
 import { useUserContext } from '@/contexts/UserContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
 
-const API_HOST = process.env.NEXT_PUBLIC_API_HOST || '';
+const API_HOST =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_HOST ||
+  '';
 
 interface Entry {
   id: string;
