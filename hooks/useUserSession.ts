@@ -23,7 +23,7 @@ export function useUserSession({ profile, onReady }: UseUserSessionParams) {
         const { wp_user_id, email } = event.data;
         if (!wp_user_id || !email || typeof profile !== 'string') return;
 
-        fetch('/user', {
+        fetch('/api/user', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ wp_user_id, email }),

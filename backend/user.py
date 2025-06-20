@@ -1,7 +1,15 @@
+from __future__ import annotations
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from uuid import uuid4
 from typing import Dict
+from pathlib import Path
+import sys
+
+# Ensure backend package is on sys.path
+BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.append(str(BASE_DIR))
 
 from backend.supabase_client import supabase, _execute
 

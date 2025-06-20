@@ -69,7 +69,7 @@ export default function ChatPage() {
     const handleWPUser = (event: MessageEvent) => {
       if (event.data?.type === 'wp_user') {
         const { wp_user_id, email } = event.data;
-        fetch('/user', {
+        fetch('/api/user', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ wp_user_id, email }),
