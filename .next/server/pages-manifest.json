@@ -1,5 +1,23 @@
 {
   "/_app": "pages/_app.js",
+  "/api/chatload": "pages/api/chatload.js",
+  "/api/check-profile-access": "pages/api/check-profile-access.js",
+  "/api/entries": "pages/api/entries.js",
+  "/api/conversation/new": "pages/api/conversation/new.js",
+  "/api/profile": "pages/api/profile.js",
+  "/api/profile-list": "pages/api/profile-list.js",
+  "/api/profile/from-survey": "pages/api/profile/from-survey.js",
+  "/api/respond": "pages/api/respond.js",
+  "/api/prompt": "pages/api/prompt.js",
+  "/api/session": "pages/api/session.js",
+  "/api/session/close": "pages/api/session/close.js",
+  "/api/session/updateLabel": "pages/api/session/updateLabel.js",
+  "/chat": "pages/chat.html",
+  "/api/test-supabase": "pages/api/test-supabase.js",
+  "/non-authorized": "pages/non-authorized.html",
   "/_error": "pages/_error.js",
-  "/_document": "pages/_document.js"
+  "/profile-builder": "pages/profile-builder.html",
+  "/select-profile": "pages/select-profile.html",
+  "/_document": "pages/_document.js",
+  "/404": "pages/404.html"
 }
