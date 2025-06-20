@@ -11,6 +11,7 @@
   text-align: center;
   font-weight: bold;
   font-size: 1.25rem;
+  font-family: 'Raleway', sans-serif;
 }
 
 .retryButton {
@@ -19,6 +20,7 @@
   box-shadow: none;
   cursor: pointer;
   font-size: 1rem;
+  font-family: 'Raleway', sans-serif;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
