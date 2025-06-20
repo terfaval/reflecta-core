@@ -1,5 +1,6 @@
 import React from 'react';
 import { RotateCw } from 'lucide-react';
+import styles from './UserErrorDisplay.module.css';
 
 interface UserErrorDisplayProps {
   message: string;
@@ -8,12 +9,9 @@ interface UserErrorDisplayProps {
 
 export default function UserErrorDisplay({ message, onRetry }: UserErrorDisplayProps) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
-      <p className="mb-6 text-lg font-bold">{message}</p>
-      <button
-        onClick={onRetry}
-        className="flex items-center gap-2 text-base bg-transparent border-none"
-      >
+    <div className={styles.wrapper}>
+      <p className={styles.message}>{message}</p>
+      <button onClick={onRetry} className={styles.retryButton}>
         <RotateCw size={20} />
         <span>Próbáld újra</span>
       </button>

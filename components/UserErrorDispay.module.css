@@ -1,0 +1,30 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  min-height: 100vh;
+  gap: 1rem;
+}
+
+.message {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+.retryButton {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: opacity 0.2s ease;
+}
+
+.retryButton:hover {
+  opacity: 0.8;
+}
