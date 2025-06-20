@@ -5,6 +5,8 @@ import { useUserContext } from '@/contexts/UserContext';
 import { useRouter } from 'next/router';
 import { useProfileContext } from '@/contexts/ProfileContext';
 
+const WP_ORIGIN = process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://beenook.hu/reflecta';
+
 const QUESTIONS = [
   {
     q: 'Milyen terület az, amelyben szeretnél most jobban elmélyülni vagy fejlődni?',
@@ -39,8 +41,9 @@ export default function ProfileBuilder() {
   const router = useRouter();
 
   useEffect(() => {
-    const handleWPUser = (event: MessageEvent) => {
-      if (event.data?.type === 'wp_user') {
+    const handleInitUser = (event: MessageEvent) => {
+      if (event.origin !== WP_ORIGIN) return;
+      if (event.data?.type === 'init_user' || event.data?.type === 'wp_user') {
         const { wp_user_id, email } = event.data;
         fetch('/user', {
           method: 'POST',
@@ -48,12 +51,15 @@ export default function ProfileBuilder() {
           body: JSON.stringify({ wp_user_id, email })
         })
           .then(res => res.json())
-          .then(({ user_id }) => setUserId(user_id))
+          .then(({ user_id }) => {
+            setUserId(user_id);
+            window.parent.postMessage({ status: 'user_received' }, event.origin);
+          })
           .catch(console.error);
       }
     };
-    window.addEventListener('message', handleWPUser);
-    return () => window.removeEventListener('message', handleWPUser);
+    window.addEventListener('message', handleInitUser);
+    return () => window.removeEventListener('message', handleInitUser);
   }, [setUserId]);
 
   useEffect(() => {

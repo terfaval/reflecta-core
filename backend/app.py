@@ -12,7 +12,6 @@ from .session_update_label import router as session_update_label_router
 from .profile_handler import router as profile_router
 from .profile_list import router as profile_list_router
 from .profile_from_survey import router as profile_from_survey_router
-from .prompt import router as prompt_router
 from .check_profile_access import router as check_profile_access_router
 from .memory_summary import router as memory_summary_router
 from .generate_personal_profile import router as generate_profile_router
@@ -60,9 +59,6 @@ api_router.include_router(profile_list_router)
 
 app.include_router(profile_from_survey_router)
 api_router.include_router(profile_from_survey_router)
-
-app.include_router(prompt_router)
-api_router.include_router(prompt_router)
 
 app.include_router(check_profile_access_router)
 api_router.include_router(check_profile_access_router)

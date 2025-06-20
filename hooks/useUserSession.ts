@@ -16,10 +16,13 @@ export function useUserSession({ profile, onReady }: UseUserSessionParams) {
   const initialized = useRef(false);
   const { session: sessionOverride } = router.query;
 
+  const WP_ORIGIN = process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://beenook.hu/reflecta';
+
   useEffect(() => {
     const handleWPUser = (event: MessageEvent) => {
-      if (event.data?.type === 'wp_user') {
-       if (initialized.current) return;
+      if (event.origin !== WP_ORIGIN) return;
+      if (event.data?.type === 'init_user' || event.data?.type === 'wp_user') {
+        if (initialized.current) return;
         const { wp_user_id, email } = event.data;
         if (!wp_user_id || !email || typeof profile !== 'string') return;
 
@@ -30,6 +33,7 @@ export function useUserSession({ profile, onReady }: UseUserSessionParams) {
         })
           .then(res => res.json())
           .then(async ({ user_id }) => {
+            window.parent.postMessage({ status: 'user_received' }, event.origin);
             // 🔐 Hozzáférés ellenőrzése
             const profileRes = await fetch('/profile', {
               method: 'POST',
