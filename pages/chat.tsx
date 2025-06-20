@@ -48,7 +48,7 @@ export default function ChatPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [closingTrigger, setClosingTrigger] = useState<string>('');
   const [loading, setLoading] = useState(false);
-  const { userId, setUserId, userInitialized } = useUserContext();
+  const { userId, setUserId, userInitialized, userError } = useUserContext();
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [startingPrompts, setStartingPrompts] = useState<{ label: string; message: string }[]>([]);
@@ -154,7 +154,7 @@ export default function ChatPage() {
   useUserSession({
     profile,
     onReady: handleReady,
-    enabled: userInitialized && !sessionId,
+    enabled: !!userId && !!profile && !sessionId,
     userId,
   });
 
@@ -259,6 +259,17 @@ if (debug) console.log('[Debug] fetching page', pageIndex);
     fetchMoreEntries(0);
   }, [profile, userId, sessionId]);
 
+  if (userError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
+        <p className="mb-4">{userError}</p>
+        <button className={buttonStyles.primary} onClick={() => window.location.reload()}>
+          Újra próbálom
+        </button>
+      </div>
+    );
+  }
+
   if (!userInitialized) {
     return (
       <SpiralLoader
@@ -268,8 +279,8 @@ if (debug) console.log('[Debug] fetching page', pageIndex);
     );
   }
 
-  if (showProfileSelect) {
-     if (loadingProfiles)
+  if (showProfileSelect || (userInitialized && !profile && !sessionId)) {
+    if (loadingProfiles)
       return (
         <SpiralLoader
           userColor={currentStyle['--user-color'] || '#7A4DFF'}

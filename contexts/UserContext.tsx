@@ -5,6 +5,8 @@ interface UserContextType {
   setUserId: (id: string | null) => void;
   userInitialized: boolean;
   setUserInitialized: (v: boolean) => void;
+  userError: string | null;
+  setUserError: (err: string | null) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -12,29 +14,34 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [userInitialized, setUserInitialized] = useState(false);
+  const [userError, setUserError] = useState<string | null>(null);
 
   useEffect(() => {
     const WP_ORIGIN = process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://beenook.hu/reflecta';
 
-    const handleInitUser = (event: MessageEvent) => {
+    const handleInitUser = async (event: MessageEvent) => {
       if (event.origin !== WP_ORIGIN) return;
       if (event.data?.type === 'init_user' || event.data?.type === 'wp_user') {
         const { wp_user_id, email } = event.data;
-        fetch('/user', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ wp_user_id, email })
-        })
-          .then(res => res.json())
-          .then(({ user_id }) => {
-            setUserId(user_id);
+        try {
+          const res = await fetch('/user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ wp_user_id, email })
+          });
+          const data = await res.json();
+          if (res.ok && data?.user_id) {
+            setUserId(data.user_id);
             setUserInitialized(true);
             window.parent.postMessage({ status: 'user_received' }, event.origin);
-          })
-          .catch(err => {
-            console.error(err);
-            setUserInitialized(true);
-          });
+          } else {
+            console.error('[init_user]', data);
+            setUserError('Hiba a bejelentkezés során. Kérlek frissítsd az oldalt vagy próbáld újra.');
+          }
+        } catch (err) {
+          console.error(err);
+          setUserError('Hiba a bejelentkezés során. Kérlek frissítsd az oldalt vagy próbáld újra.');
+        }
       }
     };
 
@@ -42,8 +49,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener('message', handleInitUser);
   }, []);
 
+  useEffect(() => {
+    if (userInitialized || userError) return;
+    const id = setTimeout(() => {
+      if (!userInitialized && !userError) {
+        setUserError('Nem érkezett bejelentkezési adat a WordPress oldalról. Kérlek frissítsd az oldalt vagy próbáld újra.');
+      }
+    }, 5000);
+    return () => clearTimeout(id);
+  }, [userInitialized, userError]);
+
   return (
-    <UserContext.Provider value={{ userId, setUserId, userInitialized, setUserInitialized }}>
+    <UserContext.Provider value={{ userId, setUserId, userInitialized, setUserInitialized, userError, setUserError }}>
       {children}
     </UserContext.Provider>
   );

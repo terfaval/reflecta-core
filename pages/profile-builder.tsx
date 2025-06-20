@@ -30,7 +30,7 @@ const QUESTIONS = [
 ];
 
 export default function ProfileBuilder() {
-  const { userId, userInitialized } = useUserContext();
+  const { userId, userInitialized, userError } = useUserContext();
   const { setProfile } = useProfileContext();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<string[]>(['', '', '', '', '']);
@@ -86,6 +86,17 @@ export default function ProfileBuilder() {
       console.error(err);
     }
   };
+
+  if (userError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
+        <p className="mb-4">{userError}</p>
+        <button className="px-4 py-2 bg-purple-600 text-white rounded" onClick={() => window.location.reload()}>
+          Újra próbálom
+        </button>
+      </div>
+    );
+  }
 
   if (!userInitialized) {
     return (
