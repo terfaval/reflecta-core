@@ -107,8 +107,10 @@ export default function ChatPage() {
           body: JSON.stringify({ userId }),
         });
         const data = await res.json();
-        if (res.ok && data.profile) {
+        if (res.ok && data.profile && data.sessionId) {
           setProfile(data.profile);
+          setSessionId(data.sessionId);
+          setLoadingProfiles(false);
           return;
         }
       } catch (err) {
@@ -173,7 +175,9 @@ export default function ChatPage() {
 
   useUserSession({
   profile,
-  onReady: handleReady,
+    onReady: handleReady,
+    enabled: !sessionId,
+    userId,
 });
 
   useAutoTextareaResize();
@@ -284,6 +288,10 @@ if (debug) console.log('[Debug] fetching page', pageIndex);
         <ProfileCarousel profiles={profiles} onSelect={handleSelectProfile} />
       </div>
     );
+  }
+
+  if (!sessionId) {
+    return <div className="p-4">Betöltés...</div>;
   }
 
   return (
