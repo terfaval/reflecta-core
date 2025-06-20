@@ -17,7 +17,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userError, setUserError] = useState<string | null>(null);
 
   useEffect(() => {
-    const WP_ORIGIN = process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://beenook.hu/reflecta';
+    const rawOrigin = process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://beenook.hu/reflecta';
+    const WP_ORIGIN = (() => {
+      try {
+        return new URL(rawOrigin).origin;
+      } catch {
+        return rawOrigin.replace(/\/+$/, '');
+      }
+    })();
 
     const handleInitUser = async (event: MessageEvent) => {
       if (event.origin !== WP_ORIGIN) return;
