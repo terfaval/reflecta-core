@@ -21,7 +21,7 @@ const DEFAULT_PROFILES: { name: string; icon: string }[] = [
 
 export default function ProfileSelectorPage() {
   const router = useRouter();
-  const { userId } = useUserContext();
+  const { userId, userInitialized } = useUserContext();
   const { setProfile } = useProfileContext();
   const [profiles, setProfiles] = useState<Meta[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -76,6 +76,8 @@ export default function ProfileSelectorPage() {
     };
     load();
   }, [userId, router, setProfile]);
+
+  if (!userInitialized) return <div className="p-4">Betöltés...</div>;
 
   const handleSelect = (p: Meta) => {
     setProfile(p.name);

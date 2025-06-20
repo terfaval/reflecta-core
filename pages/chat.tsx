@@ -20,8 +20,6 @@ import { useHandleSend } from '../hooks/useHandleSend';
 import { useUserContext } from '@/contexts/UserContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
 
-const WP_ORIGIN = process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://beenook.hu/reflecta';
-
 interface Entry {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -50,7 +48,7 @@ export default function ChatPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [closingTrigger, setClosingTrigger] = useState<string>('');
   const [loading, setLoading] = useState(false);
-  const { userId, setUserId } = useUserContext();
+  const { userId, setUserId, userInitialized } = useUserContext();
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [startingPrompts, setStartingPrompts] = useState<{ label: string; message: string }[]>([]);
@@ -66,27 +64,7 @@ export default function ChatPage() {
   const [profiles, setProfiles] = useState<ProfileCard[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
 
-  useEffect(() => {
-   const handleInitUser = (event: MessageEvent) => {
-      if (event.origin !== WP_ORIGIN) return;
-      if (event.data?.type === 'init_user' || event.data?.type === 'wp_user') {
-        const { wp_user_id, email } = event.data;
-        fetch('/user', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ wp_user_id, email }),
-        })
-          .then(res => res.json())
-          .then(({ user_id }) => {
-            setUserId(user_id);
-            window.parent.postMessage({ status: 'user_received' }, event.origin);
-          })
-          .catch(console.error);
-      }
-    };
-    window.addEventListener('message', handleInitUser);
-    return () => window.removeEventListener('message', handleInitUser);
-  }, [setUserId]);
+  // waiting for user initialization is handled in UserProvider
 
   useEffect(() => {
     if (debug) console.log('[Debug] profile', profile);
@@ -174,11 +152,11 @@ export default function ChatPage() {
   );
 
   useUserSession({
-  profile,
+    profile,
     onReady: handleReady,
-    enabled: !sessionId,
+    enabled: userInitialized && !sessionId,
     userId,
-});
+  });
 
   useAutoTextareaResize();
 
@@ -280,6 +258,10 @@ if (debug) console.log('[Debug] fetching page', pageIndex);
     setEntries([]);
     fetchMoreEntries(0);
   }, [profile, userId, sessionId]);
+
+  if (!userInitialized) {
+    return <div className="p-4">Betöltés...</div>;
+  }
 
   if (showProfileSelect) {
     if (loadingProfiles) return <div className="p-4">Betöltés...</div>;

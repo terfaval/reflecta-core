@@ -5,8 +5,6 @@ import { useUserContext } from '@/contexts/UserContext';
 import { useRouter } from 'next/router';
 import { useProfileContext } from '@/contexts/ProfileContext';
 
-const WP_ORIGIN = process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://beenook.hu/reflecta';
-
 const QUESTIONS = [
   {
     q: 'Milyen terület az, amelyben szeretnél most jobban elmélyülni vagy fejlődni?',
@@ -31,7 +29,7 @@ const QUESTIONS = [
 ];
 
 export default function ProfileBuilder() {
-  const { userId, setUserId } = useUserContext();
+  const { userId, userInitialized } = useUserContext();
   const { setProfile } = useProfileContext();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<string[]>(['', '', '', '', '']);
@@ -40,27 +38,7 @@ export default function ProfileBuilder() {
   const [startLoading, setStartLoading] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    const handleInitUser = (event: MessageEvent) => {
-      if (event.origin !== WP_ORIGIN) return;
-      if (event.data?.type === 'init_user' || event.data?.type === 'wp_user') {
-        const { wp_user_id, email } = event.data;
-        fetch('/user', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ wp_user_id, email })
-        })
-          .then(res => res.json())
-          .then(({ user_id }) => {
-            setUserId(user_id);
-            window.parent.postMessage({ status: 'user_received' }, event.origin);
-          })
-          .catch(console.error);
-      }
-    };
-    window.addEventListener('message', handleInitUser);
-    return () => window.removeEventListener('message', handleInitUser);
-  }, [setUserId]);
+  // user initialization handled globally in UserProvider
 
   useEffect(() => {
     if (!userId) return;
@@ -107,6 +85,10 @@ export default function ProfileBuilder() {
       console.error(err);
     }
   };
+
+  if (!userInitialized) {
+    return <div className="p-4">Betöltés...</div>;
+  }
 
   if (finished) {
     const handleStart = async () => {
