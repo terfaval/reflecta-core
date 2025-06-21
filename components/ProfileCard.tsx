@@ -35,7 +35,7 @@ export default function ProfileCard({ name, role, description, icon, color, user
       } as React.CSSProperties}
       onClick={onSelect}
     >
-      {personal && <span className={styles.personalBadge}>Saját</span>}
+      {personal && <span className={styles.personalBadge}>Személyes</span>}
       <div className={styles.iconWrap}>
         <div className={styles.icon} />
       </div>
