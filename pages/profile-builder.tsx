@@ -6,6 +6,7 @@ import UserErrorDisplay from '@/components/UserErrorDisplay';
 import { useUserContext } from '@/contexts/UserContext';
 import { useRouter } from 'next/router';
 import { useProfileContext } from '@/contexts/ProfileContext';
+import { apiFetch } from '@/lib/api';
 
 const QUESTIONS = [
   {
@@ -30,11 +31,6 @@ const QUESTIONS = [
   }
 ];
 
-const API_HOST =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  process.env.NEXT_PUBLIC_API_HOST ||
-  '';
-
 export default function ProfileBuilder() {
   const { userId, userInitialized, userError } = useUserContext();
   const { setProfile } = useProfileContext();
@@ -49,12 +45,10 @@ export default function ProfileBuilder() {
 
   useEffect(() => {
     if (!userId) return;
-    fetch(`${API_HOST}/profile-list`, {
+    apiFetch<{ role?: string; personalProfile?: string }>('/profile-list', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId })
     })
-      .then(res => res.json())
       .then(data => {
         if (data.role !== 'premium' || data.personalProfile) {
           router.push('/not-authorized');
@@ -80,12 +74,13 @@ export default function ProfileBuilder() {
   const submit = async () => {
     if (!userId) return;
     try {
-      const res = await fetch(`${API_HOST}/profile/from-survey`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, name: profileName, answers })
-      });
-      const data = await res.json();
+      const data = await apiFetch<{ name: string }>(
+        '/profile/from-survey',
+        {
+          method: 'POST',
+          body: JSON.stringify({ user_id: userId, name: profileName, answers }),
+        }
+      );
       setProfileName(data.name || profileName);
       setFinished(true);
     } catch (err) {
@@ -113,13 +108,14 @@ export default function ProfileBuilder() {
       if (!userId || startLoading) return;
       setStartLoading(true);
       try {
-        const res = await fetch(`${API_HOST}/conversation/new`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, profile_name: profileName }),
-        });
-        const data = await res.json();
-        if (res.ok) {
+        const data = await apiFetch<{ conversation_id: string; session_id: string; error?: string }>(
+          '/conversation/new',
+          {
+            method: 'POST',
+            body: JSON.stringify({ user_id: userId, profile_name: profileName }),
+          }
+        );
+        if (data.conversation_id && data.session_id) {
           setProfile(profileName);
           router.push(`/chat?conversation=${data.conversation_id}&session=${data.session_id}`);
         } else {

@@ -21,10 +21,7 @@ import { useHandleSend } from '../hooks/useHandleSend';
 import { useUserContext } from '@/contexts/UserContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
 
-const API_HOST =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  process.env.NEXT_PUBLIC_API_HOST ||
-  '';
+import { apiFetch } from '@/lib/api';
 
 interface Entry {
   id: string;
@@ -85,13 +82,14 @@ export default function ChatPage() {
     const load = async () => {
       setLoadingProfiles(true);
       try {
-        const res = await fetch(`${API_HOST}/last-session`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId }),
-        });
-        const data = await res.json();
-        if (res.ok && data.profile && data.sessionId) {
+        const data = await apiFetch<{ profile?: string; sessionId?: string }>(
+          '/last-session',
+          {
+            method: 'POST',
+            body: JSON.stringify({ userId }),
+          }
+        );
+        if (data.profile && data.sessionId) {
           setProfile(data.profile);
           setSessionId(data.sessionId);
           setLoadingProfiles(false);
@@ -102,13 +100,14 @@ export default function ChatPage() {
       }
       try {
         const names = DEFAULT_PROFILES.map(p => p.name);
-        const resp = await fetch(`${API_HOST}/profile-list`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, names }),
-        });
-        const meta = await resp.json();
-        if (resp.ok) {
+        const meta = await apiFetch<{ profiles: any[]; error?: string }>(
+          '/profile-list',
+          {
+            method: 'POST',
+            body: JSON.stringify({ userId, names }),
+          }
+        );
+        if (meta.profiles) {
           const map: Record<string, { description: string; color: string }> = {};
           (meta.profiles || []).forEach((p: any) => {
             map[p.name] = { description: p.description, color: p.color };
@@ -225,12 +224,13 @@ if (debug) console.log('[Debug] fetching page', pageIndex);
 
     isFetchingRef.current = true;
     try {
-      const res = await fetch(`${API_HOST}/chatload`, {
+      const data = await apiFetch<{
+        entries?: Entry[];
+        closingTrigger?: string;
+      }>('/chatload', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, profile, offset: pageIndex * limit, limit }),
       });
-      const data = await res.json();
 
       if (debug) console.log('[Debug] fetchMoreEntries result', data);
 

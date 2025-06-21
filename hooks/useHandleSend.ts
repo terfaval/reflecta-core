@@ -1,10 +1,7 @@
 // hooks/useHandleSend.ts
 import { useCallback } from 'react';
 
-const API_HOST =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  process.env.NEXT_PUBLIC_API_HOST ||
-  '';
+import { apiFetch } from 'lib/api';
 
 interface Entry {
   id: string;
@@ -43,13 +40,14 @@ export function useHandleSend({
     if (isTrigger) {
       setIsClosing(true);
       try {
-        const res = await fetch(`${API_HOST}/session/close`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId }),
-        });
-        const data = await res.json();
-        if (res.ok) {
+        const data = await apiFetch<{ closureEntry: string; label: string }>(
+          '/session/close',
+          {
+            method: 'POST',
+            body: JSON.stringify({ sessionId }),
+          }
+        );
+        if (data) {
           const now = new Date().toISOString();
           setEntries(prev => [
             ...prev,
@@ -58,7 +56,7 @@ export function useHandleSend({
             { id: `${Date.now()}-closure-label`, role: 'system', content: `Szakasz lezárása: ${data.label}`, created_at: now },
           ]);
         } else {
-          console.error('[Zárás] Hiba:', data.error);
+          console.error('[Zárás] Hiba:');
         }
       } catch (err) {
         console.error('[Zárás] Kivétel:', err);
@@ -82,9 +80,8 @@ export function useHandleSend({
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
     if (textarea) textarea.style.height = 'auto';
 
-    await fetch(`${API_HOST}/entries`, {
+    await apiFetch('/entries', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId, entry: userEntry }),
     });
 
@@ -96,13 +93,11 @@ export function useHandleSend({
       created_at: new Date().toISOString(),
     }]);
 
-    const res = await fetch(`${API_HOST}/respond`, {
+    const { content } = await apiFetch<{ content: string }>('/respond', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId }),
     });
 
-    const { content } = await res.json();
     setEntries(prev => prev.map(e => (e.id === thinkingId ? { ...e, content } : e)));
     setLoading(false);
   }, [sessionId, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing]);

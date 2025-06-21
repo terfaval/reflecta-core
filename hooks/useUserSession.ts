@@ -1,10 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 
-const API_HOST =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  process.env.NEXT_PUBLIC_API_HOST ||
-  '';
+import { apiFetch } from 'lib/api';
 
 type UseUserSessionParams = {
   profile: string | string[] | undefined;
@@ -27,18 +24,20 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
     if (!enabled) return;
 
     const startSession = async (uid: string) => {
-      const profileRes = await fetch(`${API_HOST}/profile`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: profile, userId: uid }),
-      });
-
-      if (profileRes.status === 403) {
-        router.push('/not-authorized');
-        return;
+      let profileData;
+      try {
+        profileData = await apiFetch<{ starting_prompts?: { label: string; message: string }[]; closing_trigger?: string }>('/profile', {
+          method: 'POST',
+          body: JSON.stringify({ name: profile, userId: uid }),
+        });
+      } catch (err: any) {
+        if (err.status === 403) {
+          router.push('/not-authorized');
+          return;
+        }
+        throw err;
       }
 
-      const profileData = await profileRes.json();
       const prompts = profileData?.starting_prompts || [];
       const closingTrigger = profileData?.closing_trigger || '';
 
@@ -53,13 +52,11 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
         return;
       }
 
-      const sessionRes = await fetch(`${API_HOST}/session`, {
+      const sessionData = await apiFetch<{ session?: { id: string } }>('/session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: uid, profile }),
       });
 
-      const sessionData = await sessionRes.json();
       if (!sessionData?.session?.id) return;
       initialized.current = true;
 

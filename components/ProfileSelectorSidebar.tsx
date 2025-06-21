@@ -4,10 +4,7 @@ import { LucidePlusCircle } from 'lucide-react';
 import { useUserContext } from '@/contexts/UserContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
 
-const API_HOST =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  process.env.NEXT_PUBLIC_API_HOST ||
-  '';
+import { apiFetch } from 'lib/api';
 
 interface ProfileMeta {
   name: string;
@@ -41,13 +38,14 @@ export default function ProfileSelectorSidebar() {
       if (!userId) return;
       try {
         const names = DEFAULT_PROFILES.map(p => p.name);
-        const res = await fetch(`${API_HOST}/profile-list`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, names }),
-        });
-        const data = await res.json();
-        if (res.ok) {
+        const data = await apiFetch<{ profiles: any[]; personalProfile?: string; role?: string; error?: string }>(
+          '/profile-list',
+          {
+            method: 'POST',
+            body: JSON.stringify({ userId, names }),
+          }
+        );
+        if (data) {
           const metaMap: Record<string, { description: string; color: string }> = {};
           (data.profiles || []).forEach((p: any) => {
             metaMap[p.name] = { description: p.description, color: p.color };

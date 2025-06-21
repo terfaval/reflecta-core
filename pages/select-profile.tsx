@@ -7,10 +7,7 @@ import { profileStyles } from '../styles/profileStyles';
 import { useUserContext } from '@/contexts/UserContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
 
-const API_HOST =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  process.env.NEXT_PUBLIC_API_HOST ||
-  '';
+import { apiFetch } from '@/lib/api';
 
 interface Meta extends ProfileCard {}
 
@@ -37,13 +34,14 @@ export default function ProfileSelectorPage() {
     if (!userId) return;
     const load = async () => {
       try {
-        const res = await fetch(`${API_HOST}/has-history`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId }),
-        });
-        const data = await res.json();
-        if (res.ok && data.hasHistory) {
+        const data = await apiFetch<{ hasHistory: boolean; profile?: string }>(
+          '/has-history',
+          {
+            method: 'POST',
+            body: JSON.stringify({ userId }),
+          }
+        );
+        if (data.hasHistory) {
           if (data.profile) setProfile(data.profile);
           router.replace('/chat');
           return;
@@ -54,13 +52,14 @@ export default function ProfileSelectorPage() {
 
       try {
         const names = DEFAULT_PROFILES.map(p => p.name);
-        const resp = await fetch(`${API_HOST}/profile-list`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, names }),
-        });
-        const meta = await resp.json();
-        if (resp.ok) {
+        const meta = await apiFetch<{ profiles: any[]; error?: string }>(
+          '/profile-list',
+          {
+            method: 'POST',
+            body: JSON.stringify({ userId, names }),
+          }
+        );
+        if (meta.profiles) {
           const map: Record<string, { description: string; color: string }> = {};
           (meta.profiles || []).forEach((p: any) => {
             map[p.name] = { description: p.description, color: p.color };

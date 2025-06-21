@@ -2,10 +2,7 @@
 import React from 'react';
 import { buttonStyles } from '../styles/profileStyles';
 
-const API_HOST =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  process.env.NEXT_PUBLIC_API_HOST ||
-  '';
+import { apiFetch } from 'lib/api';
 
 interface ChatFooterProps {
   message: string;
@@ -68,14 +65,15 @@ export function ChatFooter({
                 if (!sessionId || isClosing || assistantReplyCount < 3) return;
                 setIsClosing(true);
                 try {
-                  const res = await fetch(`${API_HOST}/session/close`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sessionId }),
-                  });
-                  const data = await res.json();
+                  const data = await apiFetch<{ closureEntry: string; label: string }>(
+                    '/session/close',
+                    {
+                      method: 'POST',
+                      body: JSON.stringify({ sessionId }),
+                    }
+                  );
 
-                  if (res.ok) {
+                  if (data) {
                     const now = new Date().toISOString();
                     setEntries(prev => [
                       ...prev,
@@ -84,7 +82,7 @@ export function ChatFooter({
                       { id: `${Date.now()}-closure-label`, role: 'system', content: `Szakasz lezárása: ${data.label}`, created_at: now },
                     ]);
                   } else {
-                    console.error('[Zárás] Hiba:', data.error);
+                    console.error('[Zárás] Hiba:');
                   }
                 } catch (err) {
                   console.error('[Zárás] Kivétel:', err);
