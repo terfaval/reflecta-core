@@ -3,6 +3,8 @@
   align-items: center;
   justify-content: center;
   gap: 1rem;
+  padding-left: 10%;
+  padding-right: 10%;
 }
 
 .track {

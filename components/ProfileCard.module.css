@@ -1,5 +1,5 @@
 .card {
-  background-color: var(--bg);
+  background-color: var(--bg-color);
   color: #000;
   text-align: center;
   padding: 1rem;
@@ -16,17 +16,15 @@
 }
 
 .iconWrap {
-  width: 3rem;
+  width: 4rem;
+  color: var(--user-color);
   height: 3rem;
   margin: 0 auto 0.5rem auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: filter 0.3s ease;
 }
-.card:hover .iconWrap {
-  filter: drop-shadow(0 0 8px var(--user));
-}
+
 .icon {
   width: 100%;
   height: 100%;
@@ -40,9 +38,11 @@
   font-size: 0.875rem;
   opacity: 0;
   max-height: 0;
-  transition: opacity 0.3s ease, max-height 0.3s ease;
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 .card:hover .desc {
   opacity: 1;
-  max-height: 5rem;
+  transform: scaleY(1);
 }
