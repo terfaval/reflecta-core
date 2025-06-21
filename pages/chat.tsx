@@ -113,13 +113,17 @@ export default function ChatPage() {
             map[p.name] = { description: p.description, color: p.color, role: p.role };
           });
           setProfiles(
-            DEFAULT_PROFILES.map(p => ({
-              ...p,
-              description: map[p.name]?.description || '',
-              color: map[p.name]?.color || '#fff',
-              role: map[p.name]?.role || '',
-              userColor: (profileStyles[p.name] || {})['--user-color'] || '#000',
-            }))
+            DEFAULT_PROFILES.map(p => {
+              const style = profileStyles[p.name] || {};
+              return {
+                ...p,
+                description: map[p.name]?.description || '',
+                color: map[p.name]?.color || '#fff',
+                role: map[p.name]?.role || '',
+                userColor: style['--user-color'] || '#000',
+                bgColor: style['--bg-color'] || '#fff',
+              };
+            })
           );
         } else {
           console.error('[profile-list]', meta.error);

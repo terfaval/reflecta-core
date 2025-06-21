@@ -8,6 +8,7 @@ export interface ProfileCardProps {
   icon: string;
   color: string;
   userColor: string;
+  bgColor: string;
   onSelect: () => void;
 }
 
@@ -20,13 +21,13 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-export default function ProfileCard({ name, role, description, icon, color, userColor, onSelect }: ProfileCardProps) {
+export default function ProfileCard({ name, role, description, icon, color, userColor, bgColor, onSelect }: ProfileCardProps) {
   const glow = hexToRgba(userColor, 0.4);
   return (
     <div
       className={styles.card}
       style={{
-        '--bg-color': 'white',
+        '--bg-color': bgColor,
         '--user-color': userColor,
         '--glow-color': glow,
         '--icon-url': `url(${icon})`,
