@@ -1,42 +1,60 @@
-from fastapi import FastAPI, HTTPException
-from typing import Optional, Dict, Any
+from fastapi import FastAPI, APIRouter
+from fastapi.middleware.cors import CORSMiddleware
 
-from supabase_client import get_user_by_id
-from users import get_user_role
-from access import is_feature_enabled
+from .users import router as users_router
+from .user_create import router as user_create_router
+from .respond import router as respond_router
+from .session import router as session_router
+from .chatload import router as chatload_router
+from .conversation_new import router as conversation_router
+from .entries import router as entries_router
+from .session_close import router as session_close_router
+from .session_update_label import router as session_update_label_router
+from .profile_handler import router as profile_router
+from .profile_list import router as profile_list_router
+from .profile_from_survey import router as profile_from_survey_router
+from .check_profile_access import router as check_profile_access_router
+from .memory_summary import router as memory_summary_router
+from .generate_personal_profile import router as generate_profile_router
+from .last_session import router as last_session_router
+from .has_history import router as has_history_router
 
-app = FastAPI()
+# Future routers can be imported here as they are implemented
+
+app = FastAPI(title="Reflecta API")
+
+# Enable CORS for all origins during development
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+api_router = APIRouter(prefix="/api")
+
+# Register all routers under the `/api` prefix
+api_router.include_router(users_router)
+api_router.include_router(user_create_router)
+api_router.include_router(respond_router)
+api_router.include_router(session_router)
+api_router.include_router(chatload_router)
+api_router.include_router(conversation_router)
+api_router.include_router(entries_router)
+api_router.include_router(session_close_router)
+api_router.include_router(session_update_label_router)
+api_router.include_router(profile_router)
+api_router.include_router(profile_list_router)
+api_router.include_router(profile_from_survey_router)
+api_router.include_router(check_profile_access_router)
+api_router.include_router(memory_summary_router)
+api_router.include_router(generate_profile_router)
+api_router.include_router(last_session_router)
+api_router.include_router(has_history_router)
+
+app.include_router(api_router)
 
 @app.get("/")
 def read_root():
-    return {"message": "Reflecta Python backend él!"}
-
-
-@app.get("/user/{user_id}")
-def get_user(user_id: str) -> Optional[Dict[str, Any]]:
-
-    try:
-        user = get_user_by_id(user_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        return user
-    except HTTPException:
-        raise
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
-
-@app.get("/user/{user_id}/role")
-def get_user_role_api(user_id: str) -> Dict[str, str]:
-    try:
-        role = get_user_role(user_id)
-        return {"role": role}
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
-
-@app.get("/feature-check")
-def feature_check(user_id: str, feature_key: str) -> Dict[str, bool]:
-    try:
-        enabled = is_feature_enabled(user_id, feature_key)
-        return {"enabled": enabled}
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+    return {"message": "Reflecta Python backend running"}
