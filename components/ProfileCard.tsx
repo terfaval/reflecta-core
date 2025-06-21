@@ -1,11 +1,12 @@
 import React from 'react';
 import styles from './ProfileCard.module.css';
+import { iconMap, ProfileIcon } from './ProfileIcons';
 
 export interface ProfileCardProps {
   name: string;
   role: string;
   description: string;
-  icon: string;
+  iconName?: string | null;
   color: string;
   userColor: string;
   bgColor: string;
@@ -22,7 +23,7 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-export default function ProfileCard({ name, role, description, icon, color, userColor, bgColor, onSelect, personal }: ProfileCardProps) {
+export default function ProfileCard({ name, role, description, iconName, color, userColor, bgColor, onSelect, personal }: ProfileCardProps) {
   const glow = hexToRgba(userColor, 0.4);
   return (
     <div
@@ -31,13 +32,14 @@ export default function ProfileCard({ name, role, description, icon, color, user
         '--bg-color': bgColor,
         '--user-color': userColor,
         '--glow-color': glow,
-        '--icon-url': `url(${icon})`,
       } as React.CSSProperties}
       onClick={onSelect}
     >
       {personal && <span className={styles.personalBadge}>Személyes</span>}
       <div className={styles.iconWrap}>
-        <div className={styles.icon} />
+        {iconName && iconMap[iconName] && (
+          <ProfileIcon icon={iconMap[iconName]} color={userColor} />
+        )}
       </div>
       <h3 className={styles.name}>{name}</h3>
       <p className={styles.role}>{role}</p>

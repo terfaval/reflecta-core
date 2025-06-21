@@ -11,17 +11,17 @@ import { apiFetch } from '@/lib/api';
 
 interface Meta extends ProfileCard {}
 
-const DEFAULT_PROFILES: { name: string; icon: string }[] = [
-  { name: 'Reflecta', icon: 'https://beenook.hu/wp-content/uploads/2025/05/00_reflecta.svg' },
-  { name: 'Akasza', icon: 'https://beenook.hu/wp-content/uploads/2025/05/01_akasza.svg' },
-  { name: 'Éana', icon: 'https://beenook.hu/wp-content/uploads/2025/06/02_eana.svg' },
-  { name: 'Luma', icon: 'https://beenook.hu/wp-content/uploads/2025/05/03_luma.svg' },
-  { name: 'Sylva', icon: 'https://beenook.hu/wp-content/uploads/2025/05/04_sylva.svg' },
-  { name: 'Zentó', icon: 'https://beenook.hu/wp-content/uploads/2025/05/05_zento.svg' },
-  { name: 'Oneiros', icon: 'https://beenook.hu/wp-content/uploads/2025/05/09_oneiros.svg' },
-  { name: 'Kairos', icon: 'https://beenook.hu/wp-content/uploads/2025/05/06_kairos.svg' },
-  { name: 'Noe', icon: 'https://beenook.hu/wp-content/uploads/2025/05/05_zento-1.svg' },
-  { name: 'Solun', icon: 'https://beenook.hu/wp-content/uploads/2025/05/08_solun-1.svg' },
+const DEFAULT_PROFILES: { name: string; iconName?: string }[] = [
+  { name: 'Reflecta', iconName: 'ReflectaIcon' },
+  { name: 'Akasza', iconName: 'AkaszaIcon' },
+  { name: 'Éana', iconName: 'EanaIcon' },
+  { name: 'Luma', iconName: 'LumaIcon' },
+  { name: 'Sylva', iconName: 'SylvaIcon' },
+  { name: 'Zentó', iconName: 'ZentoIcon' },
+  { name: 'Oneiros', iconName: 'OneirosIcon' },
+  { name: 'Kairos', iconName: 'KairosIcon' },
+  { name: 'Noe', iconName: 'NoeIcon' },
+  { name: 'Solun', iconName: 'SolunIcon' },
 ];
 
 export default function ProfileSelectorPage() {
@@ -84,7 +84,7 @@ export default function ProfileSelectorPage() {
             const pm = map[meta.personalProfile] || { description: '', color: '#fff' };
             personalProfile = {
               name: meta.personalProfile,
-              icon: '',
+              iconName: undefined,
               description: pm.description,
               color: pm.color,
               role: '',
