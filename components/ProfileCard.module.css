@@ -9,6 +9,7 @@
   transition: transform 0.3s ease;
   font-family: 'Raleway', sans-serif;
   overflow: hidden;
+  position: relative;
 }
 
 .iconWrap {
@@ -55,4 +56,15 @@
 .card:hover .desc {
   opacity: 1;
   transform: scaleY(1);
+}
+
+.personalBadge {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  font-size: 0.625rem;
+  padding: 0.1rem 0.25rem;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 0.25rem;
 }

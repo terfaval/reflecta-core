@@ -10,6 +10,7 @@ export interface ProfileCardProps {
   userColor: string;
   bgColor: string;
   onSelect: () => void;
+  personal?: boolean;
 }
 
 function hexToRgba(hex: string, alpha: number) {
@@ -21,7 +22,7 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-export default function ProfileCard({ name, role, description, icon, color, userColor, bgColor, onSelect }: ProfileCardProps) {
+export default function ProfileCard({ name, role, description, icon, color, userColor, bgColor, onSelect, personal }: ProfileCardProps) {
   const glow = hexToRgba(userColor, 0.4);
   return (
     <div
@@ -34,6 +35,7 @@ export default function ProfileCard({ name, role, description, icon, color, user
       } as React.CSSProperties}
       onClick={onSelect}
     >
+      {personal && <span className={styles.personalBadge}>Saját</span>}
       <div className={styles.iconWrap}>
         <div className={styles.icon} />
       </div>
