@@ -103,7 +103,9 @@ export default function ProfileSelectorPage() {
     return <SpiralLoader userColor="#7A4DFF" aiColor="#FFB347" />;
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div
+      style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+    >
       <ProfileCarousel profiles={profiles} onSelect={handleSelect} />
     </div>
   );

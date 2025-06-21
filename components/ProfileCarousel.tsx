@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import ProfileCardComponent, { ProfileCardProps } from './ProfileCard';
+import styles from './ProfileCarousel.module.css';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface ProfileCard extends Omit<ProfileCardProps, 'onSelect'> {}
 
@@ -9,28 +11,28 @@ interface Props {
 }
 
 export default function ProfileCarousel({ profiles, onSelect }: Props) {
-  const [page, setPage] = useState(0);
-  const perPage = 3;
-  const totalPages = Math.max(1, Math.ceil(profiles.length / perPage));
+  const [index, setIndex] = useState(0);
+  const visibleCount = 5;
 
-  const start = page * perPage;
-  const visible = profiles.slice(start, start + perPage);
+  const prev = () => setIndex(i => (i - 1 + profiles.length) % profiles.length);
+  const next = () => setIndex(i => (i + 1) % profiles.length);
 
-  const prev = () => setPage(p => Math.max(0, p - 1));
-  const next = () => setPage(p => Math.min(totalPages - 1, p + 1));
+  const visible = Array.from({ length: visibleCount }, (_, idx) => {
+    return profiles[(index + idx) % profiles.length];
+  });
 
   return (
-    <div className="flex items-center gap-4">
-      <button onClick={prev} disabled={page === 0} className="px-2">
-        ◀
+    <div className={styles.carousel}>
+      <button onClick={prev} className={styles.arrow} aria-label="Előző">
+        <ChevronLeft />
       </button>
-      <div className="flex gap-4">
+      <div className={styles.track}>
         {visible.map(p => (
           <ProfileCardComponent key={p.name} {...p} onSelect={() => onSelect(p)} />
         ))}
       </div>
-      <button onClick={next} disabled={page >= totalPages - 1} className="px-2">
-        ▶
+      <button onClick={next} className={styles.arrow} aria-label="Következő">
+        <ChevronRight />
       </button>
     </div>
   );

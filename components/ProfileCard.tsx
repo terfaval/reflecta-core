@@ -20,7 +20,9 @@ export default function ProfileCard({ name, description, icon, color, userColor,
       } as React.CSSProperties}
       onClick={onSelect}
     >
-      <img src={icon} alt="" className={styles.icon} />
+      <div className={styles.iconWrap}>
+        <img src={icon} alt="" className={styles.icon} />
+      </div>
       <h3 className={styles.name}>{name}</h3>
       <p className={styles.desc}>{description}</p>
     </div>
