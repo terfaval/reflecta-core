@@ -38,7 +38,7 @@ def _fetch_profile(profile_name: str) -> Dict[str, Any] | None:
 
     result = (
         supabase.table("profiles")
-        .select("name, prompt_core, color, is_active")
+        .select("name, prompt_core, role, color, is_active")
         .eq("name", profile_name)
         .maybe_single()
         .execute()

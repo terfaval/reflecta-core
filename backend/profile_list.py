@@ -58,7 +58,7 @@ def _fetch_profiles(names: List[str]) -> List[Dict[str, Any]]:
     try:
         result = (
             supabase.table("profiles")
-            .select("name, description, color")
+            .select("name, description, role, color")
             .in_("name", names)
             .execute()
         )

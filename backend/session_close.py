@@ -57,7 +57,7 @@ def generate_session_closure_response(session_id: str) -> str:
     
     profile_row = _execute(
         supabase.table("profiles")
-        .select("name, prompt_core, description")
+        .select("name, prompt_core, description, role")
         .eq("name", session["profile"])
         .maybe_single()
         .execute()

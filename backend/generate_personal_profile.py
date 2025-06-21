@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional
 from openai import OpenAI
 
 from .supabase_client import supabase, _execute, get_user_by_id
+from .description_role_generator import generate_description_role
 
 
 # Allowed style options mirrored from style_summary_block.style_dictionary
@@ -148,9 +149,11 @@ def generate_profile(user_id: str, name: str, answers: List[str], color: Optiona
     user_msg = (
         f"Profile name: {name}\n"
         f"Answers:\n{joined}\n\n"
-        "Generate a profile object with the following fields: description, prompt_core, domain, worldview, "
+        "Generate a profile object with the following fields: description, role, prompt_core, domain, worldview, "
         "inspirations, not_suitable_for, preferred_context, question_archetypes, avoidance_logic, connects_well_after, "
         "connects_well_before, response_focus, closing_trigger, closing_style, interaction_rhythm, style_options. "
+        "The description must be in Hungarian, friendly and intuitive, between 75 and 80 characters. "
+        "The role must be in Hungarian, 15-20 characters long, briefly labelling the profile. "
         "Each list field must contain at least the minimum elements. "
         "Allowed style options are: " + style_json + "."
     )
@@ -164,6 +167,11 @@ def generate_profile(user_id: str, name: str, answers: List[str], color: Optiona
     content = chat.choices[0].message.content or ""
     data = json.loads(_strip_json(content))
 
+    description = data.get("description", "")
+    role_label = data.get("role", "")
+    if not (75 <= len(description) <= 80) or not (15 <= len(role_label) <= 20):
+        description, role_label = generate_description_role(name)
+
     style_options = data.get("style_options", {})
     for key, options in STYLE_DICTIONARY.items():
         value = style_options.get(key)
@@ -173,7 +181,8 @@ def generate_profile(user_id: str, name: str, answers: List[str], color: Optiona
     profile_row = {
         "name": name,
         "color": color,
-        "description": data.get("description", ""),
+        "description": description,
+        "role": role_label,
         "prompt_core": data.get("prompt_core", ""),
         "is_active": True,
     }
@@ -202,7 +211,7 @@ def generate_profile(user_id: str, name: str, answers: List[str], color: Optiona
     user_profile_row = {"user_id": user_id, "profile_name": name}
     _execute(supabase.table("user_profiles").insert(user_profile_row).single().execute())
 
-    return {"name": name, "color": color}
+    return {"name": name, "color": color, "description": description, "role": role_label}
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
