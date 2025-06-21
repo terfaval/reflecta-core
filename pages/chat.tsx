@@ -123,6 +123,7 @@ export default function ChatPage() {
             color: map[p.name]?.color || '#fff',
             role: map[p.name]?.role || '',
             userColor: (profileStyles[p.name] || {})['--user-color'] || '#000',
+            bgColor: (profileStyles[p.name] || {})['--bg-color'] || '#fff',
           }));
 
           let personalProfile: ProfileCard | null = null;
@@ -135,6 +136,7 @@ export default function ChatPage() {
               color: pm.color,
               role: '',
               userColor: '#000',
+              bgColor: '#fff',
               personal: true,
             };
           }
