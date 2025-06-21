@@ -3,6 +3,7 @@ import styles from './ProfileCard.module.css';
 
 export interface ProfileCardProps {
   name: string;
+  role: string;
   description: string;
   icon: string;
   color: string;
@@ -10,20 +11,33 @@ export interface ProfileCardProps {
   onSelect: () => void;
 }
 
-export default function ProfileCard({ name, description, icon, color, userColor, onSelect }: ProfileCardProps) {
+function hexToRgba(hex: string, alpha: number) {
+  const h = hex.replace('#', '');
+  const bigint = parseInt(h, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+export default function ProfileCard({ name, role, description, icon, color, userColor, onSelect }: ProfileCardProps) {
+  const glow = hexToRgba(userColor, 0.4);
   return (
     <div
       className={styles.card}
       style={{
-        '--bg': color,
-        '--user': userColor,
+        '--bg-color': color,
+        '--user-color': userColor,
+        '--glow-color': glow,
+        '--icon-url': `url(${icon})`,
       } as React.CSSProperties}
       onClick={onSelect}
     >
       <div className={styles.iconWrap}>
-        <img src={icon} alt="" className={styles.icon} />
+        <div className={styles.icon} />
       </div>
       <h3 className={styles.name}>{name}</h3>
+      <p className={styles.role}>{role}</p>
       <p className={styles.desc}>{description}</p>
     </div>
   );

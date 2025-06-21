@@ -11,13 +11,8 @@
   overflow: hidden;
 }
 
-.card:hover {
-  transform: translateY(-4px);
-}
-
 .iconWrap {
   width: 4rem;
-  color: var(--user-color);
   height: 3rem;
   margin: 0 auto 0.5rem auto;
   display: flex;
@@ -28,12 +23,27 @@
 .icon {
   width: 100%;
   height: 100%;
+  fill: var(--user-color);
+  mask: var(--icon-url) no-repeat center / contain;
+  -webkit-mask: var(--icon-url) no-repeat center / contain;
+  transition: filter 0.3s ease;
+}
+
+.card:hover .icon {
+  filter: drop-shadow(0 0 6px var(--glow-color));
 }
 
 .name {
   font-weight: 600;
   margin-bottom: 0.25rem;
 }
+
+.role {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
 .desc {
   font-size: 0.875rem;
   opacity: 0;

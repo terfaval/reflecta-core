@@ -60,15 +60,16 @@ export default function ProfileSelectorPage() {
           }
         );
         if (meta.profiles) {
-          const map: Record<string, { description: string; color: string }> = {};
+          const map: Record<string, { description: string; color: string; role?: string }> = {};
           (meta.profiles || []).forEach((p: any) => {
-            map[p.name] = { description: p.description, color: p.color };
+            map[p.name] = { description: p.description, color: p.color, role: p.role };
           });
           setProfiles(
             DEFAULT_PROFILES.map(p => ({
               ...p,
               description: map[p.name]?.description || '',
               color: map[p.name]?.color || '#fff',
+              role: map[p.name]?.role || '',
               userColor: (profileStyles[p.name] || {})['--user-color'] || '#000',
             }))
           );
