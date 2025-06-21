@@ -39,7 +39,7 @@ export default function ProfileSelectorSidebar() {
       try {
         const names = DEFAULT_PROFILES.map(p => p.name);
         const data = await apiFetch<{ profiles: any[]; personalProfile?: string; role?: string; error?: string }>(
-          '/profile-list',
+          '/api/profile-list',
           {
             method: 'POST',
             body: JSON.stringify({ userId, names }),

@@ -101,7 +101,7 @@ export default function ChatPage() {
       try {
         const names = DEFAULT_PROFILES.map(p => p.name);
         const meta = await apiFetch<{ profiles: any[]; error?: string }>(
-          '/profile-list',
+          '/api/profile-list',
           {
             method: 'POST',
             body: JSON.stringify({ userId, names }),

@@ -45,7 +45,7 @@ export default function ProfileBuilder() {
 
   useEffect(() => {
     if (!userId) return;
-    apiFetch<{ role?: string; personalProfile?: string }>('/profile-list', {
+    apiFetch<{ role?: string; personalProfile?: string }>('/api/profile-list', {
       method: 'POST',
       body: JSON.stringify({ userId })
     })

@@ -35,7 +35,7 @@ export default function ProfileSelectorPage() {
     const load = async () => {
       try {
         const data = await apiFetch<{ hasHistory: boolean; profile?: string }>(
-          '/has-history',
+          '/api/has-history',
           {
             method: 'POST',
             body: JSON.stringify({ userId }),
@@ -53,7 +53,7 @@ export default function ProfileSelectorPage() {
       try {
         const names = DEFAULT_PROFILES.map(p => p.name);
         const meta = await apiFetch<{ profiles: any[]; error?: string }>(
-          '/profile-list',
+          '/api/profile-list',
           {
             method: 'POST',
             body: JSON.stringify({ userId, names }),

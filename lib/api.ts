@@ -1,18 +1,15 @@
-export async function apiFetch<T = any>(path: string, options: RequestInit = {}): Promise<T> {
+export async function apiFetch<T = any>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
   const base =
     process.env.NEXT_PUBLIC_BACKEND_URL ||
     (process.env.NEXT_PUBLIC_API_HOST as string | undefined) ||
     '';
 
-  let url = path;
-  if (!/^https?:\/\//.test(path)) {
-    const trimmedBase = base.replace(/\/$/, '');
-    let normalized = path.replace(/^\/+/, '');
-    if (!normalized.startsWith('api/')) {
-      normalized = `api/${normalized}`;
-    }
-    url = `${trimmedBase}/${normalized}`;
-  }
+  const url = /^https?:\/\//.test(path)
+    ? path
+    : `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 
   const headers: HeadersInit = { 'Content-Type': 'application/json', ...(options.headers || {}) };
 
