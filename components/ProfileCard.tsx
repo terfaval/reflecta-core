@@ -26,7 +26,7 @@ export default function ProfileCard({ name, role, description, icon, color, user
     <div
       className={styles.card}
       style={{
-        '--bg-color': color,
+        '--bg-color': 'white',
         '--user-color': userColor,
         '--glow-color': glow,
         '--icon-url': `url(${icon})`,
