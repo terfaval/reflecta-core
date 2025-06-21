@@ -6,11 +6,22 @@ import { useProfileContext } from '@/contexts/ProfileContext';
 
 import { apiFetch } from 'lib/api';
 
+function insertProfile(
+  list: ProfileMeta[],
+  profile: ProfileMeta,
+  index: number
+): ProfileMeta[] {
+  const arr = [...list];
+  arr.splice(index, 0, profile);
+  return arr;
+}
+
 interface ProfileMeta {
   name: string;
   description: string;
   color: string;
   icon: string;
+  personal?: boolean;
 }
 
 const DEFAULT_PROFILES: { name: string; icon: string }[] = [
@@ -50,24 +61,36 @@ export default function ProfileSelectorSidebar() {
           (data.profiles || []).forEach((p: any) => {
             metaMap[p.name] = { description: p.description, color: p.color };
           });
-          setProfiles(
-            DEFAULT_PROFILES.map(p => ({
-              ...p,
-              description: metaMap[p.name]?.description || '',
-              color: metaMap[p.name]?.color || '#000',
-              icon: p.icon,
-            }))
-          );
+          const defaults = DEFAULT_PROFILES.map(p => ({
+            ...p,
+            description: metaMap[p.name]?.description || '',
+            color: metaMap[p.name]?.color || '#000',
+            icon: p.icon,
+          }));
+
+          let personalProfile: ProfileMeta | null = null;
           if (data.personalProfile) {
             const personalMeta = metaMap[data.personalProfile] || { description: '', color: '#000' };
-            setPersonal({
+            personalProfile = {
               name: data.personalProfile,
               icon: '',
               description: personalMeta.description,
               color: personalMeta.color,
-            });
+            personal: true,
+            };
+            setPersonal(personalProfile);
+          } else {
+            setPersonal(null);
           }
-          setRole(data.role || 'basic');
+
+          const roleVal = data.role || 'basic';
+          setRole(roleVal);
+
+          let finalProfiles = defaults;
+          if (personalProfile && (roleVal === 'premium' || roleVal === 'admin')) {
+            finalProfiles = insertProfile(defaults, personalProfile, 1);
+          }
+          setProfiles(finalProfiles);
         } else {
           console.error('[profile-list]', data.error);
         }
@@ -94,19 +117,30 @@ export default function ProfileSelectorSidebar() {
           onMouseEnter={e => (e.currentTarget.style.backgroundColor = p.color)}
           onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'white')}
         >
-          <img
-            src={p.icon}
-            alt=""
-            className="w-6 h-6 filter grayscale brightness-0 group-hover:brightness-200 group-hover:invert"
-          />
+          {p.icon ? (
+            <img
+              src={p.icon}
+              alt=""
+              className="w-6 h-6 filter grayscale brightness-0 group-hover:brightness-200 group-hover:invert"
+            />
+          ) : (
+            <div className="w-6 h-6 bg-gray-300 rounded-full group-hover:bg-white" />
+          )}
           <div className="flex flex-col items-start">
-            <span>{p.name}</span>
+            <span className="flex items-center gap-1">
+              {p.name}
+              {p.personal && (
+                <span className="text-[10px] px-1 py-0.5 bg-blue-500 text-white rounded">
+                  Saját
+                </span>
+              )}
+            </span>
             <span className="text-xs opacity-75 leading-tight">{p.description}</span>
           </div>
         </button>
       ))}
 
-      {personal && (
+      {personal && role !== 'premium' && role !== 'admin' && (
         <button
           onClick={() => goto(personal.name)}
           className="group flex items-center gap-2 p-2 rounded transition-colors ease-in duration-200 text-black hover:text-white"
