@@ -71,7 +71,11 @@ export default function ProfileSelectorPage() {
             map[p.name] = { description: p.description, color: p.color, role: p.role };
           });
           const defaults = DEFAULT_PROFILES.map(p => {
-            const style = profileStyles[p.name] ?? { '--user-color': '#000', '--bg-color': '#fff' };
+            const style =
+              profileStyles[p.name] ?? {
+                '--user-color': '#000',
+                '--bg-color': '#fff',
+              };
             return {
               ...p,
               description: map[p.name]?.description || '',
@@ -98,14 +102,16 @@ export default function ProfileSelectorPage() {
             };
           }
 
-          let list = defaults;
+          const blankProfile = defaults[0];
+          let coreProfiles = defaults.slice(1);
           if (personalProfile) {
-            const arr = [...defaults];
-            if (!arr.some(p => p.name === personalProfile.name)) {
-              arr.splice(1, 0, personalProfile);
-            }
-            list = arr;
+            coreProfiles = coreProfiles.filter(p => p.name !== personalProfile.name);
           }
+          const list = [
+            blankProfile,
+            ...(personalProfile ? [personalProfile] : []),
+            ...coreProfiles,
+          ];
           setProfiles(list);
         } else {
           console.error('[profile-list]', meta.error);
