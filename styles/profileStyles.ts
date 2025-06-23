@@ -18,6 +18,11 @@ export const profileStyles: Record<string, React.CSSProperties & Record<string, 
     '--user-color': '#FBD96A',
     '--ai-color': '#FCE69E',
   },
+  luma: {
+    '--bg-color': '#ffffff',
+    '--user-color': '#FBD96A',
+    '--ai-color': '#FCE69E',
+  },
   Sylva: {
     '--bg-color': '#ffffff',
     '--user-color': '#84BD78',
@@ -44,6 +49,11 @@ export const profileStyles: Record<string, React.CSSProperties & Record<string, 
     '--ai-color': '#BFC6DB',
   },
   Oneiros: {
+    '--bg-color': '#ffffff',
+    '--user-color': '#4D73BF',
+    '--ai-color': '#BECCE8',
+  },
+  oneiros: {
     '--bg-color': '#ffffff',
     '--user-color': '#4D73BF',
     '--ai-color': '#BECCE8',

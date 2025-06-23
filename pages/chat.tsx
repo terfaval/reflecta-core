@@ -62,7 +62,10 @@ export default function ChatPage() {
   const isFetchingRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
-  const currentStyle = profileStyles[profile as string] || {};
+  const currentStyle =
+    profileStyles[profile as string] ||
+    profileStyles[(profile as string)?.toLowerCase()] ||
+    {};
   const [showProfileSelect, setShowProfileSelect] = useState(false);
   const [profiles, setProfiles] = useState<ProfileCard[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
@@ -122,8 +125,14 @@ export default function ChatPage() {
             description: map[p.name]?.description || '',
             color: map[p.name]?.color || '#fff',
             role: map[p.name]?.role || '',
-            userColor: (profileStyles[p.name] || {})['--user-color'] || '#000',
-            bgColor: (profileStyles[p.name] || {})['--bg-color'] || '#fff',
+            userColor:
+              (profileStyles[p.name] ||
+                profileStyles[p.name.toLowerCase()] || {})['--user-color'] ||
+              '#000',
+            bgColor:
+              (profileStyles[p.name] ||
+                profileStyles[p.name.toLowerCase()] || {})['--bg-color'] ||
+              '#fff',
           }));
 
           let personalProfile: ProfileCard | null = null;

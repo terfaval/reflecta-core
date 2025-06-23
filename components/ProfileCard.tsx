@@ -43,7 +43,9 @@ export default function ProfileCard({ name, role, description, iconName, color, 
       </div>
       <h3 className={styles.name}>{name}</h3>
       <p className={styles.role}>{role}</p>
-      <p className={styles.desc}>{description}</p>
+      <div className={styles.descWrap}>
+        <p className={styles.desc}>{description}</p>
+      </div>
     </div>
   );
 }

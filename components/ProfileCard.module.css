@@ -19,8 +19,8 @@
 }
 
 .iconWrap {
-  width: 100%;
-  height: 6rem;
+  width: 300px;
+  height: 300px;
   margin: 0 auto 1rem auto;
   display: flex;
   align-items: center;
@@ -29,13 +29,32 @@
   z-index: 1;
 }
 
+.iconWrap::after {
+  content: '';
+  position: absolute;
+  bottom: 0.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 40%;
+  background-color: var(--glow-color);
+  border-radius: 50%;
+  filter: blur(10px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
 .icon {
   width: 100%;
   height: 100%;
+  position: relative;
+  z-index: 1;
 }
 
-.card:hover .icon {
-  filter: drop-shadow(0 0 6px var(--glow-color));
+.card:hover .iconWrap::after {
+  opacity: 1;
 }
 
 .name {
@@ -50,16 +69,23 @@
   margin-bottom: 0.25rem;
 }
 
+.descWrap {
+  min-height: 4rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
 .desc {
   font-size: 0.875rem;
   opacity: 0;
-  max-height: 0;
-  transition: opacity 0.3s ease, max-height 0.3s ease;
+  transform: translateY(-100%);
+  transition: opacity 0.3s ease, transform 0.3s ease;
   overflow: hidden;
 }
 .card:hover .desc {
   opacity: 1;
-  max-height: 8rem;
+  transform: translateY(0);
 }
 
 .personalBadge {

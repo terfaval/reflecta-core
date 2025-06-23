@@ -8,7 +8,7 @@
   width: 100%;
   max-width: 90%;
   height: 100vh;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .track {
@@ -21,7 +21,6 @@
 .arrow {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
   z-index: 1;
   background: none;
   border: none;
@@ -39,10 +38,12 @@
 
 .arrow.left {
   left: 0;
+  transform: translate(-100%, -50%);
 }
 
 .arrow.right {
   right: 0;
+  transform: translate(100%, -50%);
 }
 
 .arrow:hover {

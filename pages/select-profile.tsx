@@ -72,7 +72,8 @@ export default function ProfileSelectorPage() {
           });
           const defaults = DEFAULT_PROFILES.map(p => {
             const style =
-              profileStyles[p.name] ?? {
+              profileStyles[p.name] ||
+              profileStyles[p.name.toLowerCase()] || {
                 '--user-color': '#000',
                 '--bg-color': '#fff',
               };
@@ -89,7 +90,10 @@ export default function ProfileSelectorPage() {
           let personalProfile: Meta | null = null;
           if (meta.personalProfile) {
             const pm = map[meta.personalProfile] || { description: '', color: '#fff' };
-            const style = profileStyles[meta.personalProfile] ?? { '--user-color': '#000', '--bg-color': '#fff' };
+            const style =
+              profileStyles[meta.personalProfile] ||
+              profileStyles[meta.personalProfile.toLowerCase()] ||
+              { '--user-color': '#000', '--bg-color': '#fff' };
             personalProfile = {
               name: meta.personalProfile,
               iconName: null,
