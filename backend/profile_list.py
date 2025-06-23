@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from .supabase_client import supabase, _execute
@@ -73,7 +74,10 @@ async def profile_list(payload: ProfileListRequest) -> Dict[str, Any]:
     try:
         user_id = payload.userId
         if not user_id:
-            raise HTTPException(status_code=400, detail="Missing userId")
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Hiányzó adat vagy érvénytelen lekérés."},
+            )
 
         names = list(payload.names or [])
 
@@ -89,7 +93,9 @@ async def profile_list(payload: ProfileListRequest) -> Dict[str, Any]:
             "personalProfiles": personal,
             "role": role,
         }
-    except HTTPException:
-        raise
     except Exception as exc:  # pragma: no cover - unexpected error
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        print(f"[profile_list] Unexpected error: {exc}")
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Hiányzó adat vagy érvénytelen lekérés."},
+        )

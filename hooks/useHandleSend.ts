@@ -40,14 +40,14 @@ export function useHandleSend({
     if (isTrigger) {
       setIsClosing(true);
       try {
-        const data = await apiFetch<{ closureEntry: string; label: string }>(
+        const data = await apiFetch<{ closureEntry?: string; label?: string }>(
           '/session/close',
           {
             method: 'POST',
             body: JSON.stringify({ sessionId }),
           }
         );
-        if (data) {
+        if (data?.closureEntry && data?.label) {
           const now = new Date().toISOString();
           setEntries(prev => [
             ...prev,
@@ -93,12 +93,14 @@ export function useHandleSend({
       created_at: new Date().toISOString(),
     }]);
 
-    const { content } = await apiFetch<{ content: string }>('/respond', {
+    const resp = await apiFetch<{ content?: string }>('/respond', {
       method: 'POST',
       body: JSON.stringify({ sessionId }),
     });
 
-    setEntries(prev => prev.map(e => (e.id === thinkingId ? { ...e, content } : e)));
+    const reply = resp?.content ?? '';
+
+    setEntries(prev => prev.map(e => (e.id === thinkingId ? { ...e, content: reply } : e)));
     setLoading(false);
   }, [sessionId, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing]);
 }

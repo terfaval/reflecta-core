@@ -49,14 +49,14 @@ export default function ProfileSelectorSidebar() {
       if (!userId) return;
       try {
         const names = DEFAULT_PROFILES.map(p => p.name);
-        const data = await apiFetch<{ profiles: any[]; personalProfiles?: string[]; role?: string; error?: string }>(
+        const data = await apiFetch<{ profiles?: any[]; personalProfiles?: string[]; role?: string; error?: string }>(
           '/api/profile-list',
           {
             method: 'POST',
             body: JSON.stringify({ userId, names }),
           }
         );
-        if (data) {
+        if (data && Array.isArray(data.profiles)) {
           const metaMap: Record<string, { description: string; color: string }> = {};
           (data.profiles || []).forEach((p: any) => {
             metaMap[p.name] = { description: p.description, color: p.color };
@@ -93,7 +93,7 @@ export default function ProfileSelectorSidebar() {
           }
           setProfiles(finalProfiles);
         } else {
-          console.error('[profile-list]', data.error);
+          console.error('[profile-list]', data?.error);
         }
       } catch (err) {
         console.error('[profile-list] fetch error', err);

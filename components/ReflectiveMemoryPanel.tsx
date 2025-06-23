@@ -22,11 +22,11 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
     if (!sessionId) return;
     const load = async () => {
       try {
-        const data = await apiFetch<{ labels: MemoryLabel[] }>(
+        const data = await apiFetch<{ labels?: MemoryLabel[] }>(
           `/memory/summary?sessionId=${sessionId}`
         );
         // expecting { labels: MemoryLabel[] }
-        setItems(data.labels || []);
+        setItems(Array.isArray(data?.labels) ? data.labels : []);
       } catch (err) {
         console.error('Failed to fetch memory summary', err);
       }

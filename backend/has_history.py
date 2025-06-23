@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import Dict, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from .supabase_client import supabase, _execute
@@ -19,7 +20,10 @@ async def has_history(payload: HistoryRequest) -> Dict[str, Optional[str]]:
     try:
         user_id = payload.userId
         if not user_id:
-            raise HTTPException(status_code=400, detail="Missing userId")
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Hiányzó adat vagy érvénytelen lekérés."},
+            )
         result = (
             supabase.table("sessions")
             .select("id, profile")
@@ -30,11 +34,13 @@ async def has_history(payload: HistoryRequest) -> Dict[str, Optional[str]]:
             .execute()
         )
         row = _execute(result)
-        
+
         if row:
             return {"hasHistory": True, "profile": row.get("profile")}
         return {"hasHistory": False, "profile": None}
-    except HTTPException:
-        raise
     except Exception as exc:  # pragma: no cover - unexpected error
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        print(f"[has_history] Unexpected error: {exc}")
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Hiányzó adat vagy érvénytelen lekérés."},
+        )

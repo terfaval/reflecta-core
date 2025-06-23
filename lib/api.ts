@@ -14,17 +14,15 @@ export async function apiFetch<T = any>(
   const headers: HeadersInit = { 'Content-Type': 'application/json', ...(options.headers || {}) };
 
   const response = await fetch(url, { ...options, headers });
-  let data: T | { error?: string };
-  try {
-    data = await response.json();
-  } catch {
-    data = {} as T;
-  }
+
   if (!response.ok) {
-    const message = (data as any).error || response.statusText;
-    const error: any = new Error(message);
-    error.status = response.status;
-    throw error;
+    throw new Error(`API hiba: ${response.status}`);
   }
-  return data as T;
+
+  try {
+    const data = await response.json();
+    return data as T;
+  } catch {
+    return {} as T;
+  }
 }

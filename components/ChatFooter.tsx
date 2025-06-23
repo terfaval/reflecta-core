@@ -65,7 +65,7 @@ export function ChatFooter({
                 if (!sessionId || isClosing || assistantReplyCount < 3) return;
                 setIsClosing(true);
                 try {
-                  const data = await apiFetch<{ closureEntry: string; label: string }>(
+                  const data = await apiFetch<{ closureEntry?: string; label?: string }>(
                     '/session/close',
                     {
                       method: 'POST',
@@ -73,7 +73,7 @@ export function ChatFooter({
                     }
                   );
 
-                  if (data) {
+                  if (data?.closureEntry && data?.label) {
                     const now = new Date().toISOString();
                     setEntries(prev => [
                       ...prev,
