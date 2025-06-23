@@ -23,6 +23,6 @@ export const ProfileIcon = ({
   color: string;
 }) => (
   <div style={{ width: '100%', height: '100%', color }}>
-    <Icon style={{ width: '100%', height: '100%' }} />
+    <Icon style={{ width: '100%', height: '100%', fill: 'currentColor' }} />
   </div>
 );

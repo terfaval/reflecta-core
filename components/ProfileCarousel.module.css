@@ -15,6 +15,8 @@
   gap: 1rem;
   flex-wrap: nowrap;
   overflow: visible;
+  transition: transform 0.3s ease;
+  touch-action: pan-y;
 }
 
 .arrow {
