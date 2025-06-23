@@ -37,13 +37,13 @@
 }
 
 .arrow.left {
-  left: 0;
-  transform: translate(-100%, -50%);
+  left: -1.5rem;
+  transform: translateY(-50%);
 }
 
 .arrow.right {
-  right: 0;
-  transform: translate(100%, -50%);
+  right: -1.5rem;
+  transform: translateY(-50%);
 }
 
 .arrow:hover {

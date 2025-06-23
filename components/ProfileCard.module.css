@@ -19,8 +19,8 @@
 }
 
 .iconWrap {
-  width: 300px;
-  height: 300px;
+  width: 8rem;
+  height: 8rem;
   margin: 0 auto 1rem auto;
   display: flex;
   align-items: center;
@@ -32,11 +32,11 @@
 .iconWrap::after {
   content: '';
   position: absolute;
-  bottom: 0.25rem;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  width: 70%;
-  height: 40%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
   background-color: var(--glow-color);
   border-radius: 50%;
   filter: blur(10px);
@@ -70,22 +70,22 @@
 }
 
 .descWrap {
-  min-height: 4rem;
+  height: 4rem;
   display: flex;
   align-items: flex-start;
   justify-content: center;
+  overflow: hidden;
 }
 
 .desc {
   font-size: 0.875rem;
   opacity: 0;
-  transform: translateY(-100%);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  overflow: hidden;
+  max-height: 0;
+  transition: opacity 0.3s ease, max-height 0.3s ease;
 }
 .card:hover .desc {
   opacity: 1;
-  transform: translateY(0);
+  max-height: 4rem;
 }
 
 .personalBadge {

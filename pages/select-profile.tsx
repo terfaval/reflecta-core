@@ -55,7 +55,7 @@ export default function ProfileSelectorPage() {
         const names = DEFAULT_PROFILES.map(p => p.name);
         const meta = await apiFetch<{
           profiles: any[];
-          personalProfile?: string | null;
+          personalProfiles?: string[];
           role?: string;
           error?: string;
         }>(
@@ -87,15 +87,15 @@ export default function ProfileSelectorPage() {
             };
           });
 
-          let personalProfile: Meta | null = null;
-          if (meta.personalProfile) {
-            const pm = map[meta.personalProfile] || { description: '', color: '#fff' };
+          const personalProfiles: Meta[] = [];
+          (meta.personalProfiles || []).forEach(name => {
+            const pm = map[name] || { description: '', color: '#fff' };
             const style =
-              profileStyles[meta.personalProfile] ||
-              profileStyles[meta.personalProfile.toLowerCase()] ||
+              profileStyles[name] ||
+              profileStyles[name.toLowerCase()] ||
               { '--user-color': '#000', '--bg-color': '#fff' };
-            personalProfile = {
-              name: meta.personalProfile,
+            personalProfiles.push({
+              name,
               iconName: null,
               description: pm.description,
               color: pm.color,
@@ -103,19 +103,16 @@ export default function ProfileSelectorPage() {
               userColor: style['--user-color'],
               bgColor: style['--bg-color'],
               personal: true,
-            };
-          }
+            });
+          });
 
           const blankProfile = defaults[0];
           let coreProfiles = defaults.slice(1);
-          if (personalProfile) {
-            coreProfiles = coreProfiles.filter(p => p.name !== personalProfile.name);
-          }
-          const list = [
-            blankProfile,
-            ...(personalProfile ? [personalProfile] : []),
-            ...coreProfiles,
-          ];
+          personalProfiles.forEach(pp => {
+            coreProfiles = coreProfiles.filter(p => p.name !== pp.name);
+          });
+          const list = [blankProfile, ...personalProfiles, ...coreProfiles];
+
           setProfiles(list);
         } else {
           console.error('[profile-list]', meta.error);

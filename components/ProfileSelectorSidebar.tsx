@@ -49,7 +49,7 @@ export default function ProfileSelectorSidebar() {
       if (!userId) return;
       try {
         const names = DEFAULT_PROFILES.map(p => p.name);
-        const data = await apiFetch<{ profiles: any[]; personalProfile?: string; role?: string; error?: string }>(
+        const data = await apiFetch<{ profiles: any[]; personalProfiles?: string[]; role?: string; error?: string }>(
           '/api/profile-list',
           {
             method: 'POST',
@@ -68,27 +68,28 @@ export default function ProfileSelectorSidebar() {
             icon: p.icon,
           }));
 
-          let personalProfile: ProfileMeta | null = null;
-          if (data.personalProfile) {
-            const personalMeta = metaMap[data.personalProfile] || { description: '', color: '#000' };
-            personalProfile = {
-              name: data.personalProfile,
+          const personalProfiles: ProfileMeta[] = [];
+          (data.personalProfiles || []).forEach(name => {
+            const personalMeta = metaMap[name] || { description: '', color: '#000' };
+            personalProfiles.push({
+              name,
               icon: '',
               description: personalMeta.description,
               color: personalMeta.color,
-            personal: true,
-            };
-            setPersonal(personalProfile);
-          } else {
-            setPersonal(null);
-          }
+              personal: true,
+            });
+          });
+          setPersonal(personalProfiles[0] || null);
 
           const roleVal = data.role || 'basic';
           setRole(roleVal);
 
           let finalProfiles = defaults;
-          if (personalProfile && (roleVal === 'premium' || roleVal === 'admin')) {
-            finalProfiles = insertProfile(defaults, personalProfile, 1);
+          if (personalProfiles.length && (roleVal === 'premium' || roleVal === 'admin')) {
+            finalProfiles = [...defaults];
+            personalProfiles.forEach((pp, idx) => {
+              finalProfiles = insertProfile(finalProfiles, pp, 1 + idx);
+            });
           }
           setProfiles(finalProfiles);
         } else {

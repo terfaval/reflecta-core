@@ -36,7 +36,7 @@ def _fetch_user_role(user_id: str) -> str:
     return row.get("role") or "basic"
 
 
-def _fetch_personal_profile_name(user_id: str) -> Optional[str]:
+def _fetch_personal_profile_names(user_id: str) -> List[str]:
     try:
         result = (
             supabase.table("user_profiles")
@@ -45,11 +45,11 @@ def _fetch_personal_profile_name(user_id: str) -> Optional[str]:
             .maybe_single()
             .execute()
         )
-        row = _execute(result)
+        rows = _execute(result)
     except Exception as exc:
-        raise HTTPException(500, f"Failed to load personal profile: {exc}") from exc
+        raise HTTPException(500, f"Failed to load personal profiles: {exc}") from exc
 
-    return row.get("profile_name") if row else None
+    return [r.get("profile_name") for r in rows or [] if r.get("profile_name")]
 
 
 def _fetch_profiles(names: List[str]) -> List[Dict[str, Any]]:
@@ -77,14 +77,14 @@ async def profile_list(payload: ProfileListRequest) -> Dict[str, Any]:
     names = list(payload.names or [])
 
     role = _fetch_user_role(user_id)
-    personal = _fetch_personal_profile_name(user_id)
+    personal = _fetch_personal_profile_names(user_id)
     if personal:
-        names.append(personal)
+        names.extend(personal)
 
     profiles = _fetch_profiles(names)
 
     return {
         "profiles": profiles,
-        "personalProfile": personal or None,
+        "personalProfiles": personal,
         "role": role,
     }

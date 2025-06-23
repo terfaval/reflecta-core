@@ -105,7 +105,7 @@ export default function ChatPage() {
         const names = DEFAULT_PROFILES.map(p => p.name);
         const meta = await apiFetch<{
           profiles: any[];
-          personalProfile?: string | null;
+          personalProfiles?: string[];
           role?: string;
           error?: string;
         }>(
@@ -135,11 +135,11 @@ export default function ChatPage() {
               '#fff',
           }));
 
-          let personalProfile: ProfileCard | null = null;
-          if (meta.personalProfile) {
-            const pm = map[meta.personalProfile] || { description: '', color: '#fff' };
-            personalProfile = {
-              name: meta.personalProfile,
+          const personalProfiles: ProfileCard[] = [];
+          (meta.personalProfiles || []).forEach(name => {
+            const pm = map[name] || { description: '', color: '#fff' };
+            personalProfiles.push({
+              name,
               iconName: undefined,
               description: pm.description,
               color: pm.color,
@@ -147,13 +147,13 @@ export default function ChatPage() {
               userColor: '#000',
               bgColor: '#fff',
               personal: true,
-            };
-          }
+            });
+          });
 
           let list = defaults;
-          if (personalProfile && (meta.role === 'premium' || meta.role === 'admin')) {
+          if (personalProfiles.length && (meta.role === 'premium' || meta.role === 'admin')) {
             const arr = [...defaults];
-            arr.splice(1, 0, personalProfile);
+            personalProfiles.forEach((pp, idx) => arr.splice(1 + idx, 0, pp));
             list = arr;
           }
           setProfiles(list);

@@ -12,7 +12,7 @@ interface Props {
 
 export default function ProfileCarousel({ profiles, onSelect }: Props) {
   const [index, setIndex] = useState(0);
-  const visibleCount = 5;
+  const visibleCount = 4;
 
   const prev = () => setIndex(i => (i - 1 + profiles.length) % profiles.length);
   const next = () => setIndex(i => (i + 1) % profiles.length);
