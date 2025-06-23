@@ -25,29 +25,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  z-index: 1;
 }
 
-.iconWrap::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  height: 100%;
-  background-color: var(--glow-color);
+.card:hover .iconWrap {
+  box-shadow: 0 0 10px var(--glow-color);
   border-radius: 50%;
-  filter: blur(10px);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.card:hover .iconWrap::after {
-  opacity: 1;
 }
 
 .name {
