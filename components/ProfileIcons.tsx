@@ -18,11 +18,15 @@ export const iconMap: Record<string, ComponentType<any>> = {
 export const ProfileIcon = ({
   icon: Icon,
   color,
+  size = '100%',
 }: {
   icon: ComponentType<any>;
   color: string;
+  size?: string | number;
 }) => (
-  <div style={{ width: '100%', height: '100%', color }}>
-    <Icon style={{ width: '100%', height: '100%', fill: 'currentColor' }} />
-  </div>
+  <Icon
+    width={size}
+    height={size}
+    style={{ color, fill: 'currentColor' }}
+  />
 );
