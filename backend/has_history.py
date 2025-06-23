@@ -15,11 +15,11 @@ class HistoryRequest(BaseModel):
 @router.post("/has-history")
 async def has_history(payload: HistoryRequest) -> Dict[str, Optional[str]]:
     """Return whether the user has any session and the last profile if available."""
-    user_id = payload.userId
-    if not user_id:
-        raise HTTPException(status_code=400, detail="Missing userId")
 
     try:
+        user_id = payload.userId
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Missing userId")
         result = (
             supabase.table("sessions")
             .select("id, profile")
@@ -30,9 +30,11 @@ async def has_history(payload: HistoryRequest) -> Dict[str, Optional[str]]:
             .execute()
         )
         row = _execute(result)
-    except Exception as exc:
-        raise HTTPException(500, f"Failed to load sessions: {exc}") from exc
-
-    if row:
-        return {"hasHistory": True, "profile": row.get("profile")}
-    return {"hasHistory": False, "profile": None}
+        
+        if row:
+            return {"hasHistory": True, "profile": row.get("profile")}
+        return {"hasHistory": False, "profile": None}
+    except HTTPException:
+        raise
+    except Exception as exc:  # pragma: no cover - unexpected error
+        raise HTTPException(status_code=500, detail=str(exc)) from exc

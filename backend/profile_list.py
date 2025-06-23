@@ -42,7 +42,6 @@ def _fetch_personal_profile_names(user_id: str) -> List[str]:
             supabase.table("user_profiles")
             .select("profile_name")
             .eq("user_id", user_id)
-            .maybe_single()
             .execute()
         )
         rows = _execute(result)
@@ -70,21 +69,27 @@ def _fetch_profiles(names: List[str]) -> List[Dict[str, Any]]:
 
 @router.post("/profile-list")
 async def profile_list(payload: ProfileListRequest) -> Dict[str, Any]:
-    user_id = payload.userId
-    if not user_id:
-        raise HTTPException(status_code=400, detail="Missing userId")
+    """Return profile metadata and role for the given user."""
+    try:
+        user_id = payload.userId
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Missing userId")
 
-    names = list(payload.names or [])
+        names = list(payload.names or [])
 
-    role = _fetch_user_role(user_id)
-    personal = _fetch_personal_profile_names(user_id)
-    if personal:
-        names.extend(personal)
+        role = _fetch_user_role(user_id)
+        personal = _fetch_personal_profile_names(user_id)
+        if personal:
+            names.extend(personal)
 
-    profiles = _fetch_profiles(names)
+        profiles = _fetch_profiles(names)
 
-    return {
-        "profiles": profiles,
-        "personalProfiles": personal,
-        "role": role,
-    }
+        return {
+            "profiles": profiles,
+            "personalProfiles": personal,
+            "role": role,
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:  # pragma: no cover - unexpected error
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
