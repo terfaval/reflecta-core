@@ -7,6 +7,7 @@ export const iconMap: Record<string, ComponentType<any>> = {
   LumaIcon: Icons.LumaIcon,
   SylvaIcon: Icons.SylvaIcon,
   ZentoIcon: Icons.ZentoIcon,
+  KairosIcon: Icons.KairosIcon,
   ReflectaIcon: Icons.ReflectaIcon,
   OneirosIcon: Icons.OneirosIcon,
   SolunIcon: Icons.SolunIcon,
@@ -15,7 +16,7 @@ export const iconMap: Record<string, ComponentType<any>> = {
 };
 
 export const ProfileIcon = ({ icon: Icon, color }: { icon: ComponentType<any>; color: string }) => (
-  <div style={{ width: '100%', height: '100%', fill: color }}>
+  <div style={{ width: '100%', height: '100%', color }}>
     <Icon />
   </div>
 );
