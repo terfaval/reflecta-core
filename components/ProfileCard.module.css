@@ -2,20 +2,24 @@
   background-color: var(--bg-color);
   color: #000;
   text-align: center;
-  padding: 1rem;
-  width: 12rem;
+  padding: 1.5rem;
+  width: 14rem;
+  aspect-ratio: 3 / 4;
   border-radius: 0.5rem;
   cursor: pointer;
   transition: transform 0.3s ease;
   font-family: 'Raleway', sans-serif;
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .iconWrap {
-  width: 4rem;
-  height: 4rem;
-  margin: 0 auto 0.5rem auto;
+  width: 100%;
+  height: 6rem;
+  margin: 0 auto 1rem auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -45,14 +49,11 @@
   font-size: 0.875rem;
   opacity: 0;
   max-height: 0;
-  transform: scaleY(0);
-  transform-origin: top;
-  transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease;
+  transition: opacity 0.3s ease, max-height 0.3s ease;
   overflow: hidden;
 }
 .card:hover .desc {
   opacity: 1;
-  transform: scaleY(1);
   max-height: 8rem;
 }
 

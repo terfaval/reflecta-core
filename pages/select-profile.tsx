@@ -70,26 +70,30 @@ export default function ProfileSelectorPage() {
           (meta.profiles || []).forEach((p: any) => {
             map[p.name] = { description: p.description, color: p.color, role: p.role };
           });
-          const defaults = DEFAULT_PROFILES.map(p => ({
-            ...p,
-            description: map[p.name]?.description || '',
-            color: map[p.name]?.color || '#fff',
-            role: map[p.name]?.role || '',
-            userColor: (profileStyles[p.name] || {})['--user-color'] || '#000',
-            bgColor: (profileStyles[p.name] || {})['--bg-color'] || '#fff',
-          }));
+          const defaults = DEFAULT_PROFILES.map(p => {
+            const style = profileStyles[p.name] ?? { '--user-color': '#000', '--bg-color': '#fff' };
+            return {
+              ...p,
+              description: map[p.name]?.description || '',
+              color: map[p.name]?.color || '#fff',
+              role: map[p.name]?.role || '',
+              userColor: style['--user-color'],
+              bgColor: style['--bg-color'],
+            };
+          });
 
           let personalProfile: Meta | null = null;
           if (meta.personalProfile) {
             const pm = map[meta.personalProfile] || { description: '', color: '#fff' };
+            const style = profileStyles[meta.personalProfile] ?? { '--user-color': '#000', '--bg-color': '#fff' };
             personalProfile = {
               name: meta.personalProfile,
               iconName: undefined,
               description: pm.description,
               color: pm.color,
               role: '',
-              userColor: '#000',
-              bgColor: '#fff',
+              userColor: style['--user-color'],
+              bgColor: style['--bg-color'],
               personal: true,
             };
           }
@@ -97,7 +101,9 @@ export default function ProfileSelectorPage() {
           let list = defaults;
           if (personalProfile && (meta.role === 'premium' || meta.role === 'admin')) {
             const arr = [...defaults];
-            arr.splice(1, 0, personalProfile);
+            if (!arr.some(p => p.name === personalProfile!.name)) {
+              arr.splice(1, 0, personalProfile);
+            }
             list = arr;
           }
           setProfiles(list);

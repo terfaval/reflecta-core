@@ -3,17 +3,19 @@
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  padding-left: 10%;
-  padding-right: 10%;
-  width: 70vw;
-  max-width: 70vw;
+  padding-left: 5%;
+  padding-right: 5%;
+  width: 85vw;
+  max-width: 85vw;
   height: 100vh;
+  overflow: hidden;
 }
 
 .track {
   display: flex;
   gap: 1rem;
   flex-wrap: nowrap;
+  overflow: visible;
 }
 
 .arrow {
