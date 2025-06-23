@@ -3,6 +3,7 @@ export { default as EanaIcon } from './EanaIcon.svg';
 export { default as LumaIcon } from './LumaIcon.svg';
 export { default as SylvaIcon } from './SylvaIcon.svg';
 export { default as ZentoIcon } from './ZentoIcon.svg';
+export { default as KairosIcon } from './KairosIcon.svg';
 export { default as ReflectaIcon } from './ReflectaIcon.svg';
 export { default as OneirosIcon } from './OneirosIcon.svg';
 export { default as SolunIcon } from './SolunIcon.svg';
