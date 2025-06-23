@@ -1,14 +1,13 @@
 .carousel {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  padding-left: 5%;
-  padding-right: 5%;
-  width: 85vw;
-  max-width: 85vw;
+  padding-inline: 2rem;
+  width: 100%;
+  max-width: 100%;
   height: 100vh;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .track {
@@ -19,6 +18,10 @@
 }
 
 .arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
   background: none;
   border: none;
   padding: 0;
@@ -29,9 +32,18 @@
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.arrow.left {
+  left: 0;
+}
+
+.arrow.right {
+  right: 0;
 }
 
 .arrow:hover {
   color: #555;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }

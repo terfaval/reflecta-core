@@ -23,7 +23,7 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
 
   return (
     <div className={styles.carousel}>
-      <button onClick={prev} className={styles.arrow} aria-label="Előző">
+      <button onClick={prev} className={`${styles.arrow} ${styles.left}`} aria-label="Előző">
         <ChevronLeft />
       </button>
       <div className={styles.track}>
@@ -31,7 +31,7 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
           <ProfileCardComponent key={p.name} {...p} onSelect={() => onSelect(p)} />
         ))}
       </div>
-      <button onClick={next} className={styles.arrow} aria-label="Következő">
+      <button onClick={next} className={`${styles.arrow} ${styles.right}`} aria-label="Következő">
         <ChevronRight />
       </button>
     </div>

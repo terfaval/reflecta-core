@@ -88,7 +88,7 @@ export default function ProfileSelectorPage() {
             const style = profileStyles[meta.personalProfile] ?? { '--user-color': '#000', '--bg-color': '#fff' };
             personalProfile = {
               name: meta.personalProfile,
-              iconName: undefined,
+              iconName: null,
               description: pm.description,
               color: pm.color,
               role: '',
@@ -99,9 +99,9 @@ export default function ProfileSelectorPage() {
           }
 
           let list = defaults;
-          if (personalProfile && (meta.role === 'premium' || meta.role === 'admin')) {
+          if (personalProfile) {
             const arr = [...defaults];
-            if (!arr.some(p => p.name === personalProfile!.name)) {
+            if (!arr.some(p => p.name === personalProfile.name)) {
               arr.splice(1, 0, personalProfile);
             }
             list = arr;
