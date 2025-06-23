@@ -15,8 +15,14 @@ export const iconMap: Record<string, ComponentType<any>> = {
   PreceptorIcon: Icons.PreceptorIcon,
 };
 
-export const ProfileIcon = ({ icon: Icon, color }: { icon: ComponentType<any>; color: string }) => (
-  <div style={{ width: '100%', height: '100%', color, fill: color }}>
-    <Icon />
+export const ProfileIcon = ({
+  icon: Icon,
+  color,
+}: {
+  icon: ComponentType<any>;
+  color: string;
+}) => (
+  <div style={{ width: '100%', height: '100%', color }}>
+    <Icon style={{ width: '100%', height: '100%' }} />
   </div>
 );

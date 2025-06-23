@@ -13,23 +13,29 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   gap: 0.5rem;
 }
 
 .iconWrap {
-  height: 45%;
-  aspect-ratio: 1 / 1;
+  width: 5rem;
+  height: 5rem;
   margin: 0 auto 1rem auto;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.card:hover .iconWrap {
-  box-shadow: 0 0 10px var(--glow-color);
-  border-radius: 50%;
+.iconWrap svg {
+  width: 100%;
+  height: 100%;
+}
+
+.card:hover .iconWrap svg {
+  filter:
+    drop-shadow(0 0 6px var(--glow-color))
+    drop-shadow(0 0 12px var(--glow-color));
 }
 
 .name {
