@@ -23,10 +23,13 @@ from .has_history import router as has_history_router
 
 app = FastAPI(title="Reflecta API")
 
-# Enable CORS for all origins during development
+# Configure CORS to allow requests from the frontend and WordPress site
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://reflecta-core.vercel.app",
+        "https://beenook.hu",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
