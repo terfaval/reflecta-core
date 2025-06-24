@@ -106,7 +106,7 @@ export default function ProfileSelectorPage() {
               };
 
             const def = DEFAULT_PROFILES.find((d) => d.name === name);
-            
+
             personalProfiles.push({
               name,
               iconName: def?.iconName || "ReflectaIcon",
@@ -161,6 +161,7 @@ export default function ProfileSelectorPage() {
       style={{
         height: "100vh",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         gap: "1.5rem",

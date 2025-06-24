@@ -93,19 +93,20 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
       >
         <ChevronLeft />
       </button>
-      <div
-        className={styles.track}
-        ref={trackRef}
-        style={{ transform: `translateX(${-index * itemWidth + dragX}px)` }}
-        {...swipeHandlers}
-      >
-        {visible.map((p) => (
-          <ProfileCardComponent
-            key={p.name}
-            {...p}
-            onSelect={() => onSelect(p)}
-          />
-        ))}
+      <div className={styles.viewport} {...swipeHandlers}>
+        <div
+          className={styles.track}
+          ref={trackRef}
+          style={{ transform: `translateX(${-index * itemWidth + dragX}px)` }}
+        >
+          {visible.map((p) => (
+            <ProfileCardComponent
+              key={p.name}
+              {...p}
+              onSelect={() => onSelect(p)}
+            />
+          ))}
+        </div>
       </div>
       <button
         onClick={next}
