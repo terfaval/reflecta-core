@@ -23,6 +23,7 @@
   height: 5rem;
   margin: 0 auto 1rem auto;
   display: flex;
+  object-fit: contain;
   align-items: center;
   justify-content: center;
 }
