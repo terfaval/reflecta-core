@@ -25,8 +25,6 @@ export const ProfileIcon = ({
   size?: string | number;
 }) => (
   <Icon
-    width={size}
-    height={size}
-    style={{ color, fill: 'currentColor' }}
+    style={{ width: size, height: size, color, fill: 'currentColor' }}
   />
 );
