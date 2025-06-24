@@ -36,6 +36,7 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [itemWidth, setItemWidth] = useState(1);
   const [dragX, setDragX] = useState(0);
+  const [dragging, setDragging] = useState(false);
 
   useLayoutEffect(() => {
     if (!trackRef.current) return;
@@ -49,14 +50,16 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
   // Always show four cards regardless of viewport size
 
   const swipeHandlers = useSwipeable({
+    onSwipeStart: () => setDragging(true),
     onSwiped: ({ dir, deltaX }) => {
       const threshold = itemWidth / 3;
       const distance = Math.abs(deltaX);
-      if (dir === "Left" && deltaX > threshold) next();
-      else if (dir === "Right" && deltaX > threshold) prev();
+      if (dir === "Left" && distance > threshold) next();
+      else if (dir === "Right" && distance > threshold) prev();
       setDragX(0);
+      setDragging(false);
     },
-    onSwiping: ({ deltaX }) => setDragX(-deltaX),
+    onSwiping: ({ deltaX }) => setDragX(deltaX),
     trackMouse: true,
     preventScrollOnSwipe: true,
   });
@@ -84,7 +87,7 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
       </button>
       <div className={styles.viewport} {...swipeHandlers}>
         <div
-          className={styles.track}
+          className={`${styles.track} ${dragging ? styles.dragging : ""}`}
           ref={trackRef}
           style={{ transform: `translateX(${-index * itemWidth + dragX}px)` }}
         >

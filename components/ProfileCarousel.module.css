@@ -31,6 +31,12 @@
   cursor: grab;
 }
 
+.dragging {
+  transition: none;
+  cursor: grabbing;
+}
+
+
 .arrow {
   position: absolute;
   top: 50%;
