@@ -18,19 +18,19 @@ interface Props {
 }
 
 export default function ProfileCarousel({ profiles, onSelect }: Props) {
-  const [index, setIndex] = useState(0);
   const visibleCount = 4;
 
-  const maxIndex = Math.max(0, profiles.length - visibleCount);
+  const clonesBefore = profiles.slice(-visibleCount);
+  const clonesAfter = profiles.slice(0, visibleCount);
+  const items = [...clonesBefore, ...profiles, ...clonesAfter];
 
-  const prev = useCallback(
-    () => setIndex((i) => Math.max(0, i - 1)),
-    [],
-  );
-  const next = useCallback(
-    () => setIndex((i) => Math.min(i + 1, maxIndex)),
-    [maxIndex],
-  );
+  const startIndex = visibleCount;
+  const endIndex = profiles.length + visibleCount;
+
+  const [index, setIndex] = useState(startIndex);
+
+  const prev = useCallback(() => setIndex((i) => i - 1), []);
+  const next = useCallback(() => setIndex((i) => i + 1), []);
 
   const trackRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -54,6 +54,10 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
     return () => window.removeEventListener("resize", update);
   }, [profiles.length]);
 
+  useEffect(() => {
+    setIndex(startIndex);
+  }, [profiles.length, startIndex]);
+
   // Always show four cards regardless of viewport size
 
   const swipeHandlers = useSwipeable({
@@ -70,6 +74,28 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
     trackMouse: true,
     preventScrollOnSwipe: true,
   });
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const handle = () => {
+      if (index >= endIndex) {
+        el.style.transition = "none";
+        setIndex((i) => i - profiles.length);
+        requestAnimationFrame(() => {
+          if (el) el.style.transition = "";
+        });
+      } else if (index < startIndex) {
+        el.style.transition = "none";
+        setIndex((i) => i + profiles.length);
+        requestAnimationFrame(() => {
+          if (el) el.style.transition = "";
+        });
+      }
+    };
+    el.addEventListener("transitionend", handle);
+    return () => el.removeEventListener("transitionend", handle);
+  }, [index, endIndex, startIndex, profiles.length]);
   
   useEffect(() => {
     const el = containerRef.current;
@@ -86,7 +112,6 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
     <div className={styles.carousel} tabIndex={0} ref={containerRef}>
       <button
         onClick={prev}
-        disabled={index === 0}
         className={`${styles.arrow} ${styles.left}`}
         aria-label="Előző"
       >
@@ -98,9 +123,9 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
           ref={trackRef}
           style={{ transform: `translateX(${-index * itemWidth + dragX}px)` }}
         >
-          {profiles.map((p) => (
+          {items.map((p, idx) => (
             <ProfileCardComponent
-              key={p.name}
+              key={`${p.name}-${idx}`}
               {...p}
               onSelect={() => onSelect(p)}
             />
@@ -109,7 +134,6 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
       </div>
       <button
         onClick={next}
-        disabled={index === maxIndex}
         className={`${styles.arrow} ${styles.right}`}
         aria-label="Következő"
       >
