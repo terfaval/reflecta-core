@@ -21,13 +21,15 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
   const [index, setIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(4);
 
+  const maxIndex = Math.max(0, profiles.length - visibleCount);
+
   const prev = useCallback(
-    () => setIndex((i) => (i - 1 + profiles.length) % profiles.length),
-    [profiles.length],
+    () => setIndex((i) => Math.max(0, i - 1)),
+    [],
   );
   const next = useCallback(
-    () => setIndex((i) => (i + 1) % profiles.length),
-    [profiles.length],
+    () => setIndex((i) => Math.min(i + 1, maxIndex)),
+    [maxIndex],
   );
 
   const trackRef = useRef<HTMLDivElement>(null);
@@ -80,14 +82,11 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
     return () => el.removeEventListener("keydown", handleKey);
   }, [prev, next]);
 
-  const visible = Array.from({ length: visibleCount }, (_, idx) => {
-    return profiles[(index + idx) % profiles.length];
-  });
-
   return (
     <div className={styles.carousel} tabIndex={0} ref={containerRef}>
       <button
         onClick={prev}
+        disabled={index === 0}
         className={`${styles.arrow} ${styles.left}`}
         aria-label="Előző"
       >
@@ -99,7 +98,7 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
           ref={trackRef}
           style={{ transform: `translateX(${-index * itemWidth + dragX}px)` }}
         >
-          {visible.map((p) => (
+          {profiles.map((p) => (
             <ProfileCardComponent
               key={p.name}
               {...p}
@@ -110,6 +109,7 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
       </div>
       <button
         onClick={next}
+        disabled={index === maxIndex}
         className={`${styles.arrow} ${styles.right}`}
         aria-label="Következő"
       >

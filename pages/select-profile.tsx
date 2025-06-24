@@ -172,6 +172,7 @@ export default function ProfileSelectorPage() {
           gap: "1.5rem",
           textAlign: "center",
           width: "100%",
+          padding: "0 1rem 2rem",
         }}
       >
       <h1

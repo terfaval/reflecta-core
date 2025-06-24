@@ -33,10 +33,10 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@svgr/webpack": "^8.1.0",
     "@types/node": "^22.15.19",
     "@types/react": "^19.1.4",
     "@vercel/python": "^4.7.2",
-    "typescript": "^5.8.3",
-    "@svgr/webpack": "^8.1.0"
+    "typescript": "^5.8.3"
   }
 }
