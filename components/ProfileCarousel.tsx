@@ -18,14 +18,29 @@ interface Props {
 }
 
 export default function ProfileCarousel({ profiles, onSelect }: Props) {
-  const visibleCount = 4;
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const clonesBefore = profiles.slice(-visibleCount);
-  const clonesAfter = profiles.slice(0, visibleCount);
-  const items = [...clonesBefore, ...profiles, ...clonesAfter];
+  const getVisibleCount = useCallback(() => {
+    const width = containerRef.current?.offsetWidth || window.innerWidth;
+    if (width < 480) return 1;
+    if (width < 768) return 2;
+    if (width < 1024) return 3;
+    return 4;
+  }, []);
 
-  const startIndex = visibleCount;
-  const endIndex = profiles.length + visibleCount;
+  const [visibleCount, setVisibleCount] = useState(getVisibleCount);
+
+  const computeItems = useCallback(
+    (count: number) => {
+      const clamp = Math.min(count, profiles.length);
+      const before = profiles.slice(-clamp);
+      const after = profiles.slice(0, clamp);
+      return { items: [...before, ...profiles, ...after], start: clamp, end: profiles.length + clamp };
+    },
+    [profiles]
+  );
+
+  const { items, start: startIndex, end: endIndex } = computeItems(visibleCount);
 
   const [index, setIndex] = useState(startIndex);
 
@@ -33,7 +48,6 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
   const next = useCallback(() => setIndex((i) => i + 1), []);
 
   const trackRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const [itemWidth, setItemWidth] = useState(1);
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -41,24 +55,25 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
   useLayoutEffect(() => {
     function update() {
       if (!trackRef.current || !containerRef.current) return;
+      const count = getVisibleCount();
+      setVisibleCount(count);
       const style = window.getComputedStyle(trackRef.current);
       const gap = parseFloat(style.gap || "0");
       const containerWidth = containerRef.current.offsetWidth;
-      const cardWidth =
-        (containerWidth - gap * (visibleCount - 1)) / visibleCount;
+      const cardWidth = (containerWidth - gap * (count - 1)) / count;
       trackRef.current.style.setProperty("--card-width", `${cardWidth}px`);
       setItemWidth(cardWidth + gap);
     }
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
-  }, [profiles.length]);
+  }, [profiles.length, getVisibleCount]);
 
   useEffect(() => {
     setIndex(startIndex);
   }, [profiles.length, startIndex]);
 
-  // Always show four cards regardless of viewport size
+  // Swipe handlers for dragging on touch devices
 
   const swipeHandlers = useSwipeable({
     onSwipeStart: () => setDragging(true),
