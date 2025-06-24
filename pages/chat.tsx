@@ -11,7 +11,7 @@ import StartingPromptSelector from "../components/StartingPromptSelector";
 import SessionLabelBubble from "../components/SessionLabelBubble";
 import ReflectiveMemoryPanel from "../components/ReflectiveMemoryPanel";
 import ProfileSelectorSidebar from "../components/ProfileSelectorSidebar";
-import ProfileCarousel, { ProfileCard } from "@/components/ProfileCarousel";
+import ProfileCarousel, { ProfileCardData } from "@/components/ProfileCarousel";
 import { useUserSession } from "../hooks/useUserSession";
 import { useAutoTextareaResize } from "../hooks/useAutoTextareaResize";
 import { ChatFooter } from "../components/ChatFooter";
