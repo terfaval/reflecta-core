@@ -19,7 +19,7 @@ interface Props {
 
 export default function ProfileCarousel({ profiles, onSelect }: Props) {
   const [index, setIndex] = useState(0);
-  const [visibleCount, setVisibleCount] = useState(4);
+  const visibleCount = 4;
 
   const maxIndex = Math.max(0, profiles.length - visibleCount);
 
@@ -46,17 +46,7 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
     setItemWidth(first.offsetWidth + gap);
   }, [profiles.length]);
 
-  const updateVisible = useCallback(() => {
-    const width = containerRef.current?.offsetWidth || window.innerWidth;
-    const count = Math.max(1, Math.min(4, Math.floor(width / itemWidth)));
-    setVisibleCount(count);
-  }, [itemWidth]);
-
-  useLayoutEffect(() => {
-    updateVisible();
-    window.addEventListener("resize", updateVisible);
-    return () => window.removeEventListener("resize", updateVisible);
-  }, [updateVisible]);
+  // Always show four cards regardless of viewport size
 
   const swipeHandlers = useSwipeable({
     onSwiped: ({ dir, deltaX }) => {
