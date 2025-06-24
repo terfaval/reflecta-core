@@ -154,8 +154,34 @@ export default function ProfileSelectorPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        gap: "1.5rem",
+        textAlign: "center",
       }}
     >
+      <div>
+        <h1
+          style={{
+            fontFamily: "Raleway, sans-serif",
+            fontSize: "1.75rem",
+            fontWeight: 600,
+            margin: 0,
+          }}
+        >
+          Válassz naplóprofilt!
+        </h1>
+        <p
+          style={{
+            fontFamily: "Raleway, sans-serif",
+            fontSize: "1rem",
+            lineHeight: 1.4,
+            marginTop: "0.5rem",
+          }}
+        >
+          Az egyes profilok különböző önismereti utakon kísérnek.<br />
+          Más kérdéseket tesznek fel, másképp hallgatnak.<br />
+          Válassz egyet, akivel most elindulnál – később bármikor válthatsz.
+        </p>
+      </div>
       <ProfileCarousel profiles={profiles} onSelect={handleSelect} />
     </div>
   );
