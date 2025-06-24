@@ -17,6 +17,8 @@
   overflow: visible;
   transition: transform 0.3s ease;
   touch-action: pan-y;
+  user-select: none;
+  cursor: grab;
 }
 
 .arrow {
@@ -38,11 +40,11 @@
 }
 
 .arrow.left {
-  left: 0px;
+   left: -3rem;
 }
 
 .arrow.right {
-  right: 0px;
+  right: -3rem;
 }
 
 .arrow:hover {
