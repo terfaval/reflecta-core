@@ -18,36 +18,32 @@ interface Props {
 }
 
 export default function ProfileCarousel({ profiles, onSelect }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const visibleCount = 4;
 
-  const getVisibleCount = useCallback(() => {
-    const width = containerRef.current?.offsetWidth || window.innerWidth;
-    if (width < 480) return 1;
-    if (width < 768) return 2;
-    if (width < 1024) return 3;
-    return 4;
-  }, []);
+  const enableNav = profiles.length > visibleCount;
 
-  const [visibleCount, setVisibleCount] = useState(getVisibleCount);
+  const clonesBefore = enableNav ? profiles.slice(-visibleCount) : [];
+  const clonesAfter = enableNav ? profiles.slice(0, visibleCount) : [];
+  const items = enableNav
+    ? [...clonesBefore, ...profiles, ...clonesAfter]
+    : profiles;
 
-  const computeItems = useCallback(
-    (count: number) => {
-      const clamp = Math.min(count, profiles.length);
-      const before = profiles.slice(-clamp);
-      const after = profiles.slice(0, clamp);
-      return { items: [...before, ...profiles, ...after], start: clamp, end: profiles.length + clamp };
-    },
-    [profiles]
-  );
-
-  const { items, start: startIndex, end: endIndex } = computeItems(visibleCount);
+  const startIndex = enableNav ? visibleCount : 0;
+  const endIndex = enableNav ? profiles.length + visibleCount : profiles.length;
 
   const [index, setIndex] = useState(startIndex);
 
-  const prev = useCallback(() => setIndex((i) => i - 1), []);
-  const next = useCallback(() => setIndex((i) => i + 1), []);
+  const prev = useCallback(() => {
+    if (!enableNav) return;
+    setIndex((i) => i - 1);
+  }, [enableNav]);
+  const next = useCallback(() => {
+    if (!enableNav) return;
+    setIndex((i) => i + 1);
+  }, [enableNav]);
 
   const trackRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [itemWidth, setItemWidth] = useState(1);
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -55,42 +51,47 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
   useLayoutEffect(() => {
     function update() {
       if (!trackRef.current || !containerRef.current) return;
-      const count = getVisibleCount();
-      setVisibleCount(count);
       const style = window.getComputedStyle(trackRef.current);
-      const gap = parseFloat(style.gap || "0");
-      const containerWidth = containerRef.current.offsetWidth;
-      const cardWidth = (containerWidth - gap * (count - 1)) / count;
+      const gap = parseFloat(style.gap || style.columnGap || "0");
+      const containerWidth = containerRef.current.clientWidth;
+      const cardWidth =
+        (containerWidth - gap * (visibleCount - 1)) / visibleCount;
       trackRef.current.style.setProperty("--card-width", `${cardWidth}px`);
       setItemWidth(cardWidth + gap);
     }
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
-  }, [profiles.length, getVisibleCount]);
+  }, [profiles.length]);
 
   useEffect(() => {
     setIndex(startIndex);
-  }, [profiles.length, startIndex]);
+  }, [startIndex]);
 
-  // Swipe handlers for dragging on touch devices
+  // Always show four cards regardless of viewport size
 
-  const swipeHandlers = useSwipeable({
-    onSwipeStart: () => setDragging(true),
-    onSwiped: ({ dir, deltaX }) => {
-      const threshold = itemWidth / 3;
-      const distance = Math.abs(deltaX);
-      if (dir === "Left" && distance > threshold) next();
-      else if (dir === "Right" && distance > threshold) prev();
-      setDragX(0);
-      setDragging(false);
-    },
-    onSwiping: ({ deltaX }) => setDragX(deltaX),
-    trackMouse: true,
-    preventScrollOnSwipe: true,
-  });
+  const swipeHandlers = useSwipeable(
+    enableNav
+      ? {
+          onSwipeStart: () => setDragging(true),
+          onSwiped: ({ dir, deltaX, velocity }) => {
+            const threshold = itemWidth / 5;
+            const distance = Math.abs(deltaX);
+            const fast = velocity > 0.2;
+            if (dir === "Left" && (distance > threshold || fast)) next();
+            else if (dir === "Right" && (distance > threshold || fast)) prev();
+            setDragX(0);
+            setDragging(false);
+          },
+          onSwiping: ({ deltaX }) => setDragX(deltaX),
+          trackMouse: true,
+          preventScrollOnSwipe: true,
+        }
+      : {}
+  );
 
   useEffect(() => {
+    if (!enableNav) return;
     const el = trackRef.current;
     if (!el) return;
     const handle = () => {
@@ -110,11 +111,12 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
     };
     el.addEventListener("transitionend", handle);
     return () => el.removeEventListener("transitionend", handle);
-  }, [index, endIndex, startIndex, profiles.length]);
+  }, [index, endIndex, startIndex, profiles.length, enableNav]);
   
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    el.focus();
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") prev();
       else if (e.key === "ArrowRight") next();
@@ -125,18 +127,20 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
 
   return (
     <div className={styles.carousel} tabIndex={0} ref={containerRef}>
-      <button
-        onClick={prev}
-        className={`${styles.arrow} ${styles.left}`}
-        aria-label="Előző"
-      >
-        <ChevronLeft />
-      </button>
+      {enableNav && (
+        <button
+          onClick={prev}
+          className={`${styles.arrow} ${styles.left}`}
+          aria-label="Előző"
+        >
+          <ChevronLeft />
+        </button>
+      )}
       <div className={styles.viewport} {...swipeHandlers}>
         <div
           className={`${styles.track} ${dragging ? styles.dragging : ""}`}
           ref={trackRef}
-          style={{ transform: `translateX(${-index * itemWidth + dragX}px)` }}
+          style={{ transform: `translateX(${dragX - index * itemWidth}px)` }}
         >
           {items.map((p, idx) => (
             <ProfileCardComponent
@@ -147,13 +151,15 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
           ))}
         </div>
       </div>
-      <button
-        onClick={next}
-        className={`${styles.arrow} ${styles.right}`}
-        aria-label="Következő"
-      >
-        <ChevronRight />
-      </button>
+      {enableNav && (
+        <button
+          onClick={next}
+          className={`${styles.arrow} ${styles.right}`}
+          aria-label="Következő"
+        >
+          <ChevronRight />
+        </button>
+      )}
     </div>
   );
 }
