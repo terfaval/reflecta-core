@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import ProfileCarousel, { ProfileCardData } from "@/components/ProfileCarousel";
 import SpiralLoader from "@/components/SpiralLoader";
@@ -157,42 +158,46 @@ export default function ProfileSelectorPage() {
  if (!loaded) return <SpiralLoader userColor="#7A4DFF" aiColor="#FFB347" />;
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "1.5rem",
-        textAlign: "center",
-      }}
-    >
-      <div>
-        <h1
-          style={{
-            fontFamily: "Raleway, sans-serif",
-            fontSize: "1.75rem",
-            fontWeight: 600,
-            margin: 0,
-          }}
-        >
-          Válassz naplóprofilt!
-        </h1>
-        <p
-          style={{
-            fontFamily: "Raleway, sans-serif",
-            fontSize: "1rem",
-            lineHeight: 1.4,
-            marginTop: "0.5rem",
-          }}
-        >
-          Az egyes profilok különböző önismereti utakon kísérnek.<br />
-          Más kérdéseket tesznek fel, másképp hallgatnak.<br />
-          Válassz egyet, akivel most elindulnál – később bármikor válthatsz.
-        </p>
-      </div>
+    <>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+      <div
+        style={{
+          minHeight: "100dvh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "1.5rem",
+          textAlign: "center",
+          width: "100%",
+        }}
+      >
+      <h1
+        style={{
+          fontFamily: "Raleway, sans-serif",
+          fontSize: "1.75rem",
+          fontWeight: 600,
+          margin: 0,
+        }}
+      >
+        Válassz naplóprofilt!
+      </h1>
       <ProfileCarousel profiles={profiles} onSelect={handleSelect} />
-    </div>
+      <p
+        style={{
+          fontFamily: "Raleway, sans-serif",
+          fontSize: "0.875rem",
+          lineHeight: 1.4,
+          marginTop: "0.5rem",
+        }}
+      >
+        Az egyes profilok különböző önismereti utakon kísérnek.<br />
+        Más kérdéseket tesznek fel, másképp hallgatnak.<br />
+        Válassz egyet, akivel most elindulnál – később bármikor válthatsz.
+      </p>
+      </div>
+    </>
   );
 }
