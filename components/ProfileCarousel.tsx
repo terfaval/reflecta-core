@@ -19,7 +19,7 @@ interface Props {
 
 export default function ProfileCarousel({ profiles, onSelect }: Props) {
   const [index, setIndex] = useState(0);
-  const visibleCount = 4;
+  const [visibleCount, setVisibleCount] = useState(4);
 
   const prev = useCallback(
     () => setIndex((i) => (i - 1 + profiles.length) % profiles.length),
@@ -43,6 +43,18 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
     const gap = parseFloat(style.gap || "0");
     setItemWidth(first.offsetWidth + gap);
   }, [profiles.length]);
+
+  const updateVisible = useCallback(() => {
+    const width = containerRef.current?.offsetWidth || window.innerWidth;
+    const count = Math.max(1, Math.min(4, Math.floor(width / itemWidth)));
+    setVisibleCount(count);
+  }, [itemWidth]);
+
+  useLayoutEffect(() => {
+    updateVisible();
+    window.addEventListener("resize", updateVisible);
+    return () => window.removeEventListener("resize", updateVisible);
+  }, [updateVisible]);
 
   const swipeHandlers = useSwipeable({
     onSwiped: ({ dir, deltaX }) => {

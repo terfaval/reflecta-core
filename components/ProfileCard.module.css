@@ -31,6 +31,7 @@
 .iconWrap svg {
   width: 100%;
   height: 100%;
+  overflow: visible; 
 }
 
 .card:hover .iconWrap svg {
