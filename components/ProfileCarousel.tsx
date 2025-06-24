@@ -39,12 +39,19 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
   const [dragging, setDragging] = useState(false);
 
   useLayoutEffect(() => {
-    if (!trackRef.current) return;
-    const first = trackRef.current.children[0] as HTMLElement | undefined;
-    if (!first) return;
-    const style = window.getComputedStyle(trackRef.current);
-    const gap = parseFloat(style.gap || "0");
-    setItemWidth(first.offsetWidth + gap);
+    function update() {
+      if (!trackRef.current || !containerRef.current) return;
+      const style = window.getComputedStyle(trackRef.current);
+      const gap = parseFloat(style.gap || "0");
+      const containerWidth = containerRef.current.offsetWidth;
+      const cardWidth =
+        (containerWidth - gap * (visibleCount - 1)) / visibleCount;
+      trackRef.current.style.setProperty("--card-width", `${cardWidth}px`);
+      setItemWidth(cardWidth + gap);
+    }
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
   }, [profiles.length]);
 
   // Always show four cards regardless of viewport size

@@ -3,7 +3,7 @@
   color: #000;
   text-align: center;
   padding: 1.5rem;
-  width: 14rem;
+  width: var(--card-width, 14rem);
   aspect-ratio: 3 / 4;
   border-radius: 0.5rem;
   cursor: pointer;
