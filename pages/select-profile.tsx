@@ -11,6 +11,9 @@ import { apiFetch } from "@/lib/api";
 
 interface Meta extends ProfileCardData {}
 
+const BLANK_PROFILE_DESCRIPTION =
+  "Alap naplóprofil, ha csak egyszerűen írnál, mindenféle irány nélkül.";
+
 const DEFAULT_PROFILES: { name: string; iconName?: string }[] = [
   { name: "Reflecta", iconName: "ReflectaIcon" },
   { name: "Akasza", iconName: "AkaszaIcon" },
@@ -75,14 +78,17 @@ export default function ProfileSelectorPage() {
             };
           });
           const defaults = DEFAULT_PROFILES.map((p) => {
-            const style = profileStyles[p.name] ||
+            const style =
+              profileStyles[p.name] ||
               profileStyles[p.name.toLowerCase()] || {
                 "--user-color": "#000",
                 "--bg-color": "#fff",
               };
             return {
               ...p,
-              description: map[p.name]?.description || "",
+              description:
+                map[p.name]?.description ||
+                (p.name === "Reflecta" ? BLANK_PROFILE_DESCRIPTION : ""),
               color: map[p.name]?.color || "#fff",
               role: map[p.name]?.role || "",
               userColor: style["--user-color"],
@@ -92,18 +98,21 @@ export default function ProfileSelectorPage() {
 
           const personalProfiles: Meta[] = [];
           (meta.personalProfiles || []).forEach((name) => {
-            const pm = map[name] || { description: "", color: "#fff" };
+            const pm = map[name] || { description: "", color: "#fff", role: "" };
             const style = profileStyles[name] ||
               profileStyles[name.toLowerCase()] || {
                 "--user-color": "#000",
                 "--bg-color": "#fff",
               };
+
+            const def = DEFAULT_PROFILES.find((d) => d.name === name);
+            
             personalProfiles.push({
               name,
-              iconName: null,
+              iconName: def?.iconName || "ReflectaIcon",
               description: pm.description,
               color: pm.color,
-              role: "",
+              role: pm.role || "",
               userColor: style["--user-color"],
               bgColor: style["--bg-color"],
               personal: true,
