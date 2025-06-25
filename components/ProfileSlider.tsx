@@ -56,6 +56,7 @@ export default function ProfileSlider() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [itemWidth, setItemWidth] = useState(1);
   const [index, setIndex] = useState(0);
+  const indexRef = useRef(index);
 
   const [dragging, setDragging] = useState(false);
   const [dragX, setDragX] = useState(0);
@@ -129,9 +130,13 @@ export default function ProfileSlider() {
   }, [userId]);
 
   const enableNav = profiles.length > visibleCount;
-  const items = profiles;
-  const startIndex = 0;
-  const endIndex = Math.max(0, profiles.length - visibleCount);
+  const repeat = 3;
+  const items = enableNav
+    ? Array.from({ length: repeat }, () => profiles).flat()
+    : profiles;
+  const baseIndex = enableNav ? profiles.length : 0;
+  const startIndex = baseIndex;
+  const endIndex = enableNav ? baseIndex + profiles.length : profiles.length;
 
   useLayoutEffect(() => {
     function update() {
@@ -140,19 +145,49 @@ export default function ProfileSlider() {
       const width = (w - gap * (visibleCount - 1)) / visibleCount;
       setItemWidth(width);
       trackRef.current.style.setProperty('--card-width', `${width}px`);
-      trackRef.current.style.transform = `translateX(0px)`;
+      const start = startIndex;
+      trackRef.current.style.transform = `translateX(${-start * (width + gap)}px)`;
     }
     update();
     window.addEventListener('resize', update);
     return () => window.removeEventListener('resize', update);
-  }, [profiles.length]);
+  }, [profiles.length, enableNav, startIndex]);
 
   useEffect(() => {
     setIndex(startIndex);
-  }, []);
+  }, [startIndex]);
 
-  const prev = () => enableNav && setIndex((i) => Math.max(0, i - 1));
-  const next = () => enableNav && setIndex((i) => Math.min(endIndex, i + 1));
+  useEffect(() => {
+    indexRef.current = index;
+  }, [index]);
+
+
+  useEffect(() => {
+    if (!enableNav) return;
+    const el = trackRef.current;
+    if (!el) return;
+    const handle = (e: TransitionEvent) => {
+      if (e.target !== el || e.propertyName !== 'transform') return;
+      const idx = indexRef.current;
+      if (idx >= endIndex || idx < startIndex) {
+        const range = profiles.length;
+        const relative = ((idx - startIndex) % range + range) % range;
+        const newIndex = startIndex + relative;
+        indexRef.current = newIndex;
+        el.style.transition = 'none';
+        el.style.transform = `translateX(${-newIndex * (itemWidth + gap)}px)`;
+        indexRef.current = newIndex;
+        requestAnimationFrame(() => {
+          el.style.transition = '';
+        });
+      }
+    };
+    el.addEventListener('transitionend', handle);
+    return () => el.removeEventListener('transitionend', handle);
+  }, [endIndex, startIndex, itemWidth, gap, enableNav, profiles.length]);
+
+  const prev = () => enableNav && setIndex((i) => i - 1);
+  const next = () => enableNav && setIndex((i) => i + 1);
 
   const startDrag = (x: number, time: number) => {
     if (!enableNav) return;
@@ -180,10 +215,8 @@ export default function ProfileSlider() {
     if (steps > maxSteps) steps = maxSteps;
     setDragging(false);
     setDragX(0);
-    if (delta < 0 && steps)
-      setIndex((i) => Math.min(endIndex, i + steps));
-    else if (delta > 0 && steps)
-      setIndex((i) => Math.max(0, i - steps));
+    if (delta < 0 && steps) setIndex((i) => i + steps);
+    else if (delta > 0 && steps) setIndex((i) => i - steps);
   };
 
   const onPointerDown = (e: React.PointerEvent) => {
@@ -198,7 +231,7 @@ export default function ProfileSlider() {
     finishDrag(e.clientX, e.timeStamp);
   };
 
-  const effectiveIndex = index;
+  const effectiveIndex = dragging ? index : indexRef.current;
   const transform = `translateX(${dragX - effectiveIndex * (itemWidth + gap)}px)`;
 
   const handleSelect = async (p: ProfileCardData) => {
