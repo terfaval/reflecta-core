@@ -17,7 +17,7 @@
   display: flex;
   flex-wrap: nowrap;
   gap: 16px;
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease-out;
   touch-action: pan-y;
   user-select: none;
 }

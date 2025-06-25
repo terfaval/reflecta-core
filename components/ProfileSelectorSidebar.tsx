@@ -1,171 +1,125 @@
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+import React from 'react';
 import { LucidePlusCircle } from 'lucide-react';
-import { useUserContext } from '@/contexts/UserContext';
-import { useProfileContext } from '@/contexts/ProfileContext';
+import { ProfileIcon, iconMap } from './ProfileIcons';
 
-import { apiFetch } from 'lib/api';
-
-function insertProfile(
-  list: ProfileMeta[],
-  profile: ProfileMeta,
-  index: number
-): ProfileMeta[] {
-  const arr = [...list];
-  arr.splice(index, 0, profile);
-  return arr;
-}
-
-interface ProfileMeta {
+export interface Profile {
+  id: string;
   name: string;
-  description: string;
+  role: string;
   color: string;
-  icon: string;
-  personal?: boolean;
+  iconName?: string;
 }
 
-const DEFAULT_PROFILES: { name: string; icon: string }[] = [
-  { name: 'Reflecta', icon: 'https://beenook.hu/wp-content/uploads/2025/05/00_reflecta.svg' },
-  { name: 'Akasza', icon: 'https://beenook.hu/wp-content/uploads/2025/05/01_akasza.svg' },
-  { name: 'Éana', icon: 'https://beenook.hu/wp-content/uploads/2025/05/02_eana.svg' },
-  { name: 'Luma', icon: 'https://beenook.hu/wp-content/uploads/2025/05/03_luma.svg' },
-  { name: 'Sylva', icon: 'https://beenook.hu/wp-content/uploads/2025/05/04_sylva.svg' },
-  { name: 'Zentó', icon: 'https://beenook.hu/wp-content/uploads/2025/05/05_zento.svg' },
-  { name: 'Oneiros', icon: 'https://beenook.hu/wp-content/uploads/2025/05/09_oneiros.svg' },
-  { name: 'Kairos', icon: 'https://beenook.hu/wp-content/uploads/2025/05/06_kairos.svg' },
-  { name: 'Noe', icon: 'https://beenook.hu/wp-content/uploads/2025/05/07_noe.svg' },
-];
+export interface Entry {
+  id: string;
+  role: string;
+  content: string;
+  created_at: string;
+}
 
-export default function ProfileSelectorSidebar() {
-  const router = useRouter();
-  const { userId } = useUserContext();
-  const { setProfile } = useProfileContext();
-  const [profiles, setProfiles] = useState<ProfileMeta[]>([]);
-  const [personal, setPersonal] = useState<ProfileMeta | null>(null);
-  const [role, setRole] = useState<string>('basic');
+export interface ProfileSelectorSidebarProps {
+  userRole: 'basic' | 'premium';
+  customProfile: Profile | null;
+  lastUsedProfiles: Profile[];
+  unusedProfiles: Profile[];
+  entries: Record<string, Entry[]>;
+  onProfileSelect: (profileId: string) => void;
+  onCreateCustomProfile: () => void;
+}
+const BLANK_PROFILE: Profile = {
+  id: 'reflecta-blank',
+  name: 'Reflecta',
+  role: '',
+  color: '#7A4DFF',
+  iconName: 'ReflectaIcon',
+};
 
-  useEffect(() => {
-    const load = async () => {
-      if (!userId) return;
-      try {
-        const names = DEFAULT_PROFILES.map(p => p.name);
-        const data = await apiFetch<{ profiles?: any[]; personalProfiles?: string[]; role?: string; error?: string }>(
-          '/api/profile-list',
-          {
-            method: 'POST',
-            body: JSON.stringify({ userId, names }),
-          }
-        );
-        if (data && Array.isArray(data.profiles)) {
-          const metaMap: Record<string, { description: string; color: string }> = {};
-          (data.profiles || []).forEach((p: any) => {
-            metaMap[p.name] = { description: p.description, color: p.color };
-          });
-          const defaults = DEFAULT_PROFILES.map(p => ({
-            ...p,
-            description: metaMap[p.name]?.description || '',
-            color: metaMap[p.name]?.color || '#000',
-            icon: p.icon,
-          }));
-
-          const personalProfiles: ProfileMeta[] = [];
-          (data.personalProfiles || []).forEach(name => {
-            const personalMeta = metaMap[name] || { description: '', color: '#000' };
-            personalProfiles.push({
-              name,
-              icon: '',
-              description: personalMeta.description,
-              color: personalMeta.color,
-              personal: true,
-            });
-          });
-          setPersonal(personalProfiles[0] || null);
-
-          const roleVal = data.role || 'basic';
-          setRole(roleVal);
-
-          let finalProfiles = defaults;
-          if (personalProfiles.length && (roleVal === 'premium' || roleVal === 'admin')) {
-            finalProfiles = [...defaults];
-            personalProfiles.forEach((pp, idx) => {
-              finalProfiles = insertProfile(finalProfiles, pp, 1 + idx);
-            });
-          }
-          setProfiles(finalProfiles);
-        } else {
-          console.error('[profile-list]', data?.error);
-        }
-      } catch (err) {
-        console.error('[profile-list] fetch error', err);
-      }
-    };
-    load();
-  }, [userId]);
-
-  const goto = (name: string) => {
-    setProfile(name);
-    router.push('/chat');
-  };
+export default function ProfileSelectorSidebar({
+  userRole,
+  customProfile,
+  lastUsedProfiles,
+  unusedProfiles,
+  entries,
+  onProfileSelect,
+  onCreateCustomProfile,
+}: ProfileSelectorSidebarProps) {
+  const profileItems = React.useMemo<(Profile | null)[]>(() => {
+    const arr: (Profile | null)[] = [BLANK_PROFILE];
+    if (userRole === 'premium') {
+      arr.push(customProfile); // may be null for create button
+    }
+    arr.push(...lastUsedProfiles, ...unusedProfiles);
+    return arr;
+  }, [userRole, customProfile, lastUsedProfiles, unusedProfiles]);
 
   return (
-    <aside className="h-screen flex flex-col gap-2 w-[240px] flex-shrink-0 py-4 px-3 bg-white shadow-inner overflow-y-auto">
-      {profiles.map(p => (
-        <button
-          key={p.name}
-          onClick={() => goto(p.name)}
-          className="group flex items-center gap-2 p-2 rounded transition-colors ease-in duration-200 text-black hover:text-white"
-          style={{ backgroundColor: 'white' }}
-          onMouseEnter={e => (e.currentTarget.style.backgroundColor = p.color)}
-          onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'white')}
-        >
-          {p.icon ? (
-            <img
-              src={p.icon}
-              alt=""
-              className="w-6 h-6 filter grayscale brightness-0 group-hover:brightness-200 group-hover:invert"
-            />
-          ) : (
-            <div className="w-6 h-6 bg-gray-300 rounded-full group-hover:bg-white" />
-          )}
-          <div className="flex flex-col items-start">
-            <span className="flex items-center gap-1">
-              {p.name}
-              {p.personal && (
-                <span className="text-[10px] px-1 py-0.5 bg-blue-500 text-white rounded">
-                  Saját
-                </span>
+    <aside className="h-screen w-60 flex-shrink-0 p-4 bg-white shadow-inner overflow-y-auto flex flex-col gap-2">
+      {profileItems.map((p, idx) => {
+        if (!p) {
+          return (
+            <button
+              key="create-custom"
+              onClick={onCreateCustomProfile}
+              className="flex items-center gap-2 p-2 text-gray-500 hover:bg-gray-100 rounded"
+            >
+              <LucidePlusCircle className="w-6 h-6 stroke-gray-400" />
+              <span className="text-sm font-medium">
+                Hozd létre a személyes napló profilodat!
+              </span>
+            </button>
+          );
+        }
+        const last = entries[p.id]?.[entries[p.id].length - 1];
+        const bottomText = last ? last.role : p.role;
+        const bottomClass = last ? 'text-sm' : 'text-sm font-medium text-gray-600';
+        const IconComp = p.iconName && iconMap[p.iconName];
+        return (
+          <button
+            key={p.id}
+            onClick={() => onProfileSelect(p.id)}
+            className="flex items-center gap-3 p-2 rounded hover:bg-gray-100 text-left"
+          >
+            <div className="w-6 h-6 flex items-center justify-center">
+              {IconComp ? (
+                <ProfileIcon icon={IconComp} color={p.color} size={24} />
+              ) : (
+                <div className="w-6 h-6 rounded-full" style={{ backgroundColor: p.color }} />
               )}
-            </span>
-            <span className="text-xs opacity-75 leading-tight">{p.description}</span>
-          </div>
-        </button>
-      ))}
-
-      {personal && role !== 'premium' && role !== 'admin' && (
-        <button
-          onClick={() => goto(personal.name)}
-          className="group flex items-center gap-2 p-2 rounded transition-colors ease-in duration-200 text-black hover:text-white"
-          style={{ backgroundColor: 'white' }}
-          onMouseEnter={e => (e.currentTarget.style.backgroundColor = personal.color)}
-          onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'white')}
-        >
-          <div className="w-6 h-6 bg-gray-300 rounded-full group-hover:bg-white" />
-          <div className="flex flex-col items-start">
-            <span>{personal.name}</span>
-            <span className="text-xs opacity-75 leading-tight">{personal.description}</span>
-          </div>
-        </button>
-      )}
-
-      {!personal && role === 'premium' && (
-        <button
-          onClick={() => router.push('/profile-builder')}
-          className="flex items-center gap-2 p-2 rounded text-black hover:text-white transition-colors ease-in duration-200 hover:bg-blue-500"
-        >
-          <LucidePlusCircle size={20} />
-          <span>Új profil létrehozása</span>
-        </button>
-      )}
+            </div>
+            <div className="flex flex-col items-start">
+              <span className="font-bold">{p.name}</span>
+              <span className={bottomClass}>{bottomText}</span>
+            </div>
+          </button>
+        );
+      })}
     </aside>
+  );
+}
+
+// Example usage with mock data
+const mockProfiles: Profile[] = [
+  { id: 'akasza', name: 'Akasza', role: 'Táncos mágus', color: '#E75735', iconName: 'AkaszaIcon' },
+  { id: 'eana', name: 'Éana', role: 'Lágy segítő', color: '#F08230', iconName: 'EanaIcon' },
+  { id: 'luma', name: 'Luma', role: 'Fénykereső', color: '#FBD96A', iconName: 'LumaIcon' },
+];
+
+const mockEntries: Record<string, Entry[]> = {
+  akasza: [
+    { id: '1', role: 'assistant', content: 'Szia', created_at: '2024-01-01' },
+  ],
+};
+
+export function MockProfileSelectorSidebar() {
+  return (
+    <ProfileSelectorSidebar
+      userRole="premium"
+      customProfile={null}
+      lastUsedProfiles={mockProfiles.slice(0, 2)}
+      unusedProfiles={mockProfiles.slice(2)}
+      entries={mockEntries}
+      onProfileSelect={(id) => console.log('select', id)}
+      onCreateCustomProfile={() => console.log('create custom')}
+    />
   );
 }
