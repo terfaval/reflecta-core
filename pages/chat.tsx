@@ -10,7 +10,9 @@ import ScrollToBottomButton from "../components/ScrollToBottomButton";
 import StartingPromptSelector from "../components/StartingPromptSelector";
 import SessionLabelBubble from "../components/SessionLabelBubble";
 import ReflectiveMemoryPanel from "../components/ReflectiveMemoryPanel";
-import ProfileSelectorSidebar from "../components/ProfileSelectorSidebar";
+import ProfileSelectorSidebar, {
+  Profile as SidebarProfile,
+} from "../components/ProfileSelectorSidebar";
 import ProfileSlider from "@/components/ProfileSlider";
 import { useUserSession } from "../hooks/useUserSession";
 import { useAutoTextareaResize } from "../hooks/useAutoTextareaResize";
@@ -29,6 +31,32 @@ interface Entry {
   content: string;
   created_at: string;
 }
+
+const SIDEBAR_ORDER = [
+  "Reflecta",
+  "Akasza",
+  "Éana",
+  "Luma",
+  "Sylva",
+  "Zentó",
+  "Oneiros",
+  "Kairos",
+  "Noe",
+];
+
+const NAME_TO_ICON: Record<string, string | undefined> = {
+  Reflecta: "ReflectaIcon",
+  Akasza: "AkaszaIcon",
+  "Éana": "EanaIcon",
+  Luma: "LumaIcon",
+  Sylva: "SylvaIcon",
+  "Zentó": "ZentoIcon",
+  Oneiros: "OneirosIcon",
+  Kairos: "KairosIcon",
+  Noe: "NoeIcon",
+  Solun: "SolunIcon",
+  Preceptor: "PreceptorIcon",
+};
 
 export default function ChatPage() {
   const { profile, setProfile } = useProfileContext();
@@ -52,10 +80,17 @@ export default function ChatPage() {
   const isFetchingRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
+  const [sidebarRole, setSidebarRole] = useState<'basic' | 'premium'>('basic');
+  const [customProfileData, setCustomProfileData] = useState<SidebarProfile | null>(null);
+  const [sidebarProfiles, setSidebarProfiles] = useState<SidebarProfile[]>([]);
   const currentStyle =
     profileStyles[profile as string] ||
     profileStyles[(profile as string)?.toLowerCase()] ||
     {};
+    const entriesByProfile = useMemo(
+    () => (profile ? { [profile]: entries } : {}),
+    [profile, entries]
+  );
   const [showProfileSelect, setShowProfileSelect] = useState(false);
 
   // waiting for user initialization is handled in UserProvider
@@ -91,6 +126,48 @@ export default function ChatPage() {
     };
     load();
   }, [userId, profile, setProfile]);
+
+  useEffect(() => {
+    if (!userId) return;
+    const load = async () => {
+      try {
+        const data = await apiFetch<{
+          profiles?: any[];
+          personalProfiles?: string[];
+          role?: string;
+          error?: string;
+        }>("/api/profile-list", {
+          method: "POST",
+          body: JSON.stringify({ userId, names: SIDEBAR_ORDER }),
+        });
+        if (data.profiles) {
+          const map: Record<string, SidebarProfile> = {};
+          (data.profiles || []).forEach((p: any) => {
+            map[p.name] = {
+              id: p.name,
+              name: p.name,
+              role: p.role,
+              color: p.color,
+              iconName: NAME_TO_ICON[p.name],
+            };
+          });
+          const personal = (data.personalProfiles || [])[0];
+          setCustomProfileData(personal ? map[personal] || null : null);
+          const others: SidebarProfile[] = [];
+          SIDEBAR_ORDER.slice(1).forEach((n) => {
+            if (map[n]) others.push(map[n]);
+          });
+          setSidebarProfiles(others);
+          setSidebarRole(data.role === "premium" ? "premium" : "basic");
+        } else if (data.error) {
+          console.error("[profile-list]", data.error);
+        }
+      } catch (err) {
+        console.error("[profile-list fetch]", err);
+      }
+    };
+    load();
+  }, [userId]);
 
   useEffect(() => {
     if (debug) console.log("[Debug] sessionId", sessionId);
@@ -166,6 +243,29 @@ export default function ChatPage() {
       (e) => e.role === "assistant" && e.content !== "__thinking__",
     ).length;
   }, [entries]);
+
+  const handleSidebarSelect = async (name: string) => {
+    if (!userId) return;
+    try {
+      const data = await apiFetch<{ conversation_id: string; session_id: string }>(
+        "/conversation/new",
+        {
+          method: "POST",
+          body: JSON.stringify({ user_id: userId, profile_name: name }),
+        },
+      );
+      if (data.conversation_id && data.session_id) {
+        setProfile(name);
+        router.push(`/chat?conversation=${data.conversation_id}&session=${data.session_id}`);
+      }
+    } catch (err) {
+      console.error("[switch profile]", err);
+    }
+  };
+
+  const handleCreateCustomProfile = () => {
+    router.push("/profile-builder");
+  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -278,7 +378,15 @@ export default function ChatPage() {
         flexDirection: "row",
       }}
     >
-      <ProfileSelectorSidebar />
+      <ProfileSelectorSidebar
+        userRole={sidebarRole}
+        customProfile={customProfileData}
+        lastUsedProfiles={sidebarProfiles}
+        unusedProfiles={[]}
+        entries={entriesByProfile}
+        onProfileSelect={handleSidebarSelect}
+        onCreateCustomProfile={handleCreateCustomProfile}
+      />
       <div
         style={{ flex: "1 1 auto", display: "flex", flexDirection: "column" }}
       >
