@@ -1,5 +1,5 @@
 // hooks/useHandleSend.ts
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { apiFetch } from 'lib/api';
 
@@ -29,7 +29,7 @@ export function useHandleSend({
   setSessionIsFresh,
   setIsClosing,
 }: UseHandleSendProps) {
-  return useCallback(async (text?: string) => {
+  const handleSend = useCallback(async (text?: string) => {
     const message = text?.trim();
     if (!message || !sessionId) return;
     const isTrigger = message === closingTrigger.trim();
@@ -103,4 +103,21 @@ export function useHandleSend({
     setEntries(prev => prev.map(e => (e.id === thinkingId ? { ...e, content: reply } : e)));
     setLoading(false);
   }, [sessionId, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing]);
+
+  useEffect(() => {
+    const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
+    if (!textarea) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend(textarea.value);
+      }
+    };
+
+    textarea.addEventListener('keydown', onKeyDown);
+    return () => textarea.removeEventListener('keydown', onKeyDown);
+  }, [handleSend]);
+
+  return handleSend;
 }
