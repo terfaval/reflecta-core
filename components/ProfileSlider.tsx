@@ -162,7 +162,7 @@ export default function ProfileSlider() {
       if (e.target !== el || e.propertyName !== 'transform') return;
       if (index >= endIndex || index < startIndex) {
         el.style.transition = 'none';
-        const newIndex = index >= endIndex ? startIndex : index + profiles.length;
+        const newIndex = index >= endIndex ? index - profiles.length : index + profiles.length;
         setIndex(newIndex);
         el.style.transform = `translateX(${-newIndex * (itemWidth + gap)}px)`;
         requestAnimationFrame(() => {

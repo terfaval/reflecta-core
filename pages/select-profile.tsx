@@ -75,9 +75,7 @@ export default function ProfileSelectorPage() {
           fontFamily: "Raleway, sans-serif",
           fontSize: "1.75rem",
           fontWeight: 600,
-          marginTop: "0.5rem",
-          marginBottom: "0.5rem",
-          margin: 0,
+          margin: "2rem 0 1.5rem 0",
         }}
       >
         Válassz naplóprofilt!

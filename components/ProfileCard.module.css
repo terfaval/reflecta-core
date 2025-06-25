@@ -4,7 +4,7 @@
   text-align: center;
   padding: 1.5rem;
   width: var(--card-width, 14rem);
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 2 / 3;
   box-sizing: border-box;
   border-radius: 0.5rem;
   cursor: pointer;
