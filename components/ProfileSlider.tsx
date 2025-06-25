@@ -162,7 +162,9 @@ export default function ProfileSlider() {
       if (e.target !== el || e.propertyName !== 'transform') return;
       if (index >= endIndex || index < startIndex) {
         el.style.transition = 'none';
-        const newIndex = index >= endIndex ? index - profiles.length : index + profiles.length;
+        const range = profiles.length;
+        const relative = ((index - startIndex) % range + range) % range;
+        const newIndex = startIndex + relative;
         setIndex(newIndex);
         el.style.transform = `translateX(${-newIndex * (itemWidth + gap)}px)`;
         requestAnimationFrame(() => {
@@ -199,6 +201,8 @@ export default function ProfileSlider() {
     const threshold = itemWidth / 5;
     let steps = Math.floor(Math.abs(delta) / (itemWidth + gap));
     if (steps === 0 && (Math.abs(delta) > threshold || velocity > 0.2)) steps = 1;
+    const maxSteps = enableNav ? visibleCount : profiles.length;
+    if (steps > maxSteps) steps = maxSteps;
     setDragging(false);
     setDragX(0);
     if (delta < 0 && steps) setIndex((i) => i + steps);

@@ -16,6 +16,15 @@ export default function ProfileSelectorPage() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    if (loaded) {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [loaded]);
+
+  useEffect(() => {
     if (!userId) return;
     const load = async () => {
       try {
