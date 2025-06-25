@@ -252,16 +252,16 @@ arr.push(profiles[profiles.length - 1]);
     if (!userId) return;
     try {
       const data = await apiFetch<{
-        conversationId: string;
-        sessionId: string;
+        conversation_id: string;
+        session_id: string;
       }>("/conversation/new", {
         method: "POST",
-        body: JSON.stringify({ userId, profile: p.name }),
+        body: JSON.stringify({ user_id: userId, profile_name: p.name }),
       });
-      if (data.conversationId && data.sessionId) {
+      if (data.conversation_id && data.session_id) {
         setProfile(p.name);
         router.push(
-          `/chat?conversation=${data.conversationId}&session=${data.sessionId}`,
+          `/chat?conversation=${data.conversation_id}&session=${data.session_id}`,
         );
       }
     } catch (err) {

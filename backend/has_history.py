@@ -39,6 +39,6 @@ async def has_history(payload: HistoryRequest) -> Dict[str, Optional[str]]:
         print(f"[has_history] Fallback due to: {exc}")
         row = None
 
-        if row:
-            return {"hasHistory": True, "profile": row.get("profile")}
-        return {"hasHistory": False, "profile": None}
+    if row:
+        return {"hasHistory": True, "profile": row.get("profile")}
+    return {"hasHistory": False, "profile": None}
