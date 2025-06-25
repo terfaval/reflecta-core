@@ -56,6 +56,8 @@ export default function ProfileSlider() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [itemWidth, setItemWidth] = useState(1);
   const [index, setIndex] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const pendingStep = useRef(0);
 
   const [dragging, setDragging] = useState(false);
   const [dragX, setDragX] = useState(0);
@@ -128,14 +130,20 @@ export default function ProfileSlider() {
     load();
   }, [userId]);
 
+  useEffect(() => {
+    setIndex(0);
+  }, [profiles.length]);
+
   const enableNav = profiles.length > visibleCount;
-  const repeat = 3;
-  const items = enableNav
-    ? Array.from({ length: repeat }, () => profiles).flat()
-    : profiles;
-  const baseIndex = enableNav ? profiles.length : 0;
-  const startIndex = baseIndex;
-  const endIndex = enableNav ? baseIndex + profiles.length : profiles.length;
+  const items = React.useMemo(() => {
+    if (!profiles.length) return [] as ProfileCardData[];
+    if (!enableNav) return profiles;
+    const arr: ProfileCardData[] = [];
+    for (let i = 0; i < visibleCount; i++) {
+      arr.push(profiles[(index + i) % profiles.length]);
+    }
+    return arr;
+  }, [profiles, index, enableNav]);
 
   useLayoutEffect(() => {
     function update() {
@@ -144,45 +152,43 @@ export default function ProfileSlider() {
       const width = (w - gap * (visibleCount - 1)) / visibleCount;
       setItemWidth(width);
       trackRef.current.style.setProperty('--card-width', `${width}px`);
-      const start = startIndex;
-      trackRef.current.style.transform = `translateX(${-start * (width + gap)}px)`;
     }
     update();
     window.addEventListener('resize', update);
     return () => window.removeEventListener('resize', update);
-  }, [profiles.length, enableNav, startIndex]);
+  }, [profiles.length]);
 
+  // handle carousel wrapping with virtual index
   useEffect(() => {
-    setIndex(startIndex);
-  }, [startIndex]);
-
-  useEffect(() => {
-    if (!enableNav) return;
     const el = trackRef.current;
     if (!el) return;
       const handle = (e: TransitionEvent) => {
-        if (e.target !== el || e.propertyName !== 'transform') return;
-        setIndex((idx) => {
-        if (idx >= endIndex || idx < startIndex) {
-          const range = profiles.length;
-          const relative = ((idx - startIndex) % range + range) % range;
-          const newIndex = startIndex + relative;
-          el.style.transition = 'none';
-          el.style.transform = `translateX(${-newIndex * (itemWidth + gap)}px)`;
-          requestAnimationFrame(() => {
-            el.style.transition = '';
-          });
-          return newIndex;
-        }
-        return idx;
+      if (e.target !== el || e.propertyName !== 'transform') return;
+      if (!pendingStep.current) return;
+      const step = pendingStep.current;
+      pendingStep.current = 0;
+      el.style.transition = 'none';
+      el.style.transform = 'translateX(0)';
+      setIndex((i) => (i + step + profiles.length) % profiles.length);
+      setOffset(0);
+      requestAnimationFrame(() => {
+        el.style.transition = '';
       });
-      };
+    };
     el.addEventListener('transitionend', handle);
     return () => el.removeEventListener('transitionend', handle);
-  }, [endIndex, startIndex, itemWidth, gap, enableNav, profiles.length]);
+  }, [profiles.length]);
 
-  const prev = () => enableNav && setIndex((i) => i - 1);
-  const next = () => enableNav && setIndex((i) => i + 1);
+  const prev = () => {
+    if (!enableNav) return;
+    pendingStep.current = -1;
+    setOffset(itemWidth + gap);
+  };
+  const next = () => {
+    if (!enableNav) return;
+    pendingStep.current = 1;
+    setOffset(-(itemWidth + gap));
+  };
 
   const startDrag = (x: number, time: number) => {
     if (!enableNav) return;
@@ -210,8 +216,18 @@ export default function ProfileSlider() {
     if (steps > maxSteps) steps = maxSteps;
     setDragging(false);
     setDragX(0);
-    if (delta < 0 && steps) setIndex((i) => i + steps);
-    else if (delta > 0 && steps) setIndex((i) => i - steps);
+    if (steps) {
+      if (delta < 0) {
+        pendingStep.current = steps;
+        setOffset(-(itemWidth + gap) * steps);
+      } else if (delta > 0) {
+        pendingStep.current = -steps;
+        setOffset((itemWidth + gap) * steps);
+      }
+    } else {
+      pendingStep.current = 0;
+      setOffset(0);
+    }
   };
 
   const onPointerDown = (e: React.PointerEvent) => {
@@ -226,8 +242,7 @@ export default function ProfileSlider() {
     finishDrag(e.clientX, e.timeStamp);
   };
 
-  const effectiveIndex = index;
-  const transform = `translateX(${dragX - effectiveIndex * (itemWidth + gap)}px)`;
+  const transform = `translateX(${dragX + offset}px)`;
 
   const handleSelect = async (p: ProfileCardData) => {
     if (!userId) return;
