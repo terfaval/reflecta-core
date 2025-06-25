@@ -175,6 +175,8 @@ export default function ProfileSlider() {
         const relative = ((idx - startIndex) % range + range) % range;
         const newIndex = startIndex + relative;
         el.style.transition = 'none';
+        el.style.transform = `translateX(${-newIndex * (itemWidth + gap)}px)`;
+        indexRef.current = newIndex;
         flushSync(() => {
           setIndex(newIndex);
         });
