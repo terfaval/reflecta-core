@@ -4,11 +4,17 @@ from datetime import datetime, timezone
 from typing import Tuple, Dict, Any
 
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 from .supabase_client import supabase, _execute, insert_log_entry
 
 router = APIRouter()
 
+class ConversationRequest(BaseModel):
+    """Request body for ``/conversation/new``."""
+
+    user_id: str
+    profile_name: str
 
 def _create_conversation(user_id: str, profile: str) -> Dict[str, Any]:
     try:
@@ -57,9 +63,11 @@ def create_conversation_and_session(user_id: str, profile: str) -> Tuple[str, Di
 
 
 @router.post("/conversation/new")
-async def conversation_new(userId: str, profile: str):
-    if not userId or not profile:
-        raise HTTPException(status_code=400, detail="Missing userId or profile")
+async def conversation_new(payload: ConversationRequest):
+    """Create a new conversation and session for the given user and profile."""
 
-    conv_id, session = create_conversation_and_session(userId, profile)
-    return {"conversationId": conv_id, "sessionId": session["id"]}
+    if not payload.user_id or not payload.profile_name:
+        raise HTTPException(status_code=400, detail="Missing user_id or profile_name")
+
+    conv_id, session = create_conversation_and_session(payload.user_id, payload.profile_name)
+    return {"conversation_id": conv_id, "session_id": session["id"]}

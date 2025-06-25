@@ -27,7 +27,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://reflecta-core.vercel.app",
-        "https://beenook.hu",
+        "https://beenook.hu/reflecta",
     ],
     allow_credentials=True,
     allow_methods=["*"],
