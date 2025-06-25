@@ -56,7 +56,6 @@ export default function ProfileSlider() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [itemWidth, setItemWidth] = useState(1);
   const [index, setIndex] = useState(0);
-  const indexRef = useRef(index);
 
   const [dragging, setDragging] = useState(false);
   const [dragX, setDragX] = useState(0);
@@ -158,29 +157,25 @@ export default function ProfileSlider() {
   }, [startIndex]);
 
   useEffect(() => {
-    indexRef.current = index;
-  }, [index]);
-
-
-  useEffect(() => {
     if (!enableNav) return;
     const el = trackRef.current;
     if (!el) return;
       const handle = (e: TransitionEvent) => {
         if (e.target !== el || e.propertyName !== 'transform') return;
-        const idx = indexRef.current;
+        setIndex((idx) => {
         if (idx >= endIndex || idx < startIndex) {
           const range = profiles.length;
           const relative = ((idx - startIndex) % range + range) % range;
           const newIndex = startIndex + relative;
-          indexRef.current = newIndex;
           el.style.transition = 'none';
           el.style.transform = `translateX(${-newIndex * (itemWidth + gap)}px)`;
-          setIndex(newIndex);
           requestAnimationFrame(() => {
             el.style.transition = '';
           });
+          return newIndex;
         }
+        return idx;
+      });
       };
     el.addEventListener('transitionend', handle);
     return () => el.removeEventListener('transitionend', handle);
@@ -231,7 +226,7 @@ export default function ProfileSlider() {
     finishDrag(e.clientX, e.timeStamp);
   };
 
-  const effectiveIndex = dragging ? index : indexRef.current;
+  const effectiveIndex = index;
   const transform = `translateX(${dragX - effectiveIndex * (itemWidth + gap)}px)`;
 
   const handleSelect = async (p: ProfileCardData) => {
