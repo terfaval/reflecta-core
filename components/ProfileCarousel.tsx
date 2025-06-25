@@ -90,27 +90,31 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
   );
 
   useEffect(() => {
-    if (!enableNav) return;
-    const el = trackRef.current;
-    if (!el) return;
-    const handle = () => {
-      if (index >= endIndex) {
-        el.style.transition = "none";
-        setIndex((i) => i - profiles.length);
-        requestAnimationFrame(() => {
-          if (el) el.style.transition = "";
-        });
-      } else if (index < startIndex) {
-        el.style.transition = "none";
-        setIndex((i) => i + profiles.length);
-        requestAnimationFrame(() => {
-          if (el) el.style.transition = "";
-        });
-      }
-    };
-    el.addEventListener("transitionend", handle);
-    return () => el.removeEventListener("transitionend", handle);
-  }, [index, endIndex, startIndex, profiles.length, enableNav]);
+  if (!enableNav) return;
+  const el = trackRef.current;
+  if (!el) return;
+
+  const handle = () => {
+    el.style.transition = "none";
+
+    if (index >= endIndex) {
+      setIndex(startIndex);
+      el.style.transform = `translateX(${-startIndex * (cardWidth + gap)}px)`;
+    } else if (index < startIndex) {
+      const newIndex = profiles.length + startIndex - 1;
+      setIndex(newIndex);
+      el.style.transform = `translateX(${-newIndex * (cardWidth + gap)}px)`;
+    }
+
+    requestAnimationFrame(() => {
+      if (el) el.style.transition = "";
+    });
+  };
+
+  el.addEventListener("transitionend", handle);
+  return () => el.removeEventListener("transitionend", handle);
+}, [index, endIndex, startIndex, profiles.length, enableNav, cardWidth, gap]);
+
   
   useEffect(() => {
     const el = containerRef.current;
