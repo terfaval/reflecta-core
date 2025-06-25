@@ -8,7 +8,10 @@ import { useProfileContext } from '@/contexts/ProfileContext';
 import { apiFetch } from '@/lib/api';
 import { profileStyles } from '@/styles/profileStyles';
 
-export interface ProfileCardData extends Omit<ProfileCardProps, 'onSelect'> {}
+export interface ProfileCardData
+  extends Omit<ProfileCardProps, 'onSelect'> {
+  personal?: boolean;
+}
 
 const BASE_ORDER = [
   'Reflecta',
@@ -32,6 +35,8 @@ const ICON_MAP: Record<string, string | undefined> = {
   Oneiros: 'OneirosIcon',
   Kairos: 'KairosIcon',
   Noe: 'NoeIcon',
+  Solun: 'SolunIcon',
+  Preceptor: 'PreceptorIcon',
 };
 
 const BLANK_DESC =
@@ -79,7 +84,7 @@ export default function ProfileSlider() {
               role: p.role,
             };
           });
-          const makeCard = (name: string): ProfileCardData => {
+          const makeCard = (name: string, personal = false): ProfileCardData => {
             const style =
               profileStyles[name] ||
               profileStyles[name.toLowerCase()] || {
@@ -94,20 +99,25 @@ export default function ProfileSlider() {
               role: map[name]?.role || '',
               userColor: style['--user-color'],
               bgColor: style['--bg-color'],
+              personal,
             };
           };
-          const personalName = meta.personalProfiles?.[0];
-          const list: ProfileCardData[] = [];
+          const personalNames = meta.personalProfiles || [];
+          const cards: ProfileCardData[] = [];
           BASE_ORDER.forEach((n) => {
             if (n === 'Reflecta') {
-              list.push(makeCard(n));
-              if (personalName) list.push(makeCard(personalName));
-            } else if (!personalName || n !== personalName) {
-              list.push(makeCard(n));
+              cards.push(makeCard(n));
+              personalNames.forEach((pn) => {
+                if (!BASE_ORDER.includes(pn)) {
+                  cards.push(makeCard(pn, true));
+                }
+              });
+            } else if (!personalNames.includes(n)) {
+              cards.push(makeCard(n));
             }
           });
-          setProfiles(list);
-          if (list.length <= visibleCount) setIndex(0);
+          setProfiles(cards);
+          if (cards.length <= visibleCount) setIndex(0);
         } else {
           console.error('[profile-list]', meta.error);
         }
@@ -164,30 +174,44 @@ export default function ProfileSlider() {
   const prev = () => enableNav && setIndex((i) => i - 1);
   const next = () => enableNav && setIndex((i) => i + 1);
 
-  const onTouchStart = (e: React.TouchEvent) => {
+  const startDrag = (x: number, time: number) => {
     if (!enableNav) return;
     setDragging(true);
-    startX.current = e.touches[0].clientX;
-    startTime.current = e.timeStamp;
+    startX.current = x;
+    startTime.current = time;
     setDragX(0);
   };
 
-  const onTouchMove = (e: React.TouchEvent) => {
+  const moveDrag = (x: number) => {
     if (!dragging) return;
-    const delta = e.touches[0].clientX - startX.current;
+    const delta = x - startX.current;
     setDragX(delta);
   };
 
-  const endDrag = (e: React.TouchEvent) => {
+  const finishDrag = (x: number, time: number) => {
     if (!dragging) return;
-    const delta = e.changedTouches[0].clientX - startX.current;
-    const time = e.timeStamp - startTime.current || 1;
-    const velocity = Math.abs(delta) / time;
+    const delta = x - startX.current;
+    const elapsed = time - startTime.current || 1;
+    const velocity = Math.abs(delta) / elapsed;
     const threshold = itemWidth / 5;
+    let steps = Math.round(Math.abs(delta) / (itemWidth + gap));
+    if (steps === 0 && (Math.abs(delta) > threshold || velocity > 0.2)) steps = 1;
     setDragging(false);
     setDragX(0);
-    if (delta < 0 && (Math.abs(delta) > threshold || velocity > 0.2)) next();
-    else if (delta > 0 && (Math.abs(delta) > threshold || velocity > 0.2)) prev();
+    if (delta < 0 && steps) setIndex((i) => i + steps);
+    else if (delta > 0 && steps) setIndex((i) => i - steps);
+  };
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    startDrag(e.clientX, e.timeStamp);
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    moveDrag(e.clientX);
+  };
+
+  const onPointerUp = (e: React.PointerEvent) => {
+    finishDrag(e.clientX, e.timeStamp);
   };
 
   const transform = `translateX(${dragX - index * (itemWidth + gap)}px)`;
@@ -223,10 +247,10 @@ export default function ProfileSlider() {
           className={`${styles.track} ${dragging ? styles.dragging : ''}`}
           ref={trackRef}
           style={{ transform }}
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={endDrag}
-          onTouchCancel={endDrag}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
         >
           {items.map((p, idx) => (
             <div key={idx} className={styles.card}>
