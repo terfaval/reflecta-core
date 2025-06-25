@@ -55,7 +55,7 @@ export default function ProfileSlider() {
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [itemWidth, setItemWidth] = useState(1);
-  const [index, setIndex] = useState(visibleCount);
+  const [index, setIndex] = useState(0);
 
   const [dragging, setDragging] = useState(false);
   const [dragX, setDragX] = useState(0);
@@ -129,11 +129,13 @@ export default function ProfileSlider() {
   }, [userId]);
 
   const enableNav = profiles.length > visibleCount;
-  const cloneBefore = enableNav ? profiles.slice(-visibleCount) : [];
-  const cloneAfter = enableNav ? profiles.slice(0, visibleCount) : [];
-  const items = enableNav ? [...cloneBefore, ...profiles, ...cloneAfter] : profiles;
-  const startIndex = enableNav ? visibleCount : 0;
-  const endIndex = enableNav ? profiles.length + visibleCount : profiles.length;
+  const repeat = 3;
+  const items = enableNav
+    ? Array.from({ length: repeat }, () => profiles).flat()
+    : profiles;
+  const baseIndex = enableNav ? profiles.length : 0;
+  const startIndex = baseIndex;
+  const endIndex = enableNav ? baseIndex + profiles.length : profiles.length;
 
   useLayoutEffect(() => {
     function update() {
@@ -142,13 +144,13 @@ export default function ProfileSlider() {
       const width = (w - gap * (visibleCount - 1)) / visibleCount;
       setItemWidth(width);
       trackRef.current.style.setProperty('--card-width', `${width}px`);
-      const start = enableNav ? visibleCount : 0;
+      const start = startIndex;
       trackRef.current.style.transform = `translateX(${-start * (width + gap)}px)`;
     }
     update();
     window.addEventListener('resize', update);
     return () => window.removeEventListener('resize', update);
-  }, [profiles.length, enableNav]);
+  }, [profiles.length, enableNav, startIndex]);
 
   useEffect(() => {
     setIndex(startIndex);
