@@ -57,6 +57,7 @@ export default function ProfileSlider() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [itemWidth, setItemWidth] = useState(1);
   const [index, setIndex] = useState(0);
+  const indexRef = useRef(index);
 
   const [dragging, setDragging] = useState(false);
   const [dragX, setDragX] = useState(0);
@@ -158,14 +159,20 @@ export default function ProfileSlider() {
   }, [startIndex]);
 
   useEffect(() => {
+    indexRef.current = index;
+  }, [index]);
+
+
+  useEffect(() => {
     if (!enableNav) return;
     const el = trackRef.current;
     if (!el) return;
     const handle = (e: TransitionEvent) => {
       if (e.target !== el || e.propertyName !== 'transform') return;
-      if (index >= endIndex || index < startIndex) {
+      const idx = indexRef.current;
+      if (idx >= endIndex || idx < startIndex) {
         const range = profiles.length;
-        const relative = ((index - startIndex) % range + range) % range;
+        const relative = ((idx - startIndex) % range + range) % range;
         const newIndex = startIndex + relative;
         el.style.transition = 'none';
         flushSync(() => {
@@ -179,7 +186,7 @@ export default function ProfileSlider() {
     };
     el.addEventListener('transitionend', handle);
     return () => el.removeEventListener('transitionend', handle);
-  }, [index, endIndex, startIndex, itemWidth, gap, enableNav, profiles.length]);
+  }, [endIndex, startIndex, itemWidth, gap, enableNav, profiles.length]);
 
   const prev = () => enableNav && setIndex((i) => i - 1);
   const next = () => enableNav && setIndex((i) => i + 1);
