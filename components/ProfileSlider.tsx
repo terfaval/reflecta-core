@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
-import { flushSync } from 'react-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/router';
 import ProfileCard, { ProfileCardProps } from './ProfileCard';
@@ -174,16 +173,13 @@ export default function ProfileSlider() {
         const range = profiles.length;
         const relative = ((idx - startIndex) % range + range) % range;
         const newIndex = startIndex + relative;
+        indexRef.current = newIndex;
         el.style.transition = 'none';
         el.style.transform = `translateX(${-newIndex * (itemWidth + gap)}px)`;
         indexRef.current = newIndex;
-        flushSync(() => {
-          setIndex(newIndex);
-        });
         requestAnimationFrame(() => {
-          if (el) el.style.transition = '';
+          el.style.transition = '';
         });
-
       }
     };
     el.addEventListener('transitionend', handle);
@@ -235,7 +231,8 @@ export default function ProfileSlider() {
     finishDrag(e.clientX, e.timeStamp);
   };
 
-  const transform = `translateX(${dragX - index * (itemWidth + gap)}px)`;
+  const effectiveIndex = dragging ? index : indexRef.current;
+  const transform = `translateX(${dragX - effectiveIndex * (itemWidth + gap)}px)`;
 
   const handleSelect = async (p: ProfileCardData) => {
     if (!userId) return;
