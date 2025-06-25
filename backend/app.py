@@ -1,4 +1,5 @@
 from fastapi import FastAPI, APIRouter
+from fastapi.middleware.cors import CORSMiddleware
 
 from .users import router as users_router
 from .user_create import router as user_create_router
@@ -19,6 +20,19 @@ from .last_session import router as last_session_router
 from .has_history import router as has_history_router
 
 app = FastAPI(title="Reflecta API")
+
+# Configure CORS so requests from the Next.js frontend and WordPress
+# embed can communicate with the API when this entrypoint is used.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://reflecta-core.vercel.app",
+        "https://beenook.hu",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Register routes under both the root path and the `/api` prefix so
 # existing clients can use either form.
