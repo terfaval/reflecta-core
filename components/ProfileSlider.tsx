@@ -55,10 +55,10 @@ export default function ProfileSlider() {
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [itemWidth, setItemWidth] = useState(1);
-  const [index, setIndex] = useState(0);
-  const [offset, setOffset] = useState(0);
-  const pendingStep = useRef(0);
 
+  // index points to the currently active real profile
+  const [index, setIndex] = useState(0);
+  
   const [dragging, setDragging] = useState(false);
   const [dragX, setDragX] = useState(0);
   const startX = useRef(0);
@@ -144,11 +144,11 @@ export default function ProfileSlider() {
     if (!profiles.length) return [] as ProfileCardData[];
     if (!enableNav) return profiles;
     const arr: ProfileCardData[] = [];
-    for (let i = -1; i <= visibleCount; i++) {
-      arr.push(profiles[(index + i + profiles.length) % profiles.length]);
-    }
+arr.push(profiles[profiles.length - 1]);
+    profiles.forEach((p) => arr.push(p));
+    arr.push(profiles[0]);
     return arr;
-  }, [profiles, index, enableNav]);
+  }, [profiles, enableNav]);
 
   useLayoutEffect(() => {
     function update() {
@@ -163,36 +163,38 @@ export default function ProfileSlider() {
     return () => window.removeEventListener("resize", update);
   }, [profiles.length, itemWidth, enableNav]);
 
-  // handle carousel wrapping with virtual index
+  // handle carousel wrapping when reaching cloned items
   useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
     const handle = (e: TransitionEvent) => {
       if (e.target !== el || e.propertyName !== "transform") return;
-      if (!pendingStep.current) return;
-      const step = pendingStep.current;
-      pendingStep.current = 0;
-      el.style.transition = "none";
-      el.style.transform = `translateX(${baseOffset}px)`;
-      setIndex((i) => (i + step + profiles.length) % profiles.length);
-      setOffset(0);
-      requestAnimationFrame(() => {
-        el.style.transition = "";
-      });
+      if (!enableNav) return;
+      if (index < 0) {
+        el.style.transition = "none";
+        setIndex(profiles.length - 1);
+        requestAnimationFrame(() => {
+          el.style.transition = "";
+        });
+      } else if (index >= profiles.length) {
+        el.style.transition = "none";
+        setIndex(0);
+        requestAnimationFrame(() => {
+          el.style.transition = "";
+        });
+      }
     };
     el.addEventListener("transitionend", handle);
     return () => el.removeEventListener("transitionend", handle);
-  }, [profiles.length]);
+  }, [index, profiles.length, enableNav]);
 
   const prev = () => {
     if (!enableNav) return;
-    pendingStep.current = -1;
-    setOffset(itemWidth + gap);
+    setIndex((i) => i - 1);
   };
   const next = () => {
     if (!enableNav) return;
-    pendingStep.current = 1;
-    setOffset(-(itemWidth + gap));
+    setIndex((i) => i + 1);
   };
 
   const startDrag = (x: number, time: number) => {
@@ -224,15 +226,10 @@ export default function ProfileSlider() {
     setDragX(0);
     if (steps) {
       if (delta < 0) {
-        pendingStep.current = steps;
-        setOffset(-(itemWidth + gap) * steps);
+        setIndex((i) => i + steps);
       } else if (delta > 0) {
-        pendingStep.current = -steps;
-        setOffset((itemWidth + gap) * steps);
+        setIndex((i) => i - steps);
       }
-    } else {
-      pendingStep.current = 0;
-      setOffset(0);
     }
   };
 
@@ -249,7 +246,7 @@ export default function ProfileSlider() {
   };
 
   const baseOffset = enableNav ? -(itemWidth + gap) : 0;
-  const transform = `translateX(${dragX + offset + baseOffset}px)`;
+  const transform = `translateX(${dragX + baseOffset - index * (itemWidth + gap)}px)`;
 
   const handleSelect = async (p: ProfileCardData) => {
     if (!userId) return;
