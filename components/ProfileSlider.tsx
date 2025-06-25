@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
+import { flushSync } from 'react-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/router';
 import ProfileCard, { ProfileCardProps } from './ProfileCard';
@@ -167,7 +168,9 @@ export default function ProfileSlider() {
         const relative = ((index - startIndex) % range + range) % range;
         const newIndex = startIndex + relative;
         el.style.transition = 'none';
-        setIndex(newIndex);
+        flushSync(() => {
+          setIndex(newIndex);
+        });
         requestAnimationFrame(() => {
           if (el) el.style.transition = '';
         });
