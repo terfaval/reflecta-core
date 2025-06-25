@@ -2,7 +2,7 @@ import React from "react";
 
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/router";
-import { profileStyles, buttonStyles } from "../styles/profileStyles";
+import { profileStyles } from "../styles/profileStyles";
 import UserErrorDisplay from "../components/UserErrorDisplay";
 import SpiralLoader from "../components/SpiralLoader";
 import ThinkingDots from "../components/ThinkingDots";
@@ -11,7 +11,7 @@ import StartingPromptSelector from "../components/StartingPromptSelector";
 import SessionLabelBubble from "../components/SessionLabelBubble";
 import ReflectiveMemoryPanel from "../components/ReflectiveMemoryPanel";
 import ProfileSelectorSidebar from "../components/ProfileSelectorSidebar";
-import ProfileCarousel, { ProfileCardData } from "@/components/ProfileSlider";
+import ProfileSlider from "@/components/ProfileSlider";
 import { useUserSession } from "../hooks/useUserSession";
 import { useAutoTextareaResize } from "../hooks/useAutoTextareaResize";
 import { ChatFooter } from "../components/ChatFooter";
@@ -29,18 +29,6 @@ interface Entry {
   content: string;
   created_at: string;
 }
-
-const DEFAULT_PROFILES: { name: string; iconName?: string }[] = [
-  { name: "Reflecta", iconName: "ReflectaIcon" },
-  { name: "Akasza", iconName: "AkaszaIcon" },
-  { name: "Éana", iconName: "EanaIcon" },
-  { name: "Luma", iconName: "LumaIcon" },
-  { name: "Sylva", iconName: "SylvaIcon" },
-  { name: "Zentó", iconName: "ZentoIcon" },
-  { name: "Oneiros", iconName: "OneirosIcon" },
-  { name: "Kairos", iconName: "KairosIcon" },
-  { name: "Noe", iconName: "NoeIcon" },
-];
 
 export default function ChatPage() {
   const { profile, setProfile } = useProfileContext();
@@ -69,8 +57,6 @@ export default function ChatPage() {
     profileStyles[(profile as string)?.toLowerCase()] ||
     {};
   const [showProfileSelect, setShowProfileSelect] = useState(false);
-  const [profiles, setProfiles] = useState<ProfileCardData[]>([]);
-  const [loadingProfiles, setLoadingProfiles] = useState(true);
 
   // waiting for user initialization is handled in UserProvider
 
@@ -85,7 +71,6 @@ export default function ChatPage() {
   useEffect(() => {
     if (!userId || profile) return;
     const load = async () => {
-      setLoadingProfiles(true);
       try {
         const data = await apiFetch<{ profile?: string; sessionId?: string }>(
           "/last-session",
@@ -97,80 +82,11 @@ export default function ChatPage() {
         if (data.profile && data.sessionId) {
           setProfile(data.profile);
           setSessionId(data.sessionId);
-          setLoadingProfiles(false);
           return;
         }
       } catch (err) {
         console.error("[last-session]", err);
       }
-      try {
-        const names = DEFAULT_PROFILES.map((p) => p.name);
-        const meta = await apiFetch<{
-          profiles: any[];
-          personalProfiles?: string[];
-          role?: string;
-          error?: string;
-        }>("/api/profile-list", {
-          method: "POST",
-          body: JSON.stringify({ userId, names }),
-        });
-        if (meta.profiles) {
-          const map: Record<
-            string,
-            { description: string; color: string; role?: string }
-          > = {};
-          (meta.profiles || []).forEach((p: any) => {
-            map[p.name] = {
-              description: p.description,
-              color: p.color,
-              role: p.role,
-            };
-          });
-          const defaults = DEFAULT_PROFILES.map((p) => ({
-            ...p,
-            description: map[p.name]?.description || "",
-            color: map[p.name]?.color || "#fff",
-            role: map[p.name]?.role || "",
-            userColor:
-              (profileStyles[p.name] ||
-                profileStyles[p.name.toLowerCase()] || {})["--user-color"] || "#000",
-            bgColor:
-              (profileStyles[p.name] ||
-                profileStyles[p.name.toLowerCase()] || {})["--bg-color"] || "#fff",
-          }));
-
-          const personalProfiles: ProfileCardData[] = [];
-          (meta.personalProfiles || []).forEach((name) => {
-            const pm = map[name] || { description: "", color: "#fff" };
-            personalProfiles.push({
-              name,
-              iconName: undefined,
-              description: pm.description,
-              color: pm.color,
-              role: "",
-              userColor: "#000",
-              bgColor: "#fff",
-              personal: true,
-            });
-          });
-
-          let list = defaults;
-          if (
-            personalProfiles.length &&
-            (meta.role === "premium" || meta.role === "admin")
-          ) {
-            const arr = [...defaults];
-            personalProfiles.forEach((pp, idx) => arr.splice(1 + idx, 0, pp));
-            list = arr;
-          }
-          setProfiles(list);
-        } else {
-          console.error("[profile-list]", meta.error);
-        }
-      } catch (err) {
-        console.error("[profile-list fetch]", err);
-      }
-      setLoadingProfiles(false);
       setShowProfileSelect(true);
     };
     load();
@@ -236,11 +152,6 @@ export default function ChatPage() {
     setSessionIsFresh,
     setIsClosing,
   });
-
-  const handleSelectProfile = (p: ProfileCardData) => {
-    setProfile(p.name);
-    setShowProfileSelect(false);
-  };
 
   useEffect(() => {
     if (debug) console.log("[Debug] ChatPage render");
@@ -341,16 +252,9 @@ export default function ChatPage() {
   }
 
   if (showProfileSelect || (userInitialized && !profile && !sessionId)) {
-    if (loadingProfiles)
-      return (
-        <SpiralLoader
-          userColor={currentStyle["--user-color"] || "#7A4DFF"}
-          aiColor={currentStyle["--ai-color"] || "#FFB347"}
-        />
-      );
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <ProfileCarousel profiles={profiles} onSelect={handleSelectProfile} />
+        <ProfileSlider />
       </div>
     );
   }
