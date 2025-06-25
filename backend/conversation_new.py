@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from typing import Tuple, Dict, Any
 
 from fastapi import APIRouter, HTTPException
+import logging
 from pydantic import BaseModel
 
 from .supabase_client import supabase, _execute, insert_log_entry
@@ -66,8 +67,21 @@ def create_conversation_and_session(user_id: str, profile: str) -> Tuple[str, Di
 async def conversation_new(payload: ConversationRequest):
     """Create a new conversation and session for the given user and profile."""
 
-    if not payload.user_id or not payload.profile_name:
-        raise HTTPException(status_code=400, detail="Missing user_id or profile_name")
+    payload_dict = payload.dict()
+    required_fields = ["user_id", "profile_name"]
+    for field in required_fields:
+        if field not in payload_dict or not payload_dict[field]:
+            raise HTTPException(status_code=400, detail=f"Hiányzó vagy érvénytelen mező: {field}")
 
-    conv_id, session = create_conversation_and_session(payload.user_id, payload.profile_name)
-    return {"conversation_id": conv_id, "session_id": session["id"]}
+    logging.info(f"[conversation/new] payload: {payload_dict}")
+
+    valid_profiles = ["Reflecta", "Solun", "Akásza", "Éana", "Kairos", "Zentó", "Noe"]
+    if payload.profile_name not in valid_profiles:
+        raise HTTPException(status_code=400, detail="Ismeretlen profilnév")
+
+    try:
+        conv_id, session = create_conversation_and_session(payload.user_id, payload.profile_name)
+        return {"conversation_id": conv_id, "session_id": session["id"]}
+    except Exception as e:
+        logging.error(f"[conversation/new] Hiba történt: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Szerverhiba: {str(e)}")
