@@ -142,11 +142,13 @@ export default function ProfileSlider() {
       const width = (w - gap * (visibleCount - 1)) / visibleCount;
       setItemWidth(width);
       trackRef.current.style.setProperty('--card-width', `${width}px`);
+      const start = enableNav ? visibleCount : 0;
+      trackRef.current.style.transform = `translateX(${-start * (width + gap)}px)`;
     }
     update();
     window.addEventListener('resize', update);
     return () => window.removeEventListener('resize', update);
-  }, [profiles.length]);
+  }, [profiles.length, enableNav]);
 
   useEffect(() => {
     setIndex(startIndex);
@@ -156,7 +158,8 @@ export default function ProfileSlider() {
     if (!enableNav) return;
     const el = trackRef.current;
     if (!el) return;
-    const handle = () => {
+    const handle = (e: TransitionEvent) => {
+      if (e.target !== el || e.propertyName !== 'transform') return;
       if (index >= endIndex || index < startIndex) {
         el.style.transition = 'none';
         const newIndex = index >= endIndex ? startIndex : index + profiles.length;
@@ -194,7 +197,7 @@ export default function ProfileSlider() {
     const elapsed = time - startTime.current || 1;
     const velocity = Math.abs(delta) / elapsed;
     const threshold = itemWidth / 5;
-    let steps = Math.round(Math.abs(delta) / (itemWidth + gap));
+    let steps = Math.floor(Math.abs(delta) / (itemWidth + gap));
     if (steps === 0 && (Math.abs(delta) > threshold || velocity > 0.2)) steps = 1;
     setDragging(false);
     setDragX(0);
