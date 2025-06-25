@@ -163,15 +163,15 @@ export default function ProfileSlider() {
     const handle = (e: TransitionEvent) => {
       if (e.target !== el || e.propertyName !== 'transform') return;
       if (index >= endIndex || index < startIndex) {
-        el.style.transition = 'none';
         const range = profiles.length;
         const relative = ((index - startIndex) % range + range) % range;
         const newIndex = startIndex + relative;
+        el.style.transition = 'none';
         setIndex(newIndex);
-        el.style.transform = `translateX(${-newIndex * (itemWidth + gap)}px)`;
         requestAnimationFrame(() => {
           if (el) el.style.transition = '';
         });
+
       }
     };
     el.addEventListener('transitionend', handle);
