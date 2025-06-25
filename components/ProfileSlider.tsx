@@ -1,46 +1,46 @@
-import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRouter } from 'next/router';
-import ProfileCard, { ProfileCardProps } from './ProfileCard';
-import styles from './ProfileSlider.module.css';
-import { useUserContext } from '@/contexts/UserContext';
-import { useProfileContext } from '@/contexts/ProfileContext';
-import { apiFetch } from '@/lib/api';
-import { profileStyles } from '@/styles/profileStyles';
+import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter } from "next/router";
+import ProfileCard, { ProfileCardProps } from "./ProfileCard";
+import styles from "./ProfileSlider.module.css";
+import { useUserContext } from "@/contexts/UserContext";
+import { useProfileContext } from "@/contexts/ProfileContext";
+import { apiFetch } from "@/lib/api";
+import { profileStyles } from "@/styles/profileStyles";
 
 export interface ProfileCardData
-  extends Omit<ProfileCardProps, 'onSelect'> {
+  extends Omit<ProfileCardProps, "onSelect"> {
   personal?: boolean;
 }
 
 const BASE_ORDER = [
-  'Reflecta',
-  'Akasza',
-  'Éana',
-  'Luma',
-  'Sylva',
-  'Zentó',
-  'Oneiros',
-  'Kairos',
-  'Noe',
+  "Reflecta",
+  "Akasza",
+  "Éana",
+  "Luma",
+  "Sylva",
+  "Zentó",
+  "Oneiros",
+  "Kairos",
+  "Noe",
 ];
 
 const ICON_MAP: Record<string, string | undefined> = {
-  Reflecta: 'ReflectaIcon',
-  Akasza: 'AkaszaIcon',
-  'Éana': 'EanaIcon',
-  Luma: 'LumaIcon',
-  Sylva: 'SylvaIcon',
-  'Zentó': 'ZentoIcon',
-  Oneiros: 'OneirosIcon',
-  Kairos: 'KairosIcon',
-  Noe: 'NoeIcon',
-  Solun: 'SolunIcon',
-  Preceptor: 'PreceptorIcon',
+  Reflecta: "ReflectaIcon",
+  Akasza: "AkaszaIcon",
+  "Éana": "EanaIcon",
+  Luma: "LumaIcon",
+  Sylva: "SylvaIcon",
+  "Zentó": "ZentoIcon",
+  Oneiros: "OneirosIcon",
+  Kairos: "KairosIcon",
+  Noe: "NoeIcon",
+  Solun: "SolunIcon",
+  Preceptor: "PreceptorIcon",
 };
 
 const BLANK_DESC =
-  'Alap naplóprofil, ha csak egyszerűen írnál, mindenféle irány nélkül.';
+  "Alap naplóprofil, ha csak egyszerűen írnál, mindenféle irány nélkül.";
 
 export default function ProfileSlider() {
   const { userId } = useUserContext();
@@ -73,12 +73,15 @@ export default function ProfileSlider() {
           profiles: any[];
           personalProfiles?: string[];
           error?: string;
-        }>('/api/profile-list', {
-          method: 'POST',
+        }>("/api/profile-list", {
+          method: "POST",
           body: JSON.stringify({ userId, names }),
         });
         if (meta.profiles) {
-          const map: Record<string, { description: string; color: string; role?: string }> = {};
+          const map: Record<
+            string,
+            { description: string; color: string; role?: string }
+          > = {};
           (meta.profiles || []).forEach((p: any) => {
             map[p.name] = {
               description: p.description,
@@ -86,28 +89,30 @@ export default function ProfileSlider() {
               role: p.role,
             };
           });
-          const makeCard = (name: string, personal = false): ProfileCardData => {
-            const style =
-              profileStyles[name] ||
+          const makeCard = (
+            name: string,
+            personal = false,
+          ): ProfileCardData => {
+            const style = profileStyles[name] ||
               profileStyles[name.toLowerCase()] || {
-                '--user-color': '#000',
-                '--bg-color': '#fff',
+                "--user-color": "#000",
+                "--bg-color": "#fff",
               };
             return {
               name,
               iconName: ICON_MAP[name],
-              description: map[name]?.description || (name === 'Reflecta' ? BLANK_DESC : ''),
-              color: map[name]?.color || '#fff',
-              role: map[name]?.role || '',
-              userColor: style['--user-color'],
-              bgColor: style['--bg-color'],
+              description: map[name]?.description || (name === "Reflecta" ? BLANK_DESC : ""),
+              color: map[name]?.color || "#fff",
+              role: map[name]?.role || "",
+              userColor: style["--user-color"],
+              bgColor: style["--bg-color"],
               personal,
             };
           };
           const personalNames = meta.personalProfiles || [];
           const cards: ProfileCardData[] = [];
           BASE_ORDER.forEach((n) => {
-            if (n === 'Reflecta') {
+            if (n === "Reflecta") {
               cards.push(makeCard(n));
               personalNames.forEach((pn) => {
                 if (!BASE_ORDER.includes(pn)) {
@@ -121,10 +126,10 @@ export default function ProfileSlider() {
           setProfiles(cards);
           if (cards.length <= visibleCount) setIndex(0);
         } else {
-          console.error('[profile-list]', meta.error);
+          console.error("[profile-list]", meta.error);
         }
       } catch (err) {
-        console.error('[profile-list fetch]', err);
+        console.error("[profile-list fetch]", err);
       }
     };
     load();
@@ -132,15 +137,15 @@ export default function ProfileSlider() {
 
   useEffect(() => {
     setIndex(0);
-  }, [profiles.length]);
+  }, [profiles.length, itemWidth]);
 
   const enableNav = profiles.length > visibleCount;
   const items = React.useMemo(() => {
     if (!profiles.length) return [] as ProfileCardData[];
     if (!enableNav) return profiles;
     const arr: ProfileCardData[] = [];
-    for (let i = 0; i < visibleCount; i++) {
-      arr.push(profiles[(index + i) % profiles.length]);
+    for (let i = -1; i <= visibleCount; i++) {
+      arr.push(profiles[(index + i + profiles.length) % profiles.length]);
     }
     return arr;
   }, [profiles, index, enableNav]);
@@ -151,32 +156,32 @@ export default function ProfileSlider() {
       const w = containerRef.current.offsetWidth;
       const width = (w - gap * (visibleCount - 1)) / visibleCount;
       setItemWidth(width);
-      trackRef.current.style.setProperty('--card-width', `${width}px`);
+      trackRef.current.style.setProperty("--card-width", `${width}px`);
     }
     update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, [profiles.length]);
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [profiles.length, itemWidth, enableNav]);
 
   // handle carousel wrapping with virtual index
   useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
-      const handle = (e: TransitionEvent) => {
-      if (e.target !== el || e.propertyName !== 'transform') return;
+    const handle = (e: TransitionEvent) => {
+      if (e.target !== el || e.propertyName !== "transform") return;
       if (!pendingStep.current) return;
       const step = pendingStep.current;
       pendingStep.current = 0;
-      el.style.transition = 'none';
-      el.style.transform = 'translateX(0)';
+      el.style.transition = "none";
+      el.style.transform = `translateX(${baseOffset}px)`;
       setIndex((i) => (i + step + profiles.length) % profiles.length);
       setOffset(0);
       requestAnimationFrame(() => {
-        el.style.transition = '';
+        el.style.transition = "";
       });
     };
-    el.addEventListener('transitionend', handle);
-    return () => el.removeEventListener('transitionend', handle);
+    el.addEventListener("transitionend", handle);
+    return () => el.removeEventListener("transitionend", handle);
   }, [profiles.length]);
 
   const prev = () => {
@@ -211,7 +216,8 @@ export default function ProfileSlider() {
     const velocity = Math.abs(delta) / elapsed;
     const threshold = itemWidth / 5;
     let steps = Math.floor(Math.abs(delta) / (itemWidth + gap));
-    if (steps === 0 && (Math.abs(delta) > threshold || velocity > 0.2)) steps = 1;
+    if (steps === 0 && (Math.abs(delta) > threshold || velocity > 0.2))
+      steps = 1;
     const maxSteps = enableNav ? visibleCount : profiles.length;
     if (steps > maxSteps) steps = maxSteps;
     setDragging(false);
@@ -242,37 +248,44 @@ export default function ProfileSlider() {
     finishDrag(e.clientX, e.timeStamp);
   };
 
-  const transform = `translateX(${dragX + offset}px)`;
+  const baseOffset = enableNav ? -(itemWidth + gap) : 0;
+  const transform = `translateX(${dragX + offset + baseOffset}px)`;
 
   const handleSelect = async (p: ProfileCardData) => {
     if (!userId) return;
     try {
-      const data = await apiFetch<{ conversationId: string; sessionId: string }>(
-        '/conversation/new',
-        {
-          method: 'POST',
-          body: JSON.stringify({ userId, profile: p.name }),
-        },
-      );
+      const data = await apiFetch<{
+        conversationId: string;
+        sessionId: string;
+      }>("/conversation/new", {
+        method: "POST",
+        body: JSON.stringify({ userId, profile: p.name }),
+      });
       if (data.conversationId && data.sessionId) {
         setProfile(p.name);
-        router.push(`/chat?conversation=${data.conversationId}&session=${data.sessionId}`);
+        router.push(
+          `/chat?conversation=${data.conversationId}&session=${data.sessionId}`,
+        );
       }
     } catch (err) {
-      console.error('[start conversation]', err);
+      console.error("[start conversation]", err);
     }
   };
 
   return (
     <div className={styles.container} ref={containerRef}>
       {enableNav && (
-        <button className={`${styles.arrow} ${styles.left}`} onClick={prev} aria-label="Előző">
+        <button
+          className={`${styles.arrow} ${styles.left}`}
+          onClick={prev}
+          aria-label="Előző"
+        >
           <ChevronLeft />
         </button>
       )}
       <div className={styles.viewport}>
         <div
-          className={`${styles.track} ${dragging ? styles.dragging : ''}`}
+          className={`${styles.track} ${dragging ? styles.dragging : ""}`}
           ref={trackRef}
           style={{ transform }}
           onPointerDown={onPointerDown}
@@ -288,7 +301,11 @@ export default function ProfileSlider() {
         </div>
       </div>
       {enableNav && (
-        <button className={`${styles.arrow} ${styles.right}`} onClick={next} aria-label="Következő">
+        <button
+          className={`${styles.arrow} ${styles.right}`}
+          onClick={next}
+          aria-label="Következő"
+        >
           <ChevronRight />
         </button>
       )}
