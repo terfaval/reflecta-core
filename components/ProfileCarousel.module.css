@@ -3,17 +3,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-inline: auto;
+  margin: 0 auto;
   width: 100%;
   max-width: 80vw;
   height: auto;
   overflow: visible;
 }
-
-.track > * {
-  flex: 0 0 auto;
-}
-
 
 .viewport {
   overflow: hidden;
@@ -22,14 +17,18 @@
 
 .track {
   display: flex;
-  gap: 16px;
   flex-wrap: nowrap;
-  overflow: visible;
+  gap: 16px;
   transition: transform 0.3s ease;
-  touch-action: pan-y;
   user-select: none;
   cursor: grab;
+  touch-action: pan-y;
 }
+
+.card {
+  flex: 0 0 auto;
+}
+
 
 .dragging {
   transition: none;
@@ -40,23 +39,21 @@
 .arrow {
   position: absolute;
   top: 50%;
-  z-index: 10;
+  transform: translateY(-50%);
   background: none;
   border: none;
-  padding: 0;
-  cursor: pointer;
-  color: #555;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
+  cursor: pointer;
+  color: #555;
   opacity: 0.7;
-  transition: color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
 .arrow.left {
-   left: -1rem;
+  left: -1rem;
 }
 
 .arrow.right {
@@ -64,6 +61,5 @@
 }
 
 .arrow:hover {
-  color: #555;
   opacity: 1;
 }
