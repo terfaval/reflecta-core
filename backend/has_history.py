@@ -17,13 +17,13 @@ class HistoryRequest(BaseModel):
 async def has_history(payload: HistoryRequest) -> Dict[str, Optional[str]]:
     """Return whether the user has any session and the last profile if available."""
 
+    user_id = payload.userId
+    if not user_id:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Hiányzó adat vagy érvénytelen lekérés."},
+        )
     try:
-        user_id = payload.userId
-        if not user_id:
-            return JSONResponse(
-                status_code=400,
-                content={"error": "Hiányzó adat vagy érvénytelen lekérés."},
-            )
         result = (
             supabase.table("sessions")
             .select("id, profile")
@@ -35,12 +35,10 @@ async def has_history(payload: HistoryRequest) -> Dict[str, Optional[str]]:
         )
         row = _execute(result)
 
+    except Exception as exc:  # pragma: no cover - graceful fallback
+        print(f"[has_history] Fallback due to: {exc}")
+        row = None
+
         if row:
             return {"hasHistory": True, "profile": row.get("profile")}
         return {"hasHistory": False, "profile": None}
-    except Exception as exc:  # pragma: no cover - unexpected error
-        print(f"[has_history] Unexpected error: {exc}")
-        return JSONResponse(
-            status_code=400,
-            content={"error": "Hiányzó adat vagy érvénytelen lekérés."},
-        )
