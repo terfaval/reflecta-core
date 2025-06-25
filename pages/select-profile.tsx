@@ -181,7 +181,7 @@ export default function ProfileSelectorPage() {
           fontSize: "1.75rem",
           fontWeight: 600,
           marginTop: "0.5rem",
-          marginBottom: "0.3rem",
+          marginBottom: "0.5rem",
           margin: 0,
         }}
       >

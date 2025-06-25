@@ -35,28 +35,26 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
   const [index, setIndex] = useState(startIndex);
 
   const prev = useCallback(() => {
-    if (!enableNav) return;
-    setIndex((i) => i - 1);
+    if (enableNav) setIndex((i) => i - 1);
   }, [enableNav]);
   const next = useCallback(() => {
-    if (!enableNav) return;
-    setIndex((i) => i + 1);
+    if (enableNav) setIndex((i) => i + 1);
   }, [enableNav]);
 
-  const trackRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [cardWidth, setCardWidth] = useState(1);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [itemWidth, setItemWidth] = useState(1);
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
 
   useLayoutEffect(() => {
     function update() {
-      if (!trackRef.current || !containerRef.current) return;
+      if (!containerRef.current || !trackRef.current) return;
       const containerWidth = containerRef.current.offsetWidth;
-      const computedCardWidth =
+      const width =
         (containerWidth - gap * (visibleCount - 1)) / visibleCount;
-      trackRef.current.style.setProperty("--card-width", `${computedCardWidth}px`);
-      setCardWidth(computedCardWidth)
+      trackRef.current.style.setProperty("--card-width", `${width}px`);
+      setItemWidth(width);
     }
     update();
     window.addEventListener("resize", update);
@@ -67,14 +65,12 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
     setIndex(startIndex);
   }, [startIndex]);
 
-  // Always show four cards regardless of viewport size
-
   const swipeHandlers = useSwipeable(
     enableNav
       ? {
           onSwipeStart: () => setDragging(true),
           onSwiped: ({ dir, deltaX, velocity }) => {
-            const threshold = cardWidth / 5;
+            const threshold = itemWidth / 5;
             const distance = Math.abs(deltaX);
             const fast = velocity > 0.2;
             if (dir === "Left" && (distance > threshold || fast)) next();
@@ -91,30 +87,29 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
 
   useEffect(() => {
   if (!enableNav) return;
-  const el = trackRef.current;
-  if (!el) return;
+    const el = trackRef.current;
+    if (!el) return;
 
-  const handle = () => {
-    el.style.transition = "none";
+    const handle = () => {
+      el.style.transition = "none";
 
-    if (index >= endIndex) {
-      setIndex(startIndex);
-      el.style.transform = `translateX(${-startIndex * (cardWidth + gap)}px)`;
-    } else if (index < startIndex) {
-      const newIndex = profiles.length + startIndex - 1;
-      setIndex(newIndex);
-      el.style.transform = `translateX(${-newIndex * (cardWidth + gap)}px)`;
-    }
+      if (index >= endIndex) {
+        setIndex(startIndex);
+        el.style.transform = `translateX(${-startIndex * (itemWidth + gap)}px)`;
+      } else if (index < startIndex) {
+        const newIndex = profiles.length + startIndex - 1;
+        setIndex(newIndex);
+        el.style.transform = `translateX(${-newIndex * (itemWidth + gap)}px)`;
+      }
 
-    requestAnimationFrame(() => {
-      if (el) el.style.transition = "";
-    });
-  };
+      requestAnimationFrame(() => {
+        if (el) el.style.transition = "";
+      });
+    };
 
-  el.addEventListener("transitionend", handle);
-  return () => el.removeEventListener("transitionend", handle);
-}, [index, endIndex, startIndex, profiles.length, enableNav, cardWidth, gap]);
-
+    el.addEventListener("transitionend", handle);
+    return () => el.removeEventListener("transitionend", handle);
+  }, [index, endIndex, startIndex, profiles.length, enableNav, itemWidth, gap]);
   
   useEffect(() => {
     const el = containerRef.current;
@@ -143,9 +138,7 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
         <div
           className={`${styles.track} ${dragging ? styles.dragging : ""}`}
           ref={trackRef}
-          style={{
-            transform: `translateX(${dragX - index * (cardWidth + gap)}px)`,
-          }}
+          style={{ transform: `translateX(${dragX - index * (itemWidth + gap)}px)` }}
         >
           {items.map((p, idx) => (
             <ProfileCardComponent
