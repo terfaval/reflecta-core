@@ -166,22 +166,22 @@ export default function ProfileSlider() {
     if (!enableNav) return;
     const el = trackRef.current;
     if (!el) return;
-    const handle = (e: TransitionEvent) => {
-      if (e.target !== el || e.propertyName !== 'transform') return;
-      const idx = indexRef.current;
-      if (idx >= endIndex || idx < startIndex) {
-        const range = profiles.length;
-        const relative = ((idx - startIndex) % range + range) % range;
-        const newIndex = startIndex + relative;
-        indexRef.current = newIndex;
-        el.style.transition = 'none';
-        el.style.transform = `translateX(${-newIndex * (itemWidth + gap)}px)`;
-        indexRef.current = newIndex;
-        requestAnimationFrame(() => {
-          el.style.transition = '';
-        });
-      }
-    };
+      const handle = (e: TransitionEvent) => {
+        if (e.target !== el || e.propertyName !== 'transform') return;
+        const idx = indexRef.current;
+        if (idx >= endIndex || idx < startIndex) {
+          const range = profiles.length;
+          const relative = ((idx - startIndex) % range + range) % range;
+          const newIndex = startIndex + relative;
+          indexRef.current = newIndex;
+          el.style.transition = 'none';
+          el.style.transform = `translateX(${-newIndex * (itemWidth + gap)}px)`;
+          setIndex(newIndex);
+          requestAnimationFrame(() => {
+            el.style.transition = '';
+          });
+        }
+      };
     el.addEventListener('transitionend', handle);
     return () => el.removeEventListener('transitionend', handle);
   }, [endIndex, startIndex, itemWidth, gap, enableNav, profiles.length]);
