@@ -19,6 +19,7 @@ interface Props {
 
 export default function ProfileCarousel({ profiles, onSelect }: Props) {
   const visibleCount = 4;
+  const gap = 16; // px, keep in sync with CSS gap
 
   const enableNav = profiles.length > visibleCount;
 
@@ -44,25 +45,23 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
 
   const trackRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [itemWidth, setItemWidth] = useState(1);
+  const [cardWidth, setCardWidth] = useState(1);
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
 
   useLayoutEffect(() => {
     function update() {
       if (!trackRef.current || !containerRef.current) return;
-      const style = window.getComputedStyle(trackRef.current);
-      const gap = parseFloat(style.gap || style.columnGap || "0");
-      const containerWidth = containerRef.current.clientWidth;
-      const cardWidth =
+      const containerWidth = containerRef.current.offsetWidth;
+      const computedCardWidth =
         (containerWidth - gap * (visibleCount - 1)) / visibleCount;
-      trackRef.current.style.setProperty("--card-width", `${cardWidth}px`);
-      setItemWidth(cardWidth + gap);
+      trackRef.current.style.setProperty("--card-width", `${computedCardWidth}px`);
+      setCardWidth(computedCardWidth)
     }
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
-  }, [profiles.length]);
+  }, [profiles.length, gap]);
 
   useEffect(() => {
     setIndex(startIndex);
@@ -75,7 +74,7 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
       ? {
           onSwipeStart: () => setDragging(true),
           onSwiped: ({ dir, deltaX, velocity }) => {
-            const threshold = itemWidth / 5;
+            const threshold = cardWidth / 5;
             const distance = Math.abs(deltaX);
             const fast = velocity > 0.2;
             if (dir === "Left" && (distance > threshold || fast)) next();
@@ -140,7 +139,9 @@ export default function ProfileCarousel({ profiles, onSelect }: Props) {
         <div
           className={`${styles.track} ${dragging ? styles.dragging : ""}`}
           ref={trackRef}
-          style={{ transform: `translateX(${dragX - index * itemWidth}px)` }}
+          style={{
+            transform: `translateX(${dragX - index * (cardWidth + gap)}px)`,
+          }}
         >
           {items.map((p, idx) => (
             <ProfileCardComponent
