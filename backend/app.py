@@ -19,20 +19,24 @@ from .generate_personal_profile import router as generate_profile_router
 from .last_session import router as last_session_router
 from .has_history import router as has_history_router
 
+ALLOWED_ORIGINS = [
+    "https://reflecta-core.vercel.app",
+    "https://beenook.hu/reflecta",
+]
+
 app = FastAPI(title="Reflecta API")
 
 # Configure CORS so requests from the Next.js frontend and WordPress
 # embed can communicate with the API when this entrypoint is used.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://reflecta-core.vercel.app",
-        "https://beenook.hu/reflecta",
-    ],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+print("\u2705 CORS beállítva az alábbi originre:", ALLOWED_ORIGINS)
 
 # Register routes under both the root path and the `/api` prefix so
 # existing clients can use either form.
@@ -90,3 +94,8 @@ app.include_router(has_history_router)
 api_router.include_router(has_history_router)
 
 app.include_router(api_router)
+
+
+@app.get("/")
+def read_root():
+    return {"message": "Reflecta Python backend running"}
