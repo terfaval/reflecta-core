@@ -108,11 +108,8 @@ export default function ChatPage() {
     const load = async () => {
       try {
         const data = await apiFetch<{ profile?: string; sessionId?: string }>(
-          "/last-session",
-          {
-            method: "POST",
-            body: JSON.stringify({ userId }),
-          }
+          `/last-session?userId=${encodeURIComponent(userId)}`,
+          { method: "GET" }
         );
         if (data.profile && data.sessionId) {
           setProfile(data.profile);

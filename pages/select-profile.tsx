@@ -28,20 +28,17 @@ export default function ProfileSelectorPage() {
     if (!userId) return;
     const load = async () => {
       try {
-        const data = await apiFetch<{ hasHistory: boolean; profile?: string }>(
-          "/api/has-history",
-          {
-            method: "POST",
-            body: JSON.stringify({ userId }),
-          },
+        const data = await apiFetch<{ profile?: string; sessionId?: string }>(
+          `/last-session?userId=${encodeURIComponent(userId)}`,
+          { method: "GET" }
         );
-        if (data.hasHistory) {
+        if (data.sessionId) {
           if (data.profile) setProfile(data.profile);
-          router.replace("/chat");
+          router.replace(`/chat?session=${data.sessionId}`);
           return;
         }
       } catch (err) {
-        console.error("[has-history]", err);
+        console.error("[last-session]", err);
       }
       setLoaded(true);
     };

@@ -22,14 +22,15 @@ async def get_or_create_conversation_and_session(user_id: str, profile: str):
     conversation, conv_err = conv_resp
     if conversation and not conv_err:
         conversation_id = conversation["id"]
-    try:
+    else:
+        try:
             created = insert_single(
                 "conversations",
                 {"user_id": user_id, "profile": profile},
             )
-    except Exception:
+        except Exception:
             raise HTTPException(500, "Failed to create conversation")
-    conversation_id = created["id"]
+        conversation_id = created["id"]
 
     existing_session, _ = (
         client.table("sessions")

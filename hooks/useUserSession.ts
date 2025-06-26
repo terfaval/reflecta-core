@@ -21,7 +21,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
   const { session: sessionOverride } = router.query;
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !router.isReady) return;
 
     const startSession = async (uid: string) => {
       let profileData;
@@ -73,5 +73,5 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
     }
 
     // waiting for external user initialization is now handled outside
-  }, [profile, onReady, enabled, userId]);
+  }, [profile, onReady, enabled, userId, router.isReady, sessionOverride]);
 }

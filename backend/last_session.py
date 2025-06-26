@@ -14,9 +14,7 @@ class LastSessionRequest(BaseModel):
     userId: str
 
 
-@router.post("/last-session")
-async def last_session(payload: LastSessionRequest) -> Dict[str, Optional[str]]:
-    user_id = payload.userId
+def _fetch_last_session(user_id: str) -> Dict[str, Optional[str]]:
     if not user_id:
         raise HTTPException(status_code=400, detail="Missing userId")
 
@@ -54,3 +52,18 @@ async def last_session(payload: LastSessionRequest) -> Dict[str, Optional[str]]:
 
     match = next((s for s in session_rows if s.get("id") == entry.get("session_id")), None)
     return {"profile": match.get("profile") if match else None, "sessionId": entry.get("session_id")}
+
+
+@router.post("/last-session")
+async def last_session_post(payload: LastSessionRequest) -> Dict[str, Optional[str]]:
+    user_id = payload.userId
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Missing userId")
+    return _fetch_last_session(user_id)
+
+
+@router.get("/last-session")
+async def last_session_get(userId: str) -> Dict[str, Optional[str]]:
+    if not userId:
+        raise HTTPException(status_code=400, detail="Missing userId")
+    return _fetch_last_session(userId)
