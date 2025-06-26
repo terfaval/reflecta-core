@@ -375,11 +375,8 @@ export default function ChatPage() {
   }
 
   return (
-    <div
-      className="reflecta-chat flex h-screen w-full"
-      style={currentStyle}
-    >
-      <div className="w-[15%] bg-gray-100 h-full overflow-y-auto hidden md:block">
+    <div className="reflecta-chat chat-layout" style={currentStyle}>
+      <div className="chat-profile-sidebar">
         <ProfileSelectorSidebar
           userRole={sidebarRole}
           customProfile={customProfileData}
@@ -390,7 +387,7 @@ export default function ChatPage() {
           onCreateCustomProfile={handleCreateCustomProfile}
         />
       </div>
-      <div className="flex flex-col w-full md:w-[75%] h-full px-6 py-4 overflow-y-auto">
+      <div className="chat-area">
         <ChatMessagesList
           entries={entries}
           loadingEntries={loadingEntries}
@@ -418,7 +415,7 @@ export default function ChatPage() {
           currentStyle={currentStyle}
         />
       </div>
-      <div className="hidden md:block w-[10%] h-full overflow-y-auto bg-gray-50">
+      <div className="chat-memory-panel">
         <ReflectiveMemoryPanel sessionId={sessionId} handleSend={handleSend} />
       </div>
     </div>

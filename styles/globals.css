@@ -113,3 +113,40 @@
   align-items: flex-end;
   gap: 10px;
 }
+
+*/ Chat layout three-column structure */
+.chat-layout {
+  display: flex;
+  height: 100vh;
+}
+
+.chat-profile-sidebar {
+  flex: 0 0 15%;
+  background: #f3f4f6; /* gray-100 */
+  overflow-y: auto;
+}
+
+.chat-area {
+  flex: 1 1 75%;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1.5rem; /* py-4 px-6 */
+  overflow-y: auto;
+}
+
+.chat-memory-panel {
+  flex: 0 0 10%;
+  background: #f9fafb; /* gray-50 */
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .chat-profile-sidebar,
+  .chat-memory-panel {
+    display: none;
+  }
+  .chat-area {
+    flex: 1 1 100%;
+    padding: 1rem;
+  }
+}
