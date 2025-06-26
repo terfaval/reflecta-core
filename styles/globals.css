@@ -121,13 +121,13 @@
 }
 
 .chat-profile-sidebar {
-  flex: 0 0 15%;
+  flex: 0 0 20%;
   background: #f3f4f6; /* gray-100 */
   overflow-y: auto;
 }
 
 .chat-area {
-  flex: 1 1 75%;
+  flex: 1 1 70%;
   display: flex;
   flex-direction: column;
   padding: 1rem 1.5rem; /* py-4 px-6 */
@@ -135,7 +135,7 @@
 }
 
 .chat-memory-panel {
-  flex: 0 0 10%;
+  flex: 0 0 15%;
   background: #f9fafb; /* gray-50 */
   overflow-y: auto;
 }

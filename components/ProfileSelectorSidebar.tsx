@@ -1,6 +1,7 @@
 import React from 'react';
 import { LucidePlusCircle } from 'lucide-react';
 import { ProfileIcon, iconMap } from './ProfileIcons';
+import styles from './ProfileSelectorSidebar.module.css';
 
 export interface Profile {
   id: string;
@@ -53,14 +54,14 @@ export default function ProfileSelectorSidebar({
   }, [userRole, customProfile, lastUsedProfiles, unusedProfiles]);
 
   return (
-    <aside className="h-full w-full p-4 bg-gray-100 overflow-y-auto flex flex-col gap-2">
+    <aside className={styles.sidebar}>
       {profileItems.map((p, idx) => {
         if (!p) {
           return (
             <button
               key="create-custom"
               onClick={onCreateCustomProfile}
-              className="flex items-center gap-2 p-2 text-gray-500 hover:bg-gray-100 rounded"
+              className={`${styles.item} ${styles.create}`}
             >
               <LucidePlusCircle className="w-6 h-6 stroke-gray-400" />
               <span className="text-sm font-medium">
@@ -77,7 +78,7 @@ export default function ProfileSelectorSidebar({
           <button
             key={p.id}
             onClick={() => onProfileSelect(p.id)}
-            className="flex items-center gap-3 p-2 rounded hover:bg-gray-100 text-left"
+            className={styles.item}
           >
             <div className="w-6 h-6 flex items-center justify-center">
               {IconComp ? (
