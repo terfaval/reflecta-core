@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException
 import logging
 from pydantic import BaseModel
 
-from .supabase_client import supabase, _execute, insert_log_entry
+from .supabase_client import supabase, insert_log_entry, insert_single
 
 router = APIRouter()
 
@@ -20,26 +20,23 @@ class ConversationRequest(BaseModel):
 def _create_conversation(user_id: str, profile: str) -> Dict[str, Any]:
     try:
         now = datetime.now(timezone.utc).isoformat()
-        result = (
-            supabase.table("conversations")
-            .insert({"user_id": user_id, "profile": profile, "started_at": now})
-            .single()
-            .execute()
+        row = insert_single(
+            "conversations",
+            {"user_id": user_id, "profile": profile, "started_at": now},
         )
-        return _execute(result)
+        return row
     except Exception as exc:
         raise HTTPException(500, f"Failed to create conversation: {exc}") from exc
 
 
 def _create_session(user_id: str, profile: str, conversation_id: str) -> Dict[str, Any]:
     try:
-        result = (
-            supabase.table("sessions")
-            .insert({"user_id": user_id, "profile": profile, "conversation_id": conversation_id})
-            .single()
-            .execute()
+        row = insert_single(
+            "sessions",
+            {"user_id": user_id, "profile": profile, "conversation_id": conversation_id},
+
         )
-        return _execute(result)
+        return row
     except Exception as exc:
         raise HTTPException(500, f"Failed to create session: {exc}") from exc
 

@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 
 from openai import OpenAI
 
-from .supabase_client import supabase, _execute, get_user_by_id
+from .supabase_client import supabase, _execute, get_user_by_id, insert_single
 from .description_role_generator import generate_description_role
 
 
@@ -186,7 +186,7 @@ def generate_profile(user_id: str, name: str, answers: List[str], color: Optiona
         "prompt_core": data.get("prompt_core", ""),
         "is_active": True,
     }
-    _execute(supabase.table("profiles").insert(profile_row).single().execute())
+    insert_single("profiles", profile_row)
 
     metadata_row = {
         "profile": name,
@@ -206,10 +206,10 @@ def generate_profile(user_id: str, name: str, answers: List[str], color: Optiona
     }
     for key in STYLE_DICTIONARY.keys():
         metadata_row[key] = style_options.get(key)
-    _execute(supabase.table("profile_metadata").insert(metadata_row).single().execute())
+    insert_single("profile_metadata", metadata_row)
 
     user_profile_row = {"user_id": user_id, "profile_name": name}
-    _execute(supabase.table("user_profiles").insert(user_profile_row).single().execute())
+    insert_single("user_profiles", user_profile_row)
 
     return {"name": name, "color": color, "description": description, "role": role_label}
 

@@ -31,6 +31,18 @@ def _execute(result: Any) -> Any:
         raise RuntimeError(result.error.message)
     return result.data
 
+def insert_single(table: str, row: Dict[str, Any]) -> Dict[str, Any]:
+    """Insert a row and ensure exactly one row is returned."""
+    try:
+        result = supabase.table(table).insert(row).execute()
+        data = _execute(result)
+        if not isinstance(data, list) or len(data) != 1:
+            raise RuntimeError("Unexpected insert response")
+        return data[0]
+    except Exception as exc:  # pragma: no cover - network/database issue
+        raise RuntimeError(f"Failed to insert row into {table}: {exc}") from exc
+
+
 # ======= DATA ACCESS FUNCTIONS =======
 
 def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
@@ -50,13 +62,7 @@ def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
 def insert_log_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
     """Insert a log entry into the `entries` table and return the created row."""
     try:
-        result = (
-            supabase.table("entries")
-            .insert(entry)
-            .single()
-            .execute()
-        )
-        return _execute(result)
+        return insert_single("entries", entry)
     except Exception as exc:
         raise RuntimeError(f"Failed to insert log entry: {exc}") from exc
 

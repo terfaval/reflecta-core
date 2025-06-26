@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from .db import get_client
+from .supabase_client import insert_single
 
 router = APIRouter()
 
@@ -21,16 +22,14 @@ async def get_or_create_conversation_and_session(user_id: str, profile: str):
     conversation, conv_err = conv_resp
     if conversation and not conv_err:
         conversation_id = conversation["id"]
-    else:
-        created_conv, create_conv_err = (
-            client.table("conversations")
-            .insert({"user_id": user_id, "profile": profile})
-            .single()
-            .execute()
-        )
-        if create_conv_err or not created_conv:
+    try:
+            created = insert_single(
+                "conversations",
+                {"user_id": user_id, "profile": profile},
+            )
+    except Exception:
             raise HTTPException(500, "Failed to create conversation")
-        conversation_id = created_conv["id"]
+    conversation_id = created["id"]
 
     existing_session, _ = (
         client.table("sessions")
@@ -44,13 +43,12 @@ async def get_or_create_conversation_and_session(user_id: str, profile: str):
     if existing_session:
         return existing_session
 
-    new_session, session_err = (
-        client.table("sessions")
-        .insert({"user_id": user_id, "profile": profile, "conversation_id": conversation_id})
-        .single()
-        .execute()
-    )
-    if session_err or not new_session:
+    try:
+        new_session = insert_single(
+            "sessions",
+            {"user_id": user_id, "profile": profile, "conversation_id": conversation_id},
+        )
+    except Exception:
         raise HTTPException(500, "Failed to create session")
     return new_session
 
