@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 from dotenv import load_dotenv
 from pathlib import Path
 from supabase import create_client, Client
+from typing import Callable
 
 # Load the .env.local file from the project root (outside backend/)
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -30,6 +31,14 @@ def _execute(result: Any) -> Any:
     if hasattr(result, "error") and result.error:
         raise RuntimeError(result.error.message)
     return result.data
+
+def safe_call(call: Callable[[], Any]) -> Any:
+    """Execute a query callable and return ``None`` on failure."""
+    try:
+        return call()
+    except Exception as exc:  # pragma: no cover - network/database issues
+        print(f"[supabase] query failed: {exc}")
+        return None
 
 def insert_single(table: str, row: Dict[str, Any]) -> Dict[str, Any]:
     """Insert a row and ensure exactly one row is returned."""

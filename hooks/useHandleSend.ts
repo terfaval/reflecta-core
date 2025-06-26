@@ -93,14 +93,21 @@ export function useHandleSend({
       created_at: new Date().toISOString(),
     }]);
 
-    const resp = await apiFetch<{ content?: string }>('/respond', {
-      method: 'POST',
-      body: JSON.stringify({ sessionId }),
-    });
+    try {
+      const resp = await apiFetch<{ content?: string }>('/respond', {
+        method: 'POST',
+        body: JSON.stringify({ sessionId }),
+      });
 
-    const reply = resp?.content ?? '';
+      const reply = resp?.content ?? '';
 
-    setEntries(prev => prev.map(e => (e.id === thinkingId ? { ...e, content: reply } : e)));
+      setEntries(prev =>
+        prev.map(e => (e.id === thinkingId ? { ...e, content: reply } : e)),
+      );
+    } catch (err) {
+      console.error('[respond]', err);
+      setEntries(prev => prev.filter(e => e.id !== thinkingId));
+    }
     setLoading(false);
   }, [sessionId, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing]);
 

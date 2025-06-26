@@ -31,6 +31,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     wp_user_id: string,
     email: string,
     origin?: string,
+    token?: string,
   ) => {
     try {
       const data = await apiFetch<{ user_id?: string }>('/api/user', {
@@ -44,6 +45,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUserInitialized(true);
         sessionStorage.setItem('reflecta_user_id', data.user_id);
         sessionStorage.setItem('reflecta_email', email);
+        if (token) {
+          sessionStorage.setItem('reflecta_token', token);
+        }
         // eslint-disable-next-line no-console
         console.log('[init_user] stored', data.user_id, email);
         if (origin) {
@@ -90,8 +94,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const handleInitUser = async (event: MessageEvent) => {
       if (event.origin !== WP_ORIGIN) return;
       if (event.data?.type === 'init_user' || event.data?.type === 'wp_user') {
-        const { wp_user_id, email } = event.data;
-        processUserInit(wp_user_id, email, event.origin);
+        const { wp_user_id, email, token } = event.data;
+        processUserInit(wp_user_id, email, event.origin, token);
       }
     };
 
@@ -114,10 +118,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const params = new URLSearchParams(window.location.search);
     const wpUserId = params.get('user_id');
     const email = params.get('email');
+    const token = params.get('token');
     if (wpUserId && email) {
       // eslint-disable-next-line no-console
       console.log('[init_user] from query', wpUserId, email);
-      processUserInit(wpUserId, email);
+      processUserInit(wpUserId, email, undefined, token || undefined);
     }
   }, [userInitialized]);
 

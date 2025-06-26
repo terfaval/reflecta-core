@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException, status, Header
 from typing import Optional
 
 from .db import get_client
+from .supabase_client import supabase
 
 
 class Role:
@@ -18,8 +19,34 @@ FEATURE_FLAGS = {
 def get_current_user(
     x_user_id: Optional[str] = Header(default=None, alias="X-User-Id"),
     x_role: Optional[str] = Header(default=None, alias="X-Role"),
+    authorization: Optional[str] = Header(default=None, alias="Authorization"),
 ):
-    """Placeholder for auth. In production this would verify tokens."""
+    """Return user information based on headers.
+
+    When an ``Authorization`` header with a bearer token is present we attempt
+    to verify it using ``supabase.auth.get_user``. If the user lookup fails we
+    log the issue and return ``401``.  For backwards compatibility we fall back
+    to the ``X-User-Id`` header when no token is provided.
+    """
+
+    token = None
+    if authorization and authorization.lower().startswith("bearer "):
+        token = authorization.split(" ", 1)[1]
+
+    if token:
+        try:
+            resp = supabase.auth.get_user(token)
+            user = getattr(resp, "user", None)
+        except Exception:
+            user = None
+        if not user:
+            print("[auth] supabase.auth.get_user returned None")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid access token",
+            )
+        return {"id": user.id, "role": x_role or Role.BASIC}
+    
     if not x_user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing user id"

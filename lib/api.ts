@@ -11,9 +11,27 @@ export async function apiFetch<T = any>(
     ? path
     : `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 
-  const headers: HeadersInit = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+  };
+
+  if (typeof window !== 'undefined') {
+    const uid = sessionStorage.getItem('reflecta_user_id');
+    const token = sessionStorage.getItem('reflecta_token');
+    if (uid && !('X-User-Id' in headers)) headers['X-User-Id'] = uid;
+    if (token && !('Authorization' in headers))
+      headers['Authorization'] = `Bearer ${token}`;
+  }
 
   const response = await fetch(url, { ...options, headers });
+
+  if (response.status === 401 || response.status === 403) {
+    if (typeof window !== 'undefined') {
+      window.location.href = '/non-authorized';
+    }
+    throw new Error(`Auth hiba: ${response.status}`);
+  }
 
   if (!response.ok) {
     throw new Error(`API hiba: ${response.status}`);
