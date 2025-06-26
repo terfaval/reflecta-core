@@ -35,12 +35,77 @@ uvicorn backend.main:app --reload
 
 ## Fájlszerkezet
 - `backend/` – FastAPI alapú szerverkód
+  - `__init__.py`
+  - `access.py`
+  - `app.py`
+  - `auth.py`
+  - `chatload.py`
+  - `check_profile_access.py`
+  - `conversation_new.py`
+  - `db.py`
+  - `description_role_generator.py`
+  - `entries.py`
+  - `generate_personal_profile.py`
+  - `has_history.py`
+  - `last_session.py`
+  - `main.py`
+  - `memory_prompt_utils.py`
+  - `memory_summary.py`
+  - `profile_from_survey.py`
+  - `profile_handler.py`
+  - `profile_list.py`
+  - `prompt_builder.py`
+  - `respond.py`
+  - `session.py`
+  - `session_close.py`
+  - `session_create.py`
+  - `session_update_label.py`
+  - `strategy_detector.py`
+  - `strategy_prompt_map.py`
+  - `strategy_response_templates.py`
+  - `style_summary_block.py`
+  - `supabase_client.py`
+  - `user.py`
+  - `user_create.py`
+  - `users.py`
 - `components/` – újrafelhasználható React komponensek
+  - `ChatFooter.tsx`
+  - `ChatMessagesList.tsx`
+  - `ProfileCard.tsx`
+  - `ProfileIcons.tsx`
+  - `ProfileSelectorSidebar.tsx`
+  - `ProfileSlider.tsx`
+  - `ReflectiveMemoryPanel.tsx`
+  - `ResponseTweakButtons.tsx`
+  - `ScrollToBottomButton.tsx`
+  - `SessionLabelBubble.tsx`
+  - `SpiralLoader.tsx`
+  - `StartingPromptSelector.tsx`
+  - `SurveySlide.tsx`
+  - `SurveySuccess.tsx`
+  - `ThinkingDots.tsx`
+  - `ThreeStateSwitch.tsx`
+  - `UserErrorDisplay.tsx`
+  - `icons/index.ts`
 - `contexts/` – globális React context-ek
+  - `ProfileContext.tsx`
+  - `UserContext.tsx`
 - `hooks/` – egyedi React hookok
+  - `useAutoTextareaResize.ts`
+  - `useHandleSend.ts`
+  - `useScrollHandler.ts`
+  - `useUserSession.ts`
 - `lib/` – API hívások és segédfüggvények
+  - `api.ts`
 - `pages/` – Next.js oldalak
+  - `_app.tsx`
+  - `chat.tsx`
+  - `non-authorized.tsx`
+  - `profile-builder.tsx`
+  - `select-profile.tsx`
+  - `api/ping.py`
 - `styles/` – CSS és egyéb stílusfájlok
+  - `profileStyles.ts`
 
 ## Fontosabb parancsok
 - `npm run dev` / `yarn dev` – fejlesztői szerver indítása

@@ -53,7 +53,7 @@ export default function ProfileSelectorSidebar({
   }, [userRole, customProfile, lastUsedProfiles, unusedProfiles]);
 
   return (
-    <aside className="h-screen w-60 flex-shrink-0 p-4 bg-white shadow-inner overflow-y-auto flex flex-col gap-2">
+    <aside className="h-full p-4 bg-gray-100 overflow-y-auto flex flex-col gap-2">
       {profileItems.map((p, idx) => {
         if (!p) {
           return (

@@ -376,26 +376,21 @@ export default function ChatPage() {
 
   return (
     <div
-      className="reflecta-chat"
-      style={{
-        ...currentStyle,
-        display: "flex",
-        height: "100vh",
-        flexDirection: "row",
-      }}
+      className="reflecta-chat flex h-screen w-full"
+      style={currentStyle}
     >
-      <ProfileSelectorSidebar
-        userRole={sidebarRole}
-        customProfile={customProfileData}
-        lastUsedProfiles={sidebarProfiles}
-        unusedProfiles={[]}
-        entries={entriesByProfile}
-        onProfileSelect={handleSidebarSelect}
-        onCreateCustomProfile={handleCreateCustomProfile}
-      />
-      <div
-        style={{ flex: "1 1 auto", display: "flex", flexDirection: "column" }}
-      >
+      <div className="w-[15%] bg-gray-100 h-full overflow-y-auto hidden md:block">
+        <ProfileSelectorSidebar
+          userRole={sidebarRole}
+          customProfile={customProfileData}
+          lastUsedProfiles={sidebarProfiles}
+          unusedProfiles={[]}
+          entries={entriesByProfile}
+          onProfileSelect={handleSidebarSelect}
+          onCreateCustomProfile={handleCreateCustomProfile}
+        />
+      </div>
+      <div className="flex flex-col w-full md:w-[75%] h-full px-6 py-4 overflow-y-auto">
         <ChatMessagesList
           entries={entries}
           loadingEntries={loadingEntries}
@@ -423,16 +418,7 @@ export default function ChatPage() {
           currentStyle={currentStyle}
         />
       </div>
-      <div
-        style={{
-          flex: "0 0 30%",
-          overflowY: "auto",
-          background: "#f7f7f7",
-          borderLeft: "1px solid #ddd",
-          padding: "1rem",
-          height: "100vh",
-        }}
-      >
+      <div className="hidden md:block w-[10%] h-full overflow-y-auto bg-gray-50">
         <ReflectiveMemoryPanel sessionId={sessionId} handleSend={handleSend} />
       </div>
     </div>
