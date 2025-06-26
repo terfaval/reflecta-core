@@ -75,13 +75,19 @@ async def conversation_new(payload: ConversationRequest):
 
     logging.info(f"[conversation/new] payload: {payload_dict}")
 
-    valid_profiles = ["Reflecta", "Solun", "Akásza", "Éana", "Kairos", "Zentó", "Noe"]
-    if payload.profile_name not in valid_profiles:
+    valid_profiles = ["Reflecta", "Solun", "Preceptor", "Akasza", "Éana", "Luma", "Sylva", "Zentó", "Oneiros", "Kairos", "Noe"]
+    profile_name = payload.get("profile_name")
+
+    if not profile_name:
+        raise HTTPException(status_code=400, detail="Hiányzik a profilnév")
+
+    if profile_name not in valid_profiles:
         raise HTTPException(status_code=400, detail="Ismeretlen profilnév")
 
     try:
-        conv_id, session = create_conversation_and_session(payload.user_id, payload.profile_name)
+        conv_id, session = create_conversation_and_session(payload["user_id"], profile_name)
         return {"conversation_id": conv_id, "session_id": session["id"]}
     except Exception as e:
         logging.error(f"[conversation/new] Hiba történt: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Szerverhiba: {str(e)}")
+
