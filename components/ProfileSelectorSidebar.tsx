@@ -2,6 +2,7 @@ import React from 'react';
 import { LucidePlusCircle } from 'lucide-react';
 import { ProfileIcon, iconMap } from './ProfileIcons';
 import styles from './ProfileSelectorSidebar.module.css';
+import { useProfileContext } from '@/contexts/ProfileContext';
 
 export interface Profile {
   id: string;
@@ -44,14 +45,22 @@ export default function ProfileSelectorSidebar({
   onProfileSelect,
   onCreateCustomProfile,
 }: ProfileSelectorSidebarProps) {
+  const { profile: activeProfile } = useProfileContext();
   const profileItems = React.useMemo<(Profile | null)[]>(() => {
     const arr: (Profile | null)[] = [BLANK_PROFILE];
     if (userRole === 'premium') {
       arr.push(customProfile); // may be null for create button
     }
     arr.push(...lastUsedProfiles, ...unusedProfiles);
+    if (activeProfile) {
+      const idx = arr.findIndex((p) => p && p.id === activeProfile);
+      if (idx > -1) {
+        const [active] = arr.splice(idx, 1);
+        arr.unshift(active);
+      }
+    }
     return arr;
-  }, [userRole, customProfile, lastUsedProfiles, unusedProfiles]);
+  }, [userRole, customProfile, lastUsedProfiles, unusedProfiles, activeProfile]);
 
   return (
     <aside className={styles.sidebar}>
@@ -78,7 +87,7 @@ export default function ProfileSelectorSidebar({
           <button
             key={p.id}
             onClick={() => onProfileSelect(p.id)}
-            className={styles.item}
+            className={`${styles.item} ${p.id === activeProfile ? styles.activeItem : ''}`}
           >
             <div className="w-6 h-6 flex items-center justify-center">
               {IconComp ? (
@@ -88,8 +97,8 @@ export default function ProfileSelectorSidebar({
               )}
             </div>
             <div className="flex flex-col items-start">
-              <span className="font-bold">{p.name}</span>
-              <span className={bottomClass}>{bottomText}</span>
+              <span className={styles.itemHeader}>{p.name}</span>
+              <span className={`${styles.itemSubtext} ${bottomClass}`}>{bottomText}</span>
             </div>
           </button>
         );

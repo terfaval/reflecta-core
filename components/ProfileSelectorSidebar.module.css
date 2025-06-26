@@ -7,6 +7,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
 
 .item {
@@ -33,4 +35,34 @@
 
 .item:active {
   background-color: #d4d4d8;
+}
+
+.itemHeader {
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.itemSubtext {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.activeItem {
+  background-color: var(--user-color);
+  color: #ffffff;
+}
+
+
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
 }
