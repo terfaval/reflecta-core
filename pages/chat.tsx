@@ -245,7 +245,13 @@ export default function ChatPage() {
   }, [entries]);
 
   const handleSidebarSelect = async (name: string) => {
-    if (!userId) return;
+    if (!userId) {
+      // eslint-disable-next-line no-console
+      console.error('[switch profile] missing userId');
+      return;
+    }
+    // eslint-disable-next-line no-console
+    console.log('[switch profile]', { userId, profile: name });
     try {
       const data = await apiFetch<{ conversation_id: string; session_id: string }>(
         "/conversation/new",

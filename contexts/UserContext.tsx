@@ -1,10 +1,18 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from 'react';
 
 import { apiFetch } from 'lib/api';
 
 interface UserContextType {
   userId: string | null;
   setUserId: (id: string | null) => void;
+  userEmail: string | null;
+  setUserEmail: (email: string | null) => void;
   userInitialized: boolean;
   setUserInitialized: (v: boolean) => void;
   userError: string | null;
@@ -15,15 +23,62 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userInitialized, setUserInitialized] = useState(false);
   const [userError, setUserError] = useState<string | null>(null);
 
+  const processUserInit = async (
+    wp_user_id: string,
+    email: string,
+    origin?: string,
+  ) => {
+    try {
+      const data = await apiFetch<{ user_id?: string }>('/api/user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wp_user_id, email }),
+      });
+      if (data?.user_id) {
+        setUserId(data.user_id);
+        setUserEmail(email);
+        setUserInitialized(true);
+        sessionStorage.setItem('reflecta_user_id', data.user_id);
+        sessionStorage.setItem('reflecta_email', email);
+        // eslint-disable-next-line no-console
+        console.log('[init_user] stored', data.user_id, email);
+        if (origin) {
+          window.parent.postMessage({ status: 'user_received' }, origin);
+        }
+      } else {
+        console.error('[init_user]', data);
+        setUserError(
+          'Hiba a beléptetés során. Kérlek frissítsd az oldalt vagy próbáld újra.',
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      setUserError(
+        'Hiba a beléptetés során. Kérlek frissítsd az oldalt vagy próbáld újra.',
+      );
+    }
+  };
+
   useEffect(() => {
+    const storedId = sessionStorage.getItem('reflecta_user_id');
+    const storedEmail = sessionStorage.getItem('reflecta_email');
+    if (storedId) {
+      setUserId(storedId);
+      setUserInitialized(true);
+      if (storedEmail) setUserEmail(storedEmail);
+      // eslint-disable-next-line no-console
+      console.log('[init_user] restored', storedId, storedEmail);
+    }
+
     // WordPress sends postMessage from the parent iframe. Default to the
     // production WP origin when the env variable is not provided so that
     // origin checks do not silently fail during local development.
     const rawOrigin =
-      process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://beenook.hu/reflecta'
+      process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://beenook.hu/reflecta';
     const WP_ORIGIN = (() => {
       try {
         return new URL(rawOrigin).origin;
@@ -36,24 +91,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       if (event.origin !== WP_ORIGIN) return;
       if (event.data?.type === 'init_user' || event.data?.type === 'wp_user') {
         const { wp_user_id, email } = event.data;
-        try {
-          const data = await apiFetch<{ user_id?: string }>('/api/user', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ wp_user_id, email })
-          });
-          if (data?.user_id) {
-            setUserId(data.user_id);
-            setUserInitialized(true);
-            window.parent.postMessage({ status: 'user_received' }, event.origin);
-          } else {
-            console.error('[init_user]', data);
-            setUserError('Hiba a beléptetés során. Kérlek frissítsd az oldalt vagy próbáld újra.');
-          }
-        } catch (err) {
-          console.error(err);
-          setUserError('Hiba a beléptetés során. Kérlek frissítsd az oldalt vagy próbáld újra.');
-        }
+        processUserInit(wp_user_id, email, event.origin);
       }
     };
 
@@ -72,6 +110,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
+    if (userInitialized) return;
+    const params = new URLSearchParams(window.location.search);
+    const wpUserId = params.get('user_id');
+    const email = params.get('email');
+    if (wpUserId && email) {
+      // eslint-disable-next-line no-console
+      console.log('[init_user] from query', wpUserId, email);
+      processUserInit(wpUserId, email);
+    }
+  }, [userInitialized]);
+
+  useEffect(() => {
     if (userInitialized || userError) return;
     const id = setTimeout(() => {
       if (!userInitialized && !userError) {
@@ -82,7 +132,18 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, [userInitialized, userError]);
 
   return (
-    <UserContext.Provider value={{ userId, setUserId, userInitialized, setUserInitialized, userError, setUserError }}>
+    <UserContext.Provider
+      value={{
+        userId,
+        setUserId,
+        userEmail,
+        setUserEmail,
+        userInitialized,
+        setUserInitialized,
+        userError,
+        setUserError,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

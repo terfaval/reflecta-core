@@ -249,7 +249,13 @@ arr.push(profiles[profiles.length - 1]);
   const transform = `translateX(${dragX + baseOffset - index * (itemWidth + gap)}px)`;
 
   const handleSelect = async (p: ProfileCardData) => {
-    if (!userId) return;
+    if (!userId) {
+      // eslint-disable-next-line no-console
+      console.error('[start conversation] missing userId');
+      return;
+    }
+    // eslint-disable-next-line no-console
+    console.log('[start conversation]', { userId, profile: p.name });
     try {
       const data = await apiFetch<{
         conversation_id: string;
