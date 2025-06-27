@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException
 import logging
 from pydantic import BaseModel
 
-from .supabase_client import supabase, insert_single
+from .supabase_client import supabase, insert_single, _execute
 
 router = APIRouter()
 
@@ -17,17 +17,36 @@ class ConversationRequest(BaseModel):
     user_id: str
     profile_name: str
 
-def _create_conversation(user_id: str, profile: str) -> Dict[str, Any]:
+
+def _get_or_create_conversation(user_id: str, profile: str) -> Tuple[Dict[str, Any], bool]:
+    """Return an existing conversation or create one if missing."""
+    try:
+        result = (
+            supabase.table("conversations")
+            .select("*")
+            .eq("user_id", user_id)
+            .eq("profile", profile)
+            .eq("is_archived", False)
+            .order("started_at", desc=True)
+            .limit(1)
+            .maybe_single()
+            .execute()
+        )
+        existing = _execute(result)
+    except Exception as exc:
+        raise HTTPException(500, f"Failed to fetch conversation: {exc}") from exc
+
+    if existing:
+        return existing, False
     try:
         now = datetime.now(timezone.utc).isoformat()
-        row = insert_single(
+        created = insert_single(
             "conversations",
             {"user_id": user_id, "profile": profile, "started_at": now},
         )
-        return row
+        return created, True
     except Exception as exc:
         raise HTTPException(500, f"Failed to create conversation: {exc}") from exc
-
 
 def _create_session(user_id: str, profile: str, conversation_id: str) -> Dict[str, Any]:
     try:
@@ -42,22 +61,24 @@ def _create_session(user_id: str, profile: str, conversation_id: str) -> Dict[st
 
 
 def create_conversation_and_session(user_id: str, profile: str) -> Tuple[str, Dict[str, Any]]:
-    conversation = _create_conversation(user_id, profile)
+    conversation, created = _get_or_create_conversation(user_id, profile)
     session = _create_session(user_id, profile, conversation["id"])
 
-    now = datetime.now(timezone.utc).isoformat()
-    try:
-        supabase.table("system_events").insert(
-            {
-                "session_id": session["id"],
-                "event_type": "conversation_started",
-                "note": f"Profile: {profile}",
-                "timestamp": now,
-            }
-        ).execute()
-    except Exception:
-        # System event logging shouldn't interrupt the flow
-        pass
+    if created:
+        now = datetime.now(timezone.utc).isoformat()
+        try:
+            supabase.table("system_events").insert(
+                {
+                    "session_id": session["id"],
+                    "event_type": "conversation_started",
+                    "note": f"Profile: {profile}",
+                    "timestamp": now,
+                }
+            ).execute()
+        except Exception:
+            # System event logging shouldn't interrupt the flow
+            pass
+
 
     return conversation["id"], session
 
