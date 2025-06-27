@@ -17,6 +17,8 @@ interface Entry {
 interface ChatMessagesListProps {
   entries: Entry[];
   loadingEntries: boolean;
+  loadError?: string | null;
+  onRetryLoad?: () => void;
   sessionIsFresh: boolean;
   startingPrompt: string;
   onSelectPrompt: (prompt: string) => void;
@@ -31,6 +33,8 @@ interface ChatMessagesListProps {
 export function ChatMessagesList({
   entries,
   loadingEntries,
+  loadError,
+  onRetryLoad,
   sessionIsFresh,
   startingPrompt,
   onSelectPrompt,
@@ -48,7 +52,16 @@ export function ChatMessagesList({
       ref={messagesRef}
       style={{ flex: 1, overflowY: 'auto', padding: '1rem', position: 'relative' }}
     >
-      {loadingEntries && !entries.length ? (
+      {loadError && !entries.length ? (
+        <div style={{ textAlign: 'center' }}>
+          <p>{loadError}</p>
+          {onRetryLoad && (
+            <button onClick={onRetryLoad} style={{ marginTop: '4px' }}>
+              Újra
+            </button>
+          )}
+        </div>
+      ) : loadingEntries && !entries.length ? (
         <SpiralLoader
           userColor={currentStyle['--user-color'] || '#7A4DFF'}
           aiColor={currentStyle['--ai-color'] || '#FFB347'}

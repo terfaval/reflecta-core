@@ -18,6 +18,7 @@ interface ReflectiveMemoryPanelProps {
 export default function ReflectiveMemoryPanel({ sessionId, handleSend }: ReflectiveMemoryPanelProps) {
   const [items, setItems] = useState<MemoryLabel[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   if (!sessionId) {
     // eslint-disable-next-line no-console
@@ -28,16 +29,19 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
   useEffect(() => {
     if (!sessionId) return;
     const load = async () => {
+      setLoading(true);
       try {
         const data = await apiFetch<{ labels?: MemoryLabel[] }>(
           `/api/memory/summary?sessionId=${sessionId}`
         );
         // expecting { labels: MemoryLabel[] }
         setItems(Array.isArray(data?.labels) ? data.labels : []);
+        setError(null);
       } catch (err) {
         console.error('Failed to fetch memory summary', err);
         setError('Nem sikerült betölteni a memóriát.');
       }
+      setLoading(false);
     };
     load();
   }, [sessionId]);
@@ -61,6 +65,7 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
 
   return (
     <div className={styles.panel}>
+      {loading && !error && <p className={styles.loading}>Töltés...</p>}
       {items.map((item) => (
         <div key={item.id} className={`${styles.item} ${item.pivot ? styles.pivot : ''}`}>
           <div className={styles.iconWrapper} aria-label={item.label}>
@@ -75,7 +80,7 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
           </button>
         </div>
       ))}
-      {error && <p className={styles.error}>{error}</p>}  
+      {error && <p className={styles.error}>{error}</p>} 
     </div>
   );
 }

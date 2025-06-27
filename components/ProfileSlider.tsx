@@ -66,20 +66,19 @@ export default function ProfileSlider() {
   const startX = useRef(0);
   const startTime = useRef(0);
 
-  useEffect(() => {
+  const loadProfiles = async () => {
     if (!userId) return;
-    const load = async () => {
-      setError(null);
-      try {
-        const names = BASE_ORDER;
-        const meta = await apiFetch<{
-          profiles: any[];
-          personalProfiles?: string[];
-          error?: string;
-        }>("/api/profile-list", {
-          method: "POST",
-          body: JSON.stringify({ userId, names }),
-        });
+    setError(null);
+    try {
+      const names = BASE_ORDER;
+      const meta = await apiFetch<{
+        profiles: any[];
+        personalProfiles?: string[];
+        error?: string;
+      }>("/api/profile-list", {
+        method: "POST",
+        body: JSON.stringify({ userId, names }),
+      });
         if (meta.profiles) {
           const map: Record<
             string,
@@ -128,17 +127,20 @@ export default function ProfileSlider() {
             }
           });
           setProfiles(cards);
-          if (cards.length <= visibleCount) setIndex(0);
-        } else {
-          console.error("[profile-list]", meta.error);
-          setError("Nem sikerült betölteni a profilokat.");
-        }
-      } catch (err) {
-        console.error("[profile-list fetch]", err);
+        if (cards.length <= visibleCount) setIndex(0);
+      } else {
+        console.error("[profile-list]", meta.error);
         setError("Nem sikerült betölteni a profilokat.");
       }
-    };
-    load();
+    } catch (err) {
+      console.error("[profile-list fetch]", err);
+      setError("Nem sikerült betölteni a profilokat.");
+    }
+  };
+
+  useEffect(() => {
+    if (!userId) return;
+    loadProfiles();
   }, [userId]);
 
   useEffect(() => {
@@ -328,7 +330,12 @@ arr.push(profiles[profiles.length - 1]);
         </button>
       )}
     </div>
-    {error && <p className={styles.error}>{error}</p>}
+    {error && (
+      <div className={styles.error}>
+        <p>{error}</p>
+        <button className={styles.retry} onClick={loadProfiles}>Újrapróbálom</button>
+      </div>
+    )}
     </>
   );
 }

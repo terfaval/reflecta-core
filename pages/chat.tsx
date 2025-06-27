@@ -68,6 +68,7 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const { userId, setUserId, userInitialized, userError } = useUserContext();
   const [loadingEntries, setLoadingEntries] = useState(true);
+  const [entriesError, setEntriesError] = useState<string | null>(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [startingPrompt, setStartingPrompt] = useState<string>('');
   const [sessionIsFresh, setSessionIsFresh] = useState(false);
@@ -285,6 +286,15 @@ export default function ChatPage() {
     if (debug) console.log("[Debug] fetching page", pageIndex);
 
     isFetchingRef.current = true;
+    setEntriesError(null);
+    setLoadingEntries(true);
+    const timeout = setTimeout(() => {
+      if (isFetchingRef.current) {
+        setEntriesError('A betöltés túl sokáig tart. Próbáld újra.');
+        setLoadingEntries(false);
+        isFetchingRef.current = false;
+      }
+    }, 15000);
     try {
       const data = await apiFetch<{
         entries?: Entry[];
@@ -310,11 +320,14 @@ export default function ChatPage() {
           return [...newOnes, ...prev];
         });
       }
+      setEntriesError(null);
       setLoadingEntries(false);
     } catch (err) {
       console.error("[chatload] fetch error:", err);
+      setEntriesError('Hiba történt az üzenetek betöltésekor.');
       setLoadingEntries(false);
     } finally {
+      clearTimeout(timeout);
       isFetchingRef.current = false;
 
       if (debug) console.log("[Debug] fetch complete");
@@ -385,6 +398,8 @@ export default function ChatPage() {
         <ChatMessagesList
           entries={entries}
           loadingEntries={loadingEntries}
+          loadError={entriesError}
+          onRetryLoad={() => fetchMoreEntries(page)}
           sessionIsFresh={sessionIsFresh}
           startingPrompt={startingPrompt}
           onSelectPrompt={handleSend}

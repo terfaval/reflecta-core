@@ -3,6 +3,7 @@ import React from 'react';
 import { buttonStyles } from '../styles/profileStyles';
 
 import { apiFetch } from 'lib/api';
+import { useToast } from '../hooks/useToast';
 
 interface ChatFooterProps {
   message: string;
@@ -33,6 +34,7 @@ export function ChatFooter({
 
 }: ChatFooterProps) {
 
+  const toast = useToast();
 
   return (
     <>
@@ -83,9 +85,11 @@ export function ChatFooter({
                     ]);
                   } else {
                     console.error('[Zárás] Hiba:');
+                    toast('A lezárás nem sikerült. Kérlek próbáld újra később.');
                   }
                 } catch (err) {
                   console.error('[Zárás] Kivétel:', err);
+                  toast('A lezárás nem sikerült. Kérlek próbáld újra később.');
                 }
                 setIsClosing(false);
               }}

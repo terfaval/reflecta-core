@@ -1,5 +1,6 @@
 // hooks/useHandleSend.ts
 import { useCallback, useEffect } from 'react';
+import { useToast } from './useToast';
 
 import { apiFetch } from 'lib/api';
 
@@ -29,6 +30,7 @@ export function useHandleSend({
   setSessionIsFresh,
   setIsClosing,
 }: UseHandleSendProps) {
+  const toast = useToast();
   const handleSend = useCallback(async (text?: string) => {
     const message = text?.trim();
     if (!message) {
@@ -66,7 +68,7 @@ export function useHandleSend({
           ]);
         } else {
           console.error('[Zárás] Hiba:');
-          alert('A szakasz lezárása nem sikerült.');
+          toast('A lezárás nem sikerült. Kérlek próbáld újra később.');
           setIsClosing(false);
           setMessage('');
           setLoading(false);
@@ -74,7 +76,7 @@ export function useHandleSend({
         }
       } catch (err) {
         console.error('[Zárás] Kivétel:', err);
-        alert('A szakasz lezárása nem sikerült.');
+        toast('A lezárás nem sikerült. Kérlek próbáld újra később.');
         setIsClosing(false);
         setMessage('');
         setLoading(false);
@@ -106,7 +108,8 @@ export function useHandleSend({
       });
     } catch (err) {
       console.error('[entries]', err);
-      alert('Az üzenet mentése nem sikerült.');
+      toast('Az üzenet mentése nem sikerült.');
+      setEntries(prev => prev.filter(e => e.id !== userEntry.id));
       setLoading(false);
       return;
     }
@@ -132,13 +135,17 @@ export function useHandleSend({
       );
     } catch (err) {
       console.error('[respond]', err);
-      setEntries(prev => prev.filter(e => e.id !== thinkingId));
-      alert('A válasz nem érkezett meg.');
+      setEntries(prev =>
+        prev.map(e =>
+          e.id === thinkingId ? { ...e, content: 'Hiba történt' } : e,
+        ),
+      );
+      toast('Nem sikerült válaszolni. Kérlek próbáld újra.');
       setLoading(false);
       return;
     }
     setLoading(false);
-  }, [sessionId, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing]);
+  }, [sessionId, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing, toast]);
 
   useEffect(() => {
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
