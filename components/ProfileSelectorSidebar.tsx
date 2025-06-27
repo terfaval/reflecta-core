@@ -3,6 +3,7 @@ import { LucidePlusCircle } from 'lucide-react';
 import { ProfileIcon, iconMap } from './ProfileIcons';
 import styles from './ProfileSelectorSidebar.module.css';
 import { useProfileContext } from '@/contexts/ProfileContext';
+import { profileStyles } from '@/styles/profileStyles';
 
 export interface Profile {
   id: string;
@@ -58,11 +59,22 @@ export default function ProfileSelectorSidebar({
 
   const activeProfile = React.useMemo(() => {
     if (!activeProfileId) return null;
-    return (
-      allProfiles.find(
-        (p) => p.id.toLowerCase() === activeProfileId.toLowerCase(),
-      ) || null
+    const found = allProfiles.find(
+      (p) => p.id.toLowerCase() === activeProfileId.toLowerCase(),
     );
+    if (found) return found;
+    // fallback using style map when profile metadata is missing
+    const style =
+      profileStyles[activeProfileId] ||
+      profileStyles[activeProfileId.toLowerCase()] ||
+      {};
+    const color = style['--user-color'] || '#7A4DFF';
+    return {
+      id: activeProfileId,
+      name: activeProfileId,
+      role: '',
+      color,
+    } as Profile;
   }, [allProfiles, activeProfileId]);
 
   const otherProfiles = React.useMemo< (Profile | null)[] >(() => {
