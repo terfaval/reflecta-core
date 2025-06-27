@@ -51,6 +51,9 @@
   font-weight: 600;
   font-size: 1rem;
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .itemSubtext {
@@ -68,6 +71,12 @@
 
 .activeItem .itemSubtext {
   color: #ffffff;
+}
+
+.activeItem svg {
+  color: #ffffff;
+  fill: #ffffff;
+  stroke: #ffffff;
 }
 
 .sidebar::-webkit-scrollbar {

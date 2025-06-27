@@ -5,6 +5,27 @@ import styles from './ProfileSelectorSidebar.module.css';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { profileStyles } from '@/styles/profileStyles';
 
+const MAX_TEXT_LENGTH = 32;
+
+function truncateWithEllipsis(text: string, maxLength: number = MAX_TEXT_LENGTH) {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  const words = text.split(' ');
+  let result = '';
+  for (const word of words) {
+    if (result.length === 0) {
+      if (word.length > maxLength) {
+        return word.slice(0, maxLength) + '...';
+      }
+      result = word;
+      continue;
+    }
+    if (result.length + 1 + word.length > maxLength) break;
+    result += ' ' + word;
+  }
+  return result + '...';
+}
+
 export interface Profile {
   id: string;
   name: string;
@@ -102,8 +123,12 @@ export default function ProfileSelectorSidebar({
             )}
           </div>
           <div className="flex flex-col items-start">
-            <span className={styles.itemHeader}>{activeProfile.name}</span>
-            <span className={styles.itemSubtext}>{activeProfile.role}</span>
+            <span className={styles.itemHeader}>
+              {truncateWithEllipsis(activeProfile.name)}
+            </span>
+            <span className={styles.itemSubtext}>
+              {truncateWithEllipsis(activeProfile.role)}
+            </span>
           </div>
         </div>
       )}
@@ -143,8 +168,12 @@ export default function ProfileSelectorSidebar({
               )}
             </div>
             <div className="flex flex-col items-start">
-              <span className={styles.itemHeader}>{p.name}</span>
-              <span className={`${styles.itemSubtext} ${bottomClass}`}>{bottomText}</span>
+              <span className={styles.itemHeader}>
+                {truncateWithEllipsis(p.name)}
+              </span>
+              <span className={`${styles.itemSubtext} ${bottomClass}`}>
+                {truncateWithEllipsis(bottomText)}
+              </span>
             </div>
           </button>
         );
