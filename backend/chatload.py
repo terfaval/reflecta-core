@@ -52,7 +52,7 @@ def _fetch_entries(session_ids: List[str], offset: int, limit: int) -> List[Dict
         supabase.table("entries")
         .select("id, role, content, created_at, session_id")
         .in_("session_id", session_ids)
-        .order("created_at", ascending=True)
+        .order("created_at", desc=False)
         .range(offset, offset + limit - 1)
         .execute()
     )
