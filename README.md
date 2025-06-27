@@ -24,6 +24,9 @@ NEXT_PUBLIC_WP_ORIGIN=https://beenook.hu/reflecta
 SUPABASE_URL=https://lqgmzgglyymnbdrqbtjz.supabase.co
 ```
 
+Az összes frontend API-hívás a `NEXT_PUBLIC_BACKEND_URL` alatti `/api` útvonalra
+irányul.
+
 ## Fejlesztés indítása
 ```bash
 npm run dev       # vagy yarn dev

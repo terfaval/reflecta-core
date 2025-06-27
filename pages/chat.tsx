@@ -105,7 +105,7 @@ export default function ChatPage() {
     const load = async () => {
       try {
         const data = await apiFetch<{ profile?: string; sessionId?: string }>(
-          `/last-session?userId=${encodeURIComponent(userId)}`,
+          `/api/last-session?userId=${encodeURIComponent(userId)}`,
           { method: "GET" }
         );
         if (data.profile && data.sessionId) {
@@ -130,7 +130,7 @@ export default function ChatPage() {
           personalProfiles?: string[];
           role?: string;
           error?: string;
-        }>("/profile-list", {
+        }>("/api/profile-list", {
           method: "POST",
           body: JSON.stringify({ userId, names: SIDEBAR_ORDER }),
         });
@@ -289,7 +289,7 @@ export default function ChatPage() {
       const data = await apiFetch<{
         entries?: Entry[];
         closingTrigger?: string;
-      }>("/chatload", {
+      }>("/api/chatload", {
         method: "POST",
         body: JSON.stringify({
           userId,

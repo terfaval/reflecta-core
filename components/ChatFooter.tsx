@@ -66,7 +66,7 @@ export function ChatFooter({
                 setIsClosing(true);
                 try {
                   const data = await apiFetch<{ closureEntry?: string; label?: string }>(
-                    '/session/close',
+                    '/api/session/close',
                     {
                       method: 'POST',
                       body: JSON.stringify({ sessionId }),

@@ -41,7 +41,7 @@ export function useHandleSend({
       setIsClosing(true);
       try {
         const data = await apiFetch<{ closureEntry?: string; label?: string }>(
-          '/session/close',
+          '/api/session/close',
           {
             method: 'POST',
             body: JSON.stringify({ sessionId }),
@@ -80,7 +80,7 @@ export function useHandleSend({
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
     if (textarea) textarea.style.height = 'auto';
 
-    await apiFetch('/entries', {
+    await apiFetch('/api/entries', {
       method: 'POST',
       body: JSON.stringify({ sessionId, entry: userEntry }),
     });
@@ -94,7 +94,7 @@ export function useHandleSend({
     }]);
 
     try {
-      const resp = await apiFetch<{ content?: string }>('/respond', {
+      const resp = await apiFetch<{ content?: string }>('/api/respond', {
         method: 'POST',
         body: JSON.stringify({ sessionId }),
       });

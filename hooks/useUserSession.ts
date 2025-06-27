@@ -26,7 +26,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
     const startSession = async (uid: string) => {
       let profileData;
       try {
-        profileData = await apiFetch<{ closing_trigger?: string }>('/profile', {
+        profileData = await apiFetch<{ closing_trigger?: string }>('/api/profile', {
           method: 'POST',
           body: JSON.stringify({ name: profile, userId: uid }),
         });
@@ -40,7 +40,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
 
       const closingTrigger = profileData?.closing_trigger || '';
 
-      const promptResp = await apiFetch<{ prompt: string }>('/starting-prompt', {
+      const promptResp = await apiFetch<{ prompt: string }>('/api/starting-prompt', {
         method: 'POST',
         body: JSON.stringify({ userId: uid, profile }),
       });
@@ -58,7 +58,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
         return;
       }
 
-      const sessionData = await apiFetch<{ session?: { id: string } }>('/session', {
+      const sessionData = await apiFetch<{ session?: { id: string } }>('/api/session', {
         method: 'POST',
         body: JSON.stringify({ userId: uid, profile }),
       });

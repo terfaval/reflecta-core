@@ -29,7 +29,7 @@ export default function ProfileSelectorPage() {
     const load = async () => {
       try {
         const data = await apiFetch<{ profile?: string; sessionId?: string }>(
-          `/last-session?userId=${encodeURIComponent(userId)}`,
+          `/api/last-session?userId=${encodeURIComponent(userId)}`,
           { method: "GET" }
         );
         if (data.sessionId) {

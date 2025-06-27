@@ -75,7 +75,7 @@ export default function ProfileBuilder() {
     if (!userId) return;
     try {
       const data = await apiFetch<{ name: string }>(
-        '/profile/from-survey',
+        '/api/profile/from-survey',
         {
           method: 'POST',
           body: JSON.stringify({ user_id: userId, name: profileName, answers }),
