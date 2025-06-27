@@ -32,7 +32,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
         });
       } catch (err: any) {
         if (err.status === 403) {
-          router.push('/not-authorized');
+          router.push('/non-authorized');
           return;
         }
         throw err;

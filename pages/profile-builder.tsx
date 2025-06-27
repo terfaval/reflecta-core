@@ -51,7 +51,7 @@ export default function ProfileBuilder() {
     })
       .then(data => {
         if (data.role !== 'premium' || (data.personalProfiles || []).length) {
-          router.push('/not-authorized');
+          router.push('/non-authorized');
         }
       })
       .catch(console.error);

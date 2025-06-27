@@ -1,4 +1,4 @@
-// pages/not-authorized.tsx
+// pages/non-authorized.tsx
 export default function NotAuthorized() {
   return (
     <div style={{ padding: '2rem', textAlign: 'center' }}>
