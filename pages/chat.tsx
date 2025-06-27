@@ -7,7 +7,6 @@ import UserErrorDisplay from "../components/UserErrorDisplay";
 import SpiralLoader from "../components/SpiralLoader";
 import ThinkingDots from "../components/ThinkingDots";
 import ScrollToBottomButton from "../components/ScrollToBottomButton";
-import StartingPromptSelector from "../components/StartingPromptSelector";
 import SessionLabelBubble from "../components/SessionLabelBubble";
 import ReflectiveMemoryPanel from "../components/ReflectiveMemoryPanel";
 import ProfileSelectorSidebar, {
@@ -70,9 +69,7 @@ export default function ChatPage() {
   const { userId, setUserId, userInitialized, userError } = useUserContext();
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [showScrollDown, setShowScrollDown] = useState(false);
-  const [startingPrompts, setStartingPrompts] = useState<
-    { label: string; message: string }[]
-  >([]);
+  const [startingPrompt, setStartingPrompt] = useState<string>('');
   const [sessionIsFresh, setSessionIsFresh] = useState(false);
   const [page, setPage] = useState(0);
   const [isClosing, setIsClosing] = useState(false);
@@ -175,21 +172,21 @@ export default function ChatPage() {
   }, [debug, entries]);
 
   const handleReady = useCallback(
-    ({ userId, sessionId, startingPrompts, closingTrigger }) => {
+    ({ userId, sessionId, startingPrompt, closingTrigger }) => {
       if (debug) {
         console.log("[Debug] session ready", { userId, sessionId });
       }
 
       setUserId(userId);
       setSessionId(sessionId);
-      setStartingPrompts(startingPrompts);
+      setStartingPrompt(startingPrompt);
       setClosingTrigger(closingTrigger);
       setSessionIsFresh(true);
     },
     [
       setUserId,
       setSessionId,
-      setStartingPrompts,
+      setStartingPrompt,
       setClosingTrigger,
       setSessionIsFresh,
     ],
@@ -389,7 +386,7 @@ export default function ChatPage() {
           entries={entries}
           loadingEntries={loadingEntries}
           sessionIsFresh={sessionIsFresh}
-          startingPrompts={startingPrompts}
+          startingPrompt={startingPrompt}
           onSelectPrompt={handleSend}
           onTweak={handleSend}
           currentStyle={currentStyle}

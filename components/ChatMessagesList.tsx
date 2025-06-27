@@ -2,7 +2,7 @@
 import React from 'react';
 import SpiralLoader from './SpiralLoader';
 import ThinkingDots from './ThinkingDots';
-import StartingPromptSelector from './StartingPromptSelector';
+import StartingPromptDisplay from './StartingPromptDisplay';
 import SessionLabelBubble from './SessionLabelBubble';
 import ScrollToBottomButton from './ScrollToBottomButton';
 import ResponseTweakButtons from './ResponseTweakButtons';
@@ -18,7 +18,7 @@ interface ChatMessagesListProps {
   entries: Entry[];
   loadingEntries: boolean;
   sessionIsFresh: boolean;
-  startingPrompts: { label: string; message: string }[];
+  startingPrompt: string;
   onSelectPrompt: (prompt: string) => void;
   onTweak: (prompt: string) => void;
   currentStyle: Record<string, string>;
@@ -32,7 +32,7 @@ export function ChatMessagesList({
   entries,
   loadingEntries,
   sessionIsFresh,
-  startingPrompts,
+  startingPrompt,
   onSelectPrompt,
   onTweak,
   currentStyle,
@@ -54,11 +54,9 @@ export function ChatMessagesList({
           aiColor={currentStyle['--ai-color'] || '#FFB347'}
         />
       ) : entries.length === 0 && sessionIsFresh ? (
-        <StartingPromptSelector
-          prompts={startingPrompts}
-          onSelectPrompt={onSelectPrompt}
-          aiColor={currentStyle['--ai-color']}
-          userColor={currentStyle['--user-color']}
+        <StartingPromptDisplay
+          prompt={startingPrompt}
+          color={currentStyle['--user-color']}
         />
       ) : (
         entries.map((entry, index) => (

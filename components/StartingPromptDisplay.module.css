@@ -1,0 +1,20 @@
+.startingPrompt {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-top: 35vh;
+  padding: 0 1rem;
+  font-family: 'Raleway', sans-serif;
+  font-size: 1.25rem;
+}
+@media (min-width: 640px) {
+  .startingPrompt {
+    font-size: 1.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .startingPrompt {
+    font-size: 1.875rem;
+  }
+}

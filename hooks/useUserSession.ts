@@ -8,7 +8,7 @@ type UseUserSessionParams = {
   onReady: (data: {
     userId: string;
     sessionId: string;
-    startingPrompts: { label: string; message: string }[];
+    startingPrompt: string;
     closingTrigger: string;
   }) => void;
   enabled?: boolean;
@@ -26,7 +26,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
     const startSession = async (uid: string) => {
       let profileData;
       try {
-        profileData = await apiFetch<{ starting_prompts?: { label: string; message: string }[]; closing_trigger?: string }>('/profile', {
+        profileData = await apiFetch<{ closing_trigger?: string }>('/profile', {
           method: 'POST',
           body: JSON.stringify({ name: profile, userId: uid }),
         });
@@ -38,15 +38,21 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
         throw err;
       }
 
-      const prompts = profileData?.starting_prompts || [];
       const closingTrigger = profileData?.closing_trigger || '';
+
+      const promptResp = await apiFetch<{ prompt: string }>('/starting-prompt', {
+        method: 'POST',
+        body: JSON.stringify({ userId: uid, profile }),
+      });
+
+      const promptText = promptResp?.prompt || '';
 
       if (typeof sessionOverride === 'string') {
         initialized.current = true;
         onReady({
           userId: uid,
           sessionId: sessionOverride,
-          startingPrompts: prompts,
+          startingPrompt: promptText,
           closingTrigger,
         });
         return;
@@ -63,7 +69,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
       onReady({
         userId: uid,
         sessionId: sessionData.session.id,
-        startingPrompts: prompts,
+        startingPrompt: promptText,
         closingTrigger,
       });
     };

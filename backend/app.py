@@ -18,6 +18,7 @@ from .memory_summary import router as memory_summary_router
 from .generate_personal_profile import router as generate_profile_router
 from .last_session import router as last_session_router
 from .has_history import router as has_history_router
+from .starting_prompt import router as starting_prompt_router
 
 ALLOWED_ORIGINS = [
     "https://reflecta-core.vercel.app",
@@ -92,6 +93,9 @@ api_router.include_router(last_session_router)
 
 app.include_router(has_history_router)
 api_router.include_router(has_history_router)
+
+app.include_router(starting_prompt_router)
+api_router.include_router(starting_prompt_router)
 
 app.include_router(api_router)
 
