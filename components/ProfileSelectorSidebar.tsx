@@ -57,14 +57,20 @@ export default function ProfileSelectorSidebar({
 }, [userRole, customProfile, lastUsedProfiles, unusedProfiles]);
 
   const activeProfile = React.useMemo(() => {
-    return allProfiles.find((p) => p.id === activeProfileId) || null;
+    if (!activeProfileId) return null;
+    return (
+      allProfiles.find(
+        (p) => p.id.toLowerCase() === activeProfileId.toLowerCase(),
+      ) || null
+    );
   }, [allProfiles, activeProfileId]);
 
   const otherProfiles = React.useMemo< (Profile | null)[] >(() => {
     const arr: (Profile | null)[] = [];
     if (userRole === 'premium' && !customProfile) arr.push(null);
+    const activeId = activeProfileId?.toLowerCase();
     allProfiles.forEach((p) => {
-      if (p.id !== activeProfileId) arr.push(p);
+      if (p.id.toLowerCase() !== activeId) arr.push(p);
     });
     return arr;
   }, [allProfiles, activeProfileId, userRole, customProfile]);
