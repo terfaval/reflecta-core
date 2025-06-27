@@ -130,7 +130,7 @@ export default function ChatPage() {
           personalProfiles?: string[];
           role?: string;
           error?: string;
-        }>("/api/profile-list", {
+        }>("/profile-list", {
           method: "POST",
           body: JSON.stringify({ userId, names: SIDEBAR_ORDER }),
         });
