@@ -54,6 +54,9 @@
   color: #ffffff;
 }
 
+.activeItem .itemSubtext {
+  color: #ffffff;
+}
 
 .sidebar::-webkit-scrollbar {
   width: 8px;

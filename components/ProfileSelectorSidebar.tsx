@@ -91,7 +91,7 @@ export default function ProfileSelectorSidebar({
     <aside className={styles.sidebar}>
       {activeProfile && (
         <div
-          className={styles.activeItem}
+          className={`${styles.item} ${styles.activeItem}`}
           style={{ backgroundColor: activeProfile.color }}
         >
           <div className="w-6 h-6 flex items-center justify-center">
@@ -106,12 +106,8 @@ export default function ProfileSelectorSidebar({
             )}
           </div>
           <div className="flex flex-col items-start">
-            <span className={styles.itemHeader} style={{ color: 'white' }}>
-              {activeProfile.name}
-            </span>
-            <span className={styles.itemSubtext} style={{ color: 'white' }}>
-              {activeProfile.role}
-            </span>
+            <span className={styles.itemHeader}>{activeProfile.name}</span>
+            <span className={styles.itemSubtext}>{activeProfile.role}</span>
           </div>
         </div>
       )}
