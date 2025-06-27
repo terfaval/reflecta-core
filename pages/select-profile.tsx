@@ -6,6 +6,7 @@ import SpiralLoader from "@/components/SpiralLoader";
 import UserErrorDisplay from "@/components/UserErrorDisplay";
 import { useUserContext } from "@/contexts/UserContext";
 import { useProfileContext } from "@/contexts/ProfileContext";
+import { toast } from "react-toastify";
 
 import { apiFetch } from "@/lib/api";
 
@@ -15,6 +16,7 @@ export default function ProfileSelectorPage() {
   const { setProfile } = useProfileContext();
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isFirst, setIsFirst] = useState(false);
 
   useEffect(() => {
     if (loaded) {
@@ -35,9 +37,11 @@ export default function ProfileSelectorPage() {
         );
         if (data.sessionId) {
           if (data.profile) setProfile(data.profile);
+          toast.info("Korábbi beszélgetés folytatódik…");
           router.replace(`/chat?session=${data.sessionId}`);
           return;
         }
+        setIsFirst(true);
       } catch (err) {
         console.error("[last-session]", err);
         setError("Nem sikerült lekérni az előző munkamenetet.");
@@ -88,6 +92,13 @@ export default function ProfileSelectorPage() {
       >
         Válassz naplóprofilt!
       </h1>
+      {isFirst && (
+        <p
+          style={{ fontFamily: 'Raleway, sans-serif', fontSize: '0.875rem' }}
+        >
+          Úgy tűnik, most jársz itt először. Válassz egy profilt a kezdéshez.
+        </p>
+      )}
       {error && (
         <p style={{ color: 'red', fontFamily: 'Raleway, sans-serif' }}>{error}</p>
       )}

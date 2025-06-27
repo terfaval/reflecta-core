@@ -49,6 +49,7 @@ export default function ProfileSlider() {
 
   const [profiles, setProfiles] = useState<ProfileCardData[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [hasPersonal, setHasPersonal] = useState(false);
 
   const visibleCount = 4;
   const gap = 16;
@@ -112,6 +113,7 @@ export default function ProfileSlider() {
             };
           };
           const personalNames = meta.personalProfiles || [];
+          setHasPersonal(personalNames.length > 0);
           const cards: ProfileCardData[] = [];
           BASE_ORDER.forEach((n) => {
             if (n === "Reflecta") {
@@ -286,6 +288,9 @@ arr.push(profiles[profiles.length - 1]);
 
   return (
     <>
+    {hasPersonal && (
+      <h2 className={styles.sectionLabel}>Személyes profiljaid</h2>
+    )}
     <div className={styles.container} ref={containerRef}>
       {enableNav && (
         <button

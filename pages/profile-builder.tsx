@@ -40,6 +40,7 @@ export default function ProfileBuilder() {
   const [finished, setFinished] = useState(false);
   const [startLoading, setStartLoading] = useState(false);
   const router = useRouter();
+  const [accessError, setAccessError] = useState<string | null>(null);
 
   // user initialization handled globally in UserProvider
 
@@ -50,7 +51,11 @@ export default function ProfileBuilder() {
       body: JSON.stringify({ userId })
     })
       .then(data => {
-        if (data.role !== 'premium' || (data.personalProfiles || []).length) {
+        if (data.role !== 'premium') {
+          setAccessError('Ez csak prémium felhasználók számára elérhető.');
+          return;
+        }
+        if ((data.personalProfiles || []).length) {
           router.push('/non-authorized');
         }
       })
@@ -100,6 +105,14 @@ export default function ProfileBuilder() {
   if (!userInitialized) {
     return (
       <SpiralLoader userColor="#7A4DFF" aiColor="#FFB347" />
+    );
+  }
+
+  if (accessError) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center' }}>
+        <p>{accessError}</p>
+      </div>
     );
   }
 
