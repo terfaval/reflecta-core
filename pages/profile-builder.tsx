@@ -109,7 +109,7 @@ export default function ProfileBuilder() {
       setStartLoading(true);
       try {
         const data = await apiFetch<{ conversation_id: string; session_id: string; error?: string }>(
-          '/conversation/new',
+          '/api/conversation/new',
           {
             method: 'POST',
             body: JSON.stringify({ user_id: userId, profile_name: profileName }),

@@ -260,7 +260,7 @@ arr.push(profiles[profiles.length - 1]);
       const data = await apiFetch<{
         conversation_id: string;
         session_id: string;
-      }>("/conversation/new", {
+      }>("/api/conversation/new", {
         method: "POST",
         body: JSON.stringify({ user_id: userId, profile_name: p.name }),
       });
