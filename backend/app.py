@@ -21,7 +21,7 @@ from .has_history import router as has_history_router
 from .starting_prompt import router as starting_prompt_router
 
 ALLOWED_ORIGINS = [
-    "https://reflecta-core.vercel.app",
+    "https://reflecta-core.vercel.app/",
     "https://beenook.hu/reflecta",
     "https://beenook.hu/",
 ]
