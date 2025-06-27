@@ -22,6 +22,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
 
   useEffect(() => {
     if (!enabled || !router.isReady) return;
+    if (!userId || typeof profile !== 'string') return;
 
     const startSession = async (uid: string) => {
       let profileData;

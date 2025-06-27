@@ -239,9 +239,9 @@ export default function ChatPage() {
   }, [entries]);
 
   const handleSidebarSelect = async (name: string) => {
-    if (!userId) {
+    if (!userId || !name) {
       // eslint-disable-next-line no-console
-      console.error('[switch profile] missing userId');
+      console.warn('[switch profile] missing userId or profile');
       return;
     }
     // eslint-disable-next-line no-console

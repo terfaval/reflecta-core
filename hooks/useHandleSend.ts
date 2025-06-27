@@ -31,7 +31,16 @@ export function useHandleSend({
 }: UseHandleSendProps) {
   const handleSend = useCallback(async (text?: string) => {
     const message = text?.trim();
-    if (!message || !sessionId) return;
+    if (!message) {
+      // eslint-disable-next-line no-console
+      console.warn('Hiányzó üzenet – a küldés nem történt meg.');
+      return;
+    }
+    if (!sessionId) {
+      // eslint-disable-next-line no-console
+      console.warn('Hiányzó sessionId – a küldés nem történt meg.');
+      return;
+    }
     const isTrigger = message === closingTrigger.trim();
 
     setLoading(true);

@@ -26,6 +26,12 @@ export default function SessionLabelBubble({
 
   const handleSave = async () => {
     if (!tempLabel.trim()) return;
+    if (!entryId) {
+      // eslint-disable-next-line no-console
+      console.warn('Hiányzó entryId – a címke mentése nem történt meg.');
+      setError('Hiba: hiányzó bejegyzés azonosító.');
+      return;
+    }
     setLoading(true);
 
     try {

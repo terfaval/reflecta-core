@@ -253,9 +253,10 @@ arr.push(profiles[profiles.length - 1]);
   const transform = `translateX(${dragX + baseOffset - index * (itemWidth + gap)}px)`;
 
   const handleSelect = async (p: ProfileCardData) => {
-    if (!userId) {
+    if (!userId || !p?.name) {
       // eslint-disable-next-line no-console
-      console.error('[start conversation] missing userId');
+      console.warn('[start conversation] missing userId or profile');
+      setError('Hiányzó felhasználó vagy profil.');
       return;
     }
     // eslint-disable-next-line no-console

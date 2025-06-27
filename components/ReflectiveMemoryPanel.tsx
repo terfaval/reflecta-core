@@ -19,6 +19,12 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
   const [items, setItems] = useState<MemoryLabel[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  if (!sessionId) {
+    // eslint-disable-next-line no-console
+    console.warn('Hiányzó sessionId – a memóriapanel nem töltődik be.');
+    return <p>Töltés...</p>;
+  }
+
   useEffect(() => {
     if (!sessionId) return;
     const load = async () => {
@@ -69,7 +75,7 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
           </button>
         </div>
       ))}
-      {error && <p className={styles.error}>{error}</p>}
+      {error && <p className={styles.error}>{error}</p>}  
     </div>
   );
 }
