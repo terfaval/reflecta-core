@@ -55,7 +55,12 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
 
     client = get_client()
 
+    print(f"[respond] generating reply for session: {session_id}")
+
     session = await _fetch_session(client, session_id)
+    if not session.get("profile"):
+        print(f"[respond] session missing profile: {session}")
+        raise HTTPException(status_code=400, detail="Session has no profile")
     entries = await _fetch_entries(client, session_id)
 
     last_user = next((e for e in reversed(entries) if e.get("role") == "user"), None)
@@ -68,20 +73,34 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
     system_prompt = build_system_prompt(
         session["user_id"], session["profile"], user_input, strategy
     )
+    if not system_prompt or not system_prompt.strip():
+        print(
+            f"[respond] empty system prompt | profile={session['profile']} | user={session['user_id']}"
+        )
+        raise HTTPException(status_code=500, detail="Failed to build system prompt")
 
     messages = [{"role": "system", "content": system_prompt}]
     for e in entries:
         if e["role"] in {"user", "assistant"}:
             messages.append({"role": e["role"], "content": e["content"]})
 
-    chat = await _openai_client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=messages,
-        temperature=0.7,
-    )
+    try:
+        chat = await _openai_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            temperature=0.7,
+        )
+    except Exception as exc:
+        print(f"[respond] OpenAI error: {exc}")
+        raise HTTPException(status_code=500, detail="OpenAI request failed") from exc
 
     reply = chat.choices[0].message.content or ""
     reply = reply.strip()
+
+    if chat.usage:
+        print(
+            f"[respond] tokens -> prompt: {chat.usage.prompt_tokens}, completion: {chat.usage.completion_tokens}"
+        )
 
     now = datetime.now(timezone.utc).isoformat()
 
@@ -99,7 +118,10 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
         .execute()
     )
     if insert_error:
+        print(f"[respond] error inserting reply: {insert_error}")
         raise HTTPException(status_code=500, detail="Failed to store AI reply")
+    else:
+        print(f"[respond] reply stored: {insert_result}")
 
     # Optional system event about strategy detection
     try:
@@ -127,6 +149,11 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
 async def respond(sessionId: str, user=Depends(role_guard(Role.BASIC))):
     if not feature_enabled("advanced_ai", user["role"]):
         raise HTTPException(status_code=403, detail="Feature not available")
-
-    result = await generate_ai_reply(sessionId)
+    try:
+        result = await generate_ai_reply(sessionId)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        print(f"[respond] unexpected error: {exc}")
+        raise HTTPException(status_code=500, detail="Unexpected error") from exc
     return {"content": result["reply"]}
