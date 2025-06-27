@@ -65,7 +65,7 @@ export default function ProfileSelectorPage() {
       </Head>
       <div
         style={{
-          minHeight: "100dvh",
+          minHeight: "100%",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
