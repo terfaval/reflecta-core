@@ -57,3 +57,10 @@
 .arrow:hover {
   opacity: 1;
 }
+
+.error {
+  color: red;
+  text-align: center;
+  margin-top: 1rem;
+  font-family: 'Raleway', sans-serif;
+}

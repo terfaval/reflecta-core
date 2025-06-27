@@ -17,6 +17,7 @@ interface ReflectiveMemoryPanelProps {
 
 export default function ReflectiveMemoryPanel({ sessionId, handleSend }: ReflectiveMemoryPanelProps) {
   const [items, setItems] = useState<MemoryLabel[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -29,6 +30,7 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
         setItems(Array.isArray(data?.labels) ? data.labels : []);
       } catch (err) {
         console.error('Failed to fetch memory summary', err);
+        setError('Nem sikerült betölteni a memóriát.');
       }
     };
     load();
@@ -67,6 +69,7 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
           </button>
         </div>
       ))}
+      {error && <p className={styles.error}>{error}</p>}
     </div>
   );
 }

@@ -14,6 +14,7 @@ export default function ProfileSelectorPage() {
   const { userId, userInitialized, userError } = useUserContext();
   const { setProfile } = useProfileContext();
   const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (loaded) {
@@ -39,6 +40,7 @@ export default function ProfileSelectorPage() {
         }
       } catch (err) {
         console.error("[last-session]", err);
+        setError("Nem sikerült lekérni az előző munkamenetet.");
       }
       setLoaded(true);
     };
@@ -86,6 +88,9 @@ export default function ProfileSelectorPage() {
       >
         Válassz naplóprofilt!
       </h1>
+      {error && (
+        <p style={{ color: 'red', fontFamily: 'Raleway, sans-serif' }}>{error}</p>
+      )}
       <ProfileSlider />
       <p
         style={{

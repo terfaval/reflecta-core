@@ -35,15 +35,22 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
           router.push('/non-authorized');
           return;
         }
-        throw err;
+        alert('Nem sikerült betölteni a profilt.');
+        return;
       }
 
       const closingTrigger = profileData?.closing_trigger || '';
 
-      const promptResp = await apiFetch<{ prompt: string }>('/api/starting-prompt', {
-        method: 'POST',
-        body: JSON.stringify({ userId: uid, profile }),
-      });
+      let promptResp;
+      try {
+        promptResp = await apiFetch<{ prompt: string }>('/api/starting-prompt', {
+          method: 'POST',
+          body: JSON.stringify({ userId: uid, profile }),
+        });
+      } catch (err) {
+        alert('Nem sikerült lekérni az indító üzenetet.');
+        return;
+      }
 
       const promptText = promptResp?.prompt || '';
 
@@ -58,12 +65,21 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
         return;
       }
 
-      const sessionData = await apiFetch<{ session?: { id: string } }>('/api/session', {
-        method: 'POST',
-        body: JSON.stringify({ userId: uid, profile }),
-      });
+      let sessionData;
+      try {
+        sessionData = await apiFetch<{ session?: { id: string } }>('/api/session', {
+          method: 'POST',
+          body: JSON.stringify({ userId: uid, profile }),
+        });
+      } catch (err) {
+        alert('Nem sikerült létrehozni a munkamenetet.');
+        return;
+      }
 
-      if (!sessionData?.session?.id) return;
+      if (!sessionData?.session?.id) {
+        alert('Nem sikerült létrehozni a munkamenetet.');
+        return;
+      }
       initialized.current = true;
 
       onReady({

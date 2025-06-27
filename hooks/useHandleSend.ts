@@ -57,9 +57,19 @@ export function useHandleSend({
           ]);
         } else {
           console.error('[Zárás] Hiba:');
+          alert('A szakasz lezárása nem sikerült.');
+          setIsClosing(false);
+          setMessage('');
+          setLoading(false);
+          return;
         }
       } catch (err) {
         console.error('[Zárás] Kivétel:', err);
+        alert('A szakasz lezárása nem sikerült.');
+        setIsClosing(false);
+        setMessage('');
+        setLoading(false);
+        return;
       }
       setIsClosing(false);
       setMessage('');
@@ -80,10 +90,17 @@ export function useHandleSend({
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
     if (textarea) textarea.style.height = 'auto';
 
-    await apiFetch('/api/entries', {
-      method: 'POST',
-      body: JSON.stringify({ sessionId, entry: userEntry }),
-    });
+    try {
+      await apiFetch('/api/entries', {
+        method: 'POST',
+        body: JSON.stringify({ sessionId, entry: userEntry }),
+      });
+    } catch (err) {
+      console.error('[entries]', err);
+      alert('Az üzenet mentése nem sikerült.');
+      setLoading(false);
+      return;
+    }
 
     const thinkingId = `${Date.now()}-thinking`;
     setEntries(prev => [...prev, {
@@ -107,6 +124,9 @@ export function useHandleSend({
     } catch (err) {
       console.error('[respond]', err);
       setEntries(prev => prev.filter(e => e.id !== thinkingId));
+      alert('A válasz nem érkezett meg.');
+      setLoading(false);
+      return;
     }
     setLoading(false);
   }, [sessionId, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing]);

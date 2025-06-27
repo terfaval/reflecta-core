@@ -22,6 +22,7 @@ export default function SessionLabelBubble({
   const [editing, setEditing] = useState(false);
   const [tempLabel, setTempLabel] = useState(label);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSave = async () => {
     if (!tempLabel.trim()) return;
@@ -33,9 +34,10 @@ export default function SessionLabelBubble({
         body: JSON.stringify({ entryId, label: tempLabel }),
       });
       setLabel(tempLabel);
-      setEditing(false);
+      setEditing(false);setError(null);
     } catch (err) {
       console.error(err);
+      setError('A címke mentése nem sikerült.');
     }
 
     setLoading(false);
@@ -86,6 +88,7 @@ export default function SessionLabelBubble({
             </button>
           </>
         )}
+        {error && <p className={styles.error}>{error}</p>}
       </div>
 
       <div className={styles.line} style={{ backgroundColor: userColor }} />

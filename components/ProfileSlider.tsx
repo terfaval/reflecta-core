@@ -48,6 +48,7 @@ export default function ProfileSlider() {
   const router = useRouter();
 
   const [profiles, setProfiles] = useState<ProfileCardData[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const visibleCount = 4;
   const gap = 16;
@@ -67,6 +68,7 @@ export default function ProfileSlider() {
   useEffect(() => {
     if (!userId) return;
     const load = async () => {
+      setError(null);
       try {
         const names = BASE_ORDER;
         const meta = await apiFetch<{
@@ -127,9 +129,11 @@ export default function ProfileSlider() {
           if (cards.length <= visibleCount) setIndex(0);
         } else {
           console.error("[profile-list]", meta.error);
+          setError("Nem sikerült betölteni a profilokat.");
         }
       } catch (err) {
         console.error("[profile-list fetch]", err);
+        setError("Nem sikerült betölteni a profilokat.");
       }
     };
     load();
@@ -269,13 +273,18 @@ arr.push(profiles[profiles.length - 1]);
         router.push(
           `/chat?conversation=${data.conversation_id}&session=${data.session_id}`,
         );
+        } else {
+        alert('Nem sikerült elindítani a beszélgetést.');
+        return;
       }
     } catch (err) {
       console.error("[start conversation]", err);
+      alert('Nem sikerült elindítani a beszélgetést.');
     }
   };
 
   return (
+    <>
     <div className={styles.container} ref={containerRef}>
       {enableNav && (
         <button
@@ -313,5 +322,7 @@ arr.push(profiles[profiles.length - 1]);
         </button>
       )}
     </div>
+    {error && <p className={styles.error}>{error}</p>}
+    </>
   );
 }

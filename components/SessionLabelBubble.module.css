@@ -64,3 +64,10 @@
   color: var(--bg-color);
   background: var(--user-color);
 }
+
+.error {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+  font-family: 'Raleway', sans-serif;
+}

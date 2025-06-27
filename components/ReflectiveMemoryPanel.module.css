@@ -70,3 +70,10 @@
   stroke: var(--user-color);
   fill: none;
 }
+
+.error {
+  color: red;
+  width: 100%;
+  margin-top: 0.5rem;
+  font-family: 'Raleway', sans-serif;
+}
