@@ -23,6 +23,7 @@ from .starting_prompt import router as starting_prompt_router
 ALLOWED_ORIGINS = [
     "https://reflecta-core.vercel.app",
     "https://beenook.hu/reflecta",
+    "https://beenook.hu/",
 ]
 
 app = FastAPI(title="Reflecta API")
