@@ -5,12 +5,19 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel
 
 from .supabase_client import supabase, _execute
 
 
 router = APIRouter()
+
+class ChatloadRequest(BaseModel):
+    userId: str
+    profile: str
+    limit: int = 20
+    offset: int = 0
 
 
 def _fetch_latest_conversation(user_id: str, profile: str) -> Dict[str, Any]:
@@ -101,12 +108,21 @@ def _fetch_arcs(session_ids: List[str]) -> List[Dict[str, Any]]:
 
 @router.post("/chatload")
 async def chatload(
-    userId: str,
-    profile: str,
-    limit: int = 20,
-    offset: int = 0,
+    payload: ChatloadRequest,
+    request: Request,
 ) -> Dict[str, Any]:
     """Return conversation entries for the chat interface."""
+
+    try:
+        body = await request.json()
+        print(f"[chatload] request body: {body}")
+    except Exception as exc:
+        print(f"[chatload] failed reading request body: {exc}")
+
+    userId = payload.userId
+    profile = payload.profile
+    limit = payload.limit
+    offset = payload.offset
 
     if not userId or not profile:
         raise HTTPException(status_code=400, detail="Missing userId or profile")
