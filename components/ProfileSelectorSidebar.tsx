@@ -45,26 +45,59 @@ export default function ProfileSelectorSidebar({
   onProfileSelect,
   onCreateCustomProfile,
 }: ProfileSelectorSidebarProps) {
-  const { profile: activeProfile } = useProfileContext();
-  const profileItems = React.useMemo<(Profile | null)[]>(() => {
-    const arr: (Profile | null)[] = [BLANK_PROFILE];
-    if (userRole === 'premium') {
-      arr.push(customProfile); // may be null for create button
+  const { profile: activeProfileId } = useProfileContext();
+
+  const allProfiles = React.useMemo<Profile[]>(() => {
+    const arr: Profile[] = [BLANK_PROFILE];
+    if (userRole === 'premium' && customProfile) {
+      arr.push(customProfile);
     }
     arr.push(...lastUsedProfiles, ...unusedProfiles);
-    if (activeProfile) {
-      const idx = arr.findIndex((p) => p && p.id === activeProfile);
-      if (idx > -1) {
-        const [active] = arr.splice(idx, 1);
-        arr.unshift(active);
-      }
-    }
     return arr;
-  }, [userRole, customProfile, lastUsedProfiles, unusedProfiles, activeProfile]);
+}, [userRole, customProfile, lastUsedProfiles, unusedProfiles]);
+
+  const activeProfile = React.useMemo(() => {
+    return allProfiles.find((p) => p.id === activeProfileId) || null;
+  }, [allProfiles, activeProfileId]);
+
+  const otherProfiles = React.useMemo< (Profile | null)[] >(() => {
+    const arr: (Profile | null)[] = [];
+    if (userRole === 'premium' && !customProfile) arr.push(null);
+    allProfiles.forEach((p) => {
+      if (p.id !== activeProfileId) arr.push(p);
+    });
+    return arr;
+  }, [allProfiles, activeProfileId, userRole, customProfile]);
 
   return (
     <aside className={styles.sidebar}>
-      {profileItems.map((p, idx) => {
+      {activeProfile && (
+        <div
+          className={styles.activeItem}
+          style={{ backgroundColor: activeProfile.color }}
+        >
+          <div className="w-6 h-6 flex items-center justify-center">
+            {activeProfile.iconName && iconMap[activeProfile.iconName] ? (
+              <ProfileIcon
+                icon={iconMap[activeProfile.iconName]}
+                color="white"
+                size={24}
+              />
+            ) : (
+              <div className="w-6 h-6 rounded-full" style={{ backgroundColor: 'white' }} />
+            )}
+          </div>
+          <div className="flex flex-col items-start">
+            <span className={styles.itemHeader} style={{ color: 'white' }}>
+              {activeProfile.name}
+            </span>
+            <span className={styles.itemSubtext} style={{ color: 'white' }}>
+              {activeProfile.role}
+            </span>
+          </div>
+        </div>
+      )}
+      {otherProfiles.map((p) => {
         if (!p) {
           return (
             <button
@@ -87,7 +120,7 @@ export default function ProfileSelectorSidebar({
           <button
             key={p.id}
             onClick={() => onProfileSelect(p.id)}
-            className={`${styles.item} ${p.id === activeProfile ? styles.activeItem : ''}`}
+            className={styles.item}
           >
             <div className="w-6 h-6 flex items-center justify-center">
               {IconComp ? (
