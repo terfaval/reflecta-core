@@ -40,62 +40,26 @@ app.add_middleware(
 
 print("\u2705 CORS beállítva az alábbi originre:", ALLOWED_ORIGINS)
 
-# Register routes under both the root path and the `/api` prefix so
-# existing clients can use either form.
+# Register routers under the `/api` prefix only to avoid duplicated paths.
 api_router = APIRouter(prefix="/api")
 
-app.include_router(users_router)
 api_router.include_router(users_router)
-
-app.include_router(user_create_router)
 api_router.include_router(user_create_router)
-
-app.include_router(respond_router)
 api_router.include_router(respond_router)
-
-app.include_router(session_router)
 api_router.include_router(session_router)
-
-app.include_router(chatload_router)
 api_router.include_router(chatload_router)
-
-app.include_router(conversation_router)
 api_router.include_router(conversation_router)
-
-app.include_router(entries_router)
 api_router.include_router(entries_router)
-
-app.include_router(session_close_router)
 api_router.include_router(session_close_router)
-
-app.include_router(session_update_label_router)
 api_router.include_router(session_update_label_router)
-
-app.include_router(profile_router)
 api_router.include_router(profile_router)
-
-app.include_router(profile_list_router)
 api_router.include_router(profile_list_router)
-
-app.include_router(profile_from_survey_router)
 api_router.include_router(profile_from_survey_router)
-
-app.include_router(check_profile_access_router)
 api_router.include_router(check_profile_access_router)
-
-app.include_router(memory_summary_router)
 api_router.include_router(memory_summary_router)
-
-app.include_router(generate_profile_router)
 api_router.include_router(generate_profile_router)
-
-app.include_router(last_session_router)
 api_router.include_router(last_session_router)
-
-app.include_router(has_history_router)
 api_router.include_router(has_history_router)
-
-app.include_router(starting_prompt_router)
 api_router.include_router(starting_prompt_router)
 
 app.include_router(api_router)
