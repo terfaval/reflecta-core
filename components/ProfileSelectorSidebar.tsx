@@ -94,13 +94,9 @@ export default function ProfileSelectorSidebar({
           className={`${styles.item} ${styles.activeItem}`}
           style={{ backgroundColor: activeProfile.color }}
         >
-          <div className="w-6 h-6 flex items-center justify-center">
+          <div className={styles.icon}>
             {activeProfile.iconName && iconMap[activeProfile.iconName] ? (
-              <ProfileIcon
-                icon={iconMap[activeProfile.iconName]}
-                color="white"
-                size={24}
-              />
+              <ProfileIcon icon={iconMap[activeProfile.iconName]} color="white" size={24} />
             ) : (
               <div className="w-6 h-6 rounded-full" style={{ backgroundColor: 'white' }} />
             )}
@@ -119,16 +115,19 @@ export default function ProfileSelectorSidebar({
               onClick={onCreateCustomProfile}
               className={`${styles.item} ${styles.create}`}
             >
-              <LucidePlusCircle className="w-6 h-6 stroke-gray-400" />
+              <div className={styles.icon}>
+                <LucidePlusCircle className="w-6 h-6 stroke-gray-400" />
+              </div>
               <span className="text-sm font-medium">
                 Hozd létre a személyes napló profilodat!
               </span>
             </button>
           );
         }
-        const last = entries[p.id]?.[entries[p.id].length - 1];
-        const bottomText = last ? last.role : p.role;
-        const bottomClass = last ? 'text-sm' : 'text-sm font-medium text-gray-600';
+        const list = entries[p.id] || [];
+        const lastUser = [...list].reverse().find((e) => e.role === 'user');
+        const bottomText = lastUser ? lastUser.content : p.role;
+        const bottomClass = lastUser ? 'text-sm' : 'text-sm font-medium text-gray-600';
         const IconComp = p.iconName && iconMap[p.iconName];
         return (
           <button
@@ -136,7 +135,7 @@ export default function ProfileSelectorSidebar({
             onClick={() => onProfileSelect(p.id)}
             className={styles.item}
           >
-            <div className="w-6 h-6 flex items-center justify-center">
+            <div className={styles.icon}>
               {IconComp ? (
                 <ProfileIcon icon={IconComp} color={p.color} size={24} />
               ) : (
