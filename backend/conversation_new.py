@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException
 import logging
 from pydantic import BaseModel
 
-from .supabase_client import supabase, insert_log_entry, insert_single
+from .supabase_client import supabase, insert_single
 
 router = APIRouter()
 
@@ -47,14 +47,16 @@ def create_conversation_and_session(user_id: str, profile: str) -> Tuple[str, Di
 
     now = datetime.now(timezone.utc).isoformat()
     try:
-        insert_log_entry({
-            "session_id": session["id"],
-            "role": "system",
-            "content": f"New conversation started with profile '{profile}'",
-            "created_at": now,
-        })
+        supabase.table("system_events").insert(
+            {
+                "session_id": session["id"],
+                "event_type": "conversation_started",
+                "note": f"Profile: {profile}",
+                "timestamp": now,
+            }
+        ).execute()
     except Exception:
-        # Logging failures shouldn't interrupt the flow
+        # System event logging shouldn't interrupt the flow
         pass
 
     return conversation["id"], session
