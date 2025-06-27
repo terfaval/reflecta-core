@@ -1,8 +1,7 @@
 from fastapi import Depends, HTTPException, status, Header
 from typing import Optional
 
-from .db import get_client
-from .supabase_client import supabase
+from .supabase_client import supabase, get_user_by_id
 
 
 class Role:
@@ -51,7 +50,14 @@ def get_current_user(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing user id"
         )
-    return {"id": x_user_id, "role": x_role or Role.BASIC}
+    role = x_role
+    if role is None:
+        try:
+            user_record = get_user_by_id(x_user_id)
+            role = user_record.get("role") if user_record else None
+        except Exception:
+            role = None
+    return {"id": x_user_id, "role": role or Role.BASIC}
 
 
 def role_guard(required_role: str):
