@@ -6,7 +6,8 @@ import os
 from datetime import datetime, timezone
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel
 
 from openai import AsyncOpenAI
 
@@ -20,6 +21,10 @@ router = APIRouter()
 
 
 _openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+
+class RespondRequest(BaseModel):
+    sessionId: str
 
 
 async def _fetch_session(client: Any, session_id: str) -> Dict[str, Any]:
@@ -146,11 +151,16 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
 
 
 @router.post("/respond")
-async def respond(sessionId: str, user=Depends(role_guard(Role.BASIC))):
+async def respond(payload: RespondRequest, request: Request, user=Depends(role_guard(Role.BASIC))):
     if not feature_enabled("advanced_ai", user["role"]):
         raise HTTPException(status_code=403, detail="Feature not available")
     try:
-        result = await generate_ai_reply(sessionId)
+        body = await request.json()
+        print(f"[respond] request body: {body}")
+    except Exception as exc:
+        print(f"[respond] error reading request body: {exc}")
+    try:
+        result = await generate_ai_reply(payload.sessionId)
     except HTTPException:
         raise
     except Exception as exc:
