@@ -22,8 +22,8 @@ def human_list(items: List[str] | None, conjunction: str = "and") -> str:
     return f"{', '.join(items[:-1])} {conjunction} {items[-1]}"
 
 
-def fetch_profile(profile_name: str) -> Dict[str, Any]:
-    normalized = normalize_profile(profile_name)
+def fetch_profile(profile: str) -> Dict[str, Any]:
+    normalized = normalize_profile(profile)
     result = (
         supabase.table("profiles")
         .select("name, prompt_core")
@@ -34,8 +34,8 @@ def fetch_profile(profile_name: str) -> Dict[str, Any]:
     return _execute(result)
 
 
-def fetch_profile_metadata(profile_name: str) -> Dict[str, Any]:
-    normalized = normalize_profile(profile_name)
+def fetch_profile_metadata(profile: str) -> Dict[str, Any]:
+    normalized = normalize_profile(profile)
     result = (
         supabase.table("profile_metadata")
         .select("*")
@@ -48,14 +48,14 @@ def fetch_profile_metadata(profile_name: str) -> Dict[str, Any]:
 
 def build_system_prompt(
     user_id: str,
-    profile_name: str,
+    profile: str,
     user_input: str,
     strategy: Optional[str] = None,
     session_position: Optional[str] = None,
 ) -> str:
-    profile = fetch_profile(profile_name)
-    metadata = fetch_profile_metadata(profile_name)
-
+    profile_data = fetch_profile(profile)
+    metadata = fetch_profile_metadata(profile)
+    
     if not strategy:
         strategies = detect_top_strategies(user_input, session_position, top_n=2)
         strategy = strategies[0]
@@ -74,7 +74,7 @@ def build_system_prompt(
     ]
     lines.extend(core_essence_prompt)
 
-    core = profile.get("prompt_core", "").strip()
+    core = profile_data.get("prompt_core", "").strip()
     if core:
         lines.append(core)
         lines.append("")

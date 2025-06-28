@@ -33,13 +33,13 @@ def _fetch_supabase_user_id(wp_user_id: str) -> Optional[str]:
     return row.get("id") if row else None
 
 
-def _fetch_allowed_users(profile_name: str) -> List[str]:
+def _fetch_allowed_users(profile: str) -> List[str]:
     """Return list of user ids allowed to access the profile."""
 
     result = (
-        supabase.table("profile_access")
+        supabase.table("user_profiles")
         .select("user_id")
-        .eq("profile_name", profile_name)
+        .eq("profile_name", profile)
         .execute()
     )
     rows = _execute(result) or []

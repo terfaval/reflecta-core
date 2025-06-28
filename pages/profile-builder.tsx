@@ -36,7 +36,7 @@ export default function ProfileBuilder() {
   const { setProfile } = useProfileContext();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<string[]>(['', '', '', '', '']);
-  const [profileName, setProfileName] = useState('Személyes profil');
+  const [profile, setProfileName] = useState('Személyes profil');
   const [finished, setFinished] = useState(false);
   const [startLoading, setStartLoading] = useState(false);
   const router = useRouter();
@@ -83,10 +83,10 @@ export default function ProfileBuilder() {
         '/api/profile/from-survey',
         {
           method: 'POST',
-          body: JSON.stringify({ user_id: userId, name: profileName, answers }),
+          body: JSON.stringify({ user_id: userId, name: profile, answers }),
         }
       );
-      setProfileName(data.name || profileName);
+      setProfileName(data.name || profile);
       setFinished(true);
     } catch (err) {
       console.error(err);
@@ -125,11 +125,11 @@ export default function ProfileBuilder() {
           '/api/conversation/new',
           {
             method: 'POST',
-            body: JSON.stringify({ user_id: userId, profile_name: profileName }),
+            body: JSON.stringify({ user_id: userId, profile }),
           }
         );
         if (data.conversation_id && data.session_id) {
-          setProfile(profileName);
+          setProfile(profile);
           router.push(`/chat?conversation=${data.conversation_id}&session=${data.session_id}`);
         } else {
           console.error(data.error);
@@ -142,7 +142,7 @@ export default function ProfileBuilder() {
     };
 
     return (
-<SurveySuccess profileName={profileName} onStart={handleStart} loading={startLoading} />
+<SurveySuccess profile={profile} onStart={handleStart} loading={startLoading} />
     );
   }
 

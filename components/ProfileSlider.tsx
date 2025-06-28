@@ -271,7 +271,7 @@ arr.push(profiles[profiles.length - 1]);
         session_id: string;
       }>("/api/conversation/new", {
         method: "POST",
-        body: JSON.stringify({ user_id: userId, profile_name: p.name }),
+        body: JSON.stringify({ user_id: userId, profile: p.name }),
       });
       if (data.conversation_id && data.session_id) {
         setProfile(p.name);

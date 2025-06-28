@@ -92,10 +92,10 @@ def get_session(session_id: str) -> Optional[Dict[str, Any]]:
         raise RuntimeError(f"Failed to fetch session: {exc}") from exc
     
 
-def profile_exists(profile_name: str) -> bool:
+def profile_exists(profile: str) -> bool:
     """Return ``True`` if the given profile exists in the database."""
     try:
-        normalized = normalize_profile(profile_name)
+        normalized = normalize_profile(profile)
         result = (
             supabase.table("profiles")
             .select("name")

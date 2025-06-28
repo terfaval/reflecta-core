@@ -258,7 +258,7 @@ export default function ChatPage() {
         "/api/conversation/new",
         {
           method: "POST",
-          body: JSON.stringify({ user_id: userId, profile_name: name }),
+          body: JSON.stringify({ user_id: userId, profile: name }),
         },
       );
       if (data.conversation_id && data.session_id) {

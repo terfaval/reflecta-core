@@ -3,12 +3,12 @@ import styles from './SurveySuccess.module.css';
 import { Sparkles } from 'lucide-react';
 
 interface SurveySuccessProps {
-  profileName: string;
+  profile: string;
   onStart: () => void;
   loading?: boolean;
 }
 
-export default function SurveySuccess({ profileName, onStart, loading = false }: SurveySuccessProps) {
+export default function SurveySuccess({ profile, onStart, loading = false }: SurveySuccessProps) {
   return (
     <div className={styles.wrapper}>
       <div className={styles.fireworks} aria-hidden="true">

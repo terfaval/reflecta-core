@@ -9,6 +9,7 @@ import logging
 from pydantic import BaseModel
 
 from .supabase_client import supabase, insert_single, _execute, profile_exists
+from .utils import normalize_profile
 
 router = APIRouter()
 
@@ -16,7 +17,7 @@ class ConversationRequest(BaseModel):
     """Request body for ``/conversation/new``."""
 
     user_id: str
-    profile_name: str
+    profile: str
 
 
 def _get_or_create_conversation(user_id: str, profile: str) -> Tuple[Dict[str, Any], bool]:
@@ -26,7 +27,7 @@ def _get_or_create_conversation(user_id: str, profile: str) -> Tuple[Dict[str, A
             supabase.table("conversations")
             .select("*")
             .eq("user_id", user_id)
-            .eq("profile", profile)
+            .ilike("profile", normalize_profile(profile))
             .eq("is_archived", False)
             .order("started_at", desc=True)
             .limit(1)
@@ -89,7 +90,7 @@ async def conversation_new(payload: ConversationRequest):
     """Create a new conversation and session for the given user and profile."""
 
     payload_dict = payload.dict()
-    required_fields = ["user_id", "profile_name"]
+    required_fields = ["user_id", "profile"]
     for field in required_fields:
         if field not in payload_dict or not payload_dict[field]:
             raise HTTPException(status_code=400, detail=f"Hiányzó vagy érvénytelen mező: {field}")
@@ -109,14 +110,14 @@ async def conversation_new(payload: ConversationRequest):
         "Kairos",
         "Noe",
     ]
-    profile_name = payload.profile_name
+    profile = payload.profile
 
-    if not profile_name:
+    if not profile:
         raise HTTPException(status_code=400, detail="Hiányzik a profilnév")
 
-    if profile_name not in valid_profiles:
+    if profile not in valid_profiles:
         try:
-            if not profile_exists(profile_name):
+            if not profile_exists(profile):
                 raise HTTPException(status_code=400, detail="Ismeretlen profil.")
         except Exception as e:
             logging.error(f"[conversation/new] Profil ellenőrzése sikertelen: {e}")
@@ -124,7 +125,7 @@ async def conversation_new(payload: ConversationRequest):
 
 
     try:
-        conv_id, session = create_conversation_and_session(payload.user_id, profile_name)
+        conv_id, session = create_conversation_and_session(payload.user_id, profile)
         return {"conversation_id": conv_id, "session_id": session["id"]}
     except HTTPException:
         raise
