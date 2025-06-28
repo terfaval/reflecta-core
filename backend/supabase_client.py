@@ -1,5 +1,7 @@
 import os
 from typing import Any, Dict, Optional
+
+from .utils import normalize_profile
 from dotenv import load_dotenv
 from pathlib import Path
 from supabase import create_client, Client
@@ -93,14 +95,15 @@ def get_session(session_id: str) -> Optional[Dict[str, Any]]:
 def profile_exists(profile_name: str) -> bool:
     """Return ``True`` if the given profile exists in the database."""
     try:
+        normalized = normalize_profile(profile_name)
         result = (
             supabase.table("profiles")
             .select("name")
-            .eq("name", profile_name)
+            .ilike("name", normalized)
             .maybe_single()
             .execute()
         )
         return bool(_execute(result))
     except Exception as exc:  # pragma: no cover - network/database issues
         print(f"[supabase] profile lookup failed: {exc}")
-        return False    
+        return False

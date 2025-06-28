@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from .supabase_client import supabase, _execute
+from .utils import normalize_profile
 
 
 router = APIRouter()
@@ -23,10 +24,11 @@ class ProfileRequest(BaseModel):
 def _fetch_access_list(profile_name: str) -> List[str]:
     """Return a list of user ids allowed to access the profile."""
 
+    normalized = normalize_profile(profile_name)
     result = (
         supabase.table("profile_access")
         .select("user_id")
-        .eq("profile_name", profile_name)
+        .ilike("profile_name", normalized)
         .execute()
     )
     rows = _execute(result) or []
@@ -36,10 +38,11 @@ def _fetch_access_list(profile_name: str) -> List[str]:
 def _fetch_profile(profile_name: str) -> Dict[str, Any] | None:
     """Return basic profile data or ``None`` if not found."""
 
+    normalized = normalize_profile(profile_name)
     result = (
         supabase.table("profiles")
         .select("name, prompt_core, role, color, is_active")
-        .eq("name", profile_name)
+        .ilike("name", normalized)
         .maybe_single()
         .execute()
     )
@@ -49,10 +52,11 @@ def _fetch_profile(profile_name: str) -> Dict[str, Any] | None:
 def _fetch_metadata(profile_name: str) -> Dict[str, Any] | None:
     """Return profile metadata or ``None`` if not found."""
 
+    normalized = normalize_profile(profile_name)
     result = (
         supabase.table("profile_metadata")
         .select("closing_trigger")
-        .eq("profile", profile_name)
+        .ilike("profile", normalized)
         .maybe_single()
         .execute()
     )
@@ -62,10 +66,11 @@ def _fetch_metadata(profile_name: str) -> Dict[str, Any] | None:
 def _fetch_prompts(profile_name: str) -> List[Dict[str, Any]]:
     """Return ordered starting prompts for the profile."""
 
+    normalized = normalize_profile(profile_name)
     result = (
         supabase.table("profile_starting_prompts")
         .select("label, message")
-        .eq("profile", profile_name)
+        .ilike("profile", normalized)
         .order("priority")
         .execute()
     )

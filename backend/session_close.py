@@ -9,6 +9,7 @@ from openai import OpenAI
 
 from .supabase_client import supabase, _execute
 from .prompt_builder import build_system_prompt
+from .utils import normalize_profile
 
 router = APIRouter()
 
@@ -55,10 +56,11 @@ def generate_session_closure_response(session_id: str) -> str:
     if not session:
         raise HTTPException(404, "Session not found")
     
+    normalized = normalize_profile(session["profile"])
     profile_row = _execute(
         supabase.table("profiles")
         .select("name, prompt_core, description, role")
-        .eq("name", session["profile"])
+        .ilike("name", normalized)
         .maybe_single()
         .execute()
     )
@@ -66,7 +68,7 @@ def generate_session_closure_response(session_id: str) -> str:
     metadata = _execute(
         supabase.table("profile_metadata")
         .select("*")
-        .eq("profile", session["profile"])
+        .ilike("profile", normalized)
         .maybe_single()
         .execute()
     )
@@ -187,10 +189,11 @@ def close_session(session_id: str) -> Dict[str, str]:
         .maybe_single()
         .execute()
     )
+    normalized_row = normalize_profile(session_row["profile"])
     metadata = _execute(
         supabase.table("profile_metadata")
         .select("closing_trigger")
-        .eq("profile", session_row["profile"])
+        .ilike("profile", normalized_row)
         .maybe_single()
         .execute()
     )

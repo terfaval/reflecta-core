@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from .supabase_client import supabase, _execute
+from .utils import normalize_profile
 
 router = APIRouter()
 
@@ -50,10 +51,11 @@ def _fetch_profile(session_id: str) -> str:
 def _fetch_closing_trigger(profile: str) -> str:
     if not profile:
         return ""
+    normalized = normalize_profile(profile)
     result = (
         supabase.table("profile_metadata")
         .select("closing_trigger")
-        .eq("profile", profile)
+        .ilike("profile", normalized)
         .maybe_single()
         .execute()
     )

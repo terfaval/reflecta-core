@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
 from .supabase_client import supabase, _execute
+from .utils import normalize_profile
 
 
 router = APIRouter()
@@ -22,11 +23,12 @@ class ChatloadRequest(BaseModel):
 
 def _fetch_latest_conversation(user_id: str, profile: str) -> Dict[str, Any]:
     """Return the most recent conversation id for the user and profile."""
+    normalized = normalize_profile(profile)
     result = (
         supabase.table("conversations")
         .select("id")
         .eq("user_id", user_id)
-        .eq("profile", profile)
+        .ilike("profile", normalized)
         .order("started_at", desc=True)
         .limit(1)
         .maybe_single()
@@ -60,10 +62,11 @@ def _fetch_entries(session_ids: List[str], offset: int, limit: int) -> List[Dict
 
 
 def _fetch_closing_trigger(profile: str) -> str:
+    normalized = normalize_profile(profile)
     result = (
         supabase.table("profile_metadata")
         .select("closing_trigger")
-        .eq("profile", profile)
+        .ilike("profile", normalized)
         .maybe_single()
         .execute()
     )
