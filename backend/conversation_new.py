@@ -27,17 +27,17 @@ async def conversation_new(payload: ConversationRequest):
     """Create a new conversation and session for the given user and profile."""
 
     payload_dict = payload.dict()
-    required_fields = ["user_id", "profile"]
-    for field in required_fields:
-        if field not in payload_dict or not payload_dict[field]:
-            raise HTTPException(status_code=400, detail=f"Hiányzó vagy érvénytelen mező: {field}")
-
-    logging.info(f"[conversation/new] payload: {payload_dict}")
-
-    profile = validate_profile_name(payload.profile)
-
-
+    
     try:
+        required_fields = ["user_id", "profile"]
+        for field in required_fields:
+            if field not in payload_dict or not payload_dict[field]:
+                raise HTTPException(status_code=400, detail=f"Hiányzó vagy érvénytelen mező: {field}")
+
+        logging.info(f"[conversation/new] payload: {payload_dict}")
+
+        profile = validate_profile_name(payload.profile)
+
         conv_id, session, created = create_conversation_and_session(
             payload.user_id, profile
         )
@@ -51,11 +51,14 @@ async def conversation_new(payload: ConversationRequest):
             "session_id": session["id"],
             "status": status,
         }
-    except HTTPException:
-        raise
+    except HTTPException as exc:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"status": "error", "detail": exc.detail},
+        )
     except Exception:
         logging.exception("[conversation/new] Hiba történt")
         return JSONResponse(
             status_code=500,
-            content={"error": "Nem sikerült új beszélgetést indítani."},
+            content={"status": "error", "error": "Nem sikerült új beszélgetést indítani."},
         )
