@@ -7,6 +7,7 @@ import { useUserContext } from "@/contexts/UserContext";
 import { useProfileContext } from "@/contexts/ProfileContext";
 import { apiFetch } from "@/lib/api";
 import { profileStyles } from "@/styles/profileStyles";
+import { toast } from "react-toastify";
 
 export interface ProfileCardData
   extends Omit<ProfileCardProps, "onSelect"> {
@@ -257,14 +258,22 @@ arr.push(profiles[profiles.length - 1]);
   const transform = `translateX(${dragX + baseOffset - index * (itemWidth + gap)}px)`;
 
   const handleSelect = async (p: ProfileCardData) => {
+    console.log('➡️ Profile selected:', p?.name);
     if (!userId || !p?.name) {
-      // eslint-disable-next-line no-console
-      console.warn('[start conversation] missing userId or profile');
+      console.warn('[start conversation] missing userId or profile', {
+        userId,
+        profile: p?.name,
+      });
+      toast.error('Hiányzó felhasználó vagy profil.');
       setError('Hiányzó felhasználó vagy profil.');
       return;
     }
-    // eslint-disable-next-line no-console
-    console.log('[start conversation]', { userId, profile: p.name });
+    
+    console.log('📤 Sending request to /api/conversation/new:', {
+      user_id: userId,
+      profile: p.name,
+    });
+
     try {
       const data = await apiFetch<{
         conversation_id: string;
@@ -273,18 +282,23 @@ arr.push(profiles[profiles.length - 1]);
         method: "POST",
         body: JSON.stringify({ user_id: userId, profile: p.name }),
       });
+
+      console.log('✅ Got response from backend:', data);
+
       if (data.conversation_id && data.session_id) {
         setProfile(p.name);
+        console.log('🔁 Redirecting to chat');
         router.push(
           `/chat?conversation=${data.conversation_id}&session=${data.session_id}`,
         );
-        } else {
-        alert('Nem sikerült elindítani a beszélgetést.');
-        return;
+      } else {
+        toast.error('Nem sikerült elindítani a beszélgetést.');
+        setError('Nem sikerült elindítani a beszélgetést.');
       }
     } catch (err) {
-      console.error("[start conversation]", err);
-      alert('Nem sikerült elindítani a beszélgetést.');
+      console.error('[start conversation]', err);
+      toast.error('Nem sikerült elindítani a beszélgetést.');
+      setError('Nem sikerült elindítani a beszélgetést.');
     }
   };
 
