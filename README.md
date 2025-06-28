@@ -111,6 +111,87 @@ uvicorn backend.main:app --reload
 - `styles/` – CSS és egyéb stílusfájlok
   - `profileStyles.ts`
 
+## 📊 Supabase táblaséma
+
+### users
+- id: UUID (PK)
+- anon_token: TEXT
+- wp_user_id: TEXT (unique)
+- email: TEXT
+- created_at: TIMESTAMP
+- role: TEXT (default: 'basic')
+- feature_flags: JSONB
+
+### user_profiles
+- id: UUID (PK)
+- user_id: UUID → users(id)
+- profile_name: TEXT → profiles(name)
+
+### profiles
+- name: TEXT (PK)
+- color: TEXT
+- role: TEXT
+- description: TEXT
+- prompt_core: TEXT
+- is_active: BOOLEAN
+
+### profile_metadata
+- profile: TEXT (PK)
+- domain, worldview, inspirations, not_suitable_for, closing_trigger, closing_style, etc.
+
+### profile_reactions
+- id: SERIAL (PK)
+- profile: TEXT
+- + extra mezők
+
+### profile_recommendations
+- id: SERIAL (PK)
+- profile: TEXT
+- + extra mezők
+
+### recommendation_steps
+- id: SERIAL (PK)
+- recommendation_id: INT → profile_recommendations(id)
+- + extra mezők
+
+### profile_starting_prompts
+- id: SERIAL (PK)
+- profile: TEXT
+- + extra mezők
+
+### conversations
+- id: UUID (PK)
+- user_id: UUID → users(id)
+- profile: TEXT → profiles(name)
+- started_at, title, is_archived
+
+### sessions
+- id: UUID (PK)
+- user_id: UUID → users(id)
+- profile: TEXT → profiles(name)
+- conversation_id: UUID → conversations(id)
+- started_at, ended_at, label, label_confidence
+
+### entries
+- id: UUID (PK)
+- session_id: UUID → sessions(id)
+- role: TEXT ('user' | 'assistant' | 'system')
+- content, created_at, reaction_tag, recommendation_tag
+
+### system_events
+- id: SERIAL (PK)
+- session_id: UUID → sessions(id)
+- event_type, timestamp, note
+
+### entry_labels
+- entry_id: UUID → entries(id)
+- label_type, label_value, confidence, added_by
+
+### conversation_arcs
+- session_id: UUID → sessions(id)
+- arc_type, pivot_points, depth_estimate, profile_sequence
+
+
 ## Fontosabb parancsok
 - `npm run dev` / `yarn dev` – fejlesztői szerver indítása
 - `npm run build` / `yarn build` – production build
