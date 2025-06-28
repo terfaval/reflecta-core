@@ -114,8 +114,14 @@ async def conversation_new(payload: ConversationRequest):
     if not profile_name:
         raise HTTPException(status_code=400, detail="Hiányzik a profilnév")
 
-    if profile_name not in valid_profiles and not profile_exists(profile_name):
-        raise HTTPException(status_code=400, detail="Ismeretlen profil.")
+    if profile_name not in valid_profiles:
+        try:
+            if not profile_exists(profile_name):
+                raise HTTPException(status_code=400, detail="Ismeretlen profil.")
+        except Exception as e:
+            logging.error(f"[conversation/new] Profil ellenőrzése sikertelen: {e}")
+            raise HTTPException(status_code=500, detail="Nem sikerült a profil ellenőrzése.")
+
 
     try:
         conv_id, session = create_conversation_and_session(payload.user_id, profile_name)
