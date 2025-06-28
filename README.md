@@ -54,6 +54,7 @@ uvicorn backend.main:app --reload
   - `main.py`
   - `memory_prompt_utils.py`
   - `memory_summary.py`
+    `ping.py`
   - `profile_from_survey.py`
   - `profile_handler.py`
   - `profile_list.py`
