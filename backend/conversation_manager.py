@@ -36,6 +36,8 @@ def get_or_create_conversation(user_id: str, profile: str) -> Tuple[Dict[str, An
     if existing:
         logging.info("[conversation] Meglévő beszélgetés újrahasználva")
         return existing, False
+    else:
+        logging.info("[conversation] Nincs meglévő beszélgetés, új készül")
 
     now = datetime.now(timezone.utc).isoformat()
     created = insert_single(

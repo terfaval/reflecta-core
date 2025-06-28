@@ -33,12 +33,20 @@ supabase: Client = _init_supabase()
 # ======= QUERY UTILITIES =======
 
 def _execute(result: Any) -> Any:
-    """Return data or raise an error based on the Supabase response object."""
+    """Return data or ``None`` based on the Supabase response object.
+
+    The Supabase client returns ``None`` when ``maybe_single()`` does not find
+    a matching record.  This should not be treated as an error so callers can
+    handle the "no row" case themselves.
+    """
     if result is None:
-        raise RuntimeError("Supabase client returned no result")
+        logging.debug("[supabase] Query executed, no data returned")
+        return None
+
     if hasattr(result, "error") and result.error:
         raise RuntimeError(result.error.message)
-    return result.data
+
+    return getattr(result, "data", None)
 
 def safe_call(call: Callable[[], Any], *, context: str = "safe_call") -> Any:
     """Execute a query callable and raise ``HTTPException`` on failure."""
