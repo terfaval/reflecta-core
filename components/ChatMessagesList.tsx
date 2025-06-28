@@ -50,6 +50,7 @@ export function ChatMessagesList({
     <div
       className="reflecta-messages"
       ref={messagesRef}
+      data-session-id={sessionId || undefined}
       style={{ flex: 1, overflowY: 'auto', padding: '1rem', position: 'relative' }}
     >
       {loadError && !entries.length ? (
@@ -67,10 +68,20 @@ export function ChatMessagesList({
           aiColor={currentStyle['--ai-color'] || '#FFB347'}
         />
       ) : entries.length === 0 && sessionIsFresh ? (
-        <StartingPromptDisplay
-          prompt={startingPrompt}
-          color={currentStyle['--user-color']}
-        />
+        <div style={{ textAlign: 'center' }}>
+          <StartingPromptDisplay
+            prompt={startingPrompt}
+            color={currentStyle['--user-color']}
+          />
+          {startingPrompt && (
+            <button
+              style={{ marginTop: '4px' }}
+              onClick={() => onSelectPrompt(startingPrompt)}
+            >
+              Küldés
+            </button>
+          )}
+        </div>
       ) : (
         entries.map((entry, index) => (
           <div key={entry.id} className={`reflecta-message ${entry.role}`}>

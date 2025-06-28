@@ -5,9 +5,6 @@ import { useRouter } from "next/router";
 import { profileStyles } from "../styles/profileStyles";
 import UserErrorDisplay from "../components/UserErrorDisplay";
 import SpiralLoader from "../components/SpiralLoader";
-import ThinkingDots from "../components/ThinkingDots";
-import ScrollToBottomButton from "../components/ScrollToBottomButton";
-import SessionLabelBubble from "../components/SessionLabelBubble";
 import ReflectiveMemoryPanel from "../components/ReflectiveMemoryPanel";
 import ProfileSelectorSidebar, {
   Profile as SidebarProfile,
