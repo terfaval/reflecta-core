@@ -10,6 +10,7 @@ from openai import OpenAI
 from .supabase_client import supabase, _execute
 from .prompt_builder import build_system_prompt
 from .utils import normalize_profile
+from .conversation_arcs import record_conversation_arc
 
 router = APIRouter()
 
@@ -238,6 +239,16 @@ def close_session(session_id: str) -> Dict[str, str]:
         raise HTTPException(500, "Session lezárása sikertelen")
 
     print(f"[session_close] Session closed: {session_id}")
+
+    # Attempt to store a conversation arc for this session.
+    # Errors are logged inside the called function and do not
+    # interrupt the session closure.
+    record_conversation_arc(
+        session_id,
+        arc_type="elmélyülő",
+        depth_estimate="közepes",
+    )
+    
     return {"label": label, "closureEntry": closure_reply}
 
 
