@@ -102,13 +102,19 @@ export default function ChatPage() {
     if (!userId || profile) return;
     const load = async () => {
       try {
-        const data = await apiFetch<{ profile?: string; sessionId?: string }>(
+        const data = await apiFetch<{
+          profile?: string;
+          sessionId?: string;
+          endedAt?: string | null;
+        }>(
           `/api/last-session?userId=${encodeURIComponent(userId)}`,
           { method: "GET" }
         );
-        if (data.profile && data.sessionId) {
+        if (data.profile) {
           setProfile(data.profile);
-          setSessionId(data.sessionId);
+          if (data.sessionId && !data.endedAt) {
+            setSessionId(data.sessionId);
+          }
           return;
         }
       } catch (err) {

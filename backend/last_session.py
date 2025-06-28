@@ -21,7 +21,7 @@ def _fetch_last_session(user_id: str) -> Dict[str, Optional[str]]:
     try:
         sessions = (
             supabase.table("sessions")
-            .select("id, profile")
+            .select("id, profile, ended_at")
             .eq("user_id", user_id)
             .execute()
         )
@@ -31,7 +31,7 @@ def _fetch_last_session(user_id: str) -> Dict[str, Optional[str]]:
 
     ids = [s.get("id") for s in session_rows]
     if not ids:
-        return {"profile": None, "sessionId": None}
+        return {"profile": None, "sessionId": None, "endedAt": None}
 
     try:
         entry_resp = (
@@ -48,10 +48,14 @@ def _fetch_last_session(user_id: str) -> Dict[str, Optional[str]]:
         raise HTTPException(500, f"Failed to load last entry: {exc}") from exc
 
     if not entry:
-        return {"profile": None, "sessionId": None}
-
+        return {"profile": None, "sessionId": None, "endedAt": None}
+    
     match = next((s for s in session_rows if s.get("id") == entry.get("session_id")), None)
-    return {"profile": match.get("profile") if match else None, "sessionId": entry.get("session_id")}
+    return {
+        "profile": match.get("profile") if match else None,
+        "sessionId": entry.get("session_id"),
+        "endedAt": match.get("ended_at") if match else None,
+    }
 
 
 @router.post("/last-session")

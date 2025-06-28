@@ -31,11 +31,15 @@ export default function ProfileSelectorPage() {
     if (!userId) return;
     const load = async () => {
       try {
-        const data = await apiFetch<{ profile?: string; sessionId?: string }>(
+        const data = await apiFetch<{
+          profile?: string;
+          sessionId?: string;
+          endedAt?: string | null;
+        }>(
           `/api/last-session?userId=${encodeURIComponent(userId)}`,
           { method: "GET" }
         );
-        if (data.sessionId) {
+        if (data.sessionId && !data.endedAt) {
           if (data.profile) setProfile(data.profile);
           toast.info("Korábbi beszélgetés folytatódik…");
           router.replace(`/chat?session=${data.sessionId}`);
