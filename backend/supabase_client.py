@@ -30,6 +30,8 @@ supabase: Client = _init_supabase()
 
 def _execute(result: Any) -> Any:
     """Return data or raise an error based on the Supabase response object."""
+    if result is None:
+        raise RuntimeError("Supabase client returned no result")
     if hasattr(result, "error") and result.error:
         raise RuntimeError(result.error.message)
     return result.data
