@@ -6,7 +6,7 @@ from typing import Tuple, Dict, Any
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 import logging
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .supabase_client import supabase, insert_single, _execute, profile_exists
 from .utils import normalize_profile
@@ -17,17 +17,21 @@ class ConversationRequest(BaseModel):
     """Request body for ``/conversation/new``."""
 
     user_id: str
-    profile: str
+    profile: str = Field(alias="profile_name")
+
+    class Config:
+        allow_population_by_field_name = True
 
 
 def _get_or_create_conversation(user_id: str, profile: str) -> Tuple[Dict[str, Any], bool]:
     """Return an existing conversation or create one if missing."""
+    profile = normalize_profile(profile)
     try:
         result = (
             supabase.table("conversations")
             .select("*")
             .eq("user_id", user_id)
-            .ilike("profile", normalize_profile(profile))
+            .ilike("profile", profile)
             .eq("is_archived", False)
             .order("started_at", desc=True)
             .limit(1)
@@ -36,6 +40,7 @@ def _get_or_create_conversation(user_id: str, profile: str) -> Tuple[Dict[str, A
         )
         existing = _execute(result)
     except Exception as exc:
+        logging.exception("[conversation/new] Failed to fetch conversation")
         raise HTTPException(500, f"Failed to fetch conversation: {exc}") from exc
 
     if existing:
@@ -48,9 +53,11 @@ def _get_or_create_conversation(user_id: str, profile: str) -> Tuple[Dict[str, A
         )
         return created, True
     except Exception as exc:
+        logging.exception("[conversation/new] Failed to create conversation")
         raise HTTPException(500, f"Failed to create conversation: {exc}") from exc
 
 def _create_session(user_id: str, profile: str, conversation_id: str) -> Dict[str, Any]:
+    profile = normalize_profile(profile)
     try:
         row = insert_single(
             "sessions",
@@ -59,10 +66,12 @@ def _create_session(user_id: str, profile: str, conversation_id: str) -> Dict[st
         )
         return row
     except Exception as exc:
+        logging.exception("[conversation/new] Failed to create session")
         raise HTTPException(500, f"Failed to create session: {exc}") from exc
 
 
 def create_conversation_and_session(user_id: str, profile: str) -> Tuple[str, Dict[str, Any]]:
+    profile = normalize_profile(profile)
     conversation, created = _get_or_create_conversation(user_id, profile)
     session = _create_session(user_id, profile, conversation["id"])
 
@@ -79,7 +88,7 @@ def create_conversation_and_session(user_id: str, profile: str) -> Tuple[str, Di
             ).execute()
         except Exception:
             # System event logging shouldn't interrupt the flow
-            pass
+            logging.exception("[conversation/new] Failed to log system event")
 
 
     return conversation["id"], session
@@ -120,7 +129,7 @@ async def conversation_new(payload: ConversationRequest):
             if not profile_exists(profile):
                 raise HTTPException(status_code=400, detail="Ismeretlen profil.")
         except Exception as e:
-            logging.error(f"[conversation/new] Profil ellenőrzése sikertelen: {e}")
+            logging.exception("[conversation/new] Profil ellenőrzése sikertelen")
             raise HTTPException(status_code=500, detail="Nem sikerült a profil ellenőrzése.")
 
 
@@ -130,5 +139,5 @@ async def conversation_new(payload: ConversationRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logging.error(f"[conversation/new] Hiba történt: {str(e)}")
+        logging.exception("[conversation/new] Hiba történt")
         return JSONResponse(status_code=500, content={"error": "Nem sikerült új beszélgetést indítani."})
