@@ -119,13 +119,20 @@ async def create_entry(payload: EntryRequest) -> Dict[str, Any]:
 
     if not session_id:
         raise HTTPException(status_code=400, detail="Missing sessionId")
+    
+    if not item.content or not item.content.strip():
+        return {"success": False, "reason": "Üres bejegyzés"}
 
     try:
         profile = _fetch_profile(session_id)
+        if not profile:
+            print(f"[entries] invalid sessionId: {session_id}")
+            return {"success": False, "reason": "Érvénytelen sessionId"}
         _fetch_closing_trigger(profile)  # fetched but not used yet
         _insert_entry(session_id, item)
         _insert_system_events(session_id, item)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        print(f"[entries] error: {exc}")
+        return {"success": False, "reason": "Hiba történt"}
 
     return {"success": True}

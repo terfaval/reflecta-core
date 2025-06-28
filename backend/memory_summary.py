@@ -41,16 +41,16 @@ def _fetch_labels(entry_ids: List[str]) -> List[Dict[str, Any]]:
 @router.get("/memory/summary")
 async def memory_summary(sessionId: str) -> Dict[str, Any]:
     if not sessionId:
-        raise HTTPException(status_code=400, detail="Missing sessionId")
+        return {"labels": [], "status": "no-memory"}
 
-    entry_ids = _fetch_entry_ids(sessionId)
-    labels = _fetch_labels(entry_ids)
-
-    if not entry_ids:
-        # No entries yet for this session -> return empty summary
-        return {"labels": []}
-
-    labels = _fetch_labels(entry_ids)
+    try:
+        entry_ids = _fetch_entry_ids(sessionId)
+        if not entry_ids:
+            return {"labels": [], "status": "no-memory"}
+        labels = _fetch_labels(entry_ids)
+    except Exception as exc:
+        print(f"[memory_summary] error: {exc}")
+        return {"labels": [], "status": "error"}
 
     items = [
         {
@@ -62,4 +62,4 @@ async def memory_summary(sessionId: str) -> Dict[str, Any]:
         for lbl in labels
     ]
 
-    return {"labels": items}
+    return {"labels": items, "status": "ok"}

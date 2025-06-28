@@ -92,13 +92,6 @@ export default function ProfileSelectorPage() {
       >
         Válassz naplóprofilt!
       </h1>
-      {isFirst && (
-        <p
-          style={{ fontFamily: 'Raleway, sans-serif', fontSize: '0.875rem' }}
-        >
-          Úgy tűnik, most jársz itt először. Válassz egy profilt a kezdéshez.
-        </p>
-      )}
       {error && (
         <p style={{ color: 'red', fontFamily: 'Raleway, sans-serif' }}>{error}</p>
       )}

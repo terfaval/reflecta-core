@@ -107,7 +107,7 @@ uvicorn backend.main:app --reload
   - `non-authorized.tsx`
   - `profile-builder.tsx`
   - `select-profile.tsx`
-  - `api/ping.py`
+  - `api/ping.py` *(deprecated)*
 - `styles/` – CSS és egyéb stílusfájlok
   - `profileStyles.ts`
 

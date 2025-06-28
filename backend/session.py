@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from .db import get_client
-from .supabase_client import insert_single
+from .supabase_client import insert_single, profile_exists
 from .conversation_new import _get_or_create_conversation
 
 router = APIRouter()
@@ -36,5 +36,11 @@ async def get_or_create_conversation_and_session(user_id: str, profile: str):
 
 @router.post("/session")
 async def session(userId: str, profile: str):
+    if not userId or not profile:
+        raise HTTPException(status_code=400, detail="Hiányzó adat")
+
+    if not profile_exists(profile):
+        raise HTTPException(status_code=400, detail="Ismeretlen profil.")
+    
     session_data = await get_or_create_conversation_and_session(userId, profile)
     return {"session": session_data}

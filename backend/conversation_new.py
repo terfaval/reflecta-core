@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException
 import logging
 from pydantic import BaseModel
 
-from .supabase_client import supabase, insert_single, _execute
+from .supabase_client import supabase, insert_single, _execute, profile_exists
 
 router = APIRouter()
 
@@ -113,8 +113,8 @@ async def conversation_new(payload: ConversationRequest):
     if not profile_name:
         raise HTTPException(status_code=400, detail="Hiányzik a profilnév")
 
-    if profile_name not in valid_profiles:
-        raise HTTPException(status_code=400, detail="Ismeretlen profilnév")
+    if profile_name not in valid_profiles and not profile_exists(profile_name):
+        raise HTTPException(status_code=400, detail="Ismeretlen profil.")
 
     try:
         conv_id, session = create_conversation_and_session(payload.user_id, profile_name)

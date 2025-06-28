@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from openai import AsyncOpenAI
@@ -62,10 +63,16 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
 
     print(f"[respond] generating reply for session: {session_id}")
 
-    session = await _fetch_session(client, session_id)
+    try:
+        session = await _fetch_session(client, session_id)
+    except HTTPException as exc:
+        if exc.status_code == 404:
+            raise HTTPException(status_code=400, detail="Érvénytelen sessionId")
+        raise
+
     if not session.get("profile"):
         print(f"[respond] session missing profile: {session}")
-        raise HTTPException(status_code=400, detail="Session has no profile")
+        raise HTTPException(status_code=422, detail="Hiányzó profil")
     entries = await _fetch_entries(client, session_id)
 
     last_user = next((e for e in reversed(entries) if e.get("role") == "user"), None)
@@ -75,14 +82,19 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
     user_input = last_user["content"]
 
     strategy = detect_strategy(user_input)
-    system_prompt = build_system_prompt(
-        session["user_id"], session["profile"], user_input, strategy
-    )
+    try:
+        system_prompt = build_system_prompt(
+            session["user_id"], session["profile"], user_input, strategy
+        )
+    except Exception as exc:
+        print(f"[respond] system prompt build failed: {exc}")
+        raise HTTPException(status_code=422, detail="Hiányzó prompt_core vagy profil") from exc
+    
     if not system_prompt or not system_prompt.strip():
         print(
             f"[respond] empty system prompt | profile={session['profile']} | user={session['user_id']}"
         )
-        raise HTTPException(status_code=500, detail="Failed to build system prompt")
+        raise HTTPException(status_code=422, detail="Hiányzó prompt_core vagy profil")
 
     messages = [{"role": "system", "content": system_prompt}]
     for e in entries:
@@ -97,7 +109,7 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
         )
     except Exception as exc:
         print(f"[respond] OpenAI error: {exc}")
-        raise HTTPException(status_code=500, detail="OpenAI request failed") from exc
+        raise HTTPException(status_code=502, detail="OpenAI request failed") from exc
 
     reply = chat.choices[0].message.content or ""
     reply = reply.strip()
@@ -159,11 +171,13 @@ async def respond(payload: RespondRequest, request: Request, user=Depends(role_g
         print(f"[respond] request body: {body}")
     except Exception as exc:
         print(f"[respond] error reading request body: {exc}")
+
     try:
         result = await generate_ai_reply(payload.sessionId)
-    except HTTPException:
-        raise
+    except HTTPException as exc:
+        return JSONResponse(status_code=exc.status_code, content={"error": str(exc.detail)})
     except Exception as exc:
         print(f"[respond] unexpected error: {exc}")
-        raise HTTPException(status_code=500, detail="Unexpected error") from exc
+        return JSONResponse(status_code=500, content={"error": "Nem sikerült választ generálni."})
+    
     return {"content": result["reply"]}

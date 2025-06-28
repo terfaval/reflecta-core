@@ -88,3 +88,19 @@ def get_session(session_id: str) -> Optional[Dict[str, Any]]:
         return _execute(result)
     except Exception as exc:
         raise RuntimeError(f"Failed to fetch session: {exc}") from exc
+    
+
+def profile_exists(profile_name: str) -> bool:
+    """Return ``True`` if the given profile exists in the database."""
+    try:
+        result = (
+            supabase.table("profiles")
+            .select("name")
+            .eq("name", profile_name)
+            .maybe_single()
+            .execute()
+        )
+        return bool(_execute(result))
+    except Exception as exc:  # pragma: no cover - network/database issues
+        print(f"[supabase] profile lookup failed: {exc}")
+        return False    
