@@ -29,6 +29,7 @@ def get_or_create_conversation(user_id: str, profile: str) -> Tuple[Dict[str, An
     existing = safe_call(_query, context="conversation_lookup")
 
     if existing:
+        logging.info("[conversation] Meglévő beszélgetés újrahasználva")
         return existing, False
 
     now = datetime.now(timezone.utc).isoformat()
@@ -36,6 +37,7 @@ def get_or_create_conversation(user_id: str, profile: str) -> Tuple[Dict[str, An
         "conversations",
         {"user_id": user_id, "profile": profile, "started_at": now},
     )
+    logging.info("[conversation] Új beszélgetés létrehozva")
     return created, True
 
 
