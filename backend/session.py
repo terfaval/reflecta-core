@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 
 from .db import get_client
 from .supabase_client import insert_single, profile_exists
@@ -41,6 +42,13 @@ async def session(userId: str, profile: str):
 
     if not profile_exists(profile):
         raise HTTPException(status_code=400, detail="Ismeretlen profil.")
+
+    try:
+        session_data = await get_or_create_conversation_and_session(userId, profile)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        print(f"[session] error: {exc}")
+        return JSONResponse(status_code=500, content={"error": "Nem sikerült sessiont létrehozni."})
     
-    session_data = await get_or_create_conversation_and_session(userId, profile)
     return {"session": session_data}

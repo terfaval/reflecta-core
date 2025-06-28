@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from typing import Tuple, Dict, Any
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 import logging
 from pydantic import BaseModel
 
@@ -119,7 +120,8 @@ async def conversation_new(payload: ConversationRequest):
     try:
         conv_id, session = create_conversation_and_session(payload.user_id, profile_name)
         return {"conversation_id": conv_id, "session_id": session["id"]}
+    except HTTPException:
+        raise
     except Exception as e:
         logging.error(f"[conversation/new] Hiba történt: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Szerverhiba: {str(e)}")
-
+        return JSONResponse(status_code=500, content={"error": "Nem sikerült új beszélgetést indítani."})
