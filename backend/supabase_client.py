@@ -1,4 +1,5 @@
 import os
+import logging
 from typing import Any, Dict, Optional
 
 from .utils import normalize_profile
@@ -6,6 +7,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from supabase import create_client, Client
 from typing import Callable
+from fastapi import HTTPException
 
 # Load the .env.local file from the project root (outside backend/)
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -36,13 +38,13 @@ def _execute(result: Any) -> Any:
         raise RuntimeError(result.error.message)
     return result.data
 
-def safe_call(call: Callable[[], Any]) -> Any:
-    """Execute a query callable and return ``None`` on failure."""
+def safe_call(call: Callable[[], Any], *, context: str = "safe_call") -> Any:
+    """Execute a query callable and raise ``HTTPException`` on failure."""
     try:
         return call()
     except Exception as exc:  # pragma: no cover - network/database issues
-        print(f"[supabase] query failed: {exc}")
-        return None
+        logging.exception(f"[{context}] Hiba a biztonsagos hivas soran")
+        raise HTTPException(status_code=503, detail="Adatkapcsolati hiba") from exc
 
 def insert_single(table: str, row: Dict[str, Any]) -> Dict[str, Any]:
     """Insert a row and ensure exactly one row is returned."""

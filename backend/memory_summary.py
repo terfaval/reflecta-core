@@ -20,7 +20,7 @@ def _fetch_entry_ids(session_id: str) -> List[str]:
         )
         return _execute(result) or []
 
-    rows = safe_call(_query) or []
+    rows = safe_call(_query, context="fetch_entry_ids")
     return [row.get("id") for row in rows if row.get("id")]
 
 def _fetch_labels(entry_ids: List[str]) -> List[Dict[str, Any]]:
@@ -35,7 +35,7 @@ def _fetch_labels(entry_ids: List[str]) -> List[Dict[str, Any]]:
         )
         return _execute(result) or []
 
-    return safe_call(_query) or []
+    return safe_call(_query, context="fetch_labels")
 
 
 @router.get("/memory/summary")

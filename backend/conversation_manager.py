@@ -26,10 +26,7 @@ def get_or_create_conversation(user_id: str, profile: str) -> Tuple[Dict[str, An
         )
         return _execute(result)
 
-    existing = safe_call(_query)
-    if existing is None:
-        logging.error("[conversation] Conversation lookup failed")
-        raise RuntimeError("Database query failed")
+    existing = safe_call(_query, context="conversation_lookup")
 
     if existing:
         return existing, False
