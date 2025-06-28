@@ -45,6 +45,8 @@ uvicorn backend.main:app --reload
   - `chatload.py`
   - `check_profile_access.py`
   - `conversation_new.py`
+  - `conversation_manager.py`
+  - `session_factory.py`
   - `db.py`
   - `description_role_generator.py`
   - `entries.py`

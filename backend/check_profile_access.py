@@ -8,6 +8,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from .supabase_client import supabase, _execute
+from .profile_utils import validate_profile_name
+from .utils import normalize_profile
 
 router = APIRouter()
 
@@ -36,10 +38,11 @@ def _fetch_supabase_user_id(wp_user_id: str) -> Optional[str]:
 def _fetch_allowed_users(profile: str) -> List[str]:
     """Return list of user ids allowed to access the profile."""
 
+    normalized = normalize_profile(profile)
     result = (
         supabase.table("user_profiles")
         .select("user_id")
-        .eq("profile_name", profile)
+        .ilike("profile_name", normalized)
         .execute()
     )
     rows = _execute(result) or []
@@ -57,6 +60,8 @@ async def check_profile_access(
 
     if not wp_user_id or not profile:
         raise HTTPException(status_code=400, detail="Missing userId or profile")
+    
+    profile = validate_profile_name(profile)
 
     try:
         supabase_user_id = _fetch_supabase_user_id(wp_user_id)

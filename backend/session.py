@@ -1,16 +1,19 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
+import logging
 
 from .db import get_client
-from .supabase_client import profile_exists
+from .profile_utils import validate_profile_name
 from .conversation_manager import get_or_create_conversation
 from .session_factory import create_session
-from .utils import normalize_profile
 
 router = APIRouter()
 
 
-async def get_or_create_conversation_and_session(user_id: str, profile: str):
+async def get_or_create_conversation_and_session(
+    user_id: str, profile: str
+) -> tuple[str, dict, str]:
+    """Return conversation_id, session dict and status ('new' or 'existing')."""
     client = get_client()
     conversation, _ = get_or_create_conversation(user_id, profile)
     conversation_id = conversation["id"]
@@ -25,49 +28,43 @@ async def get_or_create_conversation_and_session(user_id: str, profile: str):
         .execute()
     )
     if existing_session:
-        return existing_session
+        return conversation_id, existing_session, "existing"
 
     try:
         new_session = create_session(user_id, profile, conversation_id)
-    except Exception:
-        raise HTTPException(500, "Failed to create session")
-    return new_session
+    except Exception as exc:
+        logging.exception("[session] Failed to create session")
+        raise HTTPException(500, "Failed to create session") from exc
+
+    return conversation_id, new_session, "new"
 
 
 @router.post("/session")
 async def session(userId: str, profile: str):
-    profile = normalize_profile(profile)
-    if not userId or not profile:
+    if not userId:
         raise HTTPException(status_code=400, detail="Hiányzó adat")
 
-    valid_profiles = [
-        "Reflecta",
-        "Solun",
-        "Preceptor",
-        "Akasza",
-        "Éana",
-        "Luma",
-        "Sylva",
-        "Zentó",
-        "Oneiros",
-        "Kairos",
-        "Noe",
-    ]
-
-    normalized_valid = [normalize_profile(p) for p in valid_profiles]
-    if profile not in normalized_valid:
-        try:
-            if not profile_exists(profile):
-                raise HTTPException(status_code=400, detail="Ismeretlen profil.")
-        except Exception:
-            raise HTTPException(status_code=500, detail="Nem sikerült a profil ellenőrzése.")
+    profile = validate_profile_name(profile)
 
     try:
-        session_data = await get_or_create_conversation_and_session(userId, profile)
+        conv_id, session_data, status = await get_or_create_conversation_and_session(
+            userId, profile
+        )
     except HTTPException:
         raise
     except Exception as exc:
-        print(f"[session] error: {exc}")
-        return JSONResponse(status_code=500, content={"error": "Nem sikerült sessiont létrehozni."})
-    
-    return {"session": session_data}
+        logging.exception("[session] error")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Nem sikerült sessiont létrehozni."},
+        )
+
+    if not session_data or not session_data.get("id"):
+        logging.exception("[session] Missing session id")
+        raise HTTPException(500, "Hiányzó session azonosító")
+
+    return {
+        "conversation_id": conv_id,
+        "session_id": session_data["id"],
+        "status": status,
+    }

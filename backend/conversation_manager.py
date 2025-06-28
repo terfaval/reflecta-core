@@ -51,6 +51,10 @@ def create_conversation_and_session(
     from .session_factory import create_session  # local import to avoid circular deps
 
     session = create_session(user_id, profile, conversation["id"])
+    if not session or not session.get("id"):
+        logging.exception("[conversation] Missing session id after creation")
+        raise RuntimeError("Failed to create session: missing id")
+
 
     if created:
         now = datetime.now(timezone.utc).isoformat()
