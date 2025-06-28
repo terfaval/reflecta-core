@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 from .utils import normalize_profile
 from dotenv import load_dotenv
@@ -111,3 +111,34 @@ def profile_exists(profile: str) -> bool:
     except Exception as exc:  # pragma: no cover - network/database issues
         print(f"[supabase] profile lookup failed: {exc}")
         return False
+
+
+_profile_cache: Optional[set[str]] = None
+
+
+def _load_profile_cache() -> set[str]:
+    """Return a set of normalized profile names from all sources."""
+    names: List[str] = []
+    result = supabase.table("profiles").select("name").execute()
+    rows = _execute(result) or []
+    names.extend([normalize_profile(r.get("name")) for r in rows if r.get("name")])
+    result = supabase.table("custom_profiles").select("name").execute()
+    rows = _execute(result) or []
+    names.extend([normalize_profile(r.get("name")) for r in rows if r.get("name")])
+    return {n for n in names if n}
+
+
+def is_known_profile(name: str) -> bool:
+    """Return ``True`` if the profile name exists in ``profiles`` or ``custom_profiles``."""
+    normalized = normalize_profile(name)
+    if not normalized:
+        return False
+
+    global _profile_cache
+    if _profile_cache is None:
+        try:
+            _profile_cache = _load_profile_cache()
+        except Exception as exc:  # pragma: no cover - network/database issues
+            print(f"[supabase] profile cache init failed: {exc}")
+            _profile_cache = set()
+    return normalized in _profile_cache

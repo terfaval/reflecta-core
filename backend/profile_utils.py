@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from fastapi import HTTPException
 
-from .supabase_client import profile_exists
+from .supabase_client import is_known_profile
 from .utils import normalize_profile
 
 VALID_PROFILES = [
@@ -34,7 +34,7 @@ def validate_profile_name(name: str) -> str:
         return normalized
 
     try:
-        if not profile_exists(normalized):
+        if not is_known_profile(normalized):
             raise HTTPException(status_code=400, detail="Ismeretlen profil.")
     except HTTPException:
         raise
