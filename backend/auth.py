@@ -1,3 +1,8 @@
+"""User authentication helpers and role utilities.
+
+Függ tőle: supabase_client.py
+"""
+
 from fastapi import Depends, HTTPException, status, Header
 from typing import Optional
 

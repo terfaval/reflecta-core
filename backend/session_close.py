@@ -1,3 +1,8 @@
+"""Close sessions and record final reflections.
+
+Függ tőle: conversation_arcs.py
+"""
+
 from __future__ import annotations
 
 import os
@@ -248,7 +253,7 @@ def close_session(session_id: str) -> Dict[str, str]:
         arc_type="elmélyülő",
         depth_estimate="közepes",
     )
-    
+
     return {"label": label, "closureEntry": closure_reply}
 
 

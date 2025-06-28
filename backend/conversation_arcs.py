@@ -1,3 +1,8 @@
+"""Record reflection arcs for later analysis.
+
+Hívja: session_close.py
+"""
+
 from __future__ import annotations
 
 import logging

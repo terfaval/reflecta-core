@@ -1,3 +1,5 @@
+"""Utility endpoint to check for previous conversations."""
+
 from __future__ import annotations
 
 from typing import Dict, Optional

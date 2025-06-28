@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Heuristic strategy detection used by the prompt builder."""
+
+from __future__ import annotations
 
 import re
 from typing import Dict, Iterable

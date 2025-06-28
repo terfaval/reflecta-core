@@ -1,3 +1,5 @@
+"""Supabase client initialization shared across modules."""
+
 import os
 from supabase import create_client, Client
 

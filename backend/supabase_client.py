@@ -1,3 +1,5 @@
+"""Wrapper around the Supabase Python client with helpers."""
+
 import os
 import logging
 from typing import Any, Dict, Optional, List

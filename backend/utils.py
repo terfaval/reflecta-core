@@ -1,3 +1,5 @@
+"""Shared helper utilities across the backend."""
+
 from __future__ import annotations
 
 

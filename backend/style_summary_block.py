@@ -1,3 +1,5 @@
+"""Builds a style summary text block for system prompts."""
+
 from __future__ import annotations
 from typing import Dict, List
 

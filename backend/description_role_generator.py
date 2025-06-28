@@ -1,3 +1,5 @@
+"""Generate default description and role text for profiles."""
+
 from __future__ import annotations
 
 

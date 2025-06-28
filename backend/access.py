@@ -1,3 +1,5 @@
+"""Feature access helpers used by auth and router modules."""
+
 from typing import List, Callable, Dict
 
 from fastapi import Depends, Header, HTTPException, status

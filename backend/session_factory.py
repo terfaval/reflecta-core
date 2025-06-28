@@ -1,3 +1,5 @@
+"""Helper functions for creating session records."""
+
 from __future__ import annotations
 
 import logging

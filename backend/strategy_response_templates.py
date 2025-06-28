@@ -1,3 +1,5 @@
+"""Canned templates for coach strategy responses."""
+
 from __future__ import annotations
 from typing import Dict, Any, Optional
 

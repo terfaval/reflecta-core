@@ -1,3 +1,5 @@
+"""Fetch and manage conversation entries for sessions."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional

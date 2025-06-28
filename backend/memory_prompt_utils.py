@@ -1,6 +1,9 @@
-from __future__ import annotations
+"""Utilities for generating user memory prompts.
 
-"""Utilities for generating a follow-up user prompt based on conversation history."""
+Hívja: memory_summary.py
+"""
+
+from __future__ import annotations
 
 from typing import Any, Dict, List
 

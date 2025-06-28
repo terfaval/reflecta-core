@@ -1,3 +1,5 @@
+"""Generate natural language summaries of session history."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List

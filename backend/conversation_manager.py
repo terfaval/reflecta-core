@@ -1,3 +1,8 @@
+"""Manage conversations and related session creation.
+
+Függ tőle: session_factory.py
+"""
+
 from __future__ import annotations
 
 import logging

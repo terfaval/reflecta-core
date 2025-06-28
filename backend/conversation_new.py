@@ -1,3 +1,8 @@
+"""API endpoint for starting a new conversation.
+
+Hívja: frontend POST /api/conversation/new
+"""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException

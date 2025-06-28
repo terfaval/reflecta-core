@@ -1,3 +1,5 @@
+"""Helper utilities for validating and normalizing profiles."""
+
 from __future__ import annotations
 
 import logging

@@ -1,3 +1,5 @@
+"""Mapping of coaching strategies to prompt phrases."""
+
 from __future__ import annotations
 from typing import Dict, Optional
 

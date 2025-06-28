@@ -1,3 +1,5 @@
+"""Construct system prompts from profile data."""
+
 from __future__ import annotations
 from typing import List, Dict, Any, Optional
 
@@ -55,7 +57,7 @@ def build_system_prompt(
 ) -> str:
     profile_data = fetch_profile(profile)
     metadata = fetch_profile_metadata(profile)
-    
+
     if not strategy:
         strategies = detect_top_strategies(user_input, session_position, top_n=2)
         strategy = strategies[0]

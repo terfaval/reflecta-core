@@ -1,3 +1,5 @@
+"""Endpoints for retrieving and listing sessions."""
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 import logging

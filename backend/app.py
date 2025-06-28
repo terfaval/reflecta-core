@@ -1,3 +1,9 @@
+"""FastAPI application setup and router registration.
+
+Hívja: main.py
+Függ tőle: session.py, respond.py
+"""
+
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 

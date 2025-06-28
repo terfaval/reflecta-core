@@ -1,3 +1,5 @@
+"""Create Reflecta profiles from questionnaire answers."""
+
 from __future__ import annotations
 
 from typing import List

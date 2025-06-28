@@ -1,3 +1,5 @@
+"""Fetch the current user's profile and role."""
+
 from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException

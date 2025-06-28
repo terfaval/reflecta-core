@@ -1,3 +1,5 @@
+"""Retrieve the most recent session for a user."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, Optional

@@ -1,3 +1,5 @@
+"""Endpoint for creating Reflecta user accounts."""
+
 from __future__ import annotations
 
 from uuid import uuid4

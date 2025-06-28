@@ -1,3 +1,5 @@
+"""Handlers for reading and updating user records."""
+
 from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, status
