@@ -252,13 +252,13 @@ export default function ChatPage() {
       return;
     }
     // eslint-disable-next-line no-console
-    console.log('[switch profile]', { userId, profile: name });
+    console.log('[switch profile]', { userId, profile_name: name });
     try {
       const data = await apiFetch<{ conversation_id: string; session_id: string }>(
         "/api/conversation/new",
         {
           method: "POST",
-          body: JSON.stringify({ user_id: userId, profile: name }),
+          body: JSON.stringify({ user_id: userId, profile_name: name }),
         },
       );
       if (data.conversation_id && data.session_id) {

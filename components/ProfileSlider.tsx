@@ -271,7 +271,7 @@ arr.push(profiles[profiles.length - 1]);
     
     console.log('📤 Sending request to /api/conversation/new:', {
       user_id: userId,
-      profile: p.name,
+      profile_name: p.name,
     });
 
     try {
@@ -280,7 +280,7 @@ arr.push(profiles[profiles.length - 1]);
         session_id: string;
       }>("/api/conversation/new", {
         method: "POST",
-        body: JSON.stringify({ user_id: userId, profile: p.name }),
+        body: JSON.stringify({ user_id: userId, profile_name: p.name }),
       });
 
       console.log('✅ Got response from backend:', data);
