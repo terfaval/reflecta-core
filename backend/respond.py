@@ -16,6 +16,7 @@ from .auth import Role, feature_enabled, role_guard
 from .db import get_client
 from .prompt_builder import build_system_prompt
 from .strategy_detector import detect_strategy
+from .profile_recommender import recommend_profile_switch, update_session_profile
 
 
 router = APIRouter()
@@ -88,7 +89,9 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
         )
     except Exception as exc:
         print(f"[respond] system prompt build failed: {exc}")
-        raise HTTPException(status_code=422, detail="Hiányzó prompt_core vagy profil") from exc
+        raise HTTPException(
+            status_code=422, detail="Hiányzó prompt_core vagy profil"
+        ) from exc
     
     if not system_prompt or not system_prompt.strip():
         print(
@@ -153,17 +156,35 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
     except Exception:
         pass
 
+    recommended = recommend_profile_switch(reply, session["profile"])
+    if recommended:
+        update_session_profile(session_id, recommended)
+        try:
+            client.table("system_events").insert(
+                {
+                    "session_id": session_id,
+                    "event_type": "profile_switch",
+                    "note": recommended,
+                    "timestamp": now,
+                }
+            ).execute()
+        except Exception:
+            pass
+
     return {
         "reply": reply,
         "strategy": strategy,
         "labels": [],
         "system_prompt": system_prompt,
         "generated_at": now,
+        "recommended_profile": recommended,
     }
 
 
 @router.post("/respond")
-async def respond(payload: RespondRequest, request: Request, user=Depends(role_guard(Role.BASIC))):
+async def respond(
+    payload: RespondRequest, request: Request, user=Depends(role_guard(Role.BASIC))
+):
     if not feature_enabled("advanced_ai", user["role"]):
         raise HTTPException(status_code=403, detail="Feature not available")
     try:
@@ -175,9 +196,16 @@ async def respond(payload: RespondRequest, request: Request, user=Depends(role_g
     try:
         result = await generate_ai_reply(payload.sessionId)
     except HTTPException as exc:
-        return JSONResponse(status_code=exc.status_code, content={"error": str(exc.detail)})
+        return JSONResponse(
+            status_code=exc.status_code, content={"error": str(exc.detail)}
+        )
     except Exception as exc:
         print(f"[respond] unexpected error: {exc}")
-        return JSONResponse(status_code=500, content={"error": "Nem sikerült választ generálni."})
-    
-    return {"content": result["reply"]}
+        return JSONResponse(
+            status_code=500, content={"error": "Nem sikerült választ generálni."}
+        )
+
+    return {
+        "content": result["reply"],
+        "recommendedProfile": result.get("recommended_profile"),
+    }
