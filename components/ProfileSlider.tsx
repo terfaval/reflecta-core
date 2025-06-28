@@ -290,9 +290,6 @@ arr.push(profiles[profiles.length - 1]);
 
   return (
     <>
-    {hasPersonal && (
-      <h2 className={styles.sectionLabel}>Személyes profiljaid</h2>
-    )}
     <div className={styles.container} ref={containerRef}>
       {enableNav && (
         <button

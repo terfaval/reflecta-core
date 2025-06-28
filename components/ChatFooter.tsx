@@ -12,6 +12,7 @@ interface ChatFooterProps {
   handleSend: (override?: string) => void;
   closingTrigger: string;
   sessionId: string | null;
+  setSessionId: (id: string | null) => void;
   isClosing: boolean;
   assistantReplyCount: number;
   setIsClosing: (v: boolean) => void;
@@ -26,6 +27,7 @@ export function ChatFooter({
   handleSend,
   closingTrigger,
   sessionId,
+  setSessionId,
   isClosing,
   assistantReplyCount,
   setIsClosing,
@@ -92,6 +94,7 @@ export function ChatFooter({
                   toast('A lezárás nem sikerült. Kérlek próbáld újra később.');
                 }
                 setIsClosing(false);
+                setSessionId(null);
               }}
               disabled={assistantReplyCount < 3 || isClosing}
               className={`reflecta-close-animated ${buttonStyles.closeAnimated}`}

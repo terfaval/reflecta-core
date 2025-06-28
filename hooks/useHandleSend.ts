@@ -13,22 +13,28 @@ interface Entry {
 
 interface UseHandleSendProps {
   sessionId: string | null;
+  userId: string | null;
+  profile: string | undefined;
   closingTrigger: string;
   setMessage: (value: string) => void;
   setEntries: (fn: (prev: Entry[]) => Entry[]) => void;
   setLoading: (v: boolean) => void;
   setSessionIsFresh: (v: boolean) => void;
   setIsClosing: (v: boolean) => void;
+  setSessionId: (id: string | null) => void;
 }
 
 export function useHandleSend({
   sessionId,
+  userId,
+  profile,
   closingTrigger,
   setMessage,
   setEntries,
   setLoading,
   setSessionIsFresh,
   setIsClosing,
+  setSessionId,
 }: UseHandleSendProps) {
   const toast = useToast();
   const handleSend = useCallback(async (text?: string) => {
@@ -38,10 +44,32 @@ export function useHandleSend({
       console.warn('Hiányzó üzenet – a küldés nem történt meg.');
       return;
     }
-    if (!sessionId) {
-      // eslint-disable-next-line no-console
-      console.warn('Hiányzó sessionId – a küldés nem történt meg.');
-      return;
+    let currentSessionId = sessionId;
+    if (!currentSessionId) {
+      if (!userId || !profile) {
+        // eslint-disable-next-line no-console
+        console.warn('Hiányzó sessionId és user adat – a küldés nem történt meg.');
+        return;
+      }
+      setLoading(true);
+      try {
+        const data = await apiFetch<{ session?: { id: string } }>('/api/session', {
+          method: 'POST',
+          body: JSON.stringify({ userId, profile }),
+        });
+        if (!data?.session?.id) {
+          toast('Nem sikerült létrehozni a munkamenetet.');
+          setLoading(false);
+          return;
+        }
+        currentSessionId = data.session.id;
+        setSessionId(currentSessionId);
+      } catch (err) {
+        console.error('[session create]', err);
+        toast('Nem sikerült létrehozni a munkamenetet.');
+        setLoading(false);
+        return;
+      }
     }
     const isTrigger = message === closingTrigger.trim();
 
@@ -55,7 +83,7 @@ export function useHandleSend({
           '/api/session/close',
           {
             method: 'POST',
-            body: JSON.stringify({ sessionId }),
+            body: JSON.stringify({ sessionId: currentSessionId }),
           }
         );
         if (data?.closureEntry && data?.label) {
@@ -80,11 +108,13 @@ export function useHandleSend({
         setIsClosing(false);
         setMessage('');
         setLoading(false);
+        setSessionId(null);
         return;
       }
       setIsClosing(false);
       setMessage('');
       setLoading(false);
+      setSessionId(null);
       return;
     }
 
@@ -104,7 +134,7 @@ export function useHandleSend({
     try {
       await apiFetch('/api/entries', {
         method: 'POST',
-        body: JSON.stringify({ sessionId, entry: userEntry }),
+        body: JSON.stringify({ sessionId: currentSessionId, entry: userEntry }),
       });
     } catch (err) {
       console.error('[entries]', err);
@@ -125,7 +155,7 @@ export function useHandleSend({
     try {
       const resp = await apiFetch<{ content?: string }>('/api/respond', {
         method: 'POST',
-        body: JSON.stringify({ sessionId }),
+        body: JSON.stringify({ sessionId: currentSessionId }),
       });
 
       const reply = resp?.content ?? '';
@@ -145,7 +175,7 @@ export function useHandleSend({
       return;
     }
     setLoading(false);
-  }, [sessionId, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing, toast]);
+  }, [sessionId, userId, profile, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing, setSessionId, toast]);
 
   useEffect(() => {
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;

@@ -214,12 +214,15 @@ export default function ChatPage() {
 
   const handleSend = useHandleSend({
     sessionId,
+    userId,
+    profile,
     closingTrigger,
     setMessage,
     setEntries,
     setLoading,
     setSessionIsFresh,
     setIsClosing,
+    setSessionId,
   });
 
   useEffect(() => {
@@ -414,6 +417,7 @@ export default function ChatPage() {
           handleSend={handleSend}
           closingTrigger={closingTrigger}
           sessionId={sessionId}
+          setSessionId={setSessionId}
           isClosing={isClosing}
           assistantReplyCount={assistantReplyCount}
           setIsClosing={setIsClosing}
