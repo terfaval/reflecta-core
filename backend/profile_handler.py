@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
+import logging
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -11,7 +12,18 @@ from .supabase_client import supabase, _execute
 from .utils import normalize_profile
 
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
+
+STYLE_FIELDS = [
+    "style_pace",
+    "style_tone",
+    "style_rhythm",
+    "style_structure",
+    "style_visuality",
+    "style_directiveness",
+    "style_absorption_style",
+]
 
 
 class ProfileRequest(BaseModel):
@@ -49,13 +61,31 @@ def _fetch_profile(profile: str) -> Dict[str, Any] | None:
     return _execute(result)
 
 
+def _fetch_custom_profile(profile: str, user_id: str) -> Dict[str, Any] | None:
+    """Return custom profile data for the user or ``None``."""
+
+    normalized = normalize_profile(profile)
+    result = (
+        supabase.table("custom_profiles")
+        .select("name, prompt_core, style_data")
+        .eq("user_id", user_id)
+        .ilike("name", normalized)
+        .maybe_single()
+        .execute()
+    )
+    return _execute(result)
+
+
 def _fetch_metadata(profile: str) -> Dict[str, Any] | None:
     """Return profile metadata or ``None`` if not found."""
 
     normalized = normalize_profile(profile)
     result = (
         supabase.table("profile_metadata")
-        .select("closing_trigger")
+        .select(
+            "closing_trigger, "
+            + ", ".join(STYLE_FIELDS)
+        )
         .ilike("profile", normalized)
         .maybe_single()
         .execute()
@@ -97,16 +127,31 @@ async def profile_handler(payload: ProfileRequest) -> Dict[str, Any]:
 
     try:
         profile = _fetch_profile(name)
+        source = "profiles" if profile else None
+        if not profile:
+            profile = _fetch_custom_profile(name, user_id)
+            source = "custom_profiles" if profile else None
+
         metadata = _fetch_metadata(name)
         prompts = _fetch_prompts(name)
     except Exception as exc:  # pragma: no cover - network/database issue
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
-    if not profile or not metadata:
-        raise HTTPException(status_code=404, detail="Profile or metadata not found")
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    if source:
+        logger.info("Loaded profile '%s' from %s", name, source)
+
+    style_data = {
+        key: metadata.get(key)
+        for key in STYLE_FIELDS
+        if metadata and metadata.get(key) is not None
+    }
 
     return {
         **profile,
-        "closing_trigger": metadata.get("closing_trigger"),
+        "closing_trigger": metadata.get("closing_trigger") if metadata else None,
         "starting_prompts": prompts or [],
+        "style_data": style_data,
     }
