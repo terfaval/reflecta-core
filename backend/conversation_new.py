@@ -8,7 +8,13 @@ from fastapi.responses import JSONResponse
 import logging
 from pydantic import BaseModel, Field
 
-from .supabase_client import supabase, insert_single, _execute, profile_exists
+from .supabase_client import (
+    supabase,
+    insert_single,
+    _execute,
+    profile_exists,
+    safe_call,
+)
 from .utils import normalize_profile
 
 router = APIRouter()
@@ -26,7 +32,8 @@ class ConversationRequest(BaseModel):
 def _get_or_create_conversation(user_id: str, profile: str) -> Tuple[Dict[str, Any], bool]:
     """Return an existing conversation or create one if missing."""
     profile = normalize_profile(profile)
-    try:
+    
+    def _query():
         result = (
             supabase.table("conversations")
             .select("*")
@@ -38,13 +45,16 @@ def _get_or_create_conversation(user_id: str, profile: str) -> Tuple[Dict[str, A
             .maybe_single()
             .execute()
         )
-        existing = _execute(result)
-    except Exception as exc:
-        logging.exception("[conversation/new] Failed to fetch conversation")
-        raise HTTPException(500, f"Failed to fetch conversation: {exc}") from exc
+        return _execute(result)
+
+    existing = safe_call(_query)
+    if existing is None:
+        logging.error("[conversation/new] Conversation lookup failed")
+        raise HTTPException(status_code=503, detail="Database query failed")
 
     if existing:
         return existing, False
+    
     try:
         now = datetime.now(timezone.utc).isoformat()
         created = insert_single(
@@ -70,7 +80,9 @@ def _create_session(user_id: str, profile: str, conversation_id: str) -> Dict[st
         raise HTTPException(500, f"Failed to create session: {exc}") from exc
 
 
-def create_conversation_and_session(user_id: str, profile: str) -> Tuple[str, Dict[str, Any]]:
+def create_conversation_and_session(
+    user_id: str, profile: str
+) -> Tuple[str, Dict[str, Any], bool]:
     profile = normalize_profile(profile)
     conversation, created = _get_or_create_conversation(user_id, profile)
     session = _create_session(user_id, profile, conversation["id"])
@@ -90,8 +102,7 @@ def create_conversation_and_session(user_id: str, profile: str) -> Tuple[str, Di
             # System event logging shouldn't interrupt the flow
             logging.exception("[conversation/new] Failed to log system event")
 
-
-    return conversation["id"], session
+    return conversation["id"], session, created
 
 
 @router.post("/conversation/new")
@@ -134,10 +145,20 @@ async def conversation_new(payload: ConversationRequest):
 
 
     try:
-        conv_id, session = create_conversation_and_session(payload.user_id, profile)
-        return {"conversation_id": conv_id, "session_id": session["id"]}
+        conv_id, session, created = create_conversation_and_session(
+            payload.user_id, profile
+        )
+        status = "new" if created else "existing"
+        return {
+            "conversation_id": conv_id,
+            "session_id": session["id"],
+            "status": status,
+        }
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         logging.exception("[conversation/new] Hiba történt")
-        return JSONResponse(status_code=500, content={"error": "Nem sikerült új beszélgetést indítani."})
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Nem sikerült új beszélgetést indítani."},
+        )
