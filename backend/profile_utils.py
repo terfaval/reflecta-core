@@ -5,8 +5,9 @@ from __future__ import annotations
 import logging
 from fastapi import HTTPException
 
-from .supabase_client import is_known_profile
+from .supabase_client import supabase, _execute, is_known_profile
 from .utils import normalize_profile
+from typing import List
 
 VALID_PROFILES = [
     "Reflecta",
@@ -21,6 +22,21 @@ VALID_PROFILES = [
     "Kairos",
     "Noe",
 ]
+
+# Profiles that are available for every user without explicit permission
+BASIC_PROFILES: List[str] = [
+    "Reflecta",
+    "Luma",
+    "Zentó",
+    "Éana",
+    "Sylva",
+    "Kairos",
+    "Noe",
+    "Akasza",
+    "Oneiros",
+]
+
+NORMALIZED_BASIC_PROFILES = [normalize_profile(p) for p in BASIC_PROFILES]
 
 NORMALIZED_VALID_PROFILES = [normalize_profile(p) for p in VALID_PROFILES]
 
@@ -45,3 +61,36 @@ def validate_profile_name(name: str) -> str:
         raise HTTPException(status_code=500, detail="Nem sikerült a profil ellenőrzése.")
 
     return normalized
+
+
+def is_valid_profile_for_user(profile_name: str, user_id: str) -> bool:
+    """Return ``True`` if the profile is available for the user."""
+
+    normalized = normalize_profile(profile_name)
+    if normalized in NORMALIZED_BASIC_PROFILES:
+        return True
+
+    result = (
+        supabase.table("user_profiles")
+        .select("id")
+        .eq("user_id", user_id)
+        .ilike("profile_name", normalized)
+        .maybe_single()
+        .execute()
+    )
+    row = _execute(result)
+    return row is not None
+
+
+def list_available_profiles(user_id: str) -> List[str]:
+    """Return list of profile names that the user can access."""
+
+    result = (
+        supabase.table("user_profiles")
+        .select("profile_name")
+        .eq("user_id", user_id)
+        .execute()
+    )
+    rows = _execute(result) or []
+    names = [r.get("profile_name") for r in rows if r.get("profile_name")]
+    return BASIC_PROFILES + names

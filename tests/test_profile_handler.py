@@ -10,77 +10,48 @@ os.environ.setdefault("OPENAI_API_KEY", "dummy")
 
 from backend.app import app
 
-
 client = TestClient(app)
 
 
-def test_profile_handler_fallback_to_custom():
-    with patch("backend.profile_handler._fetch_access_list", return_value=[]), patch(
-        "backend.profile_handler._fetch_profile", return_value=None
+def test_profile_handler_success_post():
+    with patch("backend.profile_handler.is_valid_profile_for_user", return_value=True), patch(
+        "backend.profile_handler._fetch_profile", return_value={"name": "Reflecta", "prompt_core": "core"}
     ), patch(
-        "backend.profile_handler._fetch_custom_profile",
-        return_value={"name": "Custom", "prompt_core": "core"},
-    ), patch(
-        "backend.profile_handler._fetch_metadata",
-        return_value={"closing_trigger": "bye", "style_pace": "slow"},
-    ), patch(
-        "backend.profile_handler._fetch_prompts", return_value=[]
+        "backend.profile_handler._fetch_metadata", return_value={"closing_trigger": "bye", "style_pace": "slow"}
     ):
-        resp = client.post("/api/profile", json={"name": "Custom", "userId": "u1"})
+        resp = client.post("/api/profile", json={"name": "Reflecta", "userId": "u1"})
     assert resp.status_code == 200
     data = resp.json()
-    assert data["name"] == "Custom"
+    assert data["name"] == "Reflecta"
     assert data["prompt_core"] == "core"
     assert data["style_data"]["style_pace"] == "slow"
 
 
-def test_profile_handler_get_fallback_to_custom():
-    with patch("backend.profile_handler._fetch_access_list", return_value=[]), patch(
+def test_profile_handler_not_found_post():
+    with patch("backend.profile_handler.is_valid_profile_for_user", return_value=True), patch(
         "backend.profile_handler._fetch_profile", return_value=None
     ), patch(
-        "backend.profile_handler._fetch_custom_profile",
-        return_value={"name": "Custom", "prompt_core": "core"},
-    ), patch(
-        "backend.profile_handler._fetch_metadata",
-        return_value={"closing_trigger": "bye", "style_pace": "slow"},
-    ), patch(
-        "backend.profile_handler._fetch_prompts", return_value=[]
-    ):
-        resp = client.get("/api/profile/Custom", params={"userId": "u1"})
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["name"] == "Custom"
-    assert data["prompt_core"] == "core"
-    assert data["style_data"]["style_pace"] == "slow"
-
-
-def test_profile_handler_not_found():
-    with patch("backend.profile_handler._fetch_access_list", return_value=[]), patch(
-        "backend.profile_handler._fetch_profile", return_value=None
-    ), patch("backend.profile_handler._fetch_custom_profile", return_value=None), patch(
         "backend.profile_handler._fetch_metadata", return_value=None
-    ), patch(
-        "backend.profile_handler._fetch_prompts", return_value=[]
     ):
         resp = client.post("/api/profile", json={"name": "Missing", "userId": "u1"})
     assert resp.status_code == 404
 
 
-def test_profile_handler_get_requires_user_id_for_custom():
-    with patch("backend.profile_handler._fetch_access_list", return_value=[]), patch(
-        "backend.profile_handler._fetch_profile", return_value=None
-    ):
-        resp = client.get("/api/profile/Custom")
-    assert resp.status_code == 400
+def test_profile_handler_access_denied():
+    with patch("backend.profile_handler.is_valid_profile_for_user", return_value=False):
+        resp = client.post("/api/profile", json={"name": "Secret", "userId": "u1"})
+    assert resp.status_code == 403
 
 
-def test_profile_handler_get_not_found():
-    with patch("backend.profile_handler._fetch_access_list", return_value=[]), patch(
-        "backend.profile_handler._fetch_profile", return_value=None
-    ), patch("backend.profile_handler._fetch_custom_profile", return_value=None), patch(
-        "backend.profile_handler._fetch_metadata", return_value=None
+def test_profile_handler_get_success():
+    with patch("backend.profile_handler.is_valid_profile_for_user", return_value=True), patch(
+        "backend.profile_handler._fetch_profile", return_value={"name": "Reflecta", "prompt_core": "core"}
     ), patch(
-        "backend.profile_handler._fetch_prompts", return_value=[]
+        "backend.profile_handler._fetch_metadata", return_value={"closing_trigger": "bye", "style_pace": "slow"}
     ):
-        resp = client.get("/api/profile/Missing", params={"userId": "u1"})
-    assert resp.status_code == 404
+        resp = client.get("/api/profile/Reflecta", params={"userId": "u1"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["name"] == "Reflecta"
+    assert data["prompt_core"] == "core"
+    assert data["style_data"]["style_pace"] == "slow"

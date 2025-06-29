@@ -156,11 +156,6 @@ uvicorn backend.main:app --reload
 - recommendation_id: INT → profile_recommendations(id)
 - + extra mezők
 
-### profile_starting_prompts
-- id: SERIAL (PK)
-- profile: TEXT
-- + extra mezők
-
 ### conversations
 - id: UUID (PK)
 - user_id: UUID → users(id)

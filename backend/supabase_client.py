@@ -157,14 +157,11 @@ def _load_profile_cache() -> set[str]:
     result = supabase.table("profiles").select("name").execute()
     rows = _execute(result) or []
     names.extend([normalize_profile(r.get("name")) for r in rows if r.get("name")])
-    result = supabase.table("custom_profiles").select("name").execute()
-    rows = _execute(result) or []
-    names.extend([normalize_profile(r.get("name")) for r in rows if r.get("name")])
     return {n for n in names if n}
 
 
 def is_known_profile(name: str) -> bool:
-    """Return ``True`` if the profile name exists in ``profiles`` or ``custom_profiles``."""
+    """Return ``True`` if the profile name exists in ``profiles``."""
     normalized = normalize_profile(name)
     if not normalized:
         return False
