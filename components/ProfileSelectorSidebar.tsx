@@ -1,6 +1,7 @@
 import React from 'react';
 import { LucidePlusCircle } from 'lucide-react';
-import { ProfileIcon, iconMap } from './ProfileIcons';
+
+import SidebarProfileItem from './SidebarProfileItem';
 import styles from './ProfileSelectorSidebar.module.css';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { profileStyles } from '@/styles/profileStyles';
@@ -111,26 +112,13 @@ export default function ProfileSelectorSidebar({
   return (
     <aside className={styles.sidebar}>
       {activeProfile && (
-        <div
-          className={`${styles.item} ${styles.activeItem}`}
-          style={{ backgroundColor: activeProfile.color }}
-        >
-          <div className={styles.icon}>
-            {activeProfile.iconName && iconMap[activeProfile.iconName] ? (
-              <ProfileIcon icon={iconMap[activeProfile.iconName]} color="white" size={24} />
-            ) : (
-              <div className="w-6 h-6 rounded-full" style={{ backgroundColor: 'white' }} />
-            )}
-          </div>
-          <div className="flex flex-col items-start">
-            <span className={styles.itemHeader}>
-              {truncateWithEllipsis(activeProfile.name)}
-            </span>
-            <span className={styles.itemSubtext}>
-              {truncateWithEllipsis(activeProfile.role)}
-            </span>
-          </div>
-        </div>
+        <SidebarProfileItem
+          name={activeProfile.name}
+          bottomText={activeProfile.role}
+          iconName={activeProfile.iconName}
+          color={activeProfile.color}
+          isActive
+        />
       )}
       {otherProfiles.map((p) => {
         if (!p) {
@@ -153,29 +141,16 @@ export default function ProfileSelectorSidebar({
         const lastUser = [...list].reverse().find((e) => e.role === 'user');
         const bottomText = lastUser ? lastUser.content : p.role;
         const bottomClass = lastUser ? 'text-sm' : 'text-sm font-medium text-gray-600';
-        const IconComp = p.iconName && iconMap[p.iconName];
         return (
-          <button
+          <SidebarProfileItem
             key={p.id}
             onClick={() => onProfileSelect(p.id)}
-            className={styles.item}
-          >
-            <div className={styles.icon}>
-              {IconComp ? (
-                <ProfileIcon icon={IconComp} color={p.color} size={24} />
-              ) : (
-                <div className="w-6 h-6 rounded-full" style={{ backgroundColor: p.color }} />
-              )}
-            </div>
-            <div className="flex flex-col items-start">
-              <span className={styles.itemHeader}>
-                {truncateWithEllipsis(p.name)}
-              </span>
-              <span className={`${styles.itemSubtext} ${bottomClass}`}>
-                {truncateWithEllipsis(bottomText)}
-              </span>
-            </div>
-          </button>
+            name={p.name}
+            bottomText={bottomText}
+            bottomClassName={bottomClass}
+            iconName={p.iconName}
+            color={p.color}
+          />
         );
       })}
     </aside>
