@@ -11,11 +11,11 @@ import { ToastProvider } from '@/contexts/ToastContext';
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <ToastProvider>
-      <UserProvider>
-        <ProfileProvider>
+      <ProfileProvider>
+        <UserProvider>
           <Component {...pageProps} />
-        </ProfileProvider>
-      </UserProvider>
+        </UserProvider>
+      </ProfileProvider>
     </ToastProvider>
   );
 }
