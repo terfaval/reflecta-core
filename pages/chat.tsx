@@ -352,6 +352,30 @@ export default function ChatPage() {
     fetchMoreEntries(0);
   }, [profile, userId, sessionId]);
 
+  useEffect(() => {
+    if (
+      !sessionIsFresh ||
+      startingPrompt ||
+      !userId ||
+      !profile ||
+      entries.length !== 0
+    )
+      return;
+    const loadPrompt = async () => {
+      try {
+        const data = await apiFetch<{ prompt: string }>("/api/starting-prompt", {
+          method: "POST",
+          body: JSON.stringify({ userId, profile }),
+        });
+        setStartingPrompt(data.prompt);
+      } catch (err) {
+        console.error("[starting-prompt]", err);
+      }
+    };
+    loadPrompt();
+  }, [sessionIsFresh, startingPrompt, userId, profile, entries.length]);
+
+
   if (userError) {
     return (
       <UserErrorDisplay
