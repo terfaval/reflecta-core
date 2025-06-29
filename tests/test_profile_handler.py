@@ -6,6 +6,7 @@ from unittest.mock import patch
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 os.environ.setdefault("SUPABASE_URL", "http://localhost")
 os.environ.setdefault("SUPABASE_KEY", "dummy")
+os.environ.setdefault("OPENAI_API_KEY", "dummy")
 
 from backend.app import app
 

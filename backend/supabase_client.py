@@ -123,6 +123,31 @@ def profile_exists(profile: str) -> bool:
         return False
 
 
+def get_profile_by_name(name: str) -> Dict[str, Any]:
+    """Return a profile record from the ``profiles`` table."""
+
+    normalized = normalize_profile(name)
+    try:
+        result = (
+            supabase.table("profiles")
+            .select("*")
+            .ilike("name", normalized)
+            .maybe_single()
+            .execute()
+        )
+        profile = _execute(result)
+    except Exception as exc:  # pragma: no cover - network/database issues
+        logging.exception("[get_profile_by_name] Lekérdezési hiba")
+        raise HTTPException(status_code=503, detail="Adatkapcsolati hiba") from exc
+
+    if profile:
+        logging.info("[get_profile_by_name] Profil betöltve: %s", name)
+        return profile
+
+    logging.info("[get_profile_by_name] Ismeretlen profil: %s", name)
+    raise HTTPException(status_code=404, detail="Profil nem található")
+
+
 _profile_cache: Optional[set[str]] = None
 
 

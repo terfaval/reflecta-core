@@ -8,7 +8,7 @@ import logging
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from .supabase_client import supabase, _execute
+from .supabase_client import supabase, _execute, get_profile_by_name
 from .utils import normalize_profile
 
 
@@ -94,15 +94,20 @@ def _fetch_access_list(profile: str) -> List[str]:
 def _fetch_profile(profile: str) -> Dict[str, Any] | None:
     """Return basic profile data or ``None`` if not found."""
 
-    normalized = normalize_profile(profile)
-    result = (
-        supabase.table("profiles")
-        .select("name, prompt_core, role, color, is_active")
-        .ilike("name", normalized)
-        .maybe_single()
-        .execute()
-    )
-    return _execute(result)
+    try:
+        record = get_profile_by_name(profile)
+    except HTTPException as exc:
+        if exc.status_code == 404:
+            return None
+        raise
+
+    return {
+        "name": record.get("name"),
+        "prompt_core": record.get("prompt_core"),
+        "role": record.get("role"),
+        "color": record.get("color"),
+        "is_active": record.get("is_active"),
+    }
 
 
 def _fetch_custom_profile(profile: str, user_id: str) -> Dict[str, Any] | None:

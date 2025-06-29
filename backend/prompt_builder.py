@@ -3,7 +3,7 @@
 from __future__ import annotations
 from typing import List, Dict, Any, Optional
 
-from .supabase_client import supabase, _execute
+from .supabase_client import supabase, _execute, get_profile_by_name
 from .utils import normalize_profile
 from .style_summary_block import style_summary_block
 from .strategy_detector import detect_strategy, detect_top_strategies
@@ -25,15 +25,8 @@ def human_list(items: List[str] | None, conjunction: str = "and") -> str:
 
 
 def fetch_profile(profile: str) -> Dict[str, Any]:
-    normalized = normalize_profile(profile)
-    result = (
-        supabase.table("profiles")
-        .select("name, prompt_core")
-        .ilike("name", normalized)
-        .maybe_single()
-        .execute()
-    )
-    return _execute(result)
+    record = get_profile_by_name(profile)
+    return {"name": record.get("name"), "prompt_core": record.get("prompt_core")}
 
 
 def fetch_profile_metadata(profile: str) -> Dict[str, Any]:
