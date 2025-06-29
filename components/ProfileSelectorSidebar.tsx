@@ -112,13 +112,22 @@ export default function ProfileSelectorSidebar({
   return (
     <aside className={styles.sidebar}>
       {activeProfile && (
-        <SidebarProfileItem
-          name={activeProfile.name}
-          bottomText={activeProfile.role}
-          iconName={activeProfile.iconName}
-          color={activeProfile.color}
-          isActive
-        />
+        (() => {
+          const list = entries[activeProfile.id] || [];
+          const lastUser = [...list].reverse().find((e) => e.role === 'user');
+          const bottomText = lastUser ? lastUser.content : activeProfile.role;
+          const bottomClass = lastUser ? 'text-sm' : 'text-sm font-medium';
+          return (
+            <SidebarProfileItem
+              name={activeProfile.name}
+              bottomText={bottomText}
+              bottomClassName={bottomClass}
+              iconName={activeProfile.iconName}
+              color={activeProfile.color}
+              isActive
+            />
+          );
+        })()
       )}
       {otherProfiles.map((p) => {
         if (!p) {
