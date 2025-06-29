@@ -4,9 +4,13 @@ import {
   useState,
   ReactNode,
   useEffect,
+  useRef,
 } from 'react';
 
+import { useRouter } from 'next/router';
+
 import { apiFetch } from 'lib/api';
+import { useProfileContext } from '@/contexts/ProfileContext';
 
 interface UserContextType {
   userId: string | null;
@@ -26,6 +30,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userInitialized, setUserInitialized] = useState(false);
   const [userError, setUserError] = useState<string | null>(null);
+
+  const router = useRouter();
+  const { setProfile } = useProfileContext();
+  const redirectDone = useRef(false);
 
   const processUserInit = async (
     wp_user_id: string,
@@ -135,6 +143,38 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }, 5000);
     return () => clearTimeout(id);
   }, [userInitialized, userError]);
+
+  useEffect(() => {
+    if (redirectDone.current) return;
+    if (!userId || !userInitialized) return;
+    if (!router.isReady) return;
+    if (router.pathname !== '/' && router.pathname !== '/select-profile') return;
+
+    const check = async () => {
+      try {
+        const data = await apiFetch<{
+          conversationId?: string;
+          sessionId?: string;
+          profile?: string;
+          endedAt?: string | null;
+        }>(`/api/last-session?userId=${encodeURIComponent(userId)}`, { method: 'GET' });
+        if (data.conversationId && data.sessionId && !data.endedAt) {
+          if (data.profile) setProfile(data.profile);
+          console.log('[Bridge] \uD83D\uDD04 Redirecting to chat with existing session');
+          router.push(`/chat?conversation=${data.conversationId}&session=${data.sessionId}`);
+        } else if (router.pathname === '/') {
+          router.push('/select-profile');
+        }
+      } catch (err) {
+        console.error('[last-session]', err);
+        if (router.pathname === '/') router.push('/select-profile');
+      } finally {
+        redirectDone.current = true;
+      }
+    };
+
+    check();
+  }, [userId, userInitialized, router, setProfile]);
 
   return (
     <UserContext.Provider
