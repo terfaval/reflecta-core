@@ -4,6 +4,7 @@ import { buttonStyles } from '../styles/profileStyles';
 
 import { apiFetch } from 'lib/api';
 import { useToast } from '../hooks/useToast';
+import { useProfileContext } from '@/contexts/ProfileContext';
 
 interface ChatFooterProps {
   message: string;
@@ -37,6 +38,7 @@ export function ChatFooter({
 }: ChatFooterProps) {
 
   const toast = useToast();
+  const { profile } = useProfileContext();
 
   return (
     <>
@@ -94,6 +96,9 @@ export function ChatFooter({
                   toast('A lezárás nem sikerült. Kérlek próbáld újra később.');
                 }
                 setIsClosing(false);
+                if (profile) {
+                  sessionStorage.removeItem(`reflecta_session_${profile}`);
+                }
                 setSessionId(null);
               }}
               disabled={assistantReplyCount < 3 || isClosing}

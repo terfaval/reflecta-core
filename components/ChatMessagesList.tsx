@@ -73,14 +73,7 @@ export function ChatMessagesList({
             prompt={startingPrompt}
             color={currentStyle['--user-color']}
           />
-          {startingPrompt && (
-            <button
-              style={{ marginTop: '4px' }}
-              onClick={() => onSelectPrompt(startingPrompt)}
-            >
-              Küldés
-            </button>
-          )}
+          {startingPrompt}
         </div>
       ) : (
         entries.map((entry, index) => (

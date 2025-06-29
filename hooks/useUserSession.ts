@@ -19,6 +19,10 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
   const router = useRouter();
   const initialized = useRef(false);
   const { session: sessionOverride } = router.query;
+  const storedSessionId =
+    typeof profile === 'string'
+      ? sessionStorage.getItem(`reflecta_session_${profile}`)
+      : null;
 
   useEffect(() => {
     if (!enabled || !router.isReady) return;
@@ -42,6 +46,32 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
 
       const closingTrigger = profileData?.closing_trigger || '';
 
+      // If we have a stored session and no override in the URL,
+      // resume that session without creating a new one.
+      if (!sessionOverride && storedSessionId) {
+        initialized.current = true;
+        sessionStorage.setItem(`reflecta_session_${profile}`, storedSessionId);
+        onReady({
+          userId: uid,
+          sessionId: storedSessionId,
+          startingPrompt: '',
+          closingTrigger,
+        });
+        return;
+      }
+
+      if (typeof sessionOverride === 'string') {
+        initialized.current = true;
+        sessionStorage.setItem(`reflecta_session_${profile}`, sessionOverride);
+        onReady({
+          userId: uid,
+          sessionId: sessionOverride,
+          startingPrompt: '',
+          closingTrigger,
+        });
+        return;
+      }
+
       let promptResp;
       try {
         promptResp = await apiFetch<{ prompt: string }>('/api/starting-prompt', {
@@ -54,17 +84,6 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
       }
 
       const promptText = promptResp?.prompt || '';
-
-      if (typeof sessionOverride === 'string') {
-        initialized.current = true;
-        onReady({
-          userId: uid,
-          sessionId: sessionOverride,
-          startingPrompt: promptText,
-          closingTrigger,
-        });
-        return;
-      }
 
       let sessionData;
       try {
@@ -82,6 +101,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
         return;
       }
       initialized.current = true;
+      sessionStorage.setItem(`reflecta_session_${profile}`, sessionData.session.id);
 
       onReady({
         userId: uid,
@@ -96,5 +116,13 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
     }
 
     // waiting for external user initialization is now handled outside
-  }, [profile, onReady, enabled, userId, router.isReady, sessionOverride]);
+  }, [
+    profile,
+    onReady,
+    enabled,
+    userId,
+    router.isReady,
+    sessionOverride,
+    storedSessionId,
+  ]);
 }
