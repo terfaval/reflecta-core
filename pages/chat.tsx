@@ -193,6 +193,12 @@ export default function ChatPage() {
       if (data.conversation_id && data.session_id) {
         setProfile(name);
         redirectToChat(router, data.conversation_id, data.session_id);
+        // reset previous session state before navigating so useUserSession can
+        // initialize the new session and fetch the starting prompt
+        setSessionId(null);
+        setEntries([]);
+        setStartingPrompt('');
+        setSessionIsFresh(false);
       }
     } catch (err) {
       console.error("[switch profile]", err);
