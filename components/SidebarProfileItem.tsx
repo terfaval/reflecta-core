@@ -31,6 +31,7 @@ export interface SidebarProfileItemProps {
   isActive?: boolean;
   bottomClassName?: string;
   onClick?: () => void;
+  hoverBackground?: string;
 }
 
 export default function SidebarProfileItem({
@@ -41,14 +42,25 @@ export default function SidebarProfileItem({
   isActive = false,
   bottomClassName = '',
   onClick,
+  hoverBackground,
 }: SidebarProfileItemProps) {
   const IconComp = iconName && iconMap[iconName];
   const Container = onClick ? 'button' : 'div';
+  const [isHovered, setIsHovered] = React.useState(false);
+
+  const style: React.CSSProperties = { transition: 'background-color 0.2s ease' };
+  if (isActive) {
+    style.backgroundColor = color;
+  } else if (isHovered && hoverBackground) {
+    style.backgroundColor = hoverBackground;
+  }
   return (
     <Container
       onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={`${styles.item} ${isActive ? styles.activeItem : ''}`}
-      style={isActive ? { backgroundColor: color } : undefined}
+      style={style}
     >
       <div className={styles.icon}>
         {IconComp ? (

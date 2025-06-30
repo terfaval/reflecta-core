@@ -47,10 +47,6 @@
   color: #6b7280; /* gray-500 */
 }
 
-.item:hover {
-  background-color: var(--ai-color, #e5e7eb);
-}
-
 .item:active {
   background-color: #d4d4d8;
 }

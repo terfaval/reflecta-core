@@ -166,6 +166,10 @@ export default function ProfileSelectorSidebar({
               profileStyles[p.id.toLowerCase()]?.['--user-color'] ||
               FALLBACK_COLOR
             }
+            hoverBackground={
+              profileStyles[p.id]?.['--ai-color'] ||
+              profileStyles[p.id.toLowerCase()]?.['--ai-color']
+            }
           />
         );
       })}
