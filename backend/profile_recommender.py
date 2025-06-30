@@ -17,6 +17,12 @@ PROFILE_PATTERNS = {
     "Reflecta": [r"\breflecta\b"],
 }
 
+# Regex to detect explicit user requests for a different profile, such as
+# "Mit mondana erre Éana?" or "Kérjem Kairost".
+USER_REQUEST_RE = re.compile(
+    r"(?:mit\s+mondana\s+(?:erre\s+)?)?(?:k[ée]rjem|h[ií]vd|[áa]thozn[áa]d)?\s*(?P<name>[A-Za-zÁÉÍÓÖŐÚÜŰáéíóöőúüű]+)",
+    re.IGNORECASE,
+)
 
 def recommend_profile_switch(response_text: str, current_profile: str) -> Optional[str]:
     """Return a recommended profile based on the AI response."""
@@ -31,18 +37,57 @@ def recommend_profile_switch(response_text: str, current_profile: str) -> Option
     return None
 
 
+def detect_requested_profile(text: str, current_profile: str) -> Optional[str]:
+    """Return a profile explicitly requested in the user text."""
+    if not text:
+        return None
+    match = USER_REQUEST_RE.search(text)
+    if not match:
+        return None
+    name = match.group("name")
+    if not name:
+        return None
+    normalized = normalize_profile(name)
+    if normalized and normalized != normalize_profile(current_profile):
+        return name.capitalize()
+    return None
+
+
 def update_session_profile(session_id: str, new_profile: str) -> bool:
-    """Update the profile for the given session."""
+    """Update the profile for the given session and conversation."""
     normalized = normalize_profile(new_profile)
     try:
         result = (
             supabase.table("sessions")
             .update({"profile": normalized})
             .eq("id", session_id)
+            .select("conversation_id")
+            .maybe_single()
             .execute()
         )
-        _execute(result)
-        return True
+        session = _execute(result)
     except Exception:
         logging.exception("[role_switcher] Failed to update session profile")
         return False
+
+    conversation_id = (session or {}).get("conversation_id")
+    if conversation_id:
+        try:
+            conv_res = (
+                supabase.table("conversations")
+                .select("conversation_participants")
+                .eq("id", conversation_id)
+                .maybe_single()
+                .execute()
+            )
+            conv = _execute(conv_res) or {}
+            participants = conv.get("conversation_participants") or []
+            if normalized not in participants:
+                participants.append(normalized)
+                supabase.table("conversations").update(
+                    {"conversation_participants": participants}
+                ).eq("id", conversation_id).execute()
+        except Exception:
+            logging.exception("[role_switcher] Failed to update conversation participants")
+
+    return True

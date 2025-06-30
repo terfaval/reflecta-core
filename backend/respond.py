@@ -16,7 +16,11 @@ from .auth import Role, feature_enabled, role_guard
 from .db import get_client
 from .prompt_builder import build_system_prompt
 from .strategy_detector import detect_strategy
-from .profile_recommender import recommend_profile_switch, update_session_profile
+from .profile_recommender import (
+    recommend_profile_switch,
+    update_session_profile,
+    detect_requested_profile,
+)
 
 
 router = APIRouter()
@@ -82,7 +86,27 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
 
     user_input = last_user["content"]
 
-    strategy = detect_strategy(user_input)
+    requested = detect_requested_profile(user_input, session["profile"])
+    if requested:
+        update_session_profile(session_id, requested)
+        session["profile"] = requested
+        try:
+            now_sw = datetime.now(timezone.utc).isoformat()
+            client.table("system_events").insert(
+                {
+                    "session_id": session_id,
+                    "event_type": "profile_switch",
+                    "note": requested,
+                    "timestamp": now_sw,
+                }
+            ).execute()
+        except Exception:
+            pass
+
+    user_entries = [e for e in entries if e.get("role") == "user"]
+    position = "start" if len(user_entries) <= 1 and session["profile"].lower() == "reflecta" else None
+
+    strategy = detect_strategy(user_input, session_position=position)
     try:
         system_prompt = build_system_prompt(
             session["user_id"], session["profile"], user_input, strategy
@@ -157,19 +181,6 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
         pass
 
     recommended = recommend_profile_switch(reply, session["profile"])
-    if recommended:
-        update_session_profile(session_id, recommended)
-        try:
-            client.table("system_events").insert(
-                {
-                    "session_id": session_id,
-                    "event_type": "profile_switch",
-                    "note": recommended,
-                    "timestamp": now,
-                }
-            ).execute()
-        except Exception:
-            pass
 
     return {
         "reply": reply,

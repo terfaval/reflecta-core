@@ -69,6 +69,11 @@ def build_system_prompt(
     ]
     lines.extend(core_essence_prompt)
 
+    if normalize_profile(profile_data.get("name")) == "reflecta":
+        lines.append(
+            "You serve as a neutral starting profile. Begin by clarifying the user's aim and keep a meta perspective on which profile might help most. If another profile seems better suited, gently offer to switch and await confirmation."
+        )
+
     core = profile_data.get("prompt_core", "").strip()
     if core:
         lines.append(core)

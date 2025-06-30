@@ -42,7 +42,12 @@ def get_or_create_conversation(user_id: str, profile: str) -> Tuple[Dict[str, An
     now = datetime.now(timezone.utc).isoformat()
     created = insert_single(
         "conversations",
-        {"user_id": user_id, "profile": profile, "started_at": now},
+        {
+            "user_id": user_id,
+            "profile": profile,
+            "started_at": now,
+            "conversation_participants": [profile],
+        },
     )
     logging.info("[conversation] Új beszélgetés létrehozva")
     return created, True

@@ -16,6 +16,7 @@ from .conversation_new import router as conversation_router
 from .entries import router as entries_router
 from .session_close import router as session_close_router
 from .session_update_label import router as session_update_label_router
+from .session_switch_profile import router as session_switch_profile_router
 from .profile_handler import router as profile_router
 from .profile_list import router as profile_list_router
 from .profile_from_survey import router as profile_from_survey_router
@@ -59,6 +60,7 @@ api_router.include_router(conversation_router)
 api_router.include_router(entries_router)
 api_router.include_router(session_close_router)
 api_router.include_router(session_update_label_router)
+api_router.include_router(session_switch_profile_router)
 api_router.include_router(profile_router)
 api_router.include_router(profile_list_router)
 api_router.include_router(profile_from_survey_router)
