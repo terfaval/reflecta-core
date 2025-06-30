@@ -3,6 +3,11 @@
 import buttonStyles from '../components/buttons.module.css'; // 💡 ez az új sor
 
 export const profileStyles: Record<string, React.CSSProperties & Record<string, string>> = {
+  Reflecta: {
+    '--bg-color': '#ffffff',
+    '--user-color': '#7D9EDF',
+    '--ai-color': '#A9BEE9',
+  },
   Akasza: {
     '--bg-color': '#ffffff',
     '--user-color': '#E75735',
@@ -15,8 +20,8 @@ export const profileStyles: Record<string, React.CSSProperties & Record<string, 
   },
   Luma: {
     '--bg-color': '#ffffff',
-    '--user-color': '#FBD96A',
-    '--ai-color': '#FCE69E',
+    '--user-color': '#EFC177',
+    '--ai-color': '#F3D097',
   },
   luma: {
     '--bg-color': '#ffffff',
