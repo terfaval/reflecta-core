@@ -54,7 +54,7 @@ async def _fetch_entries(client: Any, session_id: str) -> List[Dict[str, Any]]:
         client.table("entries")
         .select("role, content")
         .eq("session_id", session_id)
-        .order("created_at", ascending=True)
+        .order("created_at", desc=False)
         .execute()
     )
     if error:

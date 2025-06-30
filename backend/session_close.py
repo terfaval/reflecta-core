@@ -78,7 +78,7 @@ def generate_session_closure_response(session_id: str) -> str:
         supabase.table("entries")
         .select("role, content")
         .eq("session_id", session_id)
-        .order("created_at", ascending=True)
+        .order("created_at", desc=False)
         .execute()
     ) or []
 
@@ -150,7 +150,7 @@ def close_session(session_id: str) -> Dict[str, str]:
         supabase.table("entries")
         .select("id, role, content, created_at")
         .eq("session_id", session_id)
-        .order("created_at", ascending=True)
+        .order("created_at", desc=False)
         .execute()
     )
     if not entries:

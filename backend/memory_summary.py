@@ -17,7 +17,7 @@ def _fetch_entry_ids(session_id: str) -> List[str]:
             supabase.table("entries")
             .select("id")
             .eq("session_id", session_id)
-            .order("created_at", ascending=True)
+            .order("created_at", desc=False)
             .execute()
         )
         return _execute(result) or []
