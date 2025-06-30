@@ -57,7 +57,7 @@ export default function SidebarProfileItem({
           <div className="w-6 h-6 rounded-full" style={{ backgroundColor: isActive ? 'white' : color }} />
         )}
       </div>
-      <div className="flex flex-col items-start">
+      <div className={styles.textContainer}>
         <span className={styles.itemHeader}>{truncate(name)}</span>
         <span className={`${styles.itemSubtext} ${bottomClassName}`}>{truncate(bottomText)}</span>
       </div>

@@ -35,6 +35,13 @@
   flex-shrink: 0;
 }
 
+.textContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
 .create {
   color: #6b7280; /* gray-500 */
 }
@@ -51,17 +58,17 @@
   font-weight: 600;
   font-size: 1rem;
   line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: block;
+  white-space: normal;
 }
 
 .itemSubtext {
   font-size: 0.875rem;
+  line-height: 1.1;
   color: #6b7280;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: block;
+  margin-top: 2px;
+  white-space: normal;
 }
 
 .activeItem {
