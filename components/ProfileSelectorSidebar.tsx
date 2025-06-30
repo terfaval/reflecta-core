@@ -8,6 +8,7 @@ import { profileStyles } from '@/styles/profileStyles';
 import { useAvailableProfiles } from '@/hooks/useAvailableProfiles';
 
 const MAX_TEXT_LENGTH = 32;
+const FALLBACK_COLOR = '#7A4DFF';
 
 function truncateWithEllipsis(text: string, maxLength: number = MAX_TEXT_LENGTH) {
   if (!text) return '';
@@ -86,7 +87,7 @@ export default function ProfileSelectorSidebar({
       profileStyles[activeProfileId] ||
       profileStyles[activeProfileId.toLowerCase()] ||
       {};
-    const color = style['--user-color'] || '#7A4DFF';
+    const color = style['--user-color'] || FALLBACK_COLOR;
     return {
       id: activeProfileId,
       name: activeProfileId,
@@ -123,7 +124,11 @@ export default function ProfileSelectorSidebar({
               bottomText={bottomText}
               bottomClassName={bottomClass}
               iconName={activeProfile.iconName}
-              color={activeProfile.color}
+              color={
+                profileStyles[activeProfile.id]?.['--user-color'] ||
+                profileStyles[activeProfile.id.toLowerCase()]?.['--user-color'] ||
+                FALLBACK_COLOR
+              }
               isActive
             />
           );
@@ -156,7 +161,11 @@ export default function ProfileSelectorSidebar({
             bottomText={bottomText}
             bottomClassName={bottomClass}
             iconName={p.iconName}
-            color={p.color}
+            color={
+              profileStyles[p.id]?.['--user-color'] ||
+              profileStyles[p.id.toLowerCase()]?.['--user-color'] ||
+              FALLBACK_COLOR
+            }
           />
         );
       })}
