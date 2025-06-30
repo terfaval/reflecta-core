@@ -45,3 +45,12 @@ def test_get_profile_by_name_seed():
     ):
         data = get_profile_by_name("Reflecta")
     assert data["name"] == "Reflecta"
+
+
+def test_get_profile_by_name_case_insensitive():
+    supabase = make_supabase()
+    with patch("backend.supabase_client.supabase", supabase), patch(
+        "backend.supabase_client._execute", return_value=None
+    ):
+        data = get_profile_by_name("reflecta")
+    assert data["name"] == "Reflecta"
