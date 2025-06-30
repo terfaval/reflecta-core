@@ -52,9 +52,9 @@ export default function SidebarProfileItem({
     >
       <div className={styles.icon}>
         {IconComp ? (
-          <ProfileIcon icon={IconComp} color={isActive ? 'white' : color} size={24} />
+          <ProfileIcon icon={IconComp} color={isActive ? 'white' : color} size={32} />
         ) : (
-          <div className="w-6 h-6 rounded-full" style={{ backgroundColor: isActive ? 'white' : color }} />
+          <div className="w-8 h-8 rounded-full" style={{ backgroundColor: isActive ? 'white' : color }} />
         )}
       </div>
       <div className={styles.textContainer}>

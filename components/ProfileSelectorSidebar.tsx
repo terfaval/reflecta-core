@@ -141,7 +141,7 @@ export default function ProfileSelectorSidebar({
           className={`${styles.item} ${styles.create}`}
         >
           <div className={styles.icon}>
-            <LucidePlusCircle className="w-6 h-6 stroke-gray-400" />
+            <LucidePlusCircle className="w-8 h-8 stroke-gray-400" />
           </div>
           <span className="text-sm font-medium">
             Hozd létre a személyes napló profilodat!

@@ -128,7 +128,7 @@ body,
 
 .chat-profile-sidebar {
   flex: 0 0 20%;
-  background: #f3f4f6; /* gray-100 */
+  background: transparent;
   overflow-y: auto;
 }
 
