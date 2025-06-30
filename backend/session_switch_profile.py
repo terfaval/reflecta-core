@@ -23,7 +23,9 @@ class SwitchProfileRequest(BaseModel):
 async def switch_profile(payload: SwitchProfileRequest) -> Dict[str, str]:
     """Migrate the given session to a new profile, creating a new session."""
     session_id = payload.sessionId
-    new_profile = validate_profile_name(payload.newProfile)
+    # Validate but keep original case
+    validate_profile_name(payload.newProfile)
+    new_profile = payload.newProfile
 
     try:
         new_session_id, conversation_id = migrate_session_to_profile(

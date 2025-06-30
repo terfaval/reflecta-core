@@ -21,5 +21,5 @@ def test_session_switch_profile_success():
         )
     assert resp.status_code == 200
     data = resp.json()
-    assert data["newProfile"] == "éana"
+    assert data["newProfile"] == "Éana"
     assert data["newSessionId"] == "n1"

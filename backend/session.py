@@ -46,7 +46,8 @@ async def session(userId: str, profile: str):
     if not userId:
         raise HTTPException(status_code=400, detail="Hiányzó adat")
 
-    profile = validate_profile_name(profile)
+    # Validate but retain original casing for database inserts
+    validate_profile_name(profile)
 
     try:
         conv_id, session_data, status = await get_or_create_conversation_and_session(

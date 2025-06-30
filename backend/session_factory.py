@@ -6,12 +6,11 @@ import logging
 from typing import Dict, Any
 
 from .supabase_client import insert_single
-from .utils import normalize_profile
 
 
 def create_session(user_id: str, profile: str, conversation_id: str) -> Dict[str, Any]:
     """Create a session row for a conversation."""
-    profile = normalize_profile(profile)
+    # Store the profile name exactly as provided for case-sensitive fields
     try:
         return insert_single(
             "sessions",

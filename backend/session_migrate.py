@@ -34,9 +34,9 @@ def migrate_session_to_profile(session_id: str, new_profile: str) -> Tuple[str, 
 
     user_id = session["user_id"]
     source_profile = normalize_profile(session["profile"])
-    target_profile = normalize_profile(new_profile)
+    normalized_target = normalize_profile(new_profile)
 
-    conversation, _ = get_or_create_conversation(user_id, target_profile)
+    conversation, _ = get_or_create_conversation(user_id, new_profile)
     conv_id = conversation["id"]
 
     now = datetime.now(timezone.utc).isoformat()
@@ -57,7 +57,7 @@ def migrate_session_to_profile(session_id: str, new_profile: str) -> Tuple[str, 
     except Exception:
         logging.exception("[session_migrate] Failed to close previous session")
 
-    new_session = create_session(user_id, target_profile, conv_id)
+    new_session = create_session(user_id, new_profile, conv_id)
 
     try:
         supabase.table("entries").update({"session_id": new_session["id"]}).eq("session_id", session_id).execute()
@@ -74,7 +74,7 @@ def migrate_session_to_profile(session_id: str, new_profile: str) -> Tuple[str, 
             {
                 "session_id": new_session["id"],
                 "event_type": "session_migrated",
-                "note": f"{source_profile}->{target_profile}",
+                "note": f"{source_profile}->{normalized_target}",
                 "timestamp": now,
             }
         ).execute()

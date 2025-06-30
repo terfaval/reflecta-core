@@ -41,10 +41,11 @@ async def conversation_new(payload: ConversationRequest):
 
         logging.info(f"[conversation/new] payload: {payload_dict}")
 
-        profile = validate_profile_name(payload.profile)
+        # Validate but keep the original casing for database inserts
+        validate_profile_name(payload.profile)
 
         conv_id, session, created = create_conversation_and_session(
-            payload.user_id, profile
+            payload.user_id, payload.profile
         )
         if not session or not session.get("id"):
             logging.exception("[conversation/new] Missing session id")

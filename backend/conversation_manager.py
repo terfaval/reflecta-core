@@ -15,14 +15,14 @@ from .utils import normalize_profile
 
 def get_or_create_conversation(user_id: str, profile: str) -> Tuple[Dict[str, Any], bool]:
     """Return an existing conversation or create one if missing."""
-    profile = normalize_profile(profile)
+    normalized = normalize_profile(profile)
 
     def _query():
         result = (
             supabase.table("conversations")
             .select("*")
             .eq("user_id", user_id)
-            .ilike("profile", profile)
+            .ilike("profile", normalized)
             .eq("is_archived", False)
             .order("started_at", desc=True)
             .limit(1)

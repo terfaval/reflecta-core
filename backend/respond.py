@@ -38,7 +38,7 @@ async def _fetch_session(client: Any, session_id: str) -> Dict[str, Any]:
     """Return session record or raise HTTP 404."""
     session, error = (
         client.table("sessions")
-        .select("id, user_id, profile")
+        .select("id, user_id, profile, ended_at")
         .eq("id", session_id)
         .maybe_single()
         .execute()
@@ -76,6 +76,10 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
             raise HTTPException(status_code=400, detail="Érvénytelen sessionId")
         raise
 
+    if session.get("ended_at"):
+        logging.warning(f"[respond] Attempt to reply to closed session {session_id}")
+        raise HTTPException(status_code=403, detail="Session is already closed")
+    
     if not session.get("profile"):
         print(f"[respond] session missing profile: {session}")
         raise HTTPException(status_code=422, detail="Hiányzó profil")
