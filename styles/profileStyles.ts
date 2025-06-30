@@ -20,13 +20,13 @@ export const profileStyles: Record<string, React.CSSProperties & Record<string, 
   },
   Luma: {
     '--bg-color': '#ffffff',
-    '--user-color': '#EFC177',
-    '--ai-color': '#F7E2A7',
+    '--user-color': '#DABD42',
+    '--ai-color': '#F4EE9A',
   },
   luma: {
     '--bg-color': '#ffffff',
-    '--user-color': '#EFC177',
-    '--ai-color': '#F7E2A7',
+    '--user-color': '#DABD42',
+    '--ai-color': '#F4EE9A',
   },
   Sylva: {
     '--bg-color': '#ffffff',
@@ -40,7 +40,7 @@ export const profileStyles: Record<string, React.CSSProperties & Record<string, 
   },
   Kairos: {
     '--bg-color': '#ffffff',
-    '--user-color': '#7E80AE',
+    '--user-color': '#6A608E',
     '--ai-color': '#BFC0D7',
   },
   Noe: {
