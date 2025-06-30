@@ -33,7 +33,7 @@ def _fetch_entries(session_id: str) -> List[Dict[str, Any]]:
         supabase.table("entries")
         .select("*")
         .eq("session_id", session_id)
-        .order("created_at", ascending=True)
+        .order("created_at", desc=False)
         .execute()
     )
     return _execute(result) or []
