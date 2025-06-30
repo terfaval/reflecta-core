@@ -21,12 +21,12 @@ export const profileStyles: Record<string, React.CSSProperties & Record<string, 
   Luma: {
     '--bg-color': '#ffffff',
     '--user-color': '#EFC177',
-    '--ai-color': '#F3D097',
+    '--ai-color': '#F7E2A7',
   },
   luma: {
     '--bg-color': '#ffffff',
-    '--user-color': '#FBD96A',
-    '--ai-color': '#FCE69E',
+    '--user-color': '#EFC177',
+    '--ai-color': '#F7E2A7',
   },
   Sylva: {
     '--bg-color': '#ffffff',
@@ -36,17 +36,17 @@ export const profileStyles: Record<string, React.CSSProperties & Record<string, 
   Zentó: {
     '--bg-color': '#ffffff',
     '--user-color': '#63B5D2',
-    '--ai-color': '#63B5D2',
+    '--ai-color': '#B4DCEA',
   },
   Kairos: {
     '--bg-color': '#ffffff',
-    '--user-color': '#8D8FB8',
+    '--user-color': '#7E80AE',
     '--ai-color': '#BFC0D7',
   },
   Noe: {
     '--bg-color': '#ffffff',
-    '--user-color': '#9484B0',
-    '--ai-color': '#BEB5CF',
+    '--user-color': '#9A5C9A',
+    '--ai-color': '#C9A3C9',
   },
   Solun: {
     '--bg-color': '#ffffff',
