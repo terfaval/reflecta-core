@@ -11,15 +11,15 @@ client = TestClient(app)
 
 
 def test_session_switch_profile_success():
-    with patch("backend.session_switch_profile.update_session_profile", return_value=True), patch(
-        "backend.session_switch_profile.supabase"
-    ) as supabase:
-        chain = supabase.table.return_value
-        chain.select.return_value.eq.return_value.maybe_single.return_value.execute.return_value = object()
-        with patch("backend.session_switch_profile._execute", return_value={"conversation_id": "c1"}):
-            resp = client.post(
-                "/api/session/switch-profile",
-                json={"sessionId": "s1", "newProfile": "Éana"},
-            )
+    with patch(
+        "backend.session_switch_profile.migrate_session_to_profile",
+        return_value=("n1", "c1"),
+    ):
+        resp = client.post(
+            "/api/session/switch-profile",
+            json={"sessionId": "s1", "newProfile": "Éana"},
+        )
     assert resp.status_code == 200
-    assert resp.json()["newProfile"] == "Éana"
+    data = resp.json()
+    assert data["newProfile"] == "Éana"
+    assert data["newSessionId"] == "n1"

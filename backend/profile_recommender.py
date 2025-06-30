@@ -61,33 +61,11 @@ def update_session_profile(session_id: str, new_profile: str) -> bool:
             supabase.table("sessions")
             .update({"profile": normalized})
             .eq("id", session_id)
-            .select("conversation_id")
-            .maybe_single()
             .execute()
         )
-        session = _execute(result)
+        _execute(result)
     except Exception:
         logging.exception("[role_switcher] Failed to update session profile")
         return False
-
-    conversation_id = (session or {}).get("conversation_id")
-    if conversation_id:
-        try:
-            conv_res = (
-                supabase.table("conversations")
-                .select("conversation_participants")
-                .eq("id", conversation_id)
-                .maybe_single()
-                .execute()
-            )
-            conv = _execute(conv_res) or {}
-            participants = conv.get("conversation_participants") or []
-            if normalized not in participants:
-                participants.append(normalized)
-                supabase.table("conversations").update(
-                    {"conversation_participants": participants}
-                ).eq("id", conversation_id).execute()
-        except Exception:
-            logging.exception("[role_switcher] Failed to update conversation participants")
 
     return True

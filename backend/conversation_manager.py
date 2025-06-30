@@ -46,7 +46,6 @@ def get_or_create_conversation(user_id: str, profile: str) -> Tuple[Dict[str, An
             "user_id": user_id,
             "profile": profile,
             "started_at": now,
-            "conversation_participants": [profile],
         },
     )
     logging.info("[conversation] Új beszélgetés létrehozva")

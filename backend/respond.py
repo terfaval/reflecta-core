@@ -18,7 +18,6 @@ from .prompt_builder import build_system_prompt
 from .strategy_detector import detect_strategy
 from .profile_recommender import (
     recommend_profile_switch,
-    update_session_profile,
     detect_requested_profile,
 )
 
@@ -87,21 +86,6 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
     user_input = last_user["content"]
 
     requested = detect_requested_profile(user_input, session["profile"])
-    if requested:
-        update_session_profile(session_id, requested)
-        session["profile"] = requested
-        try:
-            now_sw = datetime.now(timezone.utc).isoformat()
-            client.table("system_events").insert(
-                {
-                    "session_id": session_id,
-                    "event_type": "profile_switch",
-                    "note": requested,
-                    "timestamp": now_sw,
-                }
-            ).execute()
-        except Exception:
-            pass
 
     user_entries = [e for e in entries if e.get("role") == "user"]
     position = "start" if len(user_entries) <= 1 and session["profile"].lower() == "reflecta" else None
@@ -180,7 +164,7 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
     except Exception:
         pass
 
-    recommended = recommend_profile_switch(reply, session["profile"])
+    recommended = requested or recommend_profile_switch(reply, session["profile"])
 
     return {
         "reply": reply,
