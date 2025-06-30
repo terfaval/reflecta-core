@@ -38,7 +38,7 @@ export function useHandleSend({
 }: UseHandleSendProps) {
   const toast = useToast();
   const handleSend = useCallback(async (text?: string) => {
-    const message = text?.trim();
+    const message = typeof text === 'string' ? text.trim() : '';
     if (!message) {
       // eslint-disable-next-line no-console
       console.warn('Hiányzó üzenet – a küldés nem történt meg.');
@@ -155,7 +155,7 @@ export function useHandleSend({
     try {
       const resp = await apiFetch<{ content?: string }>('/api/respond', {
         method: 'POST',
-        body: JSON.stringify({ sessionId: currentSessionId }),
+        body: JSON.stringify({ sessionId: currentSessionId, content: userEntry.content }),
       });
 
       const reply = resp?.content ?? '';
