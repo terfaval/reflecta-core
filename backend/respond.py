@@ -5,6 +5,8 @@ from __future__ import annotations
 import os
 from datetime import datetime, timezone
 from typing import Any, Dict, List
+import asyncio
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
@@ -81,7 +83,14 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
 
     last_user = next((e for e in reversed(entries) if e.get("role") == "user"), None)
     if not last_user:
-        raise HTTPException(status_code=400, detail="No user input found")
+        await asyncio.sleep(0.3)
+        entries = await _fetch_entries(client, session_id)
+        last_user = next((e for e in reversed(entries) if e.get("role") == "user"), None)
+        if last_user:
+            logging.warning("[respond] user input found after retry")
+        else:
+            logging.warning("[respond] ❌ user input missing after retry")
+            raise HTTPException(status_code=400, detail="No user input found")
 
     user_input = last_user["content"]
 
