@@ -3,7 +3,8 @@
 from __future__ import annotations
 from typing import List, Dict, Any, Optional
 
-from .supabase_client import supabase, _execute, get_profile_by_name
+from .supabase_client import get_profile_by_name
+from .metadata_fallback import get_profile_metadata
 from .utils import normalize_profile
 from .style_summary_block import style_summary_block
 from .strategy_detector import detect_strategy, detect_top_strategies
@@ -30,15 +31,7 @@ def fetch_profile(profile: str) -> Dict[str, Any]:
 
 
 def fetch_profile_metadata(profile: str) -> Dict[str, Any]:
-    normalized = normalize_profile(profile)
-    result = (
-        supabase.table("profile_metadata")
-        .select("*")
-        .ilike("profile", normalized)
-        .maybe_single()
-        .execute()
-    )
-    return _execute(result)
+    return get_profile_metadata(profile)
 
 
 def build_system_prompt(
@@ -73,6 +66,11 @@ def build_system_prompt(
         lines.append(
             "You serve as a neutral starting profile. Begin by clarifying the user's aim and keep a meta perspective on which profile might help most. If another profile seems better suited, gently offer to switch and await confirmation."
         )
+        lines.append("Ask short questions to map their situation and needs.")
+        lines.append(
+            "When appropriate, recommend a specialised profile that could deepen the process, and explain in one sentence why." 
+        )
+        lines.append("Maintain a meta-reflective stance throughout.")
 
     core = profile_data.get("prompt_core", "").strip()
     if core:

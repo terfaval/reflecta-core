@@ -8,7 +8,8 @@ import logging
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from .supabase_client import supabase, _execute, get_profile_by_name
+from .supabase_client import get_profile_by_name
+from .metadata_fallback import get_profile_metadata
 from .profile_utils import is_valid_profile_for_user
 from .utils import normalize_profile
 
@@ -89,15 +90,10 @@ def _fetch_profile(profile: str) -> Dict[str, Any] | None:
 def _fetch_metadata(profile: str) -> Dict[str, Any] | None:
     """Return profile metadata or ``None`` if not found."""
 
-    normalized = normalize_profile(profile)
-    result = (
-        supabase.table("profile_metadata")
-        .select("closing_trigger, " + ", ".join(STYLE_FIELDS))
-        .ilike("profile", normalized)
-        .maybe_single()
-        .execute()
-    )
-    return _execute(result)
+    data = get_profile_metadata(profile)
+    if not data:
+        return None
+    return {key: data.get(key) for key in ["closing_trigger", *STYLE_FIELDS] if key in data}
 
 
 @router.post("/profile")

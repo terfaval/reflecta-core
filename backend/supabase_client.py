@@ -5,8 +5,31 @@ import logging
 from typing import Any, Dict, Optional, List
 
 from .utils import normalize_profile
-from dotenv import load_dotenv
+import json
 from pathlib import Path
+
+SEED_PATH = Path(__file__).resolve().parent / "seed_profiles.json"
+_seed_profiles: Optional[List[Dict[str, Any]]] = None
+
+def _load_seed_profiles() -> List[Dict[str, Any]]:
+    """Load seed profiles from the bundled JSON file."""
+    global _seed_profiles
+    if _seed_profiles is None:
+        try:
+            with open(SEED_PATH, "r", encoding="utf-8") as fh:
+                data = json.load(fh)
+            _seed_profiles = data.get("profiles", []) or []
+        except Exception:
+            _seed_profiles = []
+    return _seed_profiles
+
+def _get_seed_profile(name: str) -> Optional[Dict[str, Any]]:
+    normalized = normalize_profile(name)
+    for item in _load_seed_profiles():
+        if normalize_profile(item.get("name")) == normalized:
+            return item
+    return None
+from dotenv import load_dotenv
 from supabase import create_client, Client
 from typing import Callable
 from fastapi import HTTPException
@@ -107,9 +130,11 @@ def get_session(session_id: str) -> Optional[Dict[str, Any]]:
     
 
 def profile_exists(profile: str) -> bool:
-    """Return ``True`` if the given profile exists in the database."""
+    """Return ``True`` if the given profile exists in the database or seeds."""
+    normalized = normalize_profile(profile)
+    if _get_seed_profile(normalized):
+        return True
     try:
-        normalized = normalize_profile(profile)
         result = (
             supabase.table("profiles")
             .select("name")
@@ -124,9 +149,16 @@ def profile_exists(profile: str) -> bool:
 
 
 def get_profile_by_name(name: str) -> Dict[str, Any]:
-    """Return a profile record from the ``profiles`` table."""
+    """Return a profile record from the ``profiles`` table or seed file."""
 
     normalized = normalize_profile(name)
+
+    seed = _get_seed_profile(normalized)
+    if seed:
+        logging.info("[get_profile_by_name] Seed profile returned: %s", name)
+        return seed
+
+
     try:
         result = (
             supabase.table("profiles")
@@ -157,6 +189,9 @@ def _load_profile_cache() -> set[str]:
     result = supabase.table("profiles").select("name").execute()
     rows = _execute(result) or []
     names.extend([normalize_profile(r.get("name")) for r in rows if r.get("name")])
+    for item in _load_seed_profiles():
+        if item.get("name"):
+            names.append(normalize_profile(item.get("name")))
     return {n for n in names if n}
 
 

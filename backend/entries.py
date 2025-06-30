@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 from .supabase_client import supabase, _execute
 from .utils import normalize_profile
+from .metadata_fallback import get_profile_metadata
 
 router = APIRouter()
 
@@ -53,15 +54,7 @@ def _fetch_profile(session_id: str) -> str:
 def _fetch_closing_trigger(profile: str) -> str:
     if not profile:
         return ""
-    normalized = normalize_profile(profile)
-    result = (
-        supabase.table("profile_metadata")
-        .select("closing_trigger")
-        .ilike("profile", normalized)
-        .maybe_single()
-        .execute()
-    )
-    metadata = _execute(result)
+    metadata = get_profile_metadata(profile)
     return metadata.get("closing_trigger") or ""
 
 

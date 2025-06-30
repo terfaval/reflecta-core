@@ -35,3 +35,13 @@ def test_get_profile_by_name_not_found():
         with pytest.raises(HTTPException) as exc:
             get_profile_by_name("Missing")
     assert exc.value.status_code == 404
+
+
+def test_get_profile_by_name_seed():
+    # When the profile is defined in seed_profiles.json it should be returned
+    supabase = make_supabase()
+    with patch("backend.supabase_client.supabase", supabase), patch(
+        "backend.supabase_client._execute", return_value=None
+    ):
+        data = get_profile_by_name("Reflecta")
+    assert data["name"] == "Reflecta"

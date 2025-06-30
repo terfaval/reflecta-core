@@ -13,6 +13,7 @@ from fastapi import APIRouter, HTTPException
 from openai import OpenAI
 
 from .supabase_client import supabase, _execute
+from .metadata_fallback import get_profile_metadata
 from .prompt_builder import build_system_prompt
 from .utils import normalize_profile
 from .conversation_arcs import record_conversation_arc
@@ -71,13 +72,7 @@ def generate_session_closure_response(session_id: str) -> str:
         .execute()
     )
 
-    metadata = _execute(
-        supabase.table("profile_metadata")
-        .select("*")
-        .ilike("profile", normalized)
-        .maybe_single()
-        .execute()
-    )
+    metadata = get_profile_metadata(session["profile"])
 
     entries = _execute(
         supabase.table("entries")
@@ -195,14 +190,7 @@ def close_session(session_id: str) -> Dict[str, str]:
         .maybe_single()
         .execute()
     )
-    normalized_row = normalize_profile(session_row["profile"])
-    metadata = _execute(
-        supabase.table("profile_metadata")
-        .select("closing_trigger")
-        .ilike("profile", normalized_row)
-        .maybe_single()
-        .execute()
-    )
+    metadata = get_profile_metadata(session_row["profile"])
     closing_trigger = (metadata.get("closing_trigger") or "").strip()
 
     now = datetime.now(timezone.utc).isoformat()
