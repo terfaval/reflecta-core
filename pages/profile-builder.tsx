@@ -7,6 +7,7 @@ import { useUserContext } from '@/contexts/UserContext';
 import { useRouter } from 'next/router';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { apiFetch } from '@/lib/api';
+import { redirectToChat } from '@/lib/navigation';
 
 const QUESTIONS = [
   {
@@ -130,7 +131,7 @@ export default function ProfileBuilder() {
         );
         if (data.conversation_id && data.session_id) {
           setProfile(profile);
-          router.push(`/chat?conversation=${data.conversation_id}&session=${data.session_id}`);
+          redirectToChat(router, data.conversation_id, data.session_id);
         } else {
           console.error(data.error);
           setStartLoading(false);

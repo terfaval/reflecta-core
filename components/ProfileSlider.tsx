@@ -6,6 +6,7 @@ import styles from "./ProfileSlider.module.css";
 import { useUserContext } from "@/contexts/UserContext";
 import { useProfileContext } from "@/contexts/ProfileContext";
 import { apiFetch } from "@/lib/api";
+import { redirectToChat } from "@/lib/navigation";
 import { profileStyles } from "@/styles/profileStyles";
 import { toast } from "react-toastify";
 
@@ -288,9 +289,7 @@ arr.push(profiles[profiles.length - 1]);
       if (data.conversation_id && data.session_id) {
         setProfile(p.name);
         console.log('🔁 Redirecting to chat');
-        router.push(
-          `/chat?conversation=${data.conversation_id}&session=${data.session_id}`,
-        );
+        redirectToChat(router, data.conversation_id, data.session_id);
       } else {
         toast.error('Nem sikerült elindítani a beszélgetést.');
         setError('Nem sikerült elindítani a beszélgetést.');

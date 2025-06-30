@@ -10,6 +10,7 @@ import {
 import { useRouter } from 'next/router';
 
 import { apiFetch } from 'lib/api';
+import { redirectToChat } from 'lib/navigation';
 import { useProfileContext } from '@/contexts/ProfileContext';
 
 interface UserContextType {
@@ -21,6 +22,7 @@ interface UserContextType {
   setUserInitialized: (v: boolean) => void;
   userError: string | null;
   setUserError: (err: string | null) => void;
+  checkingSession: boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -30,6 +32,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userInitialized, setUserInitialized] = useState(false);
   const [userError, setUserError] = useState<string | null>(null);
+  const [checkingSession, setCheckingSession] = useState(
+    typeof window === 'undefined'
+      ? false
+      : window.location.pathname === '/' ||
+        window.location.pathname === '/select-profile',
+  );
 
   const router = useRouter();
   const { setProfile } = useProfileContext();
@@ -148,9 +156,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     if (redirectDone.current) return;
     if (!userId || !userInitialized) return;
     if (!router.isReady) return;
-    if (router.pathname !== '/' && router.pathname !== '/select-profile') return;
+    if (router.pathname !== '/' && router.pathname !== '/select-profile') {
+      redirectDone.current = true;
+      setCheckingSession(false);
+      return;
+    }
 
     const check = async () => {
+      setCheckingSession(true);
       try {
         const data = await apiFetch<{
           conversationId?: string;
@@ -161,7 +174,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         if (data.conversationId && data.sessionId && !data.endedAt) {
           if (data.profile) setProfile(data.profile);
           console.log('[Bridge] \uD83D\uDD04 Redirecting to chat with existing session');
-          router.push(`/chat?conversation=${data.conversationId}&session=${data.sessionId}`);
+          redirectToChat(router, data.conversationId, data.sessionId);
         } else if (router.pathname === '/') {
           router.push('/select-profile');
         }
@@ -170,6 +183,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         if (router.pathname === '/') router.push('/select-profile');
       } finally {
         redirectDone.current = true;
+        setCheckingSession(false);
       }
     };
 
@@ -187,6 +201,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUserInitialized,
         userError,
         setUserError,
+        checkingSession,
       }}
     >
       {children}

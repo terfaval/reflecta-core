@@ -18,6 +18,7 @@ import { useUserContext } from "@/contexts/UserContext";
 import { useProfileContext } from "@/contexts/ProfileContext";
 
 import { apiFetch } from "@/lib/api";
+import { redirectToChat } from "@/lib/navigation";
 
 interface Entry {
   id: string;
@@ -191,7 +192,7 @@ export default function ChatPage() {
       );
       if (data.conversation_id && data.session_id) {
         setProfile(name);
-        router.push(`/chat?conversation=${data.conversation_id}&session=${data.session_id}`);
+        redirectToChat(router, data.conversation_id, data.session_id);
       }
     } catch (err) {
       console.error("[switch profile]", err);

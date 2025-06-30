@@ -1,59 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+
 import Head from "next/head";
-import { useRouter } from "next/router";
 import ProfileSlider from "@/components/ProfileSlider";
 import SpiralLoader from "@/components/SpiralLoader";
 import UserErrorDisplay from "@/components/UserErrorDisplay";
 import { useUserContext } from "@/contexts/UserContext";
-import { useProfileContext } from "@/contexts/ProfileContext";
-import { toast } from "react-toastify";
-
-import { apiFetch } from "@/lib/api";
 
 export default function ProfileSelectorPage() {
-  const router = useRouter();
-  const { userId, userInitialized, userError } = useUserContext();
-  const { setProfile } = useProfileContext();
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isFirst, setIsFirst] = useState(false);
-
-  useEffect(() => {
-    if (loaded) {
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: 'smooth',
-      });
-    }
-  }, [loaded]);
-
-  useEffect(() => {
-    if (!userId) return;
-    const load = async () => {
-      try {
-        const data = await apiFetch<{
-          profile?: string;
-          sessionId?: string;
-          endedAt?: string | null;
-        }>(
-          `/api/last-session?userId=${encodeURIComponent(userId)}`,
-          { method: "GET" }
-        );
-        if (data.sessionId && !data.endedAt) {
-          if (data.profile) setProfile(data.profile);
-          toast.info("Korábbi beszélgetés folytatódik…");
-          router.replace(`/chat?session=${data.sessionId}`);
-          return;
-        }
-        setIsFirst(true);
-      } catch (err) {
-        console.error("[last-session]", err);
-        setError("Nem sikerült lekérni az előző munkamenetet.");
-      }
-      setLoaded(true);
-    };
-    load();
-  }, [userId, router, setProfile]);
+  const { userInitialized, userError, checkingSession } = useUserContext();
+  
 
   if (userError)
     return (
@@ -66,7 +21,7 @@ export default function ProfileSelectorPage() {
   if (!userInitialized)
     return <SpiralLoader userColor="#7A4DFF" aiColor="#FFB347" />;
 
- if (!loaded) return <SpiralLoader userColor="#7A4DFF" aiColor="#FFB347" />;
+ if (checkingSession) return <SpiralLoader userColor="#7A4DFF" aiColor="#FFB347" />;
 
   return (
     <>
@@ -96,9 +51,6 @@ export default function ProfileSelectorPage() {
       >
         Válassz naplóprofilt!
       </h1>
-      {error && (
-        <p style={{ color: 'red', fontFamily: 'Raleway, sans-serif' }}>{error}</p>
-      )}
       <ProfileSlider />
       <p
         style={{
