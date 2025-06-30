@@ -5,6 +5,7 @@ import SidebarProfileItem from './SidebarProfileItem';
 import styles from './ProfileSelectorSidebar.module.css';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { profileStyles } from '@/styles/profileStyles';
+import { useAvailableProfiles } from '@/hooks/useAvailableProfiles';
 
 const MAX_TEXT_LENGTH = 32;
 
@@ -43,41 +44,36 @@ export interface Entry {
 }
 
 export interface ProfileSelectorSidebarProps {
-  userRole: 'basic' | 'premium';
-  customProfile: Profile | null;
-  lastUsedProfiles: Profile[];
-  unusedProfiles: Profile[];
   entries: Record<string, Entry[]>;
   onProfileSelect: (profileId: string) => void;
   onCreateCustomProfile: () => void;
 }
-const BLANK_PROFILE: Profile = {
-  id: 'reflecta-blank',
-  name: 'Reflecta',
-  role: '',
-  color: '#7A4DFF',
-  iconName: 'ReflectaIcon',
-};
 
 export default function ProfileSelectorSidebar({
-  userRole,
-  customProfile,
-  lastUsedProfiles,
-  unusedProfiles,
   entries,
   onProfileSelect,
   onCreateCustomProfile,
 }: ProfileSelectorSidebarProps) {
   const { profile: activeProfileId } = useProfileContext();
+  const { profiles: availableProfiles, personalNames, role } = useAvailableProfiles();
 
-  const allProfiles = React.useMemo<Profile[]>(() => {
-    const arr: Profile[] = [BLANK_PROFILE];
-    if (userRole === 'premium' && customProfile) {
-      arr.push(customProfile);
-    }
-    arr.push(...lastUsedProfiles, ...unusedProfiles);
+  const customProfile = React.useMemo(() => {
+    if (!personalNames.length) return null;
+    return (
+      availableProfiles.find((p) => personalNames.includes(p.name)) || null
+    );
+  }, [availableProfiles, personalNames]);
+
+  const baseProfiles = React.useMemo(() => {
+    return availableProfiles.filter((p) => !personalNames.includes(p.name));
+  }, [availableProfiles, personalNames]);
+
+  const allProfiles = React.useMemo(() => {
+    const arr: Profile[] = [];
+    if (customProfile) arr.push(customProfile);
+    arr.push(...baseProfiles);
     return arr;
-}, [userRole, customProfile, lastUsedProfiles, unusedProfiles]);
+  }, [customProfile, baseProfiles]);
 
   const activeProfile = React.useMemo(() => {
     if (!activeProfileId) return null;
@@ -99,15 +95,19 @@ export default function ProfileSelectorSidebar({
     } as Profile;
   }, [allProfiles, activeProfileId]);
 
-  const otherProfiles = React.useMemo< (Profile | null)[] >(() => {
-    const arr: (Profile | null)[] = [];
-    if (userRole === 'premium' && !customProfile) arr.push(null);
+  const otherProfiles = React.useMemo<Profile[]>(() => {
+    const arr: Profile[] = [];
     const activeId = activeProfileId?.toLowerCase();
-    allProfiles.forEach((p) => {
+    if (customProfile && customProfile.id.toLowerCase() !== activeId) {
+      arr.push(customProfile);
+    }
+    baseProfiles.forEach((p) => {
       if (p.id.toLowerCase() !== activeId) arr.push(p);
     });
     return arr;
-  }, [allProfiles, activeProfileId, userRole, customProfile]);
+  }, [baseProfiles, customProfile, activeProfileId]);
+
+  const showCreateButton = role === 'premium' && !customProfile;
 
   return (
     <aside className={styles.sidebar}>
@@ -129,23 +129,21 @@ export default function ProfileSelectorSidebar({
           );
         })()
       )}
+      {showCreateButton && (
+        <button
+          key="create-custom"
+          onClick={onCreateCustomProfile}
+          className={`${styles.item} ${styles.create}`}
+        >
+          <div className={styles.icon}>
+            <LucidePlusCircle className="w-6 h-6 stroke-gray-400" />
+          </div>
+          <span className="text-sm font-medium">
+            Hozd létre a személyes napló profilodat!
+          </span>
+        </button>
+      )}
       {otherProfiles.map((p) => {
-        if (!p) {
-          return (
-            <button
-              key="create-custom"
-              onClick={onCreateCustomProfile}
-              className={`${styles.item} ${styles.create}`}
-            >
-              <div className={styles.icon}>
-                <LucidePlusCircle className="w-6 h-6 stroke-gray-400" />
-              </div>
-              <span className="text-sm font-medium">
-                Hozd létre a személyes napló profilodat!
-              </span>
-            </button>
-          );
-        }
         const list = entries[p.id] || [];
         const lastUser = [...list].reverse().find((e) => e.role === 'user');
         const bottomText = lastUser ? lastUser.content : p.role;
@@ -167,12 +165,6 @@ export default function ProfileSelectorSidebar({
 }
 
 // Example usage with mock data
-const mockProfiles: Profile[] = [
-  { id: 'akasza', name: 'Akasza', role: 'Táncos mágus', color: '#E75735', iconName: 'AkaszaIcon' },
-  { id: 'eana', name: 'Éana', role: 'Lágy segítő', color: '#F08230', iconName: 'EanaIcon' },
-  { id: 'luma', name: 'Luma', role: 'Fénykereső', color: '#FBD96A', iconName: 'LumaIcon' },
-];
-
 const mockEntries: Record<string, Entry[]> = {
   akasza: [
     { id: '1', role: 'assistant', content: 'Szia', created_at: '2024-01-01' },
@@ -182,10 +174,6 @@ const mockEntries: Record<string, Entry[]> = {
 export function MockProfileSelectorSidebar() {
   return (
     <ProfileSelectorSidebar
-      userRole="premium"
-      customProfile={null}
-      lastUsedProfiles={mockProfiles.slice(0, 2)}
-      unusedProfiles={mockProfiles.slice(2)}
       entries={mockEntries}
       onProfileSelect={(id) => console.log('select', id)}
       onCreateCustomProfile={() => console.log('create custom')}
