@@ -191,11 +191,14 @@ export default function ChatPage() {
         },
       );
       if (data.conversation_id && data.session_id) {
+        // Store the new session id so useUserSession can resume without
+        // attempting to create another session.
+        sessionStorage.setItem(`reflecta_session_${name}`, data.session_id);
+
         setProfile(name);
+        setSessionId(data.session_id);
         redirectToChat(router, data.conversation_id, data.session_id);
-        // reset previous session state before navigating so useUserSession can
-        // initialize the new session and fetch the starting prompt
-        setSessionId(null);
+        // Reset previous entries and prompts for the new session context
         setEntries([]);
         setStartingPrompt('');
         setSessionIsFresh(false);
