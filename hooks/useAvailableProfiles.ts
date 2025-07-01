@@ -71,7 +71,8 @@ export function useAvailableProfiles() {
                 id: n,
                 name: n,
                 role: rec.role || '',
-                color: rec.color ||
+                color:
+                  rec.color ||
                   profileStyles[n]?.['--user-color'] ||
                   profileStyles[n.toLowerCase()]?.['--user-color'] ||
                   '#7A4DFF',
@@ -86,7 +87,8 @@ export function useAvailableProfiles() {
                 id: pn,
                 name: pn,
                 role: rec.role || '',
-                color: rec.color ||
+                color:
+                  rec.color ||
                   profileStyles[pn]?.['--user-color'] ||
                   profileStyles[pn.toLowerCase()]?.['--user-color'] ||
                   '#7A4DFF',
@@ -94,6 +96,27 @@ export function useAvailableProfiles() {
               });
             }
           });
+          // Include all additional profiles for admin users
+          if (data.role === 'admin') {
+            Object.keys(map).forEach((name) => {
+              if (
+                !items.find((i) => i.id.toLowerCase() === name.toLowerCase())
+              ) {
+                const rec = map[name];
+                items.push({
+                  id: name,
+                  name,
+                  role: rec.role || '',
+                  color:
+                    rec.color ||
+                    profileStyles[name]?.['--user-color'] ||
+                    profileStyles[name.toLowerCase()]?.['--user-color'] ||
+                    '#7A4DFF',
+                  iconName: NAME_TO_ICON[name],
+                });
+              }
+            });
+          }
           setProfiles(items);
           if (data.role === 'admin') {
             setRole('admin');
