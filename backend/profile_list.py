@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from .supabase_client import supabase, _execute
+from .supabase_client import supabase, _execute, list_all_profile_names
 
 
 router = APIRouter()
@@ -84,9 +84,14 @@ async def profile_list(payload: ProfileListRequest) -> Dict[str, Any]:
 
         role = _fetch_user_role(user_id)
         personal = _fetch_personal_profile_names(user_id)
-        if personal:
+
+        if role == "admin":
+            names = list_all_profile_names()
+        elif personal:
             names.extend(personal)
 
+        names = list({n for n in names if n})
+        
         profiles = _fetch_profiles(names)
 
         return {

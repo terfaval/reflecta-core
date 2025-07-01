@@ -5,7 +5,8 @@ from __future__ import annotations
 import logging
 from fastapi import HTTPException
 
-from .supabase_client import supabase, _execute, is_known_profile
+from .supabase_client import supabase, _execute, is_known_profile, list_all_profile_names
+from .users import get_user_role
 from .utils import normalize_profile
 from typing import List
 
@@ -69,6 +70,13 @@ def is_valid_profile_for_user(profile_name: str, user_id: str) -> bool:
     normalized = normalize_profile(profile_name)
     if normalized in NORMALIZED_BASIC_PROFILES:
         return True
+    
+    try:
+        role = get_user_role(user_id)
+    except Exception:
+        role = "basic"
+    if role == "admin":
+        return True
 
     result = (
         supabase.table("user_profiles")
@@ -84,6 +92,14 @@ def is_valid_profile_for_user(profile_name: str, user_id: str) -> bool:
 
 def list_available_profiles(user_id: str) -> List[str]:
     """Return list of profile names that the user can access."""
+
+    try:
+        role = get_user_role(user_id)
+    except Exception:
+        role = "basic"
+
+    if role == "admin":
+        return list_all_profile_names()
 
     result = (
         supabase.table("user_profiles")

@@ -178,3 +178,10 @@ def is_known_profile(name: str) -> bool:
             print(f"[supabase] profile cache init failed: {exc}")
             _profile_cache = set()
     return normalized in _profile_cache
+
+
+def list_all_profile_names() -> List[str]:
+    """Return a list of all profile names from the ``profiles`` table."""
+    result = supabase.table("profiles").select("name").execute()
+    rows = _execute(result) or []
+    return [r.get("name") for r in rows if r.get("name")]

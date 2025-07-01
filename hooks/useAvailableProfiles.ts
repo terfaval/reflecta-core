@@ -41,7 +41,7 @@ export function useAvailableProfiles() {
   const { userId } = useUserContext();
   const [profiles, setProfiles] = useState<AvailableProfile[]>([]);
   const [personalNames, setPersonalNames] = useState<string[]>([]);
-  const [role, setRole] = useState<'basic' | 'premium'>('basic');
+  const [role, setRole] = useState<'basic' | 'premium' | 'admin'>('basic');
 
   useEffect(() => {
     if (!userId) return;
@@ -95,7 +95,13 @@ export function useAvailableProfiles() {
             }
           });
           setProfiles(items);
-          setRole(data.role === 'premium' ? 'premium' : 'basic');
+          if (data.role === 'admin') {
+            setRole('admin');
+          } else if (data.role === 'premium') {
+            setRole('premium');
+          } else {
+            setRole('basic');
+          }
         } else if (data.error) {
           console.error('[profile-list]', data.error);
         }

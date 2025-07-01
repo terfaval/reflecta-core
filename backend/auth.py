@@ -75,5 +75,7 @@ def role_guard(required_role: str):
 
 
 def feature_enabled(feature: str, user_role: str) -> bool:
+    if user_role == Role.ADMIN:
+        return True
     allowed = FEATURE_FLAGS.get(feature, [])
     return user_role in allowed
