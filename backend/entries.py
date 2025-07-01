@@ -7,7 +7,8 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from .supabase_client import supabase, _execute
+from .db import get_client
+from .supabase_client import _execute
 from .utils import normalize_profile
 from .metadata_fallback import get_profile_metadata
 
@@ -29,8 +30,9 @@ class EntryRequest(BaseModel):
 
 
 def _fetch_entries(session_id: str) -> List[Dict[str, Any]]:
+    client = get_client()
     result = (
-        supabase.table("entries")
+        client.table("entries")
         .select("*")
         .eq("session_id", session_id)
         .order("created_at", desc=False)
@@ -40,8 +42,9 @@ def _fetch_entries(session_id: str) -> List[Dict[str, Any]]:
 
 
 def _fetch_profile(session_id: str) -> str:
+    client = get_client()
     result = (
-        supabase.table("sessions")
+        client.table("sessions")
         .select("profile")
         .eq("id", session_id)
         .maybe_single()
@@ -59,6 +62,7 @@ def _fetch_closing_trigger(profile: str) -> str:
 
 
 def _insert_entry(session_id: str, item: EntryItem) -> None:
+    client = get_client()
     entry_data = {
         "session_id": session_id,
         "role": item.role,
@@ -67,11 +71,12 @@ def _insert_entry(session_id: str, item: EntryItem) -> None:
         "reaction_tag": item.reaction_tag or None,
         "recommendation_tag": item.recommendation_tag or None,
     }
-    result = supabase.table("entries").insert(entry_data).execute()
+    result = client.table("entries").insert(entry_data).execute()
     _execute(result)
 
 
 def _insert_system_events(session_id: str, item: EntryItem) -> None:
+    client = get_client()
     events = []
     if item.reaction_tag:
         events.append(
@@ -92,7 +97,7 @@ def _insert_system_events(session_id: str, item: EntryItem) -> None:
     if not events:
         return
     try:
-        supabase.table("system_events").insert(events).execute()
+        client.table("system_events").insert(events).execute()
     except Exception:
         # System event logging should not break the main flow
         pass

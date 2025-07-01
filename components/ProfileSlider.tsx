@@ -41,9 +41,6 @@ const ICON_MAP: Record<string, string | undefined> = {
   Preceptor: "PreceptorIcon",
 };
 
-const BLANK_DESC =
-  "Alap naplóprofil, ha csak egyszerűen írnál, mindenféle irány nélkül.";
-
 export default function ProfileSlider() {
   const { userId } = useUserContext();
   const { setProfile } = useProfileContext();
@@ -105,7 +102,7 @@ export default function ProfileSlider() {
             return {
               name,
               iconName: ICON_MAP[name],
-              description: map[name]?.description || (name === "Reflecta" ? BLANK_DESC : ""),
+              description: map[name]?.description || "",
               color: map[name]?.color || "#fff",
               role: map[name]?.role || "",
               userColor: style["--user-color"],

@@ -87,7 +87,8 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
         raise HTTPException(status_code=422, detail="Hiányzó profil")
     entries = await _fetch_entries(client, session_id)
 
-    last_user = await get_last_user_entry(client, session_id)
+    # Recreate client to avoid potential caching delay
+    last_user = await get_last_user_entry(get_client(), session_id)
     if not last_user:
         raise HTTPException(status_code=400, detail="No user input found")
 
