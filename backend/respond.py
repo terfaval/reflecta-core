@@ -135,8 +135,13 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
             temperature=0.7,
         )
     except Exception as exc:
+        # Log and surface the exact error to help debugging when
+        # the assistant reply cannot be generated.
         print(f"[respond] OpenAI error: {exc}")
-        raise HTTPException(status_code=502, detail="OpenAI request failed") from exc
+        raise HTTPException(
+            status_code=502,
+            detail=f"OpenAI request failed: {exc}"
+        ) from exc
 
     reply = chat.choices[0].message.content or ""
     reply = reply.strip()

@@ -108,13 +108,13 @@ export function useHandleSend({
         setIsClosing(false);
         setMessage('');
         setLoading(false);
-        setSessionId(null);
+        // keep currentSessionId so session can be resumed later
         return;
       }
       setIsClosing(false);
       setMessage('');
       setLoading(false);
-      setSessionId(null);
+      // do not clear the session id after closing; it remains available
       return;
     }
 

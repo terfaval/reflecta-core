@@ -96,10 +96,9 @@ export function ChatFooter({
                   toast('A lezárás nem sikerült. Kérlek próbáld újra később.');
                 }
                 setIsClosing(false);
-                if (profile) {
-                  sessionStorage.removeItem(`reflecta_session_${profile}`);
-                }
-                setSessionId(null);
+                // Keep the session ID so the user can return to this
+                // conversation later. We no longer remove it from
+                // sessionStorage or clear the state here.
               }}
               disabled={assistantReplyCount < 3 || isClosing}
               className={`reflecta-close-animated ${buttonStyles.closeAnimated}`}
