@@ -28,6 +28,12 @@ def _init_supabase() -> Client:
         _supabase = create_client(url, key)
     return _supabase
 
+
+def get_shared_client() -> Client:
+    """Return the singleton Supabase client instance."""
+    return supabase
+
+
 supabase: Client = _init_supabase()
 
 # ======= QUERY UTILITIES =======

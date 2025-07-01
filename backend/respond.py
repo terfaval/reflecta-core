@@ -69,7 +69,7 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
 
     client = get_client()
 
-    print(f"[respond] generating reply for session: {session_id}")
+    print(f"[respond] ▶️ generate_ai_reply start | session={session_id}")
 
     try:
         session = await _fetch_session(client, session_id)
@@ -77,6 +77,8 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
         if exc.status_code == 404:
             raise HTTPException(status_code=400, detail="Érvénytelen sessionId")
         raise
+
+    print(f"[respond] ▶️ session: {session_id} | profile: {session.get('profile')}")
 
     if session.get("ended_at"):
         logging.warning(f"[respond] Attempt to reply to closed session {session_id}")
@@ -86,11 +88,15 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
         print(f"[respond] session missing profile: {session}")
         raise HTTPException(status_code=422, detail="Hiányzó profil")
     entries = await _fetch_entries(client, session_id)
+    print(f"[respond] 🧾 entries loaded: {len(entries)}")
 
     # Recreate client to avoid potential caching delay
-    last_user = await get_last_user_entry(get_client(), session_id)
+    last_user = await get_last_user_entry(session_id)
     if not last_user:
+        print("[respond] ❌ last user entry not found")
         raise HTTPException(status_code=400, detail="No user input found")
+
+    print(f"[respond] 🧠 last_user found: {last_user['content'][:40]}...")
 
     user_input = last_user["content"]
 
@@ -121,6 +127,8 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
             status_code=422, detail="Hiányzó prompt_core vagy profil"
         ) from exc
     
+    print(f"[respond] 📌 system_prompt built, length: {len(system_prompt)}")
+
     if not system_prompt or not system_prompt.strip():
         print(
             f"[respond] empty system prompt | profile={session['profile']} | user={session['user_id']}"
@@ -133,11 +141,13 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
             messages.append({"role": e["role"], "content": e["content"]})
 
     try:
+        start_openai = datetime.now(timezone.utc)
         chat = await _openai_client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages,
             temperature=0.7,
         )
+        elapsed = (datetime.now(timezone.utc) - start_openai).total_seconds()
     except Exception as exc:
         # Log and surface the exact error to help debugging when
         # the assistant reply cannot be generated.
@@ -150,9 +160,11 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
     reply = chat.choices[0].message.content or ""
     reply = reply.strip()
 
+    print(f"[respond] 💬 reply ready, {len(reply)} chars")
+
     if chat.usage:
         print(
-            f"[respond] tokens -> prompt: {chat.usage.prompt_tokens}, completion: {chat.usage.completion_tokens}"
+            f"[respond] \U0001F4CA OpenAI: {elapsed:.2f}s prompt={chat.usage.prompt_tokens} / completion={chat.usage.completion_tokens}"
         )
 
     now = datetime.now(timezone.utc).isoformat()
@@ -174,7 +186,7 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
         print(f"[respond] error inserting reply: {insert_error}")
         raise HTTPException(status_code=500, detail="Failed to store AI reply")
     else:
-        print(f"[respond] reply stored: {insert_result}")
+        print(f"[respond] ✅ reply INSERT success")
 
     # Optional system event about strategy detection
     try:
