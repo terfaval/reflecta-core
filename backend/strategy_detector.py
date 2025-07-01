@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import re
-from typing import Dict, Iterable
+from typing import Dict, Iterable, List
+from collections import Counter
 
 
 # ---------------------------------------------------------------------------
@@ -226,3 +227,39 @@ def detect_top_strategies(
     )
 
     return [s for s, _ in ranked[:top_n]]
+
+
+def detect_strategy_smoothed(
+    entries: List[str], session_position: str | None = None, window: int = 3
+) -> str:
+    """Return a stabilised strategy considering recent entries.
+
+    Parameters
+    ----------
+    entries:
+        Chronologically ordered user entry texts. The most recent entry should
+        be last.
+    session_position:
+        Optional position hint (``"start"`` or ``"end"``) for the newest entry.
+    window:
+        How many of the most recent entries to consider. Defaults to ``3``.
+    """
+    if not entries:
+        return "explorative"
+
+    recent = entries[-window:]
+    strategies = [
+        detect_strategy(text, session_position if i == len(recent) - 1 else None)
+        for i, text in enumerate(recent)
+    ]
+
+    if len(recent) == 1:
+        return strategies[0]
+
+    counts = Counter(strategies)
+    top, freq = counts.most_common(1)[0]
+    if freq > 1:
+        return top
+
+    # If no strategy repeats, keep the previous one
+    return strategies[-2]

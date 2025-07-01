@@ -17,7 +17,7 @@ from openai import AsyncOpenAI
 from .auth import Role, feature_enabled, role_guard
 from .db import get_client
 from .prompt_builder import build_system_prompt
-from .strategy_detector import detect_strategy
+from .strategy_detector import detect_strategy, detect_strategy_smoothed
 from .profile_recommender import (
     recommend_profile_switch,
     detect_requested_profile,
@@ -101,7 +101,11 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
 
     suggestions = suggest_profiles(user_input, session["profile"])
 
-    strategy = detect_strategy(user_input, session_position=position)
+    history_texts = [e["content"] for e in user_entries]
+    if not history_texts or history_texts[-1] != user_input:
+        history_texts.append(user_input)
+
+    strategy = detect_strategy_smoothed(history_texts, session_position=position)
     try:
         system_prompt = build_system_prompt(
             session["user_id"],
