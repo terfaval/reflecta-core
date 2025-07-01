@@ -91,7 +91,7 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
     print(f"[respond] 🧾 entries loaded: {len(entries)}")
 
     # Recreate client to avoid potential caching delay
-    last_user = await get_last_user_entry(session_id)
+    last_user = await get_last_user_entry(session_id, client=client)
     if not last_user:
         print("[respond] ❌ last user entry not found")
         raise HTTPException(status_code=400, detail="No user input found")
