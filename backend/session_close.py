@@ -106,7 +106,14 @@ def generate_session_closure_response(session_id: str) -> str:
         "Ügyelj a helyesírásra, nyelvtani pontosságra és gördülékeny stílusra."
     )
 
-    full_prompt = build_system_prompt(profile, {"isClosing": True})
+    # Build the system prompt using the closing strategy
+    full_prompt = build_system_prompt(
+        session["user_id"],
+        session["profile"],
+        "",
+        strategy="session_closure",
+        session_position="end",
+    )
     system_prompt = f"{language_tone_prefix}\n\n{full_prompt}"
 
     messages = [{"role": "system", "content": system_prompt}] + user_entries

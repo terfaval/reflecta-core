@@ -22,6 +22,8 @@ from .profile_recommender import (
     recommend_profile_switch,
     detect_requested_profile,
 )
+from lib.entry_utils import get_last_user_entry
+from .profile_suggester import suggest_profiles
 
 
 router = APIRouter()
@@ -85,16 +87,9 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
         raise HTTPException(status_code=422, detail="Hiányzó profil")
     entries = await _fetch_entries(client, session_id)
 
-    last_user = next((e for e in reversed(entries) if e.get("role") == "user"), None)
+    last_user = await get_last_user_entry(client, session_id)
     if not last_user:
-        await asyncio.sleep(0.3)
-        entries = await _fetch_entries(client, session_id)
-        last_user = next((e for e in reversed(entries) if e.get("role") == "user"), None)
-        if last_user:
-            logging.warning("[respond] user input found after retry")
-        else:
-            logging.warning("[respond] ❌ user input missing after retry")
-            raise HTTPException(status_code=400, detail="No user input found")
+        raise HTTPException(status_code=400, detail="No user input found")
 
     user_input = last_user["content"]
 
@@ -103,10 +98,17 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
     user_entries = [e for e in entries if e.get("role") == "user"]
     position = "start" if len(user_entries) <= 1 and session["profile"].lower() == "reflecta" else None
 
+    suggestions = suggest_profiles(user_input, session["profile"])
+
     strategy = detect_strategy(user_input, session_position=position)
     try:
         system_prompt = build_system_prompt(
-            session["user_id"], session["profile"], user_input, strategy
+            session["user_id"],
+            session["profile"],
+            user_input,
+            strategy,
+            session_position=position,
+            suggested_profiles=suggestions,
         )
     except Exception as exc:
         print(f"[respond] system prompt build failed: {exc}")
@@ -178,6 +180,8 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
         pass
 
     recommended = requested or recommend_profile_switch(reply, session["profile"])
+    if not recommended and suggestions:
+        recommended = suggestions[0]
 
     return {
         "reply": reply,
@@ -186,6 +190,7 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
         "system_prompt": system_prompt,
         "generated_at": now,
         "recommended_profile": recommended,
+        "suggested_profiles": suggestions,
     }
 
 
@@ -216,4 +221,5 @@ async def respond(
     return {
         "content": result["reply"],
         "recommendedProfile": result.get("recommended_profile"),
+        "suggestedProfiles": result.get("suggested_profiles"),
     }

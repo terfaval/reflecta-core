@@ -40,6 +40,7 @@ def build_system_prompt(
     user_input: str,
     strategy: Optional[str] = None,
     session_position: Optional[str] = None,
+    suggested_profiles: Optional[List[str]] = None,
 ) -> str:
     profile_data = fetch_profile(profile)
     metadata = fetch_profile_metadata(profile)
@@ -71,6 +72,11 @@ def build_system_prompt(
             "When appropriate, recommend a specialised profile that could deepen the process, and explain in one sentence why." 
         )
         lines.append("Maintain a meta-reflective stance throughout.")
+        if suggested_profiles:
+            names = human_list(suggested_profiles, "or")
+            lines.append(
+                f"If helpful, mention that profiles like {names} could offer a different lens and ask if the user wishes to switch."
+            )
 
     core = profile_data.get("prompt_core", "").strip()
     if core:
