@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from .supabase_client import supabase, _execute, _get_seed_profile
+from .supabase_client import supabase, _execute
 
 
 router = APIRouter()
@@ -66,16 +66,6 @@ def _fetch_profiles(names: List[str]) -> List[Dict[str, Any]]:
     except Exception as exc:
         raise HTTPException(500, f"Failed to load profiles: {exc}") from exc
     
-    # Inject seed profiles if missing
-    for n in names:
-        seed = _get_seed_profile(n)
-        if seed and not any(p.get("name") == seed.get("name") for p in data):
-            data.append({
-                "name": seed.get("name"),
-                "description": seed.get("description"),
-                "role": seed.get("role"),
-                "color": seed.get("color"),
-            })
     return data
 
 

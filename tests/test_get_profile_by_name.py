@@ -37,20 +37,10 @@ def test_get_profile_by_name_not_found():
     assert exc.value.status_code == 404
 
 
-def test_get_profile_by_name_seed():
-    # When the profile is defined in seed_profiles.json it should be returned
-    supabase = make_supabase()
-    with patch("backend.supabase_client.supabase", supabase), patch(
-        "backend.supabase_client._execute", return_value=None
-    ):
-        data = get_profile_by_name("Reflecta")
-    assert data["name"] == "Reflecta"
-
-
 def test_get_profile_by_name_case_insensitive():
     supabase = make_supabase()
     with patch("backend.supabase_client.supabase", supabase), patch(
-        "backend.supabase_client._execute", return_value=None
+        "backend.supabase_client._execute", return_value={"name": "Reflecta"}
     ):
         data = get_profile_by_name("reflecta")
     assert data["name"] == "Reflecta"
