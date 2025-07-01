@@ -10,6 +10,11 @@ from .style_summary_block import style_summary_block
 from .strategy_detector import detect_strategy, detect_top_strategies
 from .strategy_prompt_map import get_structure_hint
 from .strategy_response_templates import get_strategy_template
+from .system_prompt_base import (
+    CORE_ESSENCE_LINES,
+    GUIDELINE_LINES,
+    STRUCTURE_LINES,
+)
 
 
 def human_list(items: List[str] | None, conjunction: str = "and") -> str:
@@ -53,15 +58,8 @@ def build_system_prompt(
 
     lines: List[str] = []
 
-    core_essence_prompt: List[str] = [
-        "You accompany the user with presence, clarity, and care.",
-        "Each reply should deepen their self-awareness.",
-        "Avoid empty sympathy — offer quiet mirrors and brave questions.",
-        "Ask what they dare not ask themselves.",
-        "Reflect the shape of their pain, not its excuse.",
-        "Let your words breathe — then guide gently.",
-    ]
-    lines.extend(core_essence_prompt)
+    # Begin with the core essence shared across profiles
+    lines.extend(CORE_ESSENCE_LINES)
 
     if normalize_profile(profile_data.get("name")) == "reflecta":
         lines.append(
@@ -85,15 +83,8 @@ def build_system_prompt(
     if worldview:
         lines.append(f'You speak from the sense that: "{worldview}".')
 
-    lines.append(
-        "Always deepen the user's self-awareness with each reply. Challenge them with short, evocative questions that do not avoid pain."
-    )
-    lines.append(
-        "Do not use empty consolations like 'Ez teljesen érthető' or 'Sajnálom, hogy ezt éled meg'."
-    )
-    lines.append(
-        'Prefer direct questions such as: "Mi az, amit valójában szeretnél kimondani, de visszatartod?"'
-    )
+    # Core behavioural guidelines
+    lines.extend(GUIDELINE_LINES)
 
     lines.append(f"The active reflective strategy is: {strategy}.")
     if len(strategies) > 1:
@@ -132,7 +123,6 @@ def build_system_prompt(
         lines.append(
             f"When it fits the moment, you may ask in the spirit of {archetypes} — not to direct, but to gently open something within."
         )
-    lines.append("Always prioritize the user's tone and intention — follow their lead.")
 
     style_line = style_summary_block(metadata)
     if style_line:
@@ -145,18 +135,7 @@ def build_system_prompt(
             f"You tend to follow an interaction rhythm that feels {rhythm_label} — let this shape your pacing, pauses, and how you pass the conversation back."
         )
 
-    lines.append("Each response you offer can have a gentle structure.")
-    lines.append(
-        "Begin by holding up a mirror — reflect something the user just shared, as if you're gently naming its shape or mood."
-    )
-    lines.append(
-        "Then, if the moment allows, invite a next step. This might be a quiet prompt, an open question, or a space left for them to continue in their own way."
-    )
-    lines.append(
-        "Let these two parts be separated by a natural pause or line break. Keep your reply spacious enough to breathe, but clear enough to guide."
-    )
-    lines.append(
-        "And always remember: your purpose is not to lead, but to accompany — with presence, care, and clarity."
-    )
+    # Guidance on how to shape each reply
+    lines.extend(STRUCTURE_LINES)
 
     return "\n".join(lines)
