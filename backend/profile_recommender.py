@@ -17,6 +17,12 @@ PROFILE_PATTERNS = {
     "Reflecta": [r"\breflecta\b"],
 }
 
+# Verbs or phrases that typically signal a recommendation or invitation
+_SUGGEST_RE = re.compile(
+    r"aj[áa]nl|javasl|pr[óo]b[áa]ld|szerintem|\bhasznos\b|\bérdemes\b|\bv[áa]lt",
+    re.IGNORECASE,
+)
+
 # Regex to detect explicit user requests for a different profile, such as
 # "Mit mondana erre Éana?" or "Kérjem Kairost".
 USER_REQUEST_RE = re.compile(
@@ -28,6 +34,8 @@ def recommend_profile_switch(response_text: str, current_profile: str) -> Option
     """Return a recommended profile based on the AI response."""
     text = (response_text or "").lower()
     current = normalize_profile(current_profile)
+    if not _SUGGEST_RE.search(text):
+        return None
     for profile, patterns in PROFILE_PATTERNS.items():
         if normalize_profile(profile) == current:
             continue

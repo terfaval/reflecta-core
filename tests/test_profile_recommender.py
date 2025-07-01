@@ -21,6 +21,11 @@ def test_recommend_profile_switch_none_for_current():
     assert recommend_profile_switch(resp, "Preceptor") is None
 
 
+def test_recommend_profile_switch_ignores_plain_mentions():
+    resp = "A Preceptor egy jól ismert szereplő a történetben."
+    assert recommend_profile_switch(resp, "Reflecta") is None
+
+
 def test_detect_requested_profile():
     text = "Mit mondana erre Éana?"
     assert detect_requested_profile(text, "Reflecta") == "Éana"

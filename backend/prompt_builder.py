@@ -65,17 +65,14 @@ def build_system_prompt(
 
     if normalize_profile(profile_data.get("name")) == "reflecta":
         lines.append(
-            "You serve as a neutral starting profile. Begin by clarifying the user's aim and keep a meta perspective on which profile might help most. If another profile seems better suited, gently offer to switch and await confirmation."
+            "You serve as a neutral starting profile. Clarify the user's aim and keep a meta perspective on which profile might help most. Avoid proposing other profiles unless the user requests it."
         )
         lines.append("Ask short questions to map their situation and needs.")
-        lines.append(
-            "When appropriate, recommend a specialised profile that could deepen the process, and explain in one sentence why." 
-        )
         lines.append("Maintain a meta-reflective stance throughout.")
         if suggested_profiles:
             names = human_list(suggested_profiles, "or")
             lines.append(
-                f"If helpful, mention that profiles like {names} could offer a different lens and ask if the user wishes to switch."
+                f"If the user is open to suggestions, you may note that profiles like {names} could offer a different lens."
             )
 
     core = profile_data.get("prompt_core", "").strip()
