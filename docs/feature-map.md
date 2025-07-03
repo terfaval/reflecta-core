@@ -8,7 +8,7 @@ Ez a dokumentum összefoglalja a frontend és backend által biztosított főbb 
 |-------|---------|---------|-----------------------|
 | **Profilválasztó** | `/select-profile` | A felhasználó rendelkezésre álló naplóprofilok közül választhat. A `ProfileSlider` komponens jelenik meg. | `POST /api/profile-list` a profil adatokért; kiválasztáskor `POST /api/conversation/new` hívás történik. |
 | **Chat felület** | `/chat` | A fő csevegőablak. Tartalmazza a beszélgetési listát, az üzenetküldő felületet, profilváltási lehetőséget és a memóriapanelt. | `POST /api/session` vagy `POST /api/conversation/new` (új beszélgetéshez), `POST /api/entries` üzenet mentéséhez, `POST /api/respond` válasz generálásához, `POST /api/session/close` záráshoz, `GET /api/memory/summary` memóriához. |
-| **Profilépítő** | `/profile-builder` | Kérdőíves folyamat személyes profil létrehozására prémium felhasználók számára. | `POST /api/profile-list` jogosultság ellenőrzéshez, `POST /api/profile/from-survey` a profil generálásához, majd `POST /api/conversation/new` indítja a beszélgetést. |
+| **Profilépítő** | `/profile-builder` | Kérdőíves folyamat személyes profil létrehozására prémium vagy admin felhasználók számára. | `POST /api/profile-list` jogosultság ellenőrzéshez, `POST /api/profile/from-survey` a profil generálásához, majd `POST /api/conversation/new` indítja a beszélgetést. |
 | **Nincs jogosultság** | `/non-authorized` | Egyszerű figyelmeztetés jogosultság hiányában. | – |
 
 ## Felhasználói útvonalak
@@ -20,7 +20,7 @@ Ez a dokumentum összefoglalja a frontend és backend által biztosított főbb 
 2. **Profil kiválasztása**
    - A `/select-profile` oldalon a `ProfileSlider` jelenik meg. A kártyák adatai `POST /api/profile-list` segítségével töltődnek be.
    - Egy profil kiválasztása `POST /api/conversation/new` hívást indít, ami létrehozza a beszélgetést és a munkamenetet, majd átirányítás történik a `/chat` oldalra.
-   - Amennyiben a felhasználó rendelkezik személyes profillal, vagy prémium jogosultsággal, megjelenik egy gomb a profilépítő indításához.
+   - Amennyiben a felhasználó rendelkezik személyes profillal, vagy prémium vagy admin jogosultsággal, megjelenik egy gomb a profilépítő indításához.
 3. **Chat használata**
    - A `ChatPage` a `useUserSession` hookkal kéri le a profilhoz tartozó induló üzenetet (`POST /api/starting-prompt`) és létrehozza vagy visszatölti a munkamenetet (`POST /api/session`).
    - Üzenet elküldésekor `POST /api/entries` menti a bejegyzést, majd `POST /api/respond` generálja a választ.
@@ -28,7 +28,7 @@ Ez a dokumentum összefoglalja a frontend és backend által biztosított főbb 
    - A `ReflectiveMemoryPanel` a korábbi címkézett bejegyzéseket `GET /api/memory/summary` segítségével tölti be, melyek új beszélgetési téma indítására használhatók.
    - A munkamenet zárása a “Mára elég volt” gombbal (`POST /api/session/close`).
 4. **Személyes profil létrehozása**
-   - A prémium felhasználók a profilépítő kérdőíven (öt kérdés) haladnak végig. A válaszok elküldése `POST /api/profile/from-survey` kérést indít.
+   - A prémium vagy admin felhasználók a profilépítő kérdőíven (öt kérdés) haladnak végig. A válaszok elküldése `POST /api/profile/from-survey` kérést indít.
    - Sikeres létrehozás után a rendszer felajánlja az új profilból indított beszélgetést (`POST /api/conversation/new`).
 
 ## Jogosultságok és Feature flag-ek

@@ -52,8 +52,8 @@ export default function ProfileBuilder() {
       body: JSON.stringify({ userId })
     })
       .then(data => {
-        if (data.role !== 'premium') {
-          setAccessError('Ez csak prémium felhasználók számára elérhető.');
+        if (data.role !== 'premium' && data.role !== 'admin') {
+          setAccessError('Ez csak prémium vagy admin felhasználók számára elérhető.');
           return;
         }
         if ((data.personalProfiles || []).length) {
