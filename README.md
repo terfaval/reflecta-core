@@ -71,7 +71,6 @@ uvicorn backend.main:app --reload
   - `strategy_response_templates.py`
   - `style_summary_block.py`
   - `supabase_client.py`
-  - `user.py`
   - `user_create.py`
   - `users.py`
 - `components/` – újrafelhasználható React komponensek

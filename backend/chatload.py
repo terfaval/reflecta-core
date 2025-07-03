@@ -6,7 +6,7 @@ import re
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .supabase_client import supabase, _execute
 from .metadata_fallback import get_profile_metadata
@@ -18,8 +18,8 @@ router = APIRouter()
 class ChatloadRequest(BaseModel):
     userId: str
     profile: str
-    limit: int = 20
-    offset: int = 0
+    limit: int = Field(default=20, ge=1, le=100)
+    offset: int = Field(default=0, ge=0, le=1000)
 
 
 def _fetch_latest_conversation(user_id: str, profile: str) -> Dict[str, Any]:

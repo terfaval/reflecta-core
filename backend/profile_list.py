@@ -72,36 +72,29 @@ def _fetch_profiles(names: List[str]) -> List[Dict[str, Any]]:
 @router.post("/profile-list")
 async def profile_list(payload: ProfileListRequest) -> Dict[str, Any]:
     """Return profile metadata and role for the given user."""
-    try:
-        user_id = payload.userId
-        if not user_id:
-            return JSONResponse(
-                status_code=400,
-                content={"error": "Hiányzó adat vagy érvénytelen lekérés."},
-            )
-
-        names = list(payload.names or [])
-
-        role = _fetch_user_role(user_id)
-        personal = _fetch_personal_profile_names(user_id)
-
-        if role == "admin":
-            names = list_all_profile_names()
-        elif personal:
-            names.extend(personal)
-
-        names = list({n for n in names if n})
-        
-        profiles = _fetch_profiles(names)
-
-        return {
-            "profiles": profiles,
-            "personalProfiles": personal,
-            "role": role,
-        }
-    except Exception as exc:  # pragma: no cover - unexpected error
-        print(f"[profile_list] Unexpected error: {exc}")
+    user_id = payload.userId
+    if not user_id:
         return JSONResponse(
             status_code=400,
             content={"error": "Hiányzó adat vagy érvénytelen lekérés."},
         )
+
+    names = list(payload.names or [])
+
+    role = _fetch_user_role(user_id)
+    personal = _fetch_personal_profile_names(user_id)
+
+    if role == "admin":
+        names = list_all_profile_names()
+    elif personal:
+        names.extend(personal)
+
+    names = list({n for n in names if n})
+
+    profiles = _fetch_profiles(names)
+
+    return {
+        "profiles": profiles,
+        "personalProfiles": personal,
+        "role": role,
+    }

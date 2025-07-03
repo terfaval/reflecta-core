@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
 from .db import get_client
-from .supabase_client import _execute
-from .utils import normalize_profile
+from .supabase_client import _execute, get_session
 from .metadata_fallback import get_profile_metadata
+from .auth import role_guard, Role
 
 router = APIRouter()
 
@@ -52,6 +52,15 @@ def _fetch_profile(session_id: str) -> str:
     )
     session = _execute(result)
     return session.get("profile") if session else ""
+
+
+def _session_belongs_to_user(session_id: str, user_id: str) -> bool:
+    """Return True if the session is owned by the given user."""
+    try:
+        session = get_session(session_id)
+    except Exception:
+        return False
+    return bool(session and session.get("user_id") == user_id)
 
 
 def _fetch_closing_trigger(profile: str) -> str:
@@ -115,12 +124,17 @@ async def list_entries(sessionId: str) -> Dict[str, Any]:
 
 
 @router.post("/entries")
-async def create_entry(payload: EntryRequest) -> Dict[str, Any]:
+async def create_entry(
+    payload: EntryRequest, user=Depends(role_guard(Role.BASIC))
+) -> Dict[str, Any]:
     session_id = payload.sessionId
     item = payload.entry
 
     if not session_id:
         raise HTTPException(status_code=400, detail="Missing sessionId")
+
+    if not _session_belongs_to_user(session_id, user["id"]):
+        raise HTTPException(status_code=403, detail="Forbidden")
     
     if not item.content or not item.content.strip():
         return {"success": False, "reason": "Üres bejegyzés"}
