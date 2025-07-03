@@ -28,7 +28,7 @@ export default function LoadingPage() {
         }>(`/api/last-session?userId=${encodeURIComponent(userId)}`, {
           method: 'GET',
         });
-        
+
         const navigate = () => {
           if (data.conversationId && data.sessionId && !data.endedAt) {
             if (data.profile) setProfile(data.profile);
@@ -39,7 +39,7 @@ export default function LoadingPage() {
         };
 
         const elapsed = Date.now() - start;
-        const MIN_DELAY = 1000;
+        const MIN_DELAY = 5000;
         if (elapsed < MIN_DELAY) {
           setTimeout(navigate, MIN_DELAY - elapsed);
         } else {
