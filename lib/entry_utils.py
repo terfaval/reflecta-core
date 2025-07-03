@@ -44,8 +44,9 @@ async def get_last_user_entry(
         print(f"\n\n🚨 [entry_utils] RAW RESULT: {result}\n\n")
         logging.info(f"[entry_utils] raw result: {result}")
 
+        entries = result.get("data") if isinstance(result, dict) else result
 
-        for entry in reversed(result or []):
+        for entry in reversed(entries or []):
             if entry.get("role", "").strip().lower() == "user":
                 logging.debug(
                     f"[entry_utils] last_user found: {entry.get('content','')[:40]}..."
