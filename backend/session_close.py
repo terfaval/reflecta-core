@@ -220,7 +220,7 @@ def close_session(session_id: str) -> Dict[str, str]:
                 {
                     "session_id": session_id,
                     "role": "system",
-                    "content": f"Szakasz lezárása: {label}",
+                    "content": f"Lezárt szakasz: {label}",
                     "created_at": now,
                 },
             ]
