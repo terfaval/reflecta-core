@@ -106,7 +106,8 @@ export default function ProfileSelectorSidebar({
     return arr;
   }, [baseProfiles, customProfiles, activeProfileId]);
 
-  const showCreateButton = role !== 'basic' && customProfiles.length === 0;
+  const showCreateButton =
+    role === 'admin' || (role !== 'basic' && customProfiles.length === 0);
   
   return (
     <aside className={styles.sidebar}>
