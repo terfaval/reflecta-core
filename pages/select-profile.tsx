@@ -7,7 +7,7 @@ import UserErrorDisplay from "@/components/UserErrorDisplay";
 import { useUserContext } from "@/contexts/UserContext";
 
 export default function ProfileSelectorPage() {
-  const { userInitialized, userError, checkingSession } = useUserContext();
+  const { userInitialized, userError } = useUserContext();
   
 
   if (userError)
@@ -20,8 +20,6 @@ export default function ProfileSelectorPage() {
 
   if (!userInitialized)
     return <SpiralLoader userColor="#7A4DFF" aiColor="#FFB347" />;
-
- if (checkingSession) return <SpiralLoader userColor="#7A4DFF" aiColor="#FFB347" />;
 
   return (
     <>

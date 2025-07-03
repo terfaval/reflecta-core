@@ -22,7 +22,6 @@ interface UserContextType {
   setUserInitialized: (v: boolean) => void;
   userError: string | null;
   setUserError: (err: string | null) => void;
-  checkingSession: boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -32,17 +31,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userInitialized, setUserInitialized] = useState(false);
   const [userError, setUserError] = useState<string | null>(null);
-  const [checkingSession, setCheckingSession] = useState(
-    typeof window === 'undefined'
-      ? false
-      : window.location.pathname === '/' ||
-        window.location.pathname === '/select-profile' ||
-        window.location.pathname === '/loading',
-  );
 
   const router = useRouter();
   const { setProfile } = useProfileContext();
-  const redirectDone = useRef(false);
 
   const processUserInit = async (
     wp_user_id: string,
@@ -153,49 +144,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     return () => clearTimeout(id);
   }, [userInitialized, userError]);
 
-  useEffect(() => {
-    if (redirectDone.current) return;
-    if (!userId || !userInitialized) return;
-    if (!router.isReady) return;
-    if (
-      router.pathname !== '/' &&
-      router.pathname !== '/select-profile' &&
-      router.pathname !== '/loading'
-    ) {
-      redirectDone.current = true;
-      setCheckingSession(false);
-      return;
-    }
-
-    const check = async () => {
-      setCheckingSession(true);
-      try {
-        const data = await apiFetch<{
-          conversationId?: string;
-          sessionId?: string;
-          profile?: string;
-          endedAt?: string | null;
-        }>(`/api/last-session?userId=${encodeURIComponent(userId)}`, { method: 'GET' });
-        if (data.conversationId && data.sessionId && !data.endedAt) {
-          if (data.profile) setProfile(data.profile);
-          console.log('[Bridge] \uD83D\uDD04 Redirecting to chat with existing session');
-          redirectToChat(router, data.conversationId, data.sessionId);
-        } else if (router.pathname === '/' || router.pathname === '/loading') {
-          router.push('/select-profile');
-        }
-      } catch (err) {
-        console.error('[last-session]', err);
-        if (router.pathname === '/' || router.pathname === '/loading')
-          router.push('/select-profile');
-      } finally {
-        redirectDone.current = true;
-        setCheckingSession(false);
-      }
-    };
-
-    check();
-  }, [userId, userInitialized, router, setProfile]);
-
   return (
     <UserContext.Provider
       value={{
@@ -207,7 +155,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUserInitialized,
         userError,
         setUserError,
-        checkingSession,
       }}
     >
       {children}
