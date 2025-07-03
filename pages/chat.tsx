@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/router";
 import { profileStyles } from "../styles/profileStyles";
 import UserErrorDisplay from "../components/UserErrorDisplay";
-import SpiralLoader from "../components/SpiralLoader";
 import ReflectiveMemoryPanel from "../components/ReflectiveMemoryPanel";
 import ProfileSelectorSidebar from "../components/ProfileSelectorSidebar";
 import ProfileSlider from "@/components/ProfileSlider";
@@ -323,29 +322,11 @@ export default function ChatPage() {
     );
   }
 
-  if (!userInitialized) {
-    return (
-      <SpiralLoader
-        userColor={currentStyle["--user-color"] || "#7A4DFF"}
-        aiColor={currentStyle["--ai-color"] || "#FFB347"}
-      />
-    );
-  }
-
   if (showProfileSelect || (userInitialized && !profile && !sessionId)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <ProfileSlider />
       </div>
-    );
-  }
-
-  if (!sessionId) {
-    return (
-      <SpiralLoader
-        userColor={currentStyle["--user-color"] || "#7A4DFF"}
-        aiColor={currentStyle["--ai-color"] || "#FFB347"}
-      />
     );
   }
 
