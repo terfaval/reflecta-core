@@ -46,6 +46,7 @@ def build_system_prompt(
     strategy: Optional[str] = None,
     session_position: Optional[str] = None,
     suggested_profiles: Optional[List[str]] = None,
+    arc_state: Optional[str] = None,
 ) -> str:
     profile_data = fetch_profile(profile)
     metadata = fetch_profile_metadata(profile)
@@ -89,6 +90,8 @@ def build_system_prompt(
     lines.append(f"The active reflective strategy is: {strategy}.")
     if len(strategies) > 1:
         lines.append(f"A secondary strategy might be: {strategies[1]}.")
+    if arc_state:
+        lines.append(f"The estimated reflective arc state is: {arc_state}.")
 
     structure_hint = get_structure_hint(strategy)
     if structure_hint:

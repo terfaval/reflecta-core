@@ -18,6 +18,7 @@ from .auth import Role, feature_enabled, role_guard
 from .db import get_client
 from .prompt_builder import build_system_prompt
 from .strategy_detector import detect_strategy, detect_strategy_smoothed
+from .arc_state_estimator import estimate_arc_state
 from .profile_recommender import (
     recommend_profile_switch,
     detect_requested_profile,
@@ -147,6 +148,10 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
         history_texts.append(user_input)
 
     strategy = detect_strategy_smoothed(history_texts, session_position=position)
+
+    message_entries = [e for e in entries if e.get("role") in {"user", "assistant"}]
+    strategy_history = [detect_strategy(text) for text in history_texts]
+    arc_state = estimate_arc_state(len(message_entries), strategy_history)
     try:
         system_prompt = build_system_prompt(
             session["user_id"],
@@ -155,6 +160,7 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
             strategy,
             session_position=position,
             suggested_profiles=suggestions,
+            arc_state=arc_state,
         )
     except Exception as exc:
         print(f"[respond] system prompt build failed: {exc}")
