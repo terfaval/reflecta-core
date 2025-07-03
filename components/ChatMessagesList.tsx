@@ -83,7 +83,6 @@ export function ChatMessagesList({
             prompt={startingPrompt}
             color={currentStyle['--user-color']}
           />
-          {startingPrompt}
         </div>
       ) : (
         entries.map((entry, index) => (

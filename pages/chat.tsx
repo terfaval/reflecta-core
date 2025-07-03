@@ -200,7 +200,7 @@ export default function ChatPage() {
         // Reset previous entries and prompts for the new session context
         setEntries([]);
         setStartingPrompt('');
-        setSessionIsFresh(false);
+        setSessionIsFresh(true);
       }
     } catch (err) {
       console.error("[switch profile]", err);
