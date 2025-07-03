@@ -125,7 +125,12 @@ export default function ResponseTweakButtons({
   userColor = 'currentColor',
 }: ResponseTweakButtonsProps) {
   return (
-    <div className={styles.tweakButtons}>
+    <div
+      className={styles.tweakButtons}
+      style={{
+        '--user-color': userColor,
+      } as React.CSSProperties}
+    >
       {tweaks.map((t) => (
         <button
           key={t.label}
