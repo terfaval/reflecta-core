@@ -23,6 +23,7 @@ from .profile_recommender import (
     detect_requested_profile,
 )
 from lib.entry_utils import get_last_user_entry
+from .supabase_client import _execute
 from .profile_suggester import suggest_profiles
 
 
@@ -39,28 +40,36 @@ class RespondRequest(BaseModel):
 
 async def _fetch_session(client: Any, session_id: str) -> Dict[str, Any]:
     """Return session record or raise HTTP 404."""
-    session, error = (
-        client.table("sessions")
-        .select("id, user_id, profile, ended_at")
-        .eq("id", session_id)
-        .maybe_single()
-        .execute()
-    )
-    if error or not session:
+    try:
+        result = (
+            client.table("sessions")
+            .select("id, user_id, profile, ended_at")
+            .eq("id", session_id)
+            .maybe_single()
+            .execute()
+        )
+        session = _execute(result)
+    except Exception as exc:
+        logging.warning(f"[respond] session fetch error: {exc}")
+        session = None
+    if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     return session
 
 
 async def _fetch_entries(client: Any, session_id: str) -> List[Dict[str, Any]]:
     """Return all entries for the session ordered by creation."""
-    entries, error = (
-        client.table("entries")
-        .select("role, content")
-        .eq("session_id", session_id)
-        .order("created_at", desc=False)
-        .execute()
-    )
-    if error:
+    try:
+        result = (
+            client.table("entries")
+            .select("role, content")
+            .eq("session_id", session_id)
+            .order("created_at", desc=False)
+            .execute()
+        )
+        entries = _execute(result)
+    except Exception as exc:
+        logging.warning(f"[respond] fetch entries error: {exc}")
         raise HTTPException(status_code=500, detail="Failed to load entries")
     return entries or []
 
@@ -71,20 +80,22 @@ async def _maybe_insert_user_entry(client: Any, session_id: str, content: str) -
     if last_user and last_user.get("content") == content:
         return
     now = datetime.now(timezone.utc).isoformat()
-    _, error = (
-        client.table("entries")
-        .insert(
-            {
-                "session_id": session_id,
-                "role": "user",
-                "content": content,
-                "created_at": now,
-            }
+    try:
+        result = (
+            client.table("entries")
+            .insert(
+                {
+                    "session_id": session_id,
+                    "role": "user",
+                    "content": content,
+                    "created_at": now,
+                }
+            )
+            .execute()
         )
-        .execute()
-    )
-    if error:
-        print(f"[respond] error inserting user entry: {error}")
+        _execute(result)
+    except Exception as exc:
+        print(f"[respond] error inserting user entry: {exc}")
         raise HTTPException(status_code=500, detail="Failed to store user entry")
 
 
@@ -194,23 +205,24 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
     now = datetime.now(timezone.utc).isoformat()
 
     # Persist reply
-    insert_result, insert_error = (
-        client.table("entries")
-        .insert(
-            {
-                "session_id": session_id,
-                "role": "assistant",
-                "content": reply,
-                "created_at": now,
-            }
+    try:
+        result = (
+            client.table("entries")
+            .insert(
+                {
+                    "session_id": session_id,
+                    "role": "assistant",
+                    "content": reply,
+                    "created_at": now,
+                }
+            )
+            .execute()
         )
-        .execute()
-    )
-    if insert_error:
-        print(f"[respond] error inserting reply: {insert_error}")
-        raise HTTPException(status_code=500, detail="Failed to store AI reply")
-    else:
+        _execute(result)
         print(f"[respond] ✅ reply INSERT success")
+    except Exception as exc:
+        print(f"[respond] error inserting reply: {exc}")
+        raise HTTPException(status_code=500, detail="Failed to store AI reply")
 
     # Optional system event about strategy detection
     try:

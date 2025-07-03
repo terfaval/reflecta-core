@@ -1,6 +1,7 @@
 from typing import List, Dict, Any, Optional
 import asyncio
 import logging
+from backend.supabase_client import _execute
 
 FETCH_RETRY_DELAY = 0.4  # seconds
 FETCH_RETRY_ATTEMPTS = 3
@@ -11,15 +12,17 @@ logging.basicConfig(level=logging.DEBUG)
 
 async def fetch_user_entries(client, session_id: str) -> List[Dict[str, Any]]:
     """Return all entries for the session ordered by creation."""
-    entries, error = (
-        client.table("entries")
-        .select("role, content")
-        .eq("session_id", session_id)
-        .order("created_at", desc=False)
-        .execute()
-    )
-    if error:
-        logging.warning(f"[entry_utils] fetch error: {error}")
+    try:
+        result = (
+            client.table("entries")
+            .select("role, content")
+            .eq("session_id", session_id)
+            .order("created_at", desc=False)
+            .execute()
+        )
+        entries = _execute(result)
+    except Exception as exc:
+        logging.warning(f"[entry_utils] fetch error: {exc}")
         return []
     return entries or []
 
@@ -33,18 +36,20 @@ async def get_last_user_entry(
         f"[entry_utils] get_last_user_entry start session={session_id} client_id={id(client)}"
     )
     for attempt in range(FETCH_RETRY_ATTEMPTS):
-        result = (
-            client.table("entries")
-            .select("role, content")
-            .eq("session_id", session_id)
-            .order("created_at", desc=False)
-            .execute()
-        )
-
-        print(f"\n\n🚨 [entry_utils] RAW RESULT: {result}\n\n")
-        logging.info(f"[entry_utils] raw result: {result}")
-
-        entries = result["data"]
+        try:
+            result = (
+                client.table("entries")
+                .select("role, content")
+                .eq("session_id", session_id)
+                .order("created_at", desc=False)
+                .execute()
+            )
+            print(f"\n\n🚨 [entry_utils] RAW RESULT: {result}\n\n")
+            logging.info(f"[entry_utils] raw result: {result}")
+            entries = _execute(result)
+        except Exception as exc:
+            logging.info(f"[entry_utils] raw result fetch error: {exc}")
+            entries = []
 
         for entry in reversed(entries or []):
             if entry.get("role", "").strip().lower() == "user":
