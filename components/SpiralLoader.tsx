@@ -4,10 +4,17 @@ import styles from './SpiralLoader.module.css';
 interface SpiralLoaderProps {
   userColor: string;
   aiColor: string;
+  fullScreen?: boolean;
 }
 
-const SpiralLoader: React.FC<SpiralLoaderProps> = ({ userColor, aiColor }) => (
-  <div className={styles.spiralLoader}>
+const SpiralLoader: React.FC<SpiralLoaderProps> = ({
+  userColor,
+  aiColor,
+  fullScreen = true,
+}) => (
+  <div
+    className={`${styles.spiralLoader}${fullScreen ? '' : ' ' + styles.compact}`}
+  >
     <svg
       viewBox="0 0 100 100"
       className={styles.spiralSvg}

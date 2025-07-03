@@ -54,6 +54,7 @@ export default function LoadingPage() {
   return (
     <div
       style={{
+        ...style,
         minHeight: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -62,9 +63,14 @@ export default function LoadingPage() {
         textAlign: 'center',
         gap: '0.5rem',
         width: '100%',
+        color: style['--user-color'],
       }}
     >
-      <ReflectaIcon width={64} height={64} />
+      <ReflectaIcon
+        width={64}
+        height={64}
+        style={{ color: style['--user-color'] }}
+      />
       <h1
         style={{
           fontFamily: 'Raleway, sans-serif',
@@ -87,6 +93,7 @@ export default function LoadingPage() {
       <SpiralLoader
         userColor={style['--user-color'] || '#7A4DFF'}
         aiColor={style['--ai-color'] || '#FFB347'}
+        fullScreen={false}
       />
     </div>
   );
