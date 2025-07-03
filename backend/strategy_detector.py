@@ -30,6 +30,9 @@ THEME_PATTERNS: Dict[str, Iterable[str]] = {
         r"[áa]lmodtam",
         r"testemben",
         r"k[ée]p jelent meg",
+        r"túl sokat nyelek",
+        r"nem tudom, hol vagyok ebben",
+        r"valami mélyebb mozog bennem",
     ],
     "integrative": [
         r"egyr[ée]szt",
@@ -37,11 +40,15 @@ THEME_PATTERNS: Dict[str, Iterable[str]] = {
         r"[öo]ssze[ée]r",
         r"ellent[ée]t",
         r"k[üu]l[öo]nb[öo]z[őo] oldalr[óo]l",
+        r"összeérnek bennem.*(régi minták|helyzetek|érzések)",
     ],
     "transformative": [
         r"[úu]gy d[öo]nt[öo]ttem.*m[áa]sk[ée]pp",
         r"[úu]j n[ée]z[őo]pont",
         r"[áa]tfordult bennem",
+        r"nem a régi.*én.*vagyok",
+        r"úgy látom.*nem ugyanaz.*játszma",
+        r"új szemmel nézek.*(helyzet|kapcsolat|probléma)",
     ],
     "concluding": [
         r"megtanultam",
@@ -58,11 +65,15 @@ THEME_PATTERNS: Dict[str, Iterable[str]] = {
         r"figyelem",
         r"jelen vagyok",
         r"csendesebb lett bennem",
+        r"néha elég.*csendben maradni",
+        r"nem kell.*válasz.*most",
+        r"elég.*jelen.*lenni.*(válaszok nélkül)?",
     ],
     "affirmative": [
         r"m[áa]r meg[ée]ltem ezt",
         r"k[ée]pes vagyok r[áa]",
         r"eml[ée]keztet arra, amikor er[őo]s voltam",
+        r"most már.*törődés.*bennem.*(harag helyett|ahelyett hogy harag lenne)",
     ],
     "reflective_mirror": [
         r"nem tudom.*hogyan.*(elmondani|megfogalmazni|kifejezni)",
