@@ -19,6 +19,7 @@ export default function LoadingPage() {
 
     const check = async () => {
       try {
+        const start = Date.now();
         const data = await apiFetch<{
           conversationId?: string;
           sessionId?: string;
@@ -27,15 +28,26 @@ export default function LoadingPage() {
         }>(`/api/last-session?userId=${encodeURIComponent(userId)}`, {
           method: 'GET',
         });
-        if (data.conversationId && data.sessionId && !data.endedAt) {
-          if (data.profile) setProfile(data.profile);
-          redirectToChat(router, data.conversationId, data.sessionId);
+        
+        const navigate = () => {
+          if (data.conversationId && data.sessionId && !data.endedAt) {
+            if (data.profile) setProfile(data.profile);
+            redirectToChat(router, data.conversationId, data.sessionId);
+          } else {
+            router.replace('/select-profile');
+          }
+        };
+
+        const elapsed = Date.now() - start;
+        const MIN_DELAY = 1000;
+        if (elapsed < MIN_DELAY) {
+          setTimeout(navigate, MIN_DELAY - elapsed);
         } else {
-          router.replace('/select-profile');
+          navigate();
         }
       } catch (err) {
         console.error('[last-session]', err);
-        router.replace('/select-profile');
+        setTimeout(() => router.replace('/select-profile'), 500);
       }
     };
 
@@ -69,7 +81,7 @@ export default function LoadingPage() {
       <ReflectaIcon
         width={64}
         height={64}
-        style={{ color: style['--user-color'] }}
+        style={{ color: style['--user-color'], fill: 'currentColor' }}
       />
       <h1
         style={{
