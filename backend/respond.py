@@ -34,6 +34,7 @@ _openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class RespondRequest(BaseModel):
     sessionId: str
+    content: str | None = None
 
 
 async def _fetch_session(client: Any, session_id: str) -> Dict[str, Any]:
@@ -62,6 +63,29 @@ async def _fetch_entries(client: Any, session_id: str) -> List[Dict[str, Any]]:
     if error:
         raise HTTPException(status_code=500, detail="Failed to load entries")
     return entries or []
+
+
+async def _maybe_insert_user_entry(client: Any, session_id: str, content: str) -> None:
+    """Insert a user entry if it does not yet exist."""
+    last_user = await get_last_user_entry(session_id, client=client)
+    if last_user and last_user.get("content") == content:
+        return
+    now = datetime.now(timezone.utc).isoformat()
+    _, error = (
+        client.table("entries")
+        .insert(
+            {
+                "session_id": session_id,
+                "role": "user",
+                "content": content,
+                "created_at": now,
+            }
+        )
+        .execute()
+    )
+    if error:
+        print(f"[respond] error inserting user entry: {error}")
+        raise HTTPException(status_code=500, detail="Failed to store user entry")
 
 
 async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
@@ -228,6 +252,14 @@ async def respond(
     except Exception as exc:
         print(f"[respond] error reading request body: {exc}")
 
+    client = get_client()
+
+    if payload.content:
+        try:
+            await _maybe_insert_user_entry(client, payload.sessionId, payload.content)
+        except HTTPException as exc:
+            return JSONResponse(status_code=exc.status_code, content={"error": str(exc.detail)})
+        
     try:
         result = await generate_ai_reply(payload.sessionId)
     except HTTPException as exc:

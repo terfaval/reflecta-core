@@ -29,6 +29,9 @@ async def get_last_user_entry(
     client: Any,  # mostantól KÖTELEZŐ paraméter!
 ) -> Dict[str, Any] | None:
     """Try to fetch the last user entry with retries."""
+    print(
+        f"[entry_utils] get_last_user_entry start session={session_id} client_id={id(client)}"
+    )
     for attempt in range(FETCH_RETRY_ATTEMPTS):
         entries, error = (
             client.table("entries")
@@ -38,6 +41,14 @@ async def get_last_user_entry(
             .execute()
         )
 
+        print(
+            f"[entry_utils] attempt {attempt + 1} -> {len(entries or [])} entries"
+        )
+        for i, entry in enumerate(entries or []):
+            print(
+                f"[entry_utils] entry[{i}]: role={entry.get('role')} content={entry.get('content')}"
+            )
+            
         if error:
             logging.warning(f"[entry_utils] fetch error: {error}")
             return None
