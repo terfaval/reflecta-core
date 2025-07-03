@@ -63,10 +63,20 @@ export function ChatMessagesList({
           )}
         </div>
       ) : loadingEntries && !entries.length ? (
-        <SpiralLoader
-          userColor={currentStyle['--user-color'] || '#7A4DFF'}
-          aiColor={currentStyle['--ai-color'] || '#FFB347'}
-        />
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+          }}
+        >
+          <SpiralLoader
+            userColor={currentStyle['--user-color'] || '#7A4DFF'}
+            aiColor={currentStyle['--ai-color'] || '#FFB347'}
+            fullScreen={false}
+          />
+        </div>
       ) : entries.length === 0 && sessionIsFresh ? (
         <div style={{ textAlign: 'center' }}>
           <StartingPromptDisplay
