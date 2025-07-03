@@ -143,7 +143,7 @@ export default function ProfileSelectorSidebar({
             <LucidePlusCircle className="w-8 h-8 stroke-gray-400" />
           </div>
           <span className="text-sm font-medium">
-            Hozd létre a személyes napló profilodat!
+            Hozd létre a személyes naplódat!
           </span>
         </button>
       )}
