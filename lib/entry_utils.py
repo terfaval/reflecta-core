@@ -44,7 +44,7 @@ async def get_last_user_entry(
         print(f"\n\n🚨 [entry_utils] RAW RESULT: {result}\n\n")
         logging.info(f"[entry_utils] raw result: {result}")
 
-        entries = result.get("data") if isinstance(result, dict) else result
+        entries = result["data"]
 
         for entry in reversed(entries or []):
             if entry.get("role", "").strip().lower() == "user":
@@ -52,6 +52,7 @@ async def get_last_user_entry(
                     f"[entry_utils] last_user found: {entry.get('content','')[:40]}..."
                 )
                 return entry
+
 
         await asyncio.sleep(FETCH_RETRY_DELAY)
 
