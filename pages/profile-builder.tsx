@@ -56,8 +56,9 @@ export default function ProfileBuilder() {
           setAccessError('Ez csak prémium vagy admin felhasználók számára elérhető.');
           return;
         }
-        if ((data.personalProfiles || []).length) {
-          router.push('/non-authorized');
+        const hasPersonal = (data.personalProfiles || []).length > 0;
+        if (data.role === 'premium' && hasPersonal) {
+          router.push('/profile-limit');
         }
       })
       .catch(console.error);

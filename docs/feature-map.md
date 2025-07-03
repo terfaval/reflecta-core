@@ -9,6 +9,7 @@ Ez a dokumentum összefoglalja a frontend és backend által biztosított főbb 
 | **Profilválasztó** | `/select-profile` | A felhasználó rendelkezésre álló naplóprofilok közül választhat. A `ProfileSlider` komponens jelenik meg. | `POST /api/profile-list` a profil adatokért; kiválasztáskor `POST /api/conversation/new` hívás történik. |
 | **Chat felület** | `/chat` | A fő csevegőablak. Tartalmazza a beszélgetési listát, az üzenetküldő felületet, profilváltási lehetőséget és a memóriapanelt. | `POST /api/session` vagy `POST /api/conversation/new` (új beszélgetéshez), `POST /api/entries` üzenet mentéséhez, `POST /api/respond` válasz generálásához, `POST /api/session/close` záráshoz, `GET /api/memory/summary` memóriához. |
 | **Profilépítő** | `/profile-builder` | Kérdőíves folyamat személyes profil létrehozására prémium vagy admin felhasználók számára. | `POST /api/profile-list` jogosultság ellenőrzéshez, `POST /api/profile/from-survey` a profil generálásához, majd `POST /api/conversation/new` indítja a beszélgetést. |
+| **Profil limit** | `/profile-limit` | Jelzi, hogy csak egy személyes napló profil lehet. | – |
 | **Nincs jogosultság** | `/non-authorized` | Egyszerű figyelmeztetés jogosultság hiányában. | – |
 
 ## Felhasználói útvonalak
@@ -55,6 +56,7 @@ flowchart TD
     profile -->|Profil kiválasztása| chat
     profile -->|Személyes profil létrehozása| builder["/profile-builder"]
     builder -->|Profil elkészült| chat
+    builder --> limit["/profile-limit"]
     chat -->|Profilváltás| profile
     chat -->|Munkamenet lezárása| chat
     chat --> nonauth["/non-authorized"]

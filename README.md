@@ -106,6 +106,7 @@ uvicorn backend.main:app --reload
   - `_app.tsx`
   - `chat.tsx`
   - `non-authorized.tsx`
+  - `profile-limit.tsx`
   - `profile-builder.tsx`
   - `select-profile.tsx`
   - `api/ping.py` *(deprecated)*
