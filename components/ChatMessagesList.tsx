@@ -77,27 +77,29 @@ export function ChatMessagesList({
         </div>
       ) : (
         entries.map((entry, index) => (
-          <div key={entry.id} className={`reflecta-message ${entry.role}`}>
-            {entry.content === '__thinking__' ? (
-              <ThinkingDots />
-            ) : entry.role === 'system' && entry.content.startsWith('Szakasz lezárása:') ? (
-              <SessionLabelBubble
-                entryId={entry.id}
-                initialLabel={entry.content.replace('Szakasz lezárása:', '').trim()}
-                userColor={currentStyle['--user-color']}
-                aiColor={currentStyle['--ai-color']}
-              />
-            ) : (
-              <>
+          <div key={entry.id} className={`reflecta-message-block ${entry.role}`}> 
+            <div className={`reflecta-message ${entry.role}`}> 
+              {entry.content === '__thinking__' ? (
+                <ThinkingDots />
+              ) : entry.role === 'system' && entry.content.startsWith('Szakasz lezárása:') ? (
+                <SessionLabelBubble
+                  entryId={entry.id}
+                  initialLabel={entry.content.replace('Szakasz lezárása:', '').trim()}
+                  userColor={currentStyle['--user-color']}
+                  aiColor={currentStyle['--ai-color']}
+                />
+              ) : (
                 <p>{entry.content}</p>
-                {entry.role === 'assistant' && index === lastAssistantIndex && (
-                  <div style={{ marginTop: '4px' }}>
-                    <ResponseTweakButtons onTweak={onTweak} />
-                    {/* TODO: pass disabled or loading props when available */}
-                  </div>
-                )}
-              </>
-            )}
+              )}
+            </div>
+            {entry.role === 'assistant' &&
+              index === lastAssistantIndex &&
+              entry.content !== '__thinking__' && (
+                <div className="reflecta-tweak-container">
+                  <ResponseTweakButtons onTweak={onTweak} />
+                  {/* TODO: pass disabled or loading props when available */}
+                </div>
+              )}
           </div>
         ))
       )}

@@ -63,6 +63,26 @@ body,
   padding: 10px 0;
 }
 
+/* Új wrapper az üzenetekhez, hogy a válaszmódosító gombok a buborék alatt jelenjenek meg */
+.reflecta-message-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.reflecta-message-block.user {
+  align-items: flex-end;
+}
+
+.reflecta-message-block.assistant {
+  align-items: flex-start;
+}
+
+.reflecta-tweak-container {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
 /* Beviteli szekció */
 .reflecta-input {
   position: sticky;
