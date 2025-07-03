@@ -6,7 +6,7 @@ export const profileStyles: Record<string, React.CSSProperties & Record<string, 
   Reflecta: {
     '--bg-color': '#ffffff',
     '--user-color': '#7D9EDF',
-    '--ai-color': '#A9BEE9',
+    '--ai-color': '#C5DAF1',
   },
   Akasza: {
     '--bg-color': '#ffffff',
@@ -20,13 +20,13 @@ export const profileStyles: Record<string, React.CSSProperties & Record<string, 
   },
   Luma: {
     '--bg-color': '#ffffff',
-    '--user-color': '#DABD42',
-    '--ai-color': '#F4EE9A',
+    '--user-color': '#E5C837',
+    '--ai-color': '#F7EBB1',
   },
   luma: {
     '--bg-color': '#ffffff',
-    '--user-color': '#DABD42',
-    '--ai-color': '#F4EE9A',
+    '--user-color': '#E5C837',
+    '--ai-color': '#F7EBB1',
   },
   Sylva: {
     '--bg-color': '#ffffff',
@@ -46,7 +46,7 @@ export const profileStyles: Record<string, React.CSSProperties & Record<string, 
   Noe: {
     '--bg-color': '#ffffff',
     '--user-color': '#9A5C9A',
-    '--ai-color': '#C9A3C9',
+    '--ai-color': '#E5D3E5',
   },
   Solun: {
     '--bg-color': '#ffffff',
