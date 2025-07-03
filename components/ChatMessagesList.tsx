@@ -96,7 +96,10 @@ export function ChatMessagesList({
               index === lastAssistantIndex &&
               entry.content !== '__thinking__' && (
                 <div className="reflecta-tweak-container">
-                  <ResponseTweakButtons onTweak={onTweak} />
+                  <ResponseTweakButtons
+                    onTweak={onTweak}
+                    userColor={currentStyle['--user-color']}
+                  />
                   {/* TODO: pass disabled or loading props when available */}
                 </div>
               )}

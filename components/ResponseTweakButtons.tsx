@@ -5,6 +5,7 @@ interface ResponseTweakButtonsProps {
   onTweak: (promptText: string) => void;
   disabled?: boolean;
   loading?: boolean;
+  userColor?: string;
 }
 
 type Tweak = {
@@ -121,6 +122,7 @@ export default function ResponseTweakButtons({
   onTweak,
   disabled = false,
   loading = false,
+  userColor = 'currentColor',
 }: ResponseTweakButtonsProps) {
   return (
     <div className={styles.tweakButtons}>
@@ -132,7 +134,11 @@ export default function ResponseTweakButtons({
           disabled={disabled || loading}
           aria-label={t.label}
         >
-          {t.icon}
+          {React.isValidElement(t.icon)
+            ? React.cloneElement(t.icon as React.ReactElement<any>, {
+                stroke: userColor,
+              })
+            : t.icon}
           <span className={styles.tweakLabel}>{t.label}</span>
         </button>
       ))}
