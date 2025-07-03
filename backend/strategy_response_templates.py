@@ -170,6 +170,24 @@ STRATEGY_RESPONSE_TEMPLATES: Dict[str, Dict[str, Any]] = {
             "This strength is still here with you now."
         ),
     },
+    "reflective_mirror": {
+        "intro_type": "core reflection",
+        "body_type": "mirror-focused inquiry",
+        "layout": "layered reflection + optional silence",
+        "structure_description": (
+            "Begin by gently reflecting the user's key phrases or emotions, highlighting what is already present in their words. "
+            "Then, offer one or two inward-pointing questions that invite deeper self-observation, without pushing for answers. "
+            "Finally, if fitting, suggest simply resting in this reflection without needing to resolve anything immediately."
+        ),
+        "preferred_tone": "soft, precise, mirroring",
+        "use_bullet_style": False,
+        "emphasis_pattern": "highlight key user phrases and offer questions slowly",
+        "example_outline": (
+            "You said something essential here: 'I don't even know where I stand in this anymore.'\n\n"
+            "What would it feel like to let yourself fully stand in that not-knowing, just for a moment?\n\n"
+            "Or perhaps there's no need for answers right now — just this quiet recognition."
+        ),
+    },
     "deconstructive": {
         "intro_type": "logical disruption",
         "body_type": "reframing through contradiction",

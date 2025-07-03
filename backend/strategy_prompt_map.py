@@ -14,6 +14,7 @@ STRATEGY_PROMPT_HINTS: Dict[str, str] = {
     "contemplative": "Offer a calm, open-ended observation or paradoxical question.",
     "affirmative": "Echo a personal strength and encourage confidence in it.",
     "deconstructive": "Point out contradictions and open alternative interpretations.",
+    "reflective_mirror": "Focus on mirroring key phrases and feelings from the user, followed by inward, non-directive questions.",
 }
 
 

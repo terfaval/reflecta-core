@@ -30,6 +30,7 @@ _STRATEGY_QUESTIONS: Dict[str, str] = {
     "contemplative": "Miben vagy most csendben jelen?",
     "affirmative": "Miben érzed most az erőt?",
     "deconstructive": "Mi veszítette el számodra az értelmét?",
+    "reflective_mirror": "Mi az, ami most leginkább visszhangzik benned?",
     "explorative": "Mi az, ami most leginkább foglalkoztat?",
 }
 

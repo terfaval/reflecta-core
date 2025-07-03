@@ -64,6 +64,13 @@ THEME_PATTERNS: Dict[str, Iterable[str]] = {
         r"k[ée]pes vagyok r[áa]",
         r"eml[ée]keztet arra, amikor er[őo]s voltam",
     ],
+    "reflective_mirror": [
+        r"nem tudom.*hogyan.*(elmondani|megfogalmazni|kifejezni)",
+        r"túl sokáig.*(vártam|tűrtem|halogattam)",
+        r"már nem.*(harag|düh|feszültség).*bennem",
+        r"elvégeztem.*(belső|ön)munka",
+        r"most.*(csak)?\s*(jelen|itt)?\s*vagyok",
+    ],
     "deconstructive": [
         r"mi [ée]rtelme",
         r"ez az eg[ée]sz h[üu]lyes[ée]g",
@@ -82,6 +89,12 @@ FORM_PATTERNS: Dict[str, Iterable[str]] = {
     "contemplative": [r"\.\.\."],
     "transformative": [r"d[öo]nt[öo]ttem", r"[áa]tfordult"],
     "integrative": [r"\bmindkett[őo]\b", r"egy[üu]tt"],
+    "reflective_mirror": [
+        r"nem biztos, hogy.*(előrébb|tovább) kellene.*lenni",
+        r"néha.*elég.*csak.*jelen.*lenni",
+        r"nem.*a régi.*én.*vagyok",
+        r"nem kell.*megoldani.*most.*",
+    ],
 }
 
 
@@ -93,6 +106,13 @@ TONE_PATTERNS: Dict[str, Iterable[str]] = {
     "concluding": [r"[öo]sszegzem"],
     "explorative": [r"k[íi]v[áa]ncsi", r"érdekes"],
     "integrative": [r"összhang", r"kapcsol[oó]dik"],
+    "reflective_mirror": [
+        r"lassan.*nyitok",
+        r"elengedtem.*a harcot",
+        r"csendben.*maradok",
+        r"nyitottság.*és.*törődés",
+        r"most.*csak.*figyelek",
+    ],
 }
 
 
@@ -107,6 +127,7 @@ SCORING_WEIGHTS = {
 # Fixed priority order used when several strategies have the same score.
 PRIORITY = [
     "deepening",
+    "reflective_mirror",
     "analytical",
     "transformative",
     "integrative",
