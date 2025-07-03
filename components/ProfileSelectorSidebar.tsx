@@ -58,11 +58,9 @@ export default function ProfileSelectorSidebar({
   const { profile: activeProfileId } = useProfileContext();
   const { profiles: availableProfiles, personalNames, role } = useAvailableProfiles();
 
-  const customProfile = React.useMemo(() => {
-    if (!personalNames.length) return null;
-    return (
-      availableProfiles.find((p) => personalNames.includes(p.name)) || null
-    );
+  const customProfiles = React.useMemo(() => {
+    if (!personalNames.length) return [] as Profile[];
+    return availableProfiles.filter((p) => personalNames.includes(p.name));
   }, [availableProfiles, personalNames]);
 
   const baseProfiles = React.useMemo(() => {
@@ -71,10 +69,10 @@ export default function ProfileSelectorSidebar({
 
   const allProfiles = React.useMemo(() => {
     const arr: Profile[] = [];
-    if (customProfile) arr.push(customProfile);
+    arr.push(...customProfiles);
     arr.push(...baseProfiles);
     return arr;
-  }, [customProfile, baseProfiles]);
+  }, [customProfiles, baseProfiles]);
 
   const activeProfile = React.useMemo(() => {
     if (!activeProfileId) return null;
@@ -99,16 +97,16 @@ export default function ProfileSelectorSidebar({
   const otherProfiles = React.useMemo<Profile[]>(() => {
     const arr: Profile[] = [];
     const activeId = activeProfileId?.toLowerCase();
-    if (customProfile && customProfile.id.toLowerCase() !== activeId) {
-      arr.push(customProfile);
-    }
+    customProfiles.forEach((p) => {
+      if (p.id.toLowerCase() !== activeId) arr.push(p);
+    });
     baseProfiles.forEach((p) => {
       if (p.id.toLowerCase() !== activeId) arr.push(p);
     });
     return arr;
-  }, [baseProfiles, customProfile, activeProfileId]);
+  }, [baseProfiles, customProfiles, activeProfileId]);
 
-  const showCreateButton = role !== 'basic' && !customProfile;
+  const showCreateButton = role !== 'basic' && customProfiles.length === 0;
   
   return (
     <aside className={styles.sidebar}>
