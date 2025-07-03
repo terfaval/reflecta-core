@@ -36,7 +36,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     typeof window === 'undefined'
       ? false
       : window.location.pathname === '/' ||
-        window.location.pathname === '/select-profile',
+        window.location.pathname === '/select-profile' ||
+        window.location.pathname === '/loading',
   );
 
   const router = useRouter();
@@ -156,7 +157,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     if (redirectDone.current) return;
     if (!userId || !userInitialized) return;
     if (!router.isReady) return;
-    if (router.pathname !== '/' && router.pathname !== '/select-profile') {
+    if (
+      router.pathname !== '/' &&
+      router.pathname !== '/select-profile' &&
+      router.pathname !== '/loading'
+    ) {
       redirectDone.current = true;
       setCheckingSession(false);
       return;
@@ -175,12 +180,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           if (data.profile) setProfile(data.profile);
           console.log('[Bridge] \uD83D\uDD04 Redirecting to chat with existing session');
           redirectToChat(router, data.conversationId, data.sessionId);
-        } else if (router.pathname === '/') {
+        } else if (router.pathname === '/' || router.pathname === '/loading') {
           router.push('/select-profile');
         }
       } catch (err) {
         console.error('[last-session]', err);
-        if (router.pathname === '/') router.push('/select-profile');
+        if (router.pathname === '/' || router.pathname === '/loading')
+          router.push('/select-profile');
       } finally {
         redirectDone.current = true;
         setCheckingSession(false);
