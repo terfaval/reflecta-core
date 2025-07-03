@@ -41,25 +41,11 @@ async def get_last_user_entry(
             .execute()
         )
 
-        print(f"[entry_utils] raw result: {result}")
+        print(f"\n\n🚨 [entry_utils] RAW RESULT: {result}\n\n")
+        logging.info(f"[entry_utils] raw result: {result}")
 
-        print(
-            f"[entry_utils] attempt {attempt + 1} -> {len(entries or [])} entries"
-        )
-        for i, entry in enumerate(entries or []):
-            print(
-                f"[entry_utils] entry[{i}]: role={entry.get('role')} content={entry.get('content')}"
-            )
 
-        if error:
-            logging.warning(f"[entry_utils] fetch error: {error}")
-            return None
-
-        logging.debug(
-            f"[entry_utils] retry {attempt + 1}/{FETCH_RETRY_ATTEMPTS} -> {len(entries or [])} entries"
-        )
-
-        for entry in reversed(entries or []):
+        for entry in reversed(result or []):
             if entry.get("role", "").strip().lower() == "user":
                 logging.debug(
                     f"[entry_utils] last_user found: {entry.get('content','')[:40]}..."
