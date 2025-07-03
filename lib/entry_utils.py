@@ -33,13 +33,15 @@ async def get_last_user_entry(
         f"[entry_utils] get_last_user_entry start session={session_id} client_id={id(client)}"
     )
     for attempt in range(FETCH_RETRY_ATTEMPTS):
-        entries, error = (
+        result = (
             client.table("entries")
             .select("role, content")
             .eq("session_id", session_id)
             .order("created_at", desc=False)
             .execute()
         )
+
+        print(f"[entry_utils] raw result: {result}")
 
         print(
             f"[entry_utils] attempt {attempt + 1} -> {len(entries or [])} entries"
@@ -48,7 +50,7 @@ async def get_last_user_entry(
             print(
                 f"[entry_utils] entry[{i}]: role={entry.get('role')} content={entry.get('content')}"
             )
-            
+
         if error:
             logging.warning(f"[entry_utils] fetch error: {error}")
             return None
