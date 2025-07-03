@@ -47,11 +47,13 @@
 .tweakLabel {
   opacity: 0;
   visibility: hidden;
+  display: none;
   white-space: nowrap;
   transition: opacity 0.2s ease;
 }
 
 .tweakButton:hover .tweakLabel {
+  display: inline;
   opacity: 1;
   visibility: visible;
 }
