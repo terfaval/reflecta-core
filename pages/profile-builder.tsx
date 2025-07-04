@@ -11,6 +11,8 @@ import { useProfileContext } from '@/contexts/ProfileContext';
 import { useSurveyState } from '@/hooks/useSurveyState';
 import { apiFetch } from '@/lib/api';
 import { redirectToChat } from '@/lib/navigation';
+import { useToast } from '@/hooks/useToast';
+import styles from './ProfileBuilder.module.css';
 
 const QUESTIONS = [
   {
@@ -40,6 +42,7 @@ const COLORS = ['#4C6EF5', '#E59866', '#5DAE8B', '#A26EBA', '#CD5C5C'];
 export default function ProfileBuilder() {
   const { userId, userInitialized, userError } = useUserContext();
   const { setProfile } = useProfileContext();
+  const toast = useToast();
   const {
     currentQuestion,
     answers,
@@ -54,6 +57,7 @@ export default function ProfileBuilder() {
   const [profile, setProfileName] = useState('Személyes profil');
   const [finished, setFinished] = useState(false);
   const [startLoading, setStartLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const router = useRouter();
   const [accessError, setAccessError] = useState<string | null>(null);
 
@@ -102,8 +106,11 @@ export default function ProfileBuilder() {
       );
       setProfileName(data.name || profile);
       setFinished(true);
+      setErrorMsg(null);
     } catch (err) {
       console.error(err);
+      setErrorMsg('Hiba történt a profil mentésekor. Kérlek, próbáld újra.');
+      toast('Hiba történt a profil mentésekor. Kérlek, próbáld újra.');
     }
   };
 
@@ -140,6 +147,7 @@ export default function ProfileBuilder() {
     const handleStart = async () => {
       if (!userId || startLoading) return;
       setStartLoading(true);
+      setErrorMsg(null);
       try {
         const data = await apiFetch<{ conversation_id: string; session_id: string; error?: string }>(
           '/api/conversation/new',
@@ -154,17 +162,22 @@ export default function ProfileBuilder() {
         } else {
           console.error(data.error);
           setStartLoading(false);
+          setErrorMsg('A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.');
+          toast('A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.');
         }
       } catch (err) {
         console.error(err);
         setStartLoading(false);
+        setErrorMsg('A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.');
+        toast('A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.');
       }
     };
 
     return (
-<>
+      <>
         <BackToLogsButton />
         <SurveySuccess profile={profile} onStart={handleStart} loading={startLoading} />
+        {errorMsg && <p className={styles.error}>{errorMsg}</p>}
       </>
     );
   }
@@ -188,6 +201,7 @@ export default function ProfileBuilder() {
         bgColor={COLORS[step % COLORS.length]}
       />
       </AnimatePresence>
+      {errorMsg && <p className={styles.error}>{errorMsg}</p>}
     </>
   );
 }
