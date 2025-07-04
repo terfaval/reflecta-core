@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
-from typing import List
+from typing import List, Optional, Dict
+
+import logging
+
+from .generate_personal_profile import generate_profile
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -51,4 +55,17 @@ async def profile_from_survey(payload: SurveyRequest):
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
-    return {"name": payload.name}
+    profile_data: Optional[Dict[str, str]] = None
+    try:
+        profile_data = generate_profile(
+            payload.user_id,
+            payload.name,
+            payload.answers,
+        )
+    except Exception:
+        logging.exception("[profile_from_survey] Failed to generate profile")
+
+    response = {"name": payload.name}
+    if profile_data and isinstance(profile_data, dict):
+        response["profile_name"] = profile_data.get("name")
+    return response
