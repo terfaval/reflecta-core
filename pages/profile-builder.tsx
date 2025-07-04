@@ -8,6 +8,7 @@ import BackToLogsButton from '@/components/BackToLogsButton';
 import { useUserContext } from '@/contexts/UserContext';
 import { useRouter } from 'next/router';
 import { useProfileContext } from '@/contexts/ProfileContext';
+import { useSurveyState } from '@/hooks/useSurveyState';
 import { apiFetch } from '@/lib/api';
 import { redirectToChat } from '@/lib/navigation';
 
@@ -39,8 +40,17 @@ const COLORS = ['#4C6EF5', '#E59866', '#5DAE8B', '#A26EBA', '#CD5C5C'];
 export default function ProfileBuilder() {
   const { userId, userInitialized, userError } = useUserContext();
   const { setProfile } = useProfileContext();
-  const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<string[]>(['', '', '', '', '']);
+  const {
+    currentQuestion,
+    answers,
+    progress,
+    nextQuestion,
+    prevQuestion,
+    setAnswer,
+    isFirstQuestion,
+    isLastQuestion,
+    step,
+  } = useSurveyState(QUESTIONS);
   const [profile, setProfileName] = useState('Személyes profil');
   const [finished, setFinished] = useState(false);
   const [startLoading, setStartLoading] = useState(false);
@@ -69,14 +79,12 @@ export default function ProfileBuilder() {
   }, [userId, router]);
 
   const handleChange = (value: string) => {
-    const arr = [...answers];
-    arr[step] = value;
-    setAnswers(arr);
+    setAnswer(value);
   };
 
   const handleNext = () => {
-    if (step < QUESTIONS.length - 1) {
-      setStep(step + 1);
+    if (!isLastQuestion) {
+      nextQuestion();
     } else {
       submit();
     }
@@ -161,7 +169,7 @@ export default function ProfileBuilder() {
     );
   }
 
-  const q = QUESTIONS[step];
+  const q = currentQuestion;
 
   return (
     <>
@@ -172,11 +180,11 @@ export default function ProfileBuilder() {
         question={q.q}
         instruction={q.i}
         value={answers[step]}
-        step={step + 1}
-        total={QUESTIONS.length}
+        progress={progress}
+        isLast={isLastQuestion}
         onChange={handleChange}
         onNext={handleNext}
-        onBack={step > 0 ? () => setStep(step - 1) : undefined}
+        onBack={!isFirstQuestion ? prevQuestion : undefined}
         bgColor={COLORS[step % COLORS.length]}
       />
       </AnimatePresence>

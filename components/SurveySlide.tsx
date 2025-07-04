@@ -7,8 +7,8 @@ interface SurveySlideProps {
   question: string;
   instruction: string;
   value: string;
-  step: number;
-  total: number;
+  progress: number;
+  isLast: boolean;
   onChange: (v: string) => void;
   onNext?: () => void;
   onBack?: () => void;
@@ -19,15 +19,13 @@ export default function SurveySlide({
   question,
   instruction,
   value,
-  step,
-  total,
+  progress,
+  isLast,
   onChange,
   onNext,
   onBack,
   bgColor,
 }: SurveySlideProps) {
-  const progress = (step / total) * 100;
-  const isLast = step === total;
   return (
     <motion.div
       className={styles.slide}
