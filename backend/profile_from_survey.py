@@ -30,6 +30,13 @@ async def profile_from_survey(payload: SurveyRequest):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    role = user.get("role")
+    if role not in ("premium", "admin"):
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied: premium or admin role required.",
+        )
+    
     try:
         result = (
             supabase.table("profile_surveys")
