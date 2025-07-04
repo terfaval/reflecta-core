@@ -29,11 +29,11 @@ export default function SurveySlide({
   return (
     <motion.div
       className={styles.slide}
-      style={{ '--bg-color': bgColor } as React.CSSProperties}
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.4 }}
+      style={{ '--bg-color': bgColor, transformOrigin: 'center' } as React.CSSProperties}
+      initial={{ opacity: 0, rotateY: -90 }}
+      animate={{ opacity: 1, rotateY: 0 }}
+      exit={{ opacity: 0, rotateY: 90 }}
+      transition={{ duration: 0.5 }}
     >
       <h2 className={styles.question}>{question}</h2>
       <p className={styles.instruction}>{instruction}</p>
@@ -50,12 +50,14 @@ export default function SurveySlide({
           ) : (
           <div className={styles.placeholder} />
         )}
-        <div className={styles.progressBar} aria-hidden="true">
-          <div className={styles.progressFill} style={{ width: `${progress}%` }} />
-        </div>
+        {!isLast && (
+          <div className={styles.progressBar} aria-hidden="true">
+            <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+          </div>
+        )}
         {onNext && (
           <button
-            className={styles.navButton}
+            className={isLast ? styles.generateButton : styles.navButton}
             onClick={onNext}
             aria-label={isLast ? 'Generálás' : 'Következő kérdés'}
           >
