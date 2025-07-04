@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 export function useSurveyState<T>(initialQuestions: T[]) {
   const [index, setIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
   const [answers, setAnswers] = useState<string[]>(
     initialQuestions.map(() => '')
   );
@@ -16,10 +17,12 @@ export function useSurveyState<T>(initialQuestions: T[]) {
   const progress = ((index + 1) / total) * 100;
 
   const nextQuestion = () => {
+    setDirection(1);
     setIndex((prev) => (prev < total - 1 ? prev + 1 : prev));
   };
 
   const prevQuestion = () => {
+    setDirection(-1);
     setIndex((prev) => (prev > 0 ? prev - 1 : prev));
   };
 
@@ -33,6 +36,7 @@ export function useSurveyState<T>(initialQuestions: T[]) {
 
   const resetSurvey = () => {
     setIndex(0);
+    setDirection(1);
     setAnswers(initialQuestions.map(() => ''));
   };
 
@@ -46,6 +50,7 @@ export function useSurveyState<T>(initialQuestions: T[]) {
     isFirstQuestion,
     isLastQuestion,
     resetSurvey,
+    direction,
     step: index,
     total,
   };

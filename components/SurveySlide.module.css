@@ -8,8 +8,6 @@
   border-radius: 1.5rem;
   background-color: var(--bg-color, #fff);
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  perspective: 1000px;
-  transform-style: preserve-3d;
 }
 
 .question {

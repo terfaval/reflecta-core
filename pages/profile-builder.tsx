@@ -53,6 +53,7 @@ export default function ProfileBuilder() {
     isFirstQuestion,
     isLastQuestion,
     step,
+    direction,
   } = useSurveyState(QUESTIONS);
   const [profile, setProfileName] = useState('Személyes profil');
   const [finished, setFinished] = useState(false);
@@ -190,6 +191,7 @@ export default function ProfileBuilder() {
       <AnimatePresence mode="wait">
       <SurveySlide
         key={step}
+        direction={direction}
         question={q.q}
         instruction={q.i}
         value={answers[step]}

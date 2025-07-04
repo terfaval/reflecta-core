@@ -13,7 +13,23 @@ interface SurveySlideProps {
   onNext?: () => void;
   onBack?: () => void;
   bgColor?: string;
+  direction?: number;
 }
+
+const variants = {
+  enter: (d: number) => ({
+    x: d > 0 ? '100%' : '-100%',
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (d: number) => ({
+    x: d > 0 ? '-100%' : '100%',
+    opacity: 0,
+  }),
+};
 
 export default function SurveySlide({
   question,
@@ -25,15 +41,18 @@ export default function SurveySlide({
   onNext,
   onBack,
   bgColor,
+  direction = 1,
 }: SurveySlideProps) {
   return (
     <motion.div
       className={styles.slide}
-      style={{ '--bg-color': bgColor, transformOrigin: 'center' } as React.CSSProperties}
-      initial={{ opacity: 0, rotateY: -90 }}
-      animate={{ opacity: 1, rotateY: 0 }}
-      exit={{ opacity: 0, rotateY: 90 }}
-      transition={{ duration: 0.5 }}
+      style={{ '--bg-color': bgColor } as React.CSSProperties}
+      variants={variants}
+      custom={direction}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      transition={{ duration: 0.5, ease: 'easeInOut' }}
     >
       <h2 className={styles.question}>{question}</h2>
       <p className={styles.instruction}>{instruction}</p>
