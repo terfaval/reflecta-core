@@ -19,17 +19,24 @@ interface SurveySlideProps {
 const variants = {
   enter: (d: number) => ({
     x: d > 0 ? '100%' : '-100%',
+    scale: 0.95,
+    rotateZ: d > 0 ? -5 : 5,
     opacity: 0,
   }),
   center: {
     x: 0,
+    scale: 1,
+    rotateZ: 0,
     opacity: 1,
   },
   exit: (d: number) => ({
     x: d > 0 ? '-100%' : '100%',
+    scale: 0.95,
+    rotateZ: d > 0 ? 5 : -5,
     opacity: 0,
   }),
 };
+
 
 export default function SurveySlide({
   question,
@@ -52,7 +59,12 @@ export default function SurveySlide({
       initial="enter"
       animate="center"
       exit="exit"
-      transition={{ duration: 0.5, ease: 'easeInOut' }}
+      transition={{
+        x: { type: 'spring', stiffness: 300, damping: 30 },
+        scale: { duration: 0.3 },
+        rotateZ: { duration: 0.3 },
+        opacity: { duration: 0.2 }
+      }}
     >
       <h2 className={styles.question}>{question}</h2>
       <p className={styles.instruction}>{instruction}</p>
