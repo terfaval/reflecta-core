@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import SurveySlide from '@/components/SurveySlide';
+import { AnimatePresence } from 'framer-motion';
 import SurveySuccess from '@/components/SurveySuccess';
 import SpiralLoader from '@/components/SpiralLoader';
 import UserErrorDisplay from '@/components/UserErrorDisplay';
@@ -32,6 +33,8 @@ const QUESTIONS = [
     i: 'Írj le olyan pillanatokat vagy találkozásokat, amelyek mélyen hatottak rád.'
   }
 ];
+
+const COLORS = ['#4C6EF5', '#E59866', '#5DAE8B', '#A26EBA', '#CD5C5C'];
 
 export default function ProfileBuilder() {
   const { userId, userInitialized, userError } = useUserContext();
@@ -163,7 +166,9 @@ export default function ProfileBuilder() {
   return (
     <>
       <BackToLogsButton />
+      <AnimatePresence mode="wait">
       <SurveySlide
+        key={step}
         question={q.q}
         instruction={q.i}
         value={answers[step]}
@@ -172,7 +177,9 @@ export default function ProfileBuilder() {
         onChange={handleChange}
         onNext={handleNext}
         onBack={step > 0 ? () => setStep(step - 1) : undefined}
+        bgColor={COLORS[step % COLORS.length]}
       />
+      </AnimatePresence>
     </>
   );
 }
