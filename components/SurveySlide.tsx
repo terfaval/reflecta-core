@@ -22,34 +22,18 @@ const variants = {
     scale: 0.85,
     rotateZ: d > 0 ? -5 : 5,
     opacity: 0,
-    transition: {
-      opacity: { duration: 0.6, ease: 'easeOut', delay: -0.15 }, // Korábbi indulás!
-      scale: { duration: 0.4, ease: 'easeOut' },
-      rotateZ: { duration: 0.4, ease: 'easeOut' },
-    },
   }),
   center: {
     x: 0,
     scale: 1,
     rotateZ: 0,
     opacity: 1,
-    transition: {
-      x: { type: 'spring', stiffness: 300, damping: 30 },
-      scale: { duration: 0.4, ease: 'easeOut' },
-      rotateZ: { duration: 0.4, ease: 'easeOut' },
-      opacity: { duration: 0.4, ease: 'easeOut' },
-    },
   },
   exit: (d: number) => ({
     x: d > 0 ? '-100%' : '100%',
     scale: 0.85,
     rotateZ: d > 0 ? 5 : -5,
     opacity: 0,
-    transition: {
-      opacity: { duration: 0.6, ease: 'easeOut' }, // Kilépő: nincs delay, lassú elhalványulás
-      scale: { duration: 0.4, ease: 'easeOut' },
-      rotateZ: { duration: 0.4, ease: 'easeOut' },
-    },
   }),
 };
 
@@ -74,6 +58,12 @@ export default function SurveySlide({
       initial="enter"
       animate="center"
       exit="exit"
+      transition={{
+        x: { type: 'spring', stiffness: 300, damping: 30 },
+        scale: { duration: 0.4, ease: 'easeOut' },
+        rotateZ: { duration: 0.4, ease: 'easeOut' },
+        opacity: { duration: 0.6, ease: 'easeOut', delay: -0.15 },  // Itt van az átfedés!
+      }}
     >
       <h2 className={styles.question}>{question}</h2>
       <p className={styles.instruction}>{instruction}</p>
