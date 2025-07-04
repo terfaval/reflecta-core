@@ -1,0 +1,21 @@
+.link {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #234F8C;
+  text-decoration: none;
+  font-family: 'Raleway', sans-serif;
+  font-weight: 600;
+}
+
+.link span {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.link:hover span {
+  opacity: 1;
+}

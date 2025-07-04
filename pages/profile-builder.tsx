@@ -3,6 +3,7 @@ import SurveySlide from '@/components/SurveySlide';
 import SurveySuccess from '@/components/SurveySuccess';
 import SpiralLoader from '@/components/SpiralLoader';
 import UserErrorDisplay from '@/components/UserErrorDisplay';
+import BackToLogsButton from '@/components/BackToLogsButton';
 import { useUserContext } from '@/contexts/UserContext';
 import { useRouter } from 'next/router';
 import { useProfileContext } from '@/contexts/ProfileContext';
@@ -97,10 +98,13 @@ export default function ProfileBuilder() {
 
   if (userError) {
     return (
-      <UserErrorDisplay
-        message={userError}
-        onRetry={() => window.location.reload()}
-      />
+      <>
+        <BackToLogsButton />
+        <UserErrorDisplay
+          message={userError}
+          onRetry={() => window.location.reload()}
+        />
+      </>
     );
   }
 
@@ -112,9 +116,12 @@ export default function ProfileBuilder() {
 
   if (accessError) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <p>{accessError}</p>
-      </div>
+      <>
+        <BackToLogsButton />
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <p>{accessError}</p>
+        </div>
+      </>
     );
   }
 
@@ -144,22 +151,28 @@ export default function ProfileBuilder() {
     };
 
     return (
-<SurveySuccess profile={profile} onStart={handleStart} loading={startLoading} />
+<>
+        <BackToLogsButton />
+        <SurveySuccess profile={profile} onStart={handleStart} loading={startLoading} />
+      </>
     );
   }
 
   const q = QUESTIONS[step];
 
   return (
-    <SurveySlide
-      question={q.q}
-      instruction={q.i}
-      value={answers[step]}
-      step={step + 1}
-      total={QUESTIONS.length}
-      onChange={handleChange}
-      onNext={handleNext}
-      onBack={step > 0 ? () => setStep(step - 1) : undefined}
-    />
+    <>
+      <BackToLogsButton />
+      <SurveySlide
+        question={q.q}
+        instruction={q.i}
+        value={answers[step]}
+        step={step + 1}
+        total={QUESTIONS.length}
+        onChange={handleChange}
+        onNext={handleNext}
+        onBack={step > 0 ? () => setStep(step - 1) : undefined}
+      />
+    </>
   );
 }
