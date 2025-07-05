@@ -100,9 +100,12 @@
 .editButton {
   position: absolute;
   right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
   background: transparent;
   border: none;
-  color: #d1d5db; /* gray-300 */
+  cursor: pointer;
+  color: #D1D5DB;
   display: none;
 }
 
