@@ -139,6 +139,13 @@ uvicorn backend.main:app --reload
 ### profile_metadata
 - profile: TEXT (PK)
 - domain, worldview, inspirations, not_suitable_for, closing_trigger, closing_style, etc.
+- style_pace: TEXT
+- style_tone: TEXT
+- style_rhythm: TEXT
+- style_structure: TEXT
+- style_visuality: TEXT
+- style_directiveness: TEXT
+- style_absorption_style: TEXT
 
 ### profile_colors
 - profile: TEXT (PK) → profiles(name)
