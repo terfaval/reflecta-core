@@ -26,6 +26,8 @@ from .generate_personal_profile import router as generate_profile_router
 from .last_session import router as last_session_router
 from .has_history import router as has_history_router
 from .starting_prompt import router as starting_prompt_router
+from .profile_update import router as profile_update_router
+from .profile_metadata_api import router as profile_metadata_router
 from .ping import router as ping_router
 
 ALLOWED_ORIGINS = [
@@ -70,6 +72,8 @@ api_router.include_router(generate_profile_router)
 api_router.include_router(last_session_router)
 api_router.include_router(has_history_router)
 api_router.include_router(starting_prompt_router)
+api_router.include_router(profile_update_router)
+api_router.include_router(profile_metadata_router)
 api_router.include_router(ping_router)
 
 app.include_router(api_router)

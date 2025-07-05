@@ -25,6 +25,7 @@
   text-align: left;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  position: relative;
 }
 
 .icon {
@@ -94,4 +95,17 @@
 .sidebar::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
+}
+
+.editButton {
+  position: absolute;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #d1d5db; /* gray-300 */
+  display: none;
+}
+
+.item:hover .editButton {
+  display: block;
 }

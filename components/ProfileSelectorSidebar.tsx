@@ -1,5 +1,6 @@
 import React from 'react';
 import { LucidePlusCircle } from 'lucide-react';
+import { useRouter } from 'next/router';
 
 import SidebarProfileItem from './SidebarProfileItem';
 import styles from './ProfileSelectorSidebar.module.css';
@@ -56,6 +57,7 @@ export default function ProfileSelectorSidebar({
   onCreateCustomProfile,
 }: ProfileSelectorSidebarProps) {
   const { profile: activeProfileId } = useProfileContext();
+  const router = useRouter();
   const { profiles: availableProfiles, personalNames, role } = useAvailableProfiles();
 
   const customProfiles = React.useMemo(() => {
@@ -114,6 +116,7 @@ export default function ProfileSelectorSidebar({
               iconName={activeProfile.iconName}
               color={activeProfile.user_color}
               isActive
+              onEdit={personalNames.includes(activeProfile.name) ? () => router.push(`/edit-profile/${encodeURIComponent(activeProfile.name)}`) : undefined}
             />
           );
         })()
@@ -147,6 +150,7 @@ export default function ProfileSelectorSidebar({
             iconName={p.iconName}
             color={p.user_color}
             hoverBackground={p.ai_color}
+            onEdit={personalNames.includes(p.name) ? () => router.push(`/edit-profile/${encodeURIComponent(p.name)}`) : undefined}
           />
         );
       })}

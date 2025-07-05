@@ -32,6 +32,7 @@ export interface SidebarProfileItemProps {
   bottomClassName?: string;
   onClick?: () => void;
   hoverBackground?: string;
+  onEdit?: () => void;
 }
 
 export default function SidebarProfileItem({
@@ -43,6 +44,7 @@ export default function SidebarProfileItem({
   bottomClassName = '',
   onClick,
   hoverBackground,
+  onEdit,
 }: SidebarProfileItemProps) {
   const IconComp = iconName && iconMap[iconName];
   const Container = onClick ? 'button' : 'div';
@@ -73,6 +75,31 @@ export default function SidebarProfileItem({
         <span className={styles.itemHeader}>{truncate(name)}</span>
         <span className={`${styles.itemSubtext} ${bottomClassName}`}>{truncate(bottomText)}</span>
       </div>
+      {onEdit && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+          className={styles.editButton}
+          aria-label="Profil szerkesztése"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-4 h-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+          </svg>
+        </button>
+      )}
     </Container>
   );
 }
