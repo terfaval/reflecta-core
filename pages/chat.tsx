@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/router";
 import UserErrorDisplay from "../components/UserErrorDisplay";
 import ReflectiveMemoryPanel from "../components/ReflectiveMemoryPanel";
-import ProfileSelectorSidebar from "../components/ProfileSelectorSidebar";
+import ProfileSelectorSidebar, { Profile } from "../components/ProfileSelectorSidebar";
 import ProfileSlider from "@/components/ProfileSlider";
 import { useUserSession } from "../hooks/useUserSession";
 import { useAutoTextareaResize } from "../hooks/useAutoTextareaResize";
@@ -202,7 +202,8 @@ export default function ChatPage() {
     ).length;
   }, [entries]);
 
-  const handleSidebarSelect = async (name: string) => {
+  const handleSidebarSelect = async (p: Profile) => {
+    const name = p.id;
     if (!userId || !name) {
       // eslint-disable-next-line no-console
       console.warn('[switch profile] missing userId or profile');
@@ -210,6 +211,11 @@ export default function ChatPage() {
     }
     // eslint-disable-next-line no-console
     console.log('[switch profile]', { userId, profile_name: name });
+    setCurrentStyle({
+      '--bg-color': p.bg_color,
+      '--user-color': p.user_color,
+      '--ai-color': p.ai_color,
+    });
     try {
       const data = await apiFetch<{ conversation_id: string; session_id: string }>(
         "/api/conversation/new",
@@ -225,6 +231,11 @@ export default function ChatPage() {
 
         setProfile(name);
         setSessionId(data.session_id);
+        setCurrentStyle({
+          '--bg-color': p.bg_color,
+          '--user-color': p.user_color,
+          '--ai-color': p.ai_color,
+        });
         redirectToChat(router, data.conversation_id, data.session_id);
         // Reset previous entries and prompts for the new session context
         setEntries([]);

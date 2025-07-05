@@ -47,7 +47,7 @@ export interface Entry {
 
 export interface ProfileSelectorSidebarProps {
   entries: Record<string, Entry[]>;
-  onProfileSelect: (profileId: string) => void;
+  onProfileSelect: (profile: Profile) => void;
   onCreateCustomProfile: () => void;
 }
 
@@ -143,7 +143,7 @@ export default function ProfileSelectorSidebar({
         return (
           <SidebarProfileItem
             key={p.id}
-            onClick={() => onProfileSelect(p.id)}
+            onClick={() => onProfileSelect(p)}
             name={p.name}
             bottomText={bottomText}
             bottomClassName={bottomClass}
@@ -169,7 +169,7 @@ export function MockProfileSelectorSidebar() {
   return (
     <ProfileSelectorSidebar
       entries={mockEntries}
-      onProfileSelect={(id) => console.log('select', id)}
+      onProfileSelect={(p) => console.log('select', p.id)}
       onCreateCustomProfile={() => console.log('create custom')}
     />
   );
