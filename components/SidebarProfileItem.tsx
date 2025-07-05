@@ -47,7 +47,6 @@ export default function SidebarProfileItem({
   onEdit,
 }: SidebarProfileItemProps) {
   const IconComp = iconName && iconMap[iconName];
-  const Container = onClick ? 'button' : 'div';
   const [isHovered, setIsHovered] = React.useState(false);
 
   const style: React.CSSProperties = { transition: 'background-color 0.2s ease' };
@@ -57,12 +56,14 @@ export default function SidebarProfileItem({
     style.backgroundColor = hoverBackground;
   }
   return (
-    <Container
+    <div
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={`${styles.item} ${isActive ? styles.activeItem : ''}`}
       style={style}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
     >
       <div className={styles.icon}>
         {IconComp ? (
@@ -100,6 +101,6 @@ export default function SidebarProfileItem({
           </svg>
         </button>
       )}
-    </Container>
+    </div>
   );
 }
