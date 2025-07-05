@@ -4,7 +4,6 @@ import BackToLogsButton from '@/components/BackToLogsButton';
 import { useUserContext } from '@/contexts/UserContext';
 import { apiFetch } from '@/lib/api';
 import { HexColorPicker } from 'react-colorful';
-import 'react-colorful/dist/index.css';
 import { STYLE_OPTIONS } from '@/lib/styleOptions';
 import { useToast } from '@/hooks/useToast';
 
