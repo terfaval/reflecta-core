@@ -108,7 +108,3 @@
   color: #D1D5DB;
   display: none;
 }
-
-.item:hover .editButton {
-  display: block;
-}
