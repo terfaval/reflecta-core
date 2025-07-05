@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import os
 import random
+import logging
 from typing import Any, Dict, List, Optional
 
 from openai import OpenAI
@@ -144,6 +145,28 @@ def generate_profile(user_id: str, name: str, answers: List[str], color: Optiona
     user_profile_row = {"user_id": user_id, "profile_name": name}
     insert_single("user_profiles", user_profile_row)
 
+    # Insert default colors if missing
+    try:
+        existing = (
+            supabase.table("profile_colors")
+            .select("profile")
+            .eq("profile", name)
+            .maybe_single()
+            .execute()
+        )
+        if _execute(existing) is None:
+            insert_single(
+                "profile_colors",
+                {
+                    "profile": name,
+                    "bg_color": "#ffffff",
+                    "user_color": "#7D9EDF",
+                    "ai_color": "#C5DAF1",
+                },
+            )
+    except Exception:
+        logging.exception("[generate_profile] Failed to insert default colors")
+    
     return {
         "name": name,
         "color": color,
