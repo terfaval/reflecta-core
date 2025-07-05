@@ -52,8 +52,22 @@ export default function ChatPage() {
     '--user-color': '#7D9EDF',
     '--ai-color': '#C5DAF1',
   };
+  const getStoredColors = () => {
+    if (typeof window === 'undefined') return null;
+    const raw = sessionStorage.getItem('reflecta_colors');
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as Record<string, string>;
+    } catch {
+      return null;
+    }
+  };
 
-  const [currentStyle, setCurrentStyle] = useState<Record<string, string>>(DEFAULT_STYLE);
+  const [currentStyle, setCurrentStyle] = useState<Record<string, string>>(getStoredColors() || DEFAULT_STYLE);
+
+  useEffect(() => {
+    sessionStorage.removeItem('reflecta_colors');
+  }, []);
   const entriesByProfile = useMemo(
     () => (profile ? { [profile]: entries } : {}),
     [profile, entries]
@@ -211,11 +225,6 @@ export default function ChatPage() {
     }
     // eslint-disable-next-line no-console
     console.log('[switch profile]', { userId, profile_name: name });
-    setCurrentStyle({
-      '--bg-color': p.bg_color,
-      '--user-color': p.user_color,
-      '--ai-color': p.ai_color,
-    });
     try {
       const data = await apiFetch<{ conversation_id: string; session_id: string }>(
         "/api/conversation/new",
@@ -231,11 +240,14 @@ export default function ChatPage() {
 
         setProfile(name);
         setSessionId(data.session_id);
-        setCurrentStyle({
-          '--bg-color': p.bg_color,
-          '--user-color': p.user_color,
-          '--ai-color': p.ai_color,
-        });
+        sessionStorage.setItem(
+          'reflecta_colors',
+          JSON.stringify({
+            '--bg-color': p.bg_color,
+            '--user-color': p.user_color,
+            '--ai-color': p.ai_color,
+          }),
+        );
         redirectToChat(router, data.conversation_id, data.session_id);
         // Reset previous entries and prompts for the new session context
         setEntries([]);
