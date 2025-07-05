@@ -36,6 +36,13 @@ def get_shared_client() -> Client:
 
 supabase: Client = _init_supabase()
 
+# Default color scheme used when no custom colors are defined for a profile.
+DEFAULT_COLORS = {
+    "bg_color": "#ffffff",
+    "user_color": "#7D9EDF",
+    "ai_color": "#C5DAF1",
+}
+
 # ======= QUERY UTILITIES =======
 
 def _execute(result: Any) -> Any:
@@ -191,3 +198,32 @@ def list_all_profile_names() -> List[str]:
     result = supabase.table("profiles").select("name").execute()
     rows = _execute(result) or []
     return [r.get("name") for r in rows if r.get("name")]
+
+
+def get_profile_colors(profile: str) -> Dict[str, str]:
+    """Return color settings for the given profile.
+
+    If the profile has no row in ``profile_colors`` the default color scheme
+    is returned.
+    """
+    normalized = normalize_profile(profile)
+    try:
+        result = (
+            supabase.table("profile_colors")
+            .select("bg_color, user_color, ai_color")
+            .ilike("profile", normalized)
+            .maybe_single()
+            .execute()
+        )
+        row = _execute(result)
+    except Exception as exc:
+        raise RuntimeError(f"Failed to fetch profile colors: {exc}") from exc
+
+    if not row:
+        return DEFAULT_COLORS.copy()
+
+    return {
+        "bg_color": row.get("bg_color") or DEFAULT_COLORS["bg_color"],
+        "user_color": row.get("user_color") or DEFAULT_COLORS["user_color"],
+        "ai_color": row.get("ai_color") or DEFAULT_COLORS["ai_color"],
+    }

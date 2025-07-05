@@ -72,8 +72,8 @@ export function ChatMessagesList({
           }}
         >
           <SpiralLoader
-            userColor={currentStyle['--user-color'] || '#7A4DFF'}
-            aiColor={currentStyle['--ai-color'] || '#FFB347'}
+            userColor={currentStyle['--user-color']}
+            aiColor={currentStyle['--ai-color']}
             fullScreen={false}
           />
         </div>
@@ -130,7 +130,7 @@ export function ChatMessagesList({
           <div style={{ pointerEvents: 'auto' }}>
             <ScrollToBottomButton
               onClick={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })}
-              color={currentStyle['--ai-color'] || '#444'}
+              color={currentStyle['--ai-color']}
             />
           </div>
         </div>

@@ -8,7 +8,13 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from .supabase_client import supabase, _execute, list_all_profile_names
+from .supabase_client import (
+    supabase,
+    _execute,
+    list_all_profile_names,
+    get_profile_colors,
+    DEFAULT_COLORS,
+)
 
 
 router = APIRouter()
@@ -58,15 +64,21 @@ def _fetch_profiles(names: List[str]) -> List[Dict[str, Any]]:
     try:
         result = (
             supabase.table("profiles")
-            .select("name, description, role, color")
+            .select("name, description, role")
             .in_("name", names)
             .execute()
         )
-        data = _execute(result) or []
+        records = _execute(result) or []
     except Exception as exc:
         raise HTTPException(500, f"Failed to load profiles: {exc}") from exc
     
-    return data
+    profiles: List[Dict[str, Any]] = []
+    for rec in records:
+        name = rec.get("name")
+        colors = get_profile_colors(name) if name else DEFAULT_COLORS
+        profiles.append({**rec, **colors})
+
+    return profiles
 
 
 @router.post("/profile-list")

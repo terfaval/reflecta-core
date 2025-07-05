@@ -111,7 +111,6 @@ uvicorn backend.main:app --reload
   - `select-profile.tsx`
   - `api/ping.py` *(deprecated)*
 - `styles/` – CSS és egyéb stílusfájlok
-  - `profileStyles.ts`
 
 ## 📊 Supabase táblaséma
 
@@ -140,6 +139,13 @@ uvicorn backend.main:app --reload
 ### profile_metadata
 - profile: TEXT (PK)
 - domain, worldview, inspirations, not_suitable_for, closing_trigger, closing_style, etc.
+
+### profile_colors
+- profile: TEXT (PK) → profiles(name)
+- bg_color: TEXT
+- user_color: TEXT
+- ai_color: TEXT
+- created_at: timestamp
 
 ### profile_reactions
 - id: SERIAL (PK)

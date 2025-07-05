@@ -7,7 +7,6 @@ import { useUserContext } from "@/contexts/UserContext";
 import { useProfileContext } from "@/contexts/ProfileContext";
 import { apiFetch } from "@/lib/api";
 import { redirectToChat } from "@/lib/navigation";
-import { profileStyles } from "@/styles/profileStyles";
 import { toast } from "react-toastify";
 
 export interface ProfileCardData
@@ -78,35 +77,21 @@ export default function ProfileSlider() {
         method: "POST",
         body: JSON.stringify({ userId, names }),
       });
-        if (meta.profiles) {
-          const map: Record<
-            string,
-            { description: string; color: string; role?: string }
-          > = {};
+      if (meta.profiles) {
+        const map: Record<string, any> = {};
           (meta.profiles || []).forEach((p: any) => {
-            map[p.name] = {
-              description: p.description,
-              color: p.color,
-              role: p.role,
-            };
+            map[p.name] = p;
           });
-          const makeCard = (
-            name: string,
-            personal = false,
-          ): ProfileCardData => {
-            const style = profileStyles[name] ||
-              profileStyles[name.toLowerCase()] || {
-                "--user-color": "#000",
-                "--bg-color": "#fff",
-              };
+          const makeCard = (name: string, personal = false): ProfileCardData => {
+            const rec = map[name] || {};
             return {
               name,
               iconName: ICON_MAP[name],
-              description: map[name]?.description || "",
-              color: map[name]?.color || "#fff",
-              role: map[name]?.role || "",
-              userColor: style["--user-color"],
-              bgColor: style["--bg-color"],
+              description: rec.description || '',
+              color: rec.bg_color,
+              role: rec.role || '',
+              userColor: rec.user_color,
+              bgColor: rec.bg_color,
               personal,
             };
           };

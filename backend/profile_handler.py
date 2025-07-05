@@ -8,7 +8,7 @@ import logging
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from .supabase_client import get_profile_by_name
+from .supabase_client import get_profile_by_name, get_profile_colors
 from .metadata_fallback import get_profile_metadata
 from .profile_utils import is_valid_profile_for_user
 from .utils import normalize_profile
@@ -78,11 +78,13 @@ def _fetch_profile(profile: str) -> Dict[str, Any] | None:
             return None
         raise
 
+    colors = get_profile_colors(profile)
+
     return {
         "name": record.get("name"),
         "prompt_core": record.get("prompt_core"),
         "role": record.get("role"),
-        "color": record.get("color"),
+        **colors,
         "is_active": record.get("is_active"),
     }
 

@@ -1,6 +1,6 @@
 // components/ChatFooter.tsx
 import React from 'react';
-import { buttonStyles } from '../styles/profileStyles';
+import buttonStyles from './buttons.module.css';
 
 import { apiFetch } from 'lib/api';
 import { useToast } from '../hooks/useToast';

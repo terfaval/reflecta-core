@@ -4,11 +4,9 @@ import { LucidePlusCircle } from 'lucide-react';
 import SidebarProfileItem from './SidebarProfileItem';
 import styles from './ProfileSelectorSidebar.module.css';
 import { useProfileContext } from '@/contexts/ProfileContext';
-import { profileStyles } from '@/styles/profileStyles';
 import { useAvailableProfiles } from '@/hooks/useAvailableProfiles';
 
 const MAX_TEXT_LENGTH = 32;
-const FALLBACK_COLOR = '#7A4DFF';
 
 function truncateWithEllipsis(text: string, maxLength: number = MAX_TEXT_LENGTH) {
   if (!text) return '';
@@ -33,7 +31,9 @@ export interface Profile {
   id: string;
   name: string;
   role: string;
-  color: string;
+  bg_color: string;
+  user_color: string;
+  ai_color: string;
   iconName?: string;
 }
 
@@ -80,18 +80,7 @@ export default function ProfileSelectorSidebar({
       (p) => p.id.toLowerCase() === activeProfileId.toLowerCase(),
     );
     if (found) return found;
-    // fallback using style map when profile metadata is missing
-    const style =
-      profileStyles[activeProfileId] ||
-      profileStyles[activeProfileId.toLowerCase()] ||
-      {};
-    const color = style['--user-color'] || FALLBACK_COLOR;
-    return {
-      id: activeProfileId,
-      name: activeProfileId,
-      role: '',
-      color,
-    } as Profile;
+    return null;
   }, [allProfiles, activeProfileId]);
 
   const otherProfiles = React.useMemo<Profile[]>(() => {
@@ -123,11 +112,7 @@ export default function ProfileSelectorSidebar({
               bottomText={bottomText}
               bottomClassName={bottomClass}
               iconName={activeProfile.iconName}
-              color={
-                profileStyles[activeProfile.id]?.['--user-color'] ||
-                profileStyles[activeProfile.id.toLowerCase()]?.['--user-color'] ||
-                FALLBACK_COLOR
-              }
+              color={activeProfile.user_color}
               isActive
             />
           );
@@ -160,15 +145,8 @@ export default function ProfileSelectorSidebar({
             bottomText={bottomText}
             bottomClassName={bottomClass}
             iconName={p.iconName}
-            color={
-              profileStyles[p.id]?.['--user-color'] ||
-              profileStyles[p.id.toLowerCase()]?.['--user-color'] ||
-              FALLBACK_COLOR
-            }
-            hoverBackground={
-              profileStyles[p.id]?.['--ai-color'] ||
-              profileStyles[p.id.toLowerCase()]?.['--ai-color']
-            }
+            color={p.user_color}
+            hoverBackground={p.ai_color}
           />
         );
       })}

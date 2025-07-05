@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import SpiralLoader from '@/components/SpiralLoader';
 import { ReflectaIcon } from '@/components/icons';
-import { profileStyles } from '@/styles/profileStyles';
 import { apiFetch } from '@/lib/api';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { useUserContext } from '@/contexts/UserContext';
@@ -62,7 +61,11 @@ export default function LoadingPage() {
     );
   }
 
-  const style = profileStyles['Reflecta'] || {};
+  const style = {
+    '--bg-color': '#ffffff',
+    '--user-color': '#7D9EDF',
+    '--ai-color': '#C5DAF1',
+  } as Record<string, string>;
   return (
     <div
       style={{
@@ -103,8 +106,8 @@ export default function LoadingPage() {
         Benned kezdődik.
       </p>
       <SpiralLoader
-        userColor={style['--user-color'] || '#7A4DFF'}
-        aiColor={style['--ai-color'] || '#FFB347'}
+        userColor={style['--user-color']}
+        aiColor={style['--ai-color']}
         fullScreen={false}
       />
     </div>

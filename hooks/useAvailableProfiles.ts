@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useUserContext } from '@/contexts/UserContext';
 import { apiFetch } from '@/lib/api';
-import { profileStyles } from '@/styles/profileStyles';
 
 export interface AvailableProfile {
   id: string;
   name: string;
   role: string;
-  color: string;
+  bg_color: string;
+  user_color: string;
+  ai_color: string;
   iconName?: string;
 }
 
@@ -71,11 +72,9 @@ export function useAvailableProfiles() {
                 id: n,
                 name: n,
                 role: rec.role || '',
-                color:
-                  rec.color ||
-                  profileStyles[n]?.['--user-color'] ||
-                  profileStyles[n.toLowerCase()]?.['--user-color'] ||
-                  '#7A4DFF',
+                bg_color: rec.bg_color,
+                user_color: rec.user_color,
+                ai_color: rec.ai_color,
                 iconName: NAME_TO_ICON[n],
               });
             }
@@ -87,11 +86,9 @@ export function useAvailableProfiles() {
                 id: pn,
                 name: pn,
                 role: rec.role || '',
-                color:
-                  rec.color ||
-                  profileStyles[pn]?.['--user-color'] ||
-                  profileStyles[pn.toLowerCase()]?.['--user-color'] ||
-                  '#7A4DFF',
+                bg_color: rec.bg_color,
+                user_color: rec.user_color,
+                ai_color: rec.ai_color,
                 iconName: NAME_TO_ICON[pn],
               });
             }
@@ -107,11 +104,9 @@ export function useAvailableProfiles() {
                   id: name,
                   name,
                   role: rec.role || '',
-                  color:
-                    rec.color ||
-                    profileStyles[name]?.['--user-color'] ||
-                    profileStyles[name.toLowerCase()]?.['--user-color'] ||
-                    '#7A4DFF',
+                  bg_color: rec.bg_color,
+                  user_color: rec.user_color,
+                  ai_color: rec.ai_color,
                   iconName: NAME_TO_ICON[name],
                 });
               }

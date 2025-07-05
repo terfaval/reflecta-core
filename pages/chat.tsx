@@ -2,7 +2,6 @@ import React from "react";
 
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/router";
-import { profileStyles } from "../styles/profileStyles";
 import UserErrorDisplay from "../components/UserErrorDisplay";
 import ReflectiveMemoryPanel from "../components/ReflectiveMemoryPanel";
 import ProfileSelectorSidebar from "../components/ProfileSelectorSidebar";
@@ -48,11 +47,14 @@ export default function ChatPage() {
   const isFetchingRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
-  const currentStyle =
-    profileStyles[profile as string] ||
-    profileStyles[(profile as string)?.toLowerCase()] ||
-    {};
-    const entriesByProfile = useMemo(
+  const DEFAULT_STYLE: Record<string, string> = {
+    '--bg-color': '#ffffff',
+    '--user-color': '#7D9EDF',
+    '--ai-color': '#C5DAF1',
+  };
+
+  const [currentStyle, setCurrentStyle] = useState<Record<string, string>>(DEFAULT_STYLE);
+  const entriesByProfile = useMemo(
     () => (profile ? { [profile]: entries } : {}),
     [profile, entries]
   );
@@ -64,6 +66,33 @@ export default function ChatPage() {
     if (debug) console.log("[Debug] profile", profile);
   }, [debug, profile]);
 
+  useEffect(() => {
+    if (!profile || !userId) return;
+    const loadColors = async () => {
+      try {
+        const data = await apiFetch<{
+          bg_color: string;
+          user_color: string;
+          ai_color: string;
+        }>(
+          '/api/profile',
+          {
+            method: 'POST',
+            body: JSON.stringify({ name: profile, userId }),
+          },
+        );
+        setCurrentStyle({
+          '--bg-color': data.bg_color,
+          '--user-color': data.user_color,
+          '--ai-color': data.ai_color,
+        });
+      } catch (err) {
+        console.error('[profile colors]', err);
+      }
+    };
+    loadColors();
+  }, [profile, userId]);
+  
   useEffect(() => {
     if (debug) console.log("[Debug] userId", userId);
   }, [debug, userId]);
