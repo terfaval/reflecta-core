@@ -17,6 +17,7 @@ from .metadata_fallback import get_profile_metadata
 from .prompt_builder import build_system_prompt
 from .utils import normalize_profile
 from .conversation_arcs import record_conversation_arc
+from .functions.active_function import close_function
 
 router = APIRouter()
 
@@ -113,6 +114,7 @@ def generate_session_closure_response(session_id: str) -> str:
         "",
         strategy="session_closure",
         session_position="end",
+        session_id=session_id,
     )
     system_prompt = f"{language_tone_prefix}\n\n{full_prompt}"
 
@@ -153,6 +155,9 @@ def close_session(session_id: str) -> Dict[str, str]:
     if meta and meta.get("ended_at"):
         return {"label": "[már lezárt]", "closureEntry": ""}
 
+    # Ensure any active reflective function state is cleared
+    close_function(session_id)
+    
     entries = _execute(
         supabase.table("entries")
         .select("id, role, content, created_at")

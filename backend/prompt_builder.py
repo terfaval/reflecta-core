@@ -5,6 +5,7 @@ from typing import List, Dict, Any, Optional
 
 from .supabase_client import get_profile_by_name
 from .metadata_fallback import get_profile_metadata
+from .functions.active_function import get_active_prompt
 from .utils import normalize_profile
 from .style_summary_block import style_summary_block
 from .strategy_detector import detect_strategy, detect_top_strategies
@@ -47,6 +48,8 @@ def build_system_prompt(
     session_position: Optional[str] = None,
     suggested_profiles: Optional[List[str]] = None,
     arc_state: Optional[str] = None,
+    *,
+    session_id: Optional[str] = None,
 ) -> str:
     profile_data = fetch_profile(profile)
     metadata = fetch_profile_metadata(profile)
@@ -62,6 +65,13 @@ def build_system_prompt(
     # Begin with the core essence shared across profiles
     lines.extend(CORE_ESSENCE_LINES)
 
+    # Append instructions from any active reflective function
+    if session_id:
+        function_prompt = get_active_prompt(session_id)
+        if function_prompt:
+            lines.append("")
+            lines.append(function_prompt)
+            
     if normalize_profile(profile_data.get("name")) == "reflecta":
         lines.append(
             "You serve as a neutral starting profile. Clarify the user's aim and keep a meta perspective on which profile might help most. Avoid proposing other profiles unless the user requests it."

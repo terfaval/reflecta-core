@@ -17,6 +17,7 @@ from openai import AsyncOpenAI
 from .auth import Role, feature_enabled, role_guard
 from .db import get_client
 from .prompt_builder import build_system_prompt
+from .functions.active_function import handle_user_message
 from .strategy_detector import detect_strategy, detect_strategy_smoothed
 from .arc_state_estimator import estimate_arc_state
 from .profile_recommender import (
@@ -161,6 +162,7 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
             session_position=position,
             suggested_profiles=suggestions,
             arc_state=arc_state,
+            session_id=session_id,
         )
     except Exception as exc:
         print(f"[respond] system prompt build failed: {exc}")
@@ -277,6 +279,8 @@ async def respond(
             await _maybe_insert_user_entry(client, payload.sessionId, payload.content)
         except HTTPException as exc:
             return JSONResponse(status_code=exc.status_code, content={"error": str(exc.detail)})
+        # Update the active reflective function state with the new entry
+        handle_user_message(payload.sessionId, payload.content)
         
     try:
         result = await generate_ai_reply(payload.sessionId)
