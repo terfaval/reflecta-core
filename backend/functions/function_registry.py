@@ -1,26 +1,41 @@
-from dataclasses import dataclass, field
-from typing import List
+"""Central registry for Reflecta's self-reflection functions.
 
-@dataclass
-class FunctionSpec:
-    """Specification for an optional reflective function."""
+This module stores metadata for all optional self-reflection functions
+and provides helpers to look them up by trigger keywords or name.
+Currently the registry is empty but can be extended easily.
+"""
 
-    name: str
-    triggers: List[str]
-    closing_keywords: List[str] = field(default_factory=list)
-    prompt: str = ""
-    prefix: str = ""
+from __future__ import annotations
+
+from typing import Dict, List, Optional
+
+# List of registered functions. Each function is represented by a dictionary
+# with the following required keys:
+#   - name: str
+#   - triggers: List[str]
+#   - allowed_strategies: List[str]
+#   - recommendation_texts: Dict[str, str]
+#   - closure_keywords: List[str]
+#   - closure_question: str
+#   - session_prefix: str
+#   - prompt_addition: str
+# For now the list is intentionally empty and can be populated later.
+FUNCTIONS: List[Dict[str, object]] = []
 
 
-# Placeholder registry with a single example function. Additional
-# functions can be added easily by extending this list or loading
-# them from an external source in the future.
-FUNCTION_REGISTRY: List[FunctionSpec] = [
-    FunctionSpec(
-        name="Bels\u0151 Lev\u00e9l",
-        triggers=["bels\u0151 lev\u00e9l"],
-        closing_keywords=["lev\u00e9l z\u00e1r\u00e1s"],
-        prompt="When active, guide the user to write a letter to themselves.",
-        prefix="Bels\u0151 lev\u00e9l:",
-    )
-]
+def get_function_by_trigger(user_input: str) -> Optional[Dict[str, object]]:
+    """Return the first function whose trigger keyword appears in the input."""
+    text_lower = user_input.lower()
+    for func in FUNCTIONS:
+        for keyword in func.get("triggers", []):
+            if keyword.lower() in text_lower:
+                return func
+    return None
+
+
+def get_function_by_name(name: str) -> Optional[Dict[str, object]]:
+    """Return a function definition by its name."""
+    for func in FUNCTIONS:
+        if func.get("name") == name:
+            return func
+    return None

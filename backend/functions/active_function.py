@@ -3,22 +3,23 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
-from .function_registry import FunctionSpec
-from .trigger_detector import detect_trigger
+from .function_registry import get_function_by_trigger
 
 
 @dataclass
 class ActiveFunction:
-    spec: FunctionSpec
+    spec: Dict[str, Any]
     history: List[str] = field(default_factory=list)
     closed: bool = False
 
     def process_user_text(self, text: str) -> None:
         self.history.append(text)
-        if any(kw.lower() in text.lower() for kw in self.spec.closing_keywords):
-            self.closed = True
+        for kw in self.spec.get("closure_keywords", []):
+            if kw.lower() in text.lower():
+                self.closed = True
+                break
 
 
 # In-memory store of active functions keyed by session id.
@@ -35,7 +36,7 @@ def handle_user_message(session_id: str, text: str) -> Optional[ActiveFunction]:
             return None
         return state
 
-    spec = detect_trigger(text)
+    spec = get_function_by_trigger(text)
     if spec:
         state = ActiveFunction(spec)
         state.process_user_text(text)
@@ -47,7 +48,7 @@ def handle_user_message(session_id: str, text: str) -> Optional[ActiveFunction]:
 def get_active_prompt(session_id: str) -> Optional[str]:
     state = _ACTIVE.get(session_id)
     if state and not state.closed:
-        return state.spec.prompt
+        return state.spec.get("prompt_addition", "")
     return None
 
 
