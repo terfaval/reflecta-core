@@ -17,7 +17,7 @@ from .metadata_fallback import get_profile_metadata
 from .prompt_builder import build_system_prompt
 from .utils import normalize_profile
 from .conversation_arcs import record_conversation_arc
-from .functions.active_function import close_function
+from .functions.active_function import close_function, pop_session_prefix
 
 router = APIRouter()
 
@@ -157,7 +157,7 @@ def close_session(session_id: str) -> Dict[str, str]:
 
     # Ensure any active reflective function state is cleared
     close_function(session_id)
-    
+
     entries = _execute(
         supabase.table("entries")
         .select("id, role, content, created_at")
@@ -172,6 +172,9 @@ def close_session(session_id: str) -> Dict[str, str]:
     last_entry = entries[-1]
 
     label = label_session(session_id)
+    prefix = pop_session_prefix(session_id)
+    if prefix and not str(label).startswith(prefix):
+        label = f"{prefix} {label}".strip()
 
     try:
         supabase.table("system_events").insert(

@@ -13,6 +13,7 @@ from backend.functions.active_function import (
     is_active,
     get_active_prompt,
     close_function,
+    pop_closure_question,
 )
 from backend.functions import function_registry
 from backend.prompt_builder import build_system_prompt
@@ -20,24 +21,24 @@ from backend.prompt_builder import build_system_prompt
 
 def test_active_function_trigger_and_prompt_integration():
     session_id = "s1"
-    dummy_function = {
-        "name": "Bels\u0151 lev\u00e9l",
-        "triggers": ["bels\u0151 lev\u00e9l"],
-        "allowed_strategies": [],
-        "recommendation_texts": {"first": "", "repeat": "", "direct": ""},
-        "closure_keywords": ["lev\u00e9l z\u00e1r\u00e1s"],
-        "closure_question": "",
-        "session_prefix": "Bels\u0151 lev\u00e9l:",
-        "prompt_addition": "When active, guide the user to write a letter to themselves.",
-    }
+    dummy_function = function_registry.FunctionSpec(
+        name="Bels\u0151 lev\u00e9l",
+        triggers=["bels\u0151 lev\u00e9l"],
+        allowed_strategies=[],
+        recommendation_texts={"first": "", "repeat": "", "direct": ""},
+        closure_keywords=["lev\u00e9l z\u00e1r\u00e1s"],
+        closure_question="Mi volt a legfontosabb felismer\u00e9sed a lev\u00e9l meg\u00edr\u00e1sakor?",
+        session_prefix="Bels\u0151 lev\u00e9l:",
+        prompt_addition="When active, guide the user to write a letter to themselves.",
+    )
 
     with patch("backend.functions.function_registry.FUNCTIONS", [dummy_function]):
-        trigger = dummy_function["triggers"][0]
+        trigger = dummy_function.triggers[0]
 
         handle_user_message(session_id, f"Elindul a {trigger}")
         assert is_active(session_id)
         prompt = get_active_prompt(session_id)
-        assert prompt == dummy_function["prompt_addition"]
+        assert prompt == dummy_function.prompt_addition
 
     with patch("backend.prompt_builder.fetch_profile", return_value={"name": "Reflecta", "prompt_core": ""}), patch(
         "backend.prompt_builder.fetch_profile_metadata", return_value={}
@@ -49,6 +50,12 @@ def test_active_function_trigger_and_prompt_integration():
             session_id=session_id,
         )
     assert prompt in system_prompt
+
+        # Trigger closing after verifying prompt integration
+    handle_user_message(session_id, dummy_function.closure_keywords[0])
+    assert not is_active(session_id)
+    question = pop_closure_question(session_id)
+    assert question == dummy_function.closure_question
 
     close_function(session_id)
     assert not is_active(session_id)

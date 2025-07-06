@@ -17,7 +17,7 @@ from openai import AsyncOpenAI
 from .auth import Role, feature_enabled, role_guard
 from .db import get_client
 from .prompt_builder import build_system_prompt
-from .functions.active_function import handle_user_message
+from .functions.active_function import handle_user_message, pop_closure_question
 from .strategy_detector import detect_strategy, detect_strategy_smoothed
 from .arc_state_estimator import estimate_arc_state
 from .profile_recommender import (
@@ -281,6 +281,27 @@ async def respond(
             return JSONResponse(status_code=exc.status_code, content={"error": str(exc.detail)})
         # Update the active reflective function state with the new entry
         handle_user_message(payload.sessionId, payload.content)
+        question = pop_closure_question(payload.sessionId)
+        if question:
+            now = datetime.now(timezone.utc).isoformat()
+            try:
+                result = (
+                    client.table("entries")
+                    .insert(
+                        {
+                            "session_id": payload.sessionId,
+                            "role": "assistant",
+                            "content": question,
+                            "created_at": now,
+                        }
+                    )
+                    .execute()
+                )
+                _execute(result)
+            except Exception as exc:
+                print(f"[respond] error inserting closure question: {exc}")
+                raise HTTPException(500, "Failed to store closure question") from exc
+            return {"content": question}
         
     try:
         result = await generate_ai_reply(payload.sessionId)
