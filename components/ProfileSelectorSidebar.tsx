@@ -1,31 +1,46 @@
-import React from 'react';
-import { LucidePlusCircle } from 'lucide-react';
-import { useRouter } from 'next/router';
+import React from "react";
+import { LucidePlusCircle } from "lucide-react";
+import { useRouter } from "next/router";
 
-import SidebarProfileItem from './SidebarProfileItem';
-import styles from './ProfileSelectorSidebar.module.css';
-import { useProfileContext } from '@/contexts/ProfileContext';
-import { useAvailableProfiles } from '@/hooks/useAvailableProfiles';
+import SidebarProfileItem from "./SidebarProfileItem";
+import styles from "./ProfileSelectorSidebar.module.css";
+import { useProfileContext } from "@/contexts/ProfileContext";
+import { useAvailableProfiles } from "@/hooks/useAvailableProfiles";
+
+const builtInProfiles = [
+  "Reflecta",
+  "Akasza",
+  "Éana",
+  "Luma",
+  "Sylva",
+  "Zentó",
+  "Oneiros",
+  "Kairos",
+  "Noe",
+];
 
 const MAX_TEXT_LENGTH = 32;
 
-function truncateWithEllipsis(text: string, maxLength: number = MAX_TEXT_LENGTH) {
-  if (!text) return '';
+function truncateWithEllipsis(
+  text: string,
+  maxLength: number = MAX_TEXT_LENGTH,
+) {
+  if (!text) return "";
   if (text.length <= maxLength) return text;
-  const words = text.split(' ');
-  let result = '';
+  const words = text.split(" ");
+  let result = "";
   for (const word of words) {
     if (result.length === 0) {
       if (word.length > maxLength) {
-        return word.slice(0, maxLength) + '...';
+        return word.slice(0, maxLength) + "...";
       }
       result = word;
       continue;
     }
     if (result.length + 1 + word.length > maxLength) break;
-    result += ' ' + word;
+    result += " " + word;
   }
-  return result + '...';
+  return result + "...";
 }
 
 export interface Profile {
@@ -58,16 +73,15 @@ export default function ProfileSelectorSidebar({
 }: ProfileSelectorSidebarProps) {
   const { profile: activeProfileId } = useProfileContext();
   const router = useRouter();
-  const { profiles: availableProfiles, personalNames, role } = useAvailableProfiles();
+  const { profiles: availableProfiles, role } = useAvailableProfiles();
 
   const customProfiles = React.useMemo(() => {
-    if (!personalNames.length) return [] as Profile[];
-    return availableProfiles.filter((p) => personalNames.includes(p.name));
-  }, [availableProfiles, personalNames]);
+    return availableProfiles.filter((p) => !builtInProfiles.includes(p.name));
+  }, [availableProfiles]);
 
   const baseProfiles = React.useMemo(() => {
-    return availableProfiles.filter((p) => !personalNames.includes(p.name));
-  }, [availableProfiles, personalNames]);
+    return availableProfiles.filter((p) => builtInProfiles.includes(p.name));
+  }, [availableProfiles]);
 
   const allProfiles = React.useMemo(() => {
     const arr: Profile[] = [];
@@ -98,16 +112,16 @@ export default function ProfileSelectorSidebar({
   }, [baseProfiles, customProfiles, activeProfileId]);
 
   const showCreateButton =
-    role === 'admin' || (role !== 'basic' && customProfiles.length === 0);
+    role === "admin" || (role !== "basic" && customProfiles.length === 0);
   
   return (
     <aside className={styles.sidebar}>
-      {activeProfile && (
+      {activeProfile &&
         (() => {
           const list = entries[activeProfile.id] || [];
-          const lastUser = [...list].reverse().find((e) => e.role === 'user');
+          const lastUser = [...list].reverse().find((e) => e.role === "user");
           const bottomText = lastUser ? lastUser.content : activeProfile.role;
-          const bottomClass = lastUser ? 'text-sm' : 'text-sm font-medium';
+          const bottomClass = lastUser ? "text-sm" : "text-sm font-medium";
           return (
             <SidebarProfileItem
               name={activeProfile.name}
@@ -116,11 +130,17 @@ export default function ProfileSelectorSidebar({
               iconName={activeProfile.iconName}
               color={activeProfile.user_color}
               isActive
-              onEdit={personalNames.includes(activeProfile.name) ? () => router.push(`/edit-profile/${encodeURIComponent(activeProfile.name)}`) : undefined}
+              onEdit={
+                !builtInProfiles.includes(activeProfile.name)
+                  ? () =>
+                      router.push(
+                        `/edit-profile/${encodeURIComponent(activeProfile.name)}`,
+                      )
+                  : undefined
+              }
             />
           );
-        })()
-      )}
+})()}
       {showCreateButton && (
         <button
           key="create-custom"
@@ -137,9 +157,11 @@ export default function ProfileSelectorSidebar({
       )}
       {otherProfiles.map((p) => {
         const list = entries[p.id] || [];
-        const lastUser = [...list].reverse().find((e) => e.role === 'user');
+        const lastUser = [...list].reverse().find((e) => e.role === "user");
         const bottomText = lastUser ? lastUser.content : p.role;
-        const bottomClass = lastUser ? 'text-sm' : 'text-sm font-medium text-gray-600';
+        const bottomClass = lastUser
+          ? "text-sm"
+          : "text-sm font-medium text-gray-600";
         return (
           <SidebarProfileItem
             key={p.id}
@@ -150,7 +172,12 @@ export default function ProfileSelectorSidebar({
             iconName={p.iconName}
             color={p.user_color}
             hoverBackground={p.ai_color}
-            onEdit={personalNames.includes(p.name) ? () => router.push(`/edit-profile/${encodeURIComponent(p.name)}`) : undefined}
+            onEdit={
+              !builtInProfiles.includes(p.name)
+                ? () =>
+                    router.push(`/edit-profile/${encodeURIComponent(p.name)}`)
+                : undefined
+            }
           />
         );
       })}
@@ -161,7 +188,7 @@ export default function ProfileSelectorSidebar({
 // Example usage with mock data
 const mockEntries: Record<string, Entry[]> = {
   akasza: [
-    { id: '1', role: 'assistant', content: 'Szia', created_at: '2024-01-01' },
+    { id: "1", role: "assistant", content: "Szia", created_at: "2024-01-01" },
   ],
 };
 
@@ -169,8 +196,8 @@ export function MockProfileSelectorSidebar() {
   return (
     <ProfileSelectorSidebar
       entries={mockEntries}
-      onProfileSelect={(p) => console.log('select', p.id)}
-      onCreateCustomProfile={() => console.log('create custom')}
+      onProfileSelect={(p) => console.log("select", p.id)}
+      onCreateCustomProfile={() => console.log("create custom")}
     />
   );
 }
