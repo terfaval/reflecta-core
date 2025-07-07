@@ -200,6 +200,48 @@ FUNCTIONS: List[FunctionSpec] = [
             "Offer only gentle, open-ended questions that invite reflection, not analysis."
         ),
         relationship_dynamics=[],
+            ),
+    FunctionSpec(
+        name="Nem-Tudás Gondozása",
+        triggers=[
+            "nem tudom, mit tegyek",
+            "elbizonytalanodtam",
+            "nem értem, mi történik",
+            "tanácstalan vagyok",
+            "csak sodródom, nem tudom, hova vezet",
+        ],
+        allowed_strategies=["contemplative", "deepening", "reflective_mirror"],
+        recommendation_texts={
+            "first": "Érzem, hogy most olyan térben vagy, ahol nincs biztos válasz. Ha szeretnéd, szívesen kísérlek egy olyan folyamatban, ahol nem a megértés, hanem a békés jelenlét és a nem-tudás elfogadása a cél.",
+            "repeat": "Ha most is jól esne, szívesen kísérlek egy olyan folyamatban, ahol teret adunk a nem-tudásnak.",
+            "direct": "Rendben, nagyon szívesen kísérlek a nem-tudás gondozásában. Lassan, figyelmesen adunk teret annak, ami most nem világos.",
+        },
+        prompt_addition=(
+            "This is a contemplative, non-solution-oriented process focused on helping the user accept their state of not knowing. Guide the user gently to find peace in uncertainty without seeking answers or resolutions. Always maintain a very slow, quiet, and non-directive tone throughout the process."
+        ),
+        session_prefix="Nem-tudás:",
+        closure_keywords=[
+            "kész",
+            "most békében vagyok",
+            "nyugodtabb vagyok",
+            "elfogadtam, hogy nem tudom",
+        ],
+        closure_question="Rendben, lezárhatjuk most ezt a nem-tudás gondozási folyamatot?",
+        process_steps=(
+            "1. Help the user consciously acknowledge their state of not knowing.\n"
+            "2. Support the user in noticing bodily sensations related to uncertainty.\n"
+            "3. Encourage the user to build a peaceful, non-judgmental attitude toward their not-knowing.\n"
+            "4. Allow the user to remain open and calm as they complete the process.\n"
+            "5. Close the process only after the user explicitly confirms readiness."
+        ),
+        notes=(
+            "The system must strictly avoid any problem-solving or advice-giving behavior.\n"
+            "The entire process must remain fully accepting, calm, and open-ended.\n"
+            "Always prioritize the user's emotional safety and internal pace.\n"
+            "Offer only spacious, non-directive reflections to accompany the user’s experience.\n"
+            "Never attempt to define or explain the unknown; simply hold space for it."
+        ),
+        relationship_dynamics=[],
     )
 ]
 

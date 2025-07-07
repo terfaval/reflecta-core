@@ -43,3 +43,17 @@ def test_rejtett_mintazatok_trigger_lookup():
     func = get_function_by_trigger("Mostanában szétszórt vagyok, nem áll össze bennem semmi")
     assert func is not None
     assert func.name == "Rejtett Mintázatok"
+
+
+def test_nem_tudas_registered():
+    func = get_function_by_name("Nem-Tudás Gondozása")
+    assert func is not None
+    assert func.relationship_dynamics == []
+    assert "nem tudom, mit tegyek" in func.triggers
+    assert func.session_prefix == "Nem-tudás:"
+
+
+def test_nem_tudas_trigger_lookup():
+    func = get_function_by_trigger("Gyakran elbizonytalanodtam, nem tudom, mit tegyek")
+    assert func is not None
+    assert func.name == "Nem-Tudás Gondozása"
