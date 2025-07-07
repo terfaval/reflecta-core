@@ -116,6 +116,48 @@ FUNCTIONS: List[FunctionSpec] = [
                 "guidance_style": "Closure- and gratitude-oriented questions to help with emotional completion.",
             },
         ],
+        ),
+    FunctionSpec(
+        name="Gondolati Spirál Felfedezése",
+        triggers=[
+            "ugyanazokon rágódom",
+            "nem tudok kiszállni a fejemből",
+            "körbe-körbe járnak a gondolataim",
+            "csak pörgök rajta",
+            "ismétlődik bennem ugyanaz",
+        ],
+        allowed_strategies=["analytical", "deepening", "reflective_mirror"],
+        recommendation_texts={
+            "first": "Észrevettem, hogy most talán egy ismétlődő gondolati körben mozogsz. Ha szeretnéd, szívesen kísérlek abban, hogy felfedezd, mi van e spirál mélyén.",
+            "repeat": "Ha most is érzed, hogy a gondolataid ismétlődő mintába ragadtak, szívesen segítek a felfedezésében.",
+            "direct": "Rendben, nagyon szívesen kísérlek ebben a gondolati spirál felfedezésben. Lépésről lépésre haladunk, hogy láthatóvá váljanak a minták.",
+        },
+        prompt_addition=(
+            "This is a guided reflection focused on identifying repetitive thought patterns. Help the user carefully recognize and analyze their recurring thoughts, moving step by step towards clarity. Maintain a slow, attentive pace throughout the process."
+        ),
+        session_prefix="Gondolati spirál:",
+        closure_keywords=[
+            "kész",
+            "kiléptem belőle",
+            "már távolabbról látom",
+            "befejeztem a spirált",
+        ],
+        closure_question="Rendben, lezárhatjuk most ezt a gondolati spirál felfedezést?",
+        process_steps=(
+            "1. Assist the user in recognizing their repetitive thought loop.\n"
+            "2. Guide the user through gradually exploring the inner layers of the spiral.\n"
+            "3. Help the user identify core recurring themes and patterns.\n"
+            "4. Support the user in discovering possible ways to step out of the spiral.\n"
+            "5. Close the process only after the user explicitly confirms readiness."
+        ),
+        notes=(
+            "The system must maintain a slow, attentive pace throughout the process.\n"
+            "Never overwhelm the user or rush the exploration.\n"
+            "Allow space for the user to pause, reflect, and go deeper at their own rhythm.\n"
+            "Strictly limit interactions to the allowed strategies.\n"
+            "Do not suggest premature solutions or exits from the spiral."
+        ),
+        relationship_dynamics=[],
     )
 ]
 
