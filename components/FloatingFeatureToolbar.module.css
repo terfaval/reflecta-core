@@ -7,6 +7,7 @@
   z-index: 200;
   background: var(--ai-color);
   border-radius: 9999px;
+  padding: 10px;
 }
 
 .items {
