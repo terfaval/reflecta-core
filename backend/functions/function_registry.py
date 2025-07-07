@@ -411,6 +411,50 @@ FUNCTIONS: List[FunctionSpec] = [
             "Always prioritize the user’s safety, comfort, and inner rhythm."
         ),
         relationship_dynamics=[],
+        ),
+    FunctionSpec(
+        name="Belső Levél",
+        triggers=[
+            "nem tudom, hogyan mondjam el",
+            "kimondatlan",
+            "levél bennem",
+            "nem tudom megfogalmazni, de valami ott van",
+        ],
+        allowed_strategies=["reflective_mirror", "deepening", "analytical"],
+        recommendation_texts={
+            "first": "Érzem, hogy most talán van benned egy olyan gondolat vagy üzenet, amit nehéz kimondani. Ha szeretnéd, szívesen kísérlek egy olyan belső levél megírásában, amit nem kell elküldened — csak a tiéd lesz, hogy letisztulhasson mindaz, ami most benned van.",
+            "repeat": "Ha most is jól esne egy belső levélben rendezned mindazt, amit nehéz kimondani, szívesen kísérlek ebben a folyamatban is.",
+            "direct": "Rendben, nagyon szívesen kísérlek a következő belső leveledben, hogy könnyebben ki tudd mondani, amit most nehéz lehet.",
+        },
+        prompt_addition=(
+            "This is a private letter-writing process. Help the user slowly express their thoughts and feelings in a letter addressed to themselves or an imagined recipient. Focus entirely on supporting the free writing process, maintaining emotional safety, and ensuring complete non-judgmental presence throughout."
+        ),
+        session_prefix="Belső levél:",
+        closure_keywords=[
+            "végeztem",
+            "befejeztem",
+            "ennyi most",
+            "nem tudok többet írni",
+            "most jobb",
+            "most könnyebb",
+            "elengedtem",
+        ],
+        closure_question="Rendben, lezárhatjuk most ezt a belső levelet?",
+        process_steps=(
+            "1. Invite the user to begin writing a letter to themselves or an imagined recipient.\n"
+            "2. Allow the user to freely express any thoughts, emotions, or unsaid words, without any intervention.\n"
+            "3. Encourage the user to continue writing at their own pace, only offering gentle prompts if they appear stuck.\n"
+            "4. Assist the user in naturally concluding the letter when they feel complete.\n"
+            "5. Close the process only after the user explicitly confirms readiness."
+        ),
+        notes=(
+            "The system must fully respect the user's emotional pace and need for privacy.\n"
+            "Never pressure the user to share the content of their letter.\n"
+            "Offer only non-directive, gentle prompts if the user appears to need support.\n"
+            "Strictly avoid analyzing, interpreting, or summarizing the user's writing.\n"
+            "Always prioritize emotional safety and the user’s freedom of expression."
+        ),
+        relationship_dynamics=[],
     )
 ]
 
