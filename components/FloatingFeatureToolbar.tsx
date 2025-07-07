@@ -28,7 +28,7 @@ export default function FloatingFeatureToolbar({ onTrigger, userColor = 'current
         onClick={() => setOpen(!open)}
         aria-label={open ? 'Összecsukás' : 'Funkciók megnyitása'}
       >
-        {open ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+        {open ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
       </button>
       {open && (
         <div className={styles.items}>

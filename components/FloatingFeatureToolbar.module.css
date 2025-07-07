@@ -1,19 +1,20 @@
 .toolbar {
   position: absolute;
-  top: 8px;
-  left: 8px;
+  bottom: 8px;
+  right: 8px;
   display: flex;
+  flex-direction: row-reverse;
   align-items: center;
   z-index: 200;
   background: var(--ai-color);
   border-radius: 9999px;
-  padding: 10px;
+  padding: 4px;
 }
 
 .items {
   display: flex;
   gap: 6px;
-  margin-left: 4px;
+  margin-right: 4px;
 }
 
 .toggle {
@@ -34,7 +35,7 @@
 .toggle svg {
   width: 14px;
   height: 14px;
-  stroke: var(--user-color);
+  fill: var(--user-color);
 }
 
 .toggle:hover {
@@ -43,7 +44,7 @@
 }
 
 .toggle:hover svg {
-  stroke: var(--bg-color);
+  fill: var(--bg-color);
 }
 
 .itemButton {
@@ -65,7 +66,7 @@
 .itemButton svg {
   width: 14px;
   height: 14px;
-  stroke: var(--user-color);
+  fill: var(--user-color);
 }
 
 .itemButton:hover {
@@ -74,7 +75,7 @@
 }
 
 .itemButton:hover svg {
-  stroke: var(--bg-color);
+  fill: var(--bg-color);
 }
 
 .helpButton {
