@@ -6,6 +6,7 @@ import StartingPromptDisplay from './StartingPromptDisplay';
 import SessionLabelBubble from './SessionLabelBubble';
 import ScrollToBottomButton from './ScrollToBottomButton';
 import ResponseTweakButtons from './ResponseTweakButtons';
+import FloatingFeatureToolbar from './FloatingFeatureToolbar';
 
 interface Entry {
   id: string;
@@ -53,6 +54,10 @@ export function ChatMessagesList({
       data-session-id={sessionId || undefined}
       style={{ flex: 1, overflowY: 'auto', padding: '1rem', position: 'relative' }}
     >
+      <FloatingFeatureToolbar
+        onTrigger={onTweak}
+        userColor={currentStyle['--user-color']}
+      />
       {loadError && !entries.length ? (
         <div style={{ textAlign: 'center' }}>
           <p>{loadError}</p>
