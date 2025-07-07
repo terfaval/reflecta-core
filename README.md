@@ -24,6 +24,15 @@ NEXT_PUBLIC_WP_ORIGIN=https://beenook.hu/reflecta
 SUPABASE_URL=https://lqgmzgglyymnbdrqbtjz.supabase.co
 ```
 
+### Trigger detection konfigurálása
+Az opcionális reflexiós funkciók rugalmas felismerését két változóval szabályozhatod:
+```env
+FUZZY_MATCH_THRESHOLD=80  # a rapidfuzz részleges egyezés minimum pontszáma
+ENABLE_LEMMA_MATCH=false  # igaz esetén magyar lemmatizálás vagy szótőkeresés
+```
+Amennyiben `ENABLE_LEMMA_MATCH` értéke `true`, a rendszer először a `spaCy` `hu_core_web_sm` modellt próbálja betölteni.
+Ha ez nem érhető el, a `snowballstemmer` könyvtárra áll át.
+
 Az összes frontend API-hívás a `NEXT_PUBLIC_BACKEND_URL` alatti `/api` útvonalra
 irányul.
 

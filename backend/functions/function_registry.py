@@ -10,6 +10,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from .trigger_detector import match_trigger
+
 
 @dataclass
 class FunctionSpec:
@@ -518,11 +520,11 @@ FUNCTIONS: List[FunctionSpec] = [
 
 
 def get_function_by_trigger(user_input: str) -> Optional[FunctionSpec]:
-    """Return the first function whose trigger keyword appears in the input."""
+    """Return the first function whose trigger keyword matches the input."""
     text_lower = user_input.lower()
     for func in FUNCTIONS:
         for keyword in func.triggers:
-            if keyword.lower() in text_lower:
+            if match_trigger(user_input, keyword):
                 return func
     return None
 

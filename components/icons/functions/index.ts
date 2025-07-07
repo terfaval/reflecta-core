@@ -1,0 +1,9 @@
+export { default as IconBodySensation } from './IconBodySensation.svg';
+export { default as IconHiddenPatterns } from './IconHiddenPatterns.svg';
+export { default as IconInnerDialogue } from './IconInnerDialogue.svg';
+export { default as IconInnerImage } from './IconInnerImage.svg';
+export { default as IconInnerLetter } from './IconInnerLetter.svg';
+export { default as IconInnerThreshold } from './IconInnerThreshold.svg';
+export { default as IconNotKnowing } from './IconNotKnowing.svg';
+export { default as IconSilentPresence } from './IconSilentPresence.svg';
+export { default as IconThoughtSpiral } from './IconThoughtSpiral.svg';
