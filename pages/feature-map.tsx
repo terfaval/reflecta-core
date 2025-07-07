@@ -3,7 +3,7 @@ import * as FIcons from '@/components/icons/functions';
 
 interface FunctionInfo {
   name: string;
-  level: string;
+  level: 'basic' | 'advanced' | 'premium';
   description: string;
   tip: string;
   Icon: React.ComponentType<any>;
@@ -12,7 +12,7 @@ interface FunctionInfo {
 const FUNCTIONS: FunctionInfo[] = [
   {
     name: 'Testérzet-figyelés',
-    level: 'Alap szintű funkció',
+    level: 'basic',
     description:
       'Figyelmedet a testedre irányítva fedezheted fel, milyen érzések vannak jelen most. Segít a testi jelzések tudatosításában és a belső nyugalom elmélyítésében.',
     tip: 'szeretnék egy testérzet figyelést csinálni',
@@ -20,7 +20,7 @@ const FUNCTIONS: FunctionInfo[] = [
   },
   {
     name: 'Csendben Maradás',
-    level: 'Alap szintű funkció',
+    level: 'basic',
     description:
       'Egy biztonságos tér a szavak nélküli jelenléthez. A csendben maradás segít lassítani, megpihenni, és hagyni, hogy a belső folyamatok maguktól rendeződjenek.',
     tip: 'szeretnék csak csendben maradni',
@@ -28,7 +28,7 @@ const FUNCTIONS: FunctionInfo[] = [
   },
   {
     name: 'Rejtett Mintázatok',
-    level: 'Alap szintű funkció',
+    level: 'basic',
     description:
       'Segít meglátni, hogyan kapcsolódnak össze a benned kavargó érzések és gondolatok. Ha valami most még kusza, ez a funkció támogat a felfedezésben.',
     tip: 'szeretnék felfedezni rejtett mintázatokat',
@@ -36,7 +36,7 @@ const FUNCTIONS: FunctionInfo[] = [
   },
   {
     name: 'Belső Küszöb Átlépése',
-    level: 'Haladó szintű funkció',
+    level: 'advanced',
     description:
       'Amikor úgy érzed, elérkeztél egy fontos belső határhoz, ez a funkció segít megjeleníteni és átlépni azt. Egy lassú, biztonságos folyamat, amely a belső változásra hív.',
     tip: 'szeretnék belső küszöböt átlépni',
@@ -44,7 +44,7 @@ const FUNCTIONS: FunctionInfo[] = [
   },
   {
     name: 'A Nem-Tudás Gondozása',
-    level: 'Haladó szintű funkció',
+    level: 'advanced',
     description:
       'Ez a funkció megtanít arra, hogyan maradhatsz jelen a bizonytalanságban. Nem a megoldás a cél, hanem a nem-tudás elfogadása és a belső nyugalom megélése.',
     tip: 'szeretném gondozni a nem-tudást',
@@ -52,7 +52,7 @@ const FUNCTIONS: FunctionInfo[] = [
   },
   {
     name: 'Gondolati Spirál Felfedezése',
-    level: 'Haladó szintű funkció',
+    level: 'advanced',
     description:
       'Ha úgy érzed, hogy ugyanazokon a gondolatokon rágódsz újra meg újra, ez a funkció segít felfedezni, mi rejlik a spirál mélyén, és hogyan lehetne továbblépni.',
     tip: 'szeretnék felfedezni egy gondolati spirált',
@@ -60,7 +60,7 @@ const FUNCTIONS: FunctionInfo[] = [
   },
   {
     name: 'Belső Párbeszéd',
-    level: 'Prémium funkció',
+    level: 'premium',
     description:
       'Segít egy biztonságos, belső párbeszédben kimondani mindazt, amit egy másik személlyel kapcsolatban érzel. Itt teret kaphatnak a kimondatlan szavak és lezáratlan érzések.',
     tip: 'szeretnék egy belső párbeszédet',
@@ -68,7 +68,7 @@ const FUNCTIONS: FunctionInfo[] = [
   },
   {
     name: 'Belső Képalkotás',
-    level: 'Prémium funkció',
+    level: 'premium',
     description:
       'Ebben a folyamatban egy belső képet, szimbólumot vagy jelenetet alkothatsz, amely segít kifejezni a benned lévő érzéseket.',
     tip: 'szeretnék belső képet alkotni',
@@ -76,7 +76,7 @@ const FUNCTIONS: FunctionInfo[] = [
   },
   {
     name: 'Belső Levél',
-    level: 'Prémium funkció',
+    level: 'premium',
     description:
       'Ez a funkció segít megírni egy olyan levelet, amit senkinek sem kell elküldened — csak magadért írod, hogy tisztábban láss.',
     tip: 'szeretnék írni egy belső levelet',
@@ -97,17 +97,41 @@ const ACCESS = [
   { name: 'Belső Levél', basic: false, premium: true },
 ];
 
-const Card: React.FC<FunctionInfo> = ({ Icon, name, level, description, tip }) => (
-  <div className="border rounded p-4 flex flex-col items-start gap-2">
-    <Icon style={{ width: 32, height: 32 }} />
-    <h3 className="text-lg font-bold">{name}</h3>
-    <p className="italic text-sm">{level}</p>
-    <p>{description}</p>
-    <p>
-      <strong>Indítási tipp:</strong> {tip}
-    </p>
-  </div>
-);
+const LEVEL_LABELS = {
+  basic: 'Alap szintű funkció',
+  advanced: 'Haladó szintű funkció',
+  premium: 'Prémium funkció',
+};
+
+const CARD_STYLE = {
+  basic: 'bg-blue-50 border-blue-200',
+  advanced: 'bg-amber-50 border-amber-200',
+  premium: 'bg-amber-50 border-amber-200',
+};
+
+const DOT_STYLE = {
+  basic: 'bg-blue-500',
+  advanced: 'bg-purple-500',
+  premium: 'bg-amber-500',
+};
+
+const Card: React.FC<FunctionInfo> = ({ Icon, name, level, description, tip }) => {
+  return (
+    <div className={`border rounded-lg p-4 shadow flex flex-col items-center gap-2 ${CARD_STYLE[level]}`}> 
+      <Icon className="w-8 h-8" />
+      <h3 className="text-lg font-semibold text-center">{name}</h3>
+      <div className="flex items-center gap-1 text-sm text-gray-700">
+        <span className={`inline-block w-2 h-2 rounded-full ${DOT_STYLE[level]}`}></span>
+        <span>{LEVEL_LABELS[level]}</span>
+      </div>
+      <p className="text-sm text-center">{description}</p>
+      <p className="text-sm">
+        <strong>Indítási tipp:</strong> {tip}
+      </p>
+    </div>
+  );
+};
+
 
 export default function FunkcioTerkep() {
   return (
@@ -136,7 +160,7 @@ export default function FunkcioTerkep() {
           bármelyik funkció közvetlenül is elindítható egyetlen pontos
           üzenettel — ezeket a kártyákon az ‘Indítási tipp’ mezőben találod.
         </p>
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {FUNCTIONS.map((f) => (
             <Card key={f.name} {...f} />
           ))}
@@ -149,7 +173,7 @@ export default function FunkcioTerkep() {
           felhasználói szinteken érhetők el.
         </p>
         <table className="border-collapse w-full text-left">
-          <thead>
+          <thead className="bg-gray-100">
             <tr>
               <th className="border p-2">Funkció</th>
               <th className="border p-2">Basic felhasználó</th>
@@ -158,7 +182,7 @@ export default function FunkcioTerkep() {
           </thead>
           <tbody>
             {ACCESS.map((row) => (
-              <tr key={row.name}>
+              <tr key={row.name} className="odd:bg-white even:bg-gray-50">
                 <td className="border p-2">{row.name}</td>
                 <td className="border p-2 text-center">
                   {row.basic ? '✔️' : ''}
