@@ -1,21 +1,19 @@
 .toolbar {
-  position: sticky;
-  top: 0;
-  left: 0;
+  position: fixed;
+  top: 8px;
+  left: 8px;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  z-index: 50;
+  align-items: center;
+  z-index: 200;
 }
 
 .items {
   display: flex;
-  flex-direction: column;
   gap: 6px;
-  margin-top: 4px;
+  margin-left: 4px;
 }
 
-.button {
+.toggle {
   width: 28px;
   height: 28px;
   padding: 0;
@@ -27,31 +25,79 @@
   background: transparent;
   color: var(--user-color);
   cursor: pointer;
-  position: relative;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.button svg {
+.toggle svg {
   width: 14px;
   height: 14px;
   stroke: var(--user-color);
 }
 
-.button:hover {
+.toggle:hover {
   background: var(--user-color);
   color: var(--bg-color);
 }
 
-.button:hover svg {
+.toggle:hover svg {
+  stroke: var(--bg-color);
+}
+
+.itemButton {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid black;
+  background: transparent;
+  color: black;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.itemButton svg {
+  width: 14px;
+  height: 14px;
+  stroke: black;
+}
+
+.itemButton:hover {
+  background: black;
+  color: var(--bg-color);
+}
+
+.itemButton:hover svg {
+  stroke: var(--bg-color);
+}
+
+.helpButton {
+  border-color: var(--user-color);
+  color: var(--user-color);
+}
+
+.helpButton svg {
+  stroke: var(--user-color);
+}
+
+.helpButton:hover {
+  background: var(--user-color);
+  color: var(--bg-color);
+}
+
+.helpButton:hover svg {
   stroke: var(--bg-color);
 }
 
 .tooltip {
   position: absolute;
-  left: calc(100% + 6px);
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--user-color);
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: black;
   color: var(--bg-color);
   padding: 2px 6px;
   border-radius: 4px;
@@ -63,7 +109,8 @@
   font-family: 'Raleway', sans-serif;
 }
 
-.button:hover .tooltip {
+.itemButton:hover .tooltip,
+.helpButton:hover .tooltip {
   opacity: 1;
   visibility: visible;
 }

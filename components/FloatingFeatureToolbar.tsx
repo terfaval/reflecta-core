@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import { ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react';
 import styles from './FloatingFeatureToolbar.module.css';
 import { FEATURE_LIST } from '@/lib/features';
 
@@ -24,18 +24,18 @@ export default function FloatingFeatureToolbar({ onTrigger, userColor = 'current
       style={{ '--user-color': userColor } as React.CSSProperties}
     >
       <button
-        className={styles.button}
+        className={styles.toggle}
         onClick={() => setOpen(!open)}
         aria-label={open ? 'Összecsukás' : 'Funkciók megnyitása'}
       >
-        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        {open ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
       </button>
       {open && (
         <div className={styles.items}>
           {FEATURE_LIST.map((f) => (
             <button
               key={f.name}
-              className={styles.button}
+              className={styles.itemButton}
               onClick={() => handleClick(f.tip)}
               aria-label={f.name}
             >
@@ -44,7 +44,7 @@ export default function FloatingFeatureToolbar({ onTrigger, userColor = 'current
             </button>
           ))}
           <button
-            className={styles.button}
+            className={`${styles.itemButton} ${styles.helpButton}`}
             onClick={() => {
               router.push('/feature-map');
               setOpen(false);
