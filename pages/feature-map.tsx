@@ -1,5 +1,6 @@
 import React from 'react';
 import * as FIcons from '@/components/icons/functions';
+import styles from './FeatureMap.module.css';
 
 interface FunctionInfo {
   name: string;
@@ -104,24 +105,24 @@ const LEVEL_LABELS = {
 };
 
 const CARD_STYLE = {
-  basic: 'bg-blue-50 border-blue-200',
-  advanced: 'bg-amber-50 border-amber-200',
-  premium: 'bg-amber-50 border-amber-200',
+  basic: `${styles.card} ${styles.basic}`,
+  advanced: `${styles.card} ${styles.advanced}`,
+  premium: `${styles.card} ${styles.premium}`,
 };
 
 const DOT_STYLE = {
-  basic: 'bg-blue-500',
-  advanced: 'bg-purple-500',
-  premium: 'bg-amber-500',
+  basic: `${styles.dot} ${styles.dotBasic}`,
+  advanced: `${styles.dot} ${styles.dotAdvanced}`,
+  premium: `${styles.dot} ${styles.dotPremium}`,
 };
 
 const Card: React.FC<FunctionInfo> = ({ Icon, name, level, description, tip }) => {
   return (
-    <div className={`border rounded-lg p-4 shadow flex flex-col items-center gap-2 ${CARD_STYLE[level]}`}> 
-      <Icon className="w-8 h-8" />
+    <div className={CARD_STYLE[level]}>
+      <Icon className={styles.icon} />
       <h3 className="text-lg font-semibold text-center">{name}</h3>
       <div className="flex items-center gap-1 text-sm text-gray-700">
-        <span className={`inline-block w-2 h-2 rounded-full ${DOT_STYLE[level]}`}></span>
+        <span className={DOT_STYLE[level]}></span>
         <span>{LEVEL_LABELS[level]}</span>
       </div>
       <p className="text-sm text-center">{description}</p>
@@ -135,7 +136,7 @@ const Card: React.FC<FunctionInfo> = ({ Icon, name, level, description, tip }) =
 
 export default function FunkcioTerkep() {
   return (
-    <div className="p-8 space-y-12">
+    <div className={`${styles.pageContainer} p-8 space-y-12`}>
       <section className="space-y-4">
         <h1 className="text-3xl font-bold">Funkciótérkép</h1>
         <p>
@@ -172,23 +173,23 @@ export default function FunkcioTerkep() {
           Az alábbi táblázatban megnézheted, hogy a különböző funkciók mely
           felhasználói szinteken érhetők el.
         </p>
-        <table className="border-collapse w-full text-left">
-          <thead className="bg-gray-100">
+        <table className={styles.accessTable}>
+          <thead>
             <tr>
-              <th className="border p-2">Funkció</th>
-              <th className="border p-2">Basic felhasználó</th>
-              <th className="border p-2">Prémium felhasználó</th>
+              <th>Funkció</th>
+              <th>Basic felhasználó</th>
+              <th>Prémium felhasználó</th>
             </tr>
           </thead>
           <tbody>
             {ACCESS.map((row) => (
-              <tr key={row.name} className="odd:bg-white even:bg-gray-50">
-                <td className="border p-2">{row.name}</td>
-                <td className="border p-2 text-center">
-                  {row.basic ? '✔️' : ''}
+              <tr key={row.name}>
+                <td>{row.name}</td>
+                <td className="text-center">
+                  {row.basic ? <span className={styles.check}>✓</span> : ''}
                 </td>
-                <td className="border p-2 text-center">
-                  {row.premium ? '✔️' : ''}
+                <td className="text-center">
+                  {row.premium ? <span className={styles.check}>✓</span> : ''}
                 </td>
               </tr>
             ))}
