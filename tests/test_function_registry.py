@@ -57,3 +57,17 @@ def test_nem_tudas_trigger_lookup():
     func = get_function_by_trigger("Gyakran elbizonytalanodtam, nem tudom, mit tegyek")
     assert func is not None
     assert func.name == "Nem-Tudás Gondozása"
+
+
+def test_belso_kuszob_registered():
+    func = get_function_by_name("Belső Küszöb Átlépése")
+    assert func is not None
+    assert func.relationship_dynamics == []
+    assert "valaminek a küszöbén állok" in func.triggers
+    assert func.session_prefix == "Belső küszöb:"
+
+
+def test_belso_kuszob_trigger_lookup():
+    func = get_function_by_trigger("Úgy érzem, elágazáshoz érkeztem és nem tudom, mi van a másik oldalon")
+    assert func is not None
+    assert func.name == "Belső Küszöb Átlépése"

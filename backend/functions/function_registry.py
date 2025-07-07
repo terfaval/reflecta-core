@@ -242,6 +242,49 @@ FUNCTIONS: List[FunctionSpec] = [
             "Never attempt to define or explain the unknown; simply hold space for it."
         ),
         relationship_dynamics=[],
+        ),
+    FunctionSpec(
+        name="Belső Küszöb Átlépése",
+        triggers=[
+            "valaminek a küszöbén állok",
+            "átmenetben vagyok",
+            "valami változik bennem",
+            "nem tudok továbblépni",
+            "elágazáshoz érkeztem",
+            "nem tudom, mi van a másik oldalon",
+        ],
+        allowed_strategies=["deepening", "transformative", "reflective_mirror"],
+        recommendation_texts={
+            "first": "Érzem, hogy most valami belső határ közelében vagy. Ha szeretnéd, szívesen kísérlek ebben a folyamatban, ahol egy bátor, szimbolikus átlépésre hívlak.",
+            "repeat": "Ha most is érzed, hogy egy belső küszöbhöz érkeztél, szívesen kísérlek újra ezen az átmeneten.",
+            "direct": "Rendben, nagyon szívesen kísérlek ebben a belső küszöbátlépésben. Engedd, hogy együtt felfedezzük, mi vár rád a másik oldalon.",
+        },
+        prompt_addition=(
+            "This is a symbolic, inner transition process. Help the user carefully visualize their internal threshold and accompany them through the symbolic crossing at their own pace. Never rush; respect the user’s readiness and emotional safety above all."
+        ),
+        session_prefix="Belső küszöb:",
+        closure_keywords=[
+            "kész",
+            "átléptem",
+            "másik oldalon vagyok",
+            "befejeztem az utat",
+        ],
+        closure_question="Rendben, lezárhatjuk most ezt a belső küszöbátlépést?",
+        process_steps=(
+            "1. Help the user create a visualized internal space representing the threshold or gate.\n"
+            "2. Support the user in exploring the feelings, fears, and hopes surrounding the transition.\n"
+            "3. Guide the user through the symbolic act of crossing the threshold at a safe, gradual pace.\n"
+            "4. Assist the user in recognizing the internal qualities experienced on the 'other side.'\n"
+            "5. Close the process only after the user explicitly confirms their readiness."
+        ),
+        notes=(
+            "The system must maintain a very slow, respectful pace throughout the process.\n"
+            "Never push the user to cross the threshold prematurely.\n"
+            "Allow full freedom for the user to visualize their transition in their own way.\n"
+            "Strictly follow the allowed strategies without deviation.\n"
+            "Prioritize emotional safety, patience, and the user's unique rhythm and symbolic interpretation."
+        ),
+        relationship_dynamics=[],
     )
 ]
 
