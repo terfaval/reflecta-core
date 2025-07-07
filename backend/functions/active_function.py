@@ -1,4 +1,22 @@
-"""Manage active reflective functions during a session."""
+"""Manage active reflective functions during a session.
+
+This module keeps track of which optional self-reflection function is
+currently active for a conversation. A function becomes active when the
+user input matches one of its trigger keywords. While active:
+
+* ``spec.prompt_addition`` is appended to the system prompt via
+  :func:`backend.prompt_builder.build_system_prompt`.
+* ``spec.allowed_strategies`` can be consulted by future logic to limit
+  the conversation style.
+* All user messages are recorded in ``history`` until a closure keyword
+  appears.
+
+When a closure keyword is detected ``spec.closure_question`` and
+``spec.session_prefix`` are stored so that ``respond`` and
+``session_close`` can use them to gracefully finish the session.
+Additional metadata such as ``process_steps`` and ``notes`` are kept on
+the :class:`FunctionSpec` for developer reference.
+"""
 
 from __future__ import annotations
 

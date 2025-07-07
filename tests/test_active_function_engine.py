@@ -14,6 +14,7 @@ from backend.functions.active_function import (
     get_active_prompt,
     close_function,
     pop_closure_question,
+    pop_session_prefix,
 )
 from backend.functions import function_registry
 from backend.prompt_builder import build_system_prompt
@@ -40,9 +41,10 @@ def test_active_function_trigger_and_prompt_integration():
         prompt = get_active_prompt(session_id)
         assert prompt == dummy_function.prompt_addition
 
-    with patch("backend.prompt_builder.fetch_profile", return_value={"name": "Reflecta", "prompt_core": ""}), patch(
-        "backend.prompt_builder.fetch_profile_metadata", return_value={}
-    ):
+    with patch(
+        "backend.prompt_builder.fetch_profile",
+        return_value={"name": "Reflecta", "prompt_core": ""},
+    ), patch("backend.prompt_builder.fetch_profile_metadata", return_value={}):
         system_prompt = build_system_prompt(
             "u1",
             "Reflecta",
@@ -51,7 +53,7 @@ def test_active_function_trigger_and_prompt_integration():
         )
     assert prompt in system_prompt
 
-        # Trigger closing after verifying prompt integration
+    # Trigger closing after verifying prompt integration
     handle_user_message(session_id, dummy_function.closure_keywords[0])
     assert not is_active(session_id)
     question = pop_closure_question(session_id)
@@ -59,3 +61,28 @@ def test_active_function_trigger_and_prompt_integration():
 
     close_function(session_id)
     assert not is_active(session_id)
+
+
+def test_active_function_session_prefix_storage():
+    session_id = "s2"
+    dummy_function = function_registry.FunctionSpec(
+        name="Levél",
+        triggers=["levél"],
+        allowed_strategies=[],
+        recommendation_texts={"first": "", "repeat": "", "direct": ""},
+        closure_keywords=["lezárom"],
+        closure_question="?",
+        session_prefix="Prefix:",
+        prompt_addition="",
+    )
+
+    with patch("backend.functions.function_registry.FUNCTIONS", [dummy_function]):
+        handle_user_message(session_id, "levél írása")
+        assert is_active(session_id)
+        # close the function
+        handle_user_message(session_id, "Most lezárom")
+        assert not is_active(session_id)
+        prefix = pop_session_prefix(session_id)
+        assert prefix == dummy_function.session_prefix
+        # prefix store should now be empty
+        assert pop_session_prefix(session_id) is None

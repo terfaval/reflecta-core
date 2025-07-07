@@ -65,13 +65,16 @@ def build_system_prompt(
     # Begin with the core essence shared across profiles
     lines.extend(CORE_ESSENCE_LINES)
 
-    # Append instructions from any active reflective function
+    # Append additional instructions if a reflective function is active.
+    # ``get_active_prompt`` returns ``spec.prompt_addition`` from the
+    # currently active FunctionSpec. This keeps the prompt building logic
+    # independent from how functions are detected or managed.
     if session_id:
         function_prompt = get_active_prompt(session_id)
         if function_prompt:
             lines.append("")
             lines.append(function_prompt)
-            
+
     if normalize_profile(profile_data.get("name")) == "reflecta":
         lines.append(
             "You serve as a neutral starting profile. Clarify the user's aim and keep a meta perspective on which profile might help most. Avoid proposing other profiles unless the user requests it."
@@ -88,7 +91,6 @@ def build_system_prompt(
     if core:
         lines.append(core)
         lines.append("")
-
 
     worldview = metadata.get("worldview")
     if worldview:

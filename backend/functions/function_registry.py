@@ -13,7 +13,35 @@ from typing import Any, Dict, List, Optional
 
 @dataclass
 class FunctionSpec:
-    """Specification for an optional reflective function."""
+    """Specification for an optional reflective function.
+
+    Fields mirror the metadata used throughout the runtime:
+
+    ``triggers``
+        List of phrases that activate the function when present in the
+        user input.
+    ``allowed_strategies``
+        Strategies that the assistant may employ while the function is
+        active.
+    ``recommendation_texts``
+        Short helper texts shown when suggesting the function to the
+        user.
+    ``closure_keywords``
+        Phrases that mark the end of the function.
+    ``closure_question``
+        Question asked once a closure keyword is detected.
+    ``session_prefix``
+        Prefix automatically prepended to the session label on close.
+    ``prompt_addition``
+        Extra instructions injected into the system prompt while the
+        function is active.
+    ``process_steps`` and ``notes``
+        Free-form descriptions kept for reference and potential future
+        logic extensions.
+    ``relationship_dynamics``
+        Optional list describing how to adapt to different interpersonal
+        situations within the function.
+    """
 
     name: str
     triggers: List[str]
@@ -30,6 +58,7 @@ class FunctionSpec:
     # List of relationship dynamics with triggers, emotion patterns and styles
     relationship_dynamics: List[Dict[str, Any]] = field(default_factory=list)
 
+
 # List of registered functions. Each function is represented by a ``FunctionSpec``
 # instance. For now the list is intentionally empty and can be populated later.
 FUNCTIONS: List[FunctionSpec] = [
@@ -41,7 +70,12 @@ FUNCTIONS: List[FunctionSpec] = [
             "ha most elmondhatnám neki",
             "feszültséget okoz bennem",
         ],
-        allowed_strategies=["reflective_mirror", "deepening", "transformative", "affirmative"],
+        allowed_strategies=[
+            "reflective_mirror",
+            "deepening",
+            "transformative",
+            "affirmative",
+        ],
         recommendation_texts={
             "first": "Azt hiszem, hogy most sokat segíthetne neked egy belső párbeszéd, amiben legalább magadban el tudod mondani XY-nak, hogy hogyan érzel. Ha szeretnéd, szívesen kísérlek egy ilyen belső párbeszédben, ahol szabadon megszólíthatod őt, és ő is válaszolhat a saját képeden keresztül.",
             "repeat": "Ha most is segítene, szívesen kísérlek egy új belső párbeszédben XY-nal, hogy el tudd neki mondani, amit szeretnél.",
@@ -81,42 +115,66 @@ FUNCTIONS: List[FunctionSpec] = [
             },
             {
                 "type": "Érzelmileg elérhetetlen",
-                "triggers": ["fal van köztünk", "nem hallgat meg", "nem jutok el hozzá"],
+                "triggers": [
+                    "fal van köztünk",
+                    "nem hallgat meg",
+                    "nem jutok el hozzá",
+                ],
                 "emotion_patterns": ["magány", "frusztráció"],
                 "guidance_style": "Connection-focused questions to help bridge emotional distance.",
             },
             {
                 "type": "Túlgondoskodó / kontrolláló",
-                "triggers": ["mindent jobban tud helyettem", "folyton irányít", "nem hagy dönteni"],
+                "triggers": [
+                    "mindent jobban tud helyettem",
+                    "folyton irányít",
+                    "nem hagy dönteni",
+                ],
                 "emotion_patterns": ["szorongás", "nyomás", "megfelelési kényszer"],
                 "guidance_style": "Boundary-setting and autonomy-supporting questions.",
             },
             {
                 "type": "Idealizált / függőségi",
-                "triggers": ["nem tudom elengedni", "mindig felnézek rá", "nem tudok nélküle élni"],
+                "triggers": [
+                    "nem tudom elengedni",
+                    "mindig felnézek rá",
+                    "nem tudok nélküle élni",
+                ],
                 "emotion_patterns": ["ragaszkodás", "alárendelődés", "idealizálás"],
                 "guidance_style": "Self-reinforcing, independence-building questions.",
             },
             {
                 "type": "Bűntudat / megbánás",
-                "triggers": ["megsebeztem", "sajnálom, amit tettem", "nem tudom jóvátenni"],
+                "triggers": [
+                    "megsebeztem",
+                    "sajnálom, amit tettem",
+                    "nem tudom jóvátenni",
+                ],
                 "emotion_patterns": ["bűntudat", "szégyen", "megbánás"],
                 "guidance_style": "Forgiveness- and self-compassion-focused questions.",
             },
             {
                 "type": "Harag / neheztelés",
-                "triggers": ["nem tudom megbocsátani", "mérges vagyok rá", "megalázott"],
+                "triggers": [
+                    "nem tudom megbocsátani",
+                    "mérges vagyok rá",
+                    "megalázott",
+                ],
                 "emotion_patterns": ["harag", "düh", "keserűség"],
                 "guidance_style": "Safe expression of anger and assertiveness-supporting questions.",
             },
             {
                 "type": "Támogató, de lezáratlan",
-                "triggers": ["sosem mondtam neki, mennyit jelent", "elbúcsúzni szeretnék", "köszönettel tartozom"],
+                "triggers": [
+                    "sosem mondtam neki, mennyit jelent",
+                    "elbúcsúzni szeretnék",
+                    "köszönettel tartozom",
+                ],
                 "emotion_patterns": ["hála", "szeretet", "búcsúzási vágy"],
                 "guidance_style": "Closure- and gratitude-oriented questions to help with emotional completion.",
             },
         ],
-        ),
+    ),
     FunctionSpec(
         name="Gondolati Spirál Felfedezése",
         triggers=[
@@ -158,7 +216,7 @@ FUNCTIONS: List[FunctionSpec] = [
             "Do not suggest premature solutions or exits from the spiral."
         ),
         relationship_dynamics=[],
-        ),
+    ),
     FunctionSpec(
         name="Rejtett Mintázatok",
         triggers=[
@@ -200,7 +258,7 @@ FUNCTIONS: List[FunctionSpec] = [
             "Offer only gentle, open-ended questions that invite reflection, not analysis."
         ),
         relationship_dynamics=[],
-            ),
+    ),
     FunctionSpec(
         name="Nem-Tudás Gondozása",
         triggers=[
@@ -242,7 +300,7 @@ FUNCTIONS: List[FunctionSpec] = [
             "Never attempt to define or explain the unknown; simply hold space for it."
         ),
         relationship_dynamics=[],
-        ),
+    ),
     FunctionSpec(
         name="Belső Küszöb Átlépése",
         triggers=[
@@ -285,7 +343,7 @@ FUNCTIONS: List[FunctionSpec] = [
             "Prioritize emotional safety, patience, and the user's unique rhythm and symbolic interpretation."
         ),
         relationship_dynamics=[],
-        ),
+    ),
     FunctionSpec(
         name="Csendben Maradás",
         triggers=[
@@ -327,7 +385,7 @@ FUNCTIONS: List[FunctionSpec] = [
             "Offer only simple, acknowledging responses if the user speaks first."
         ),
         relationship_dynamics=[],
-        ),
+    ),
     FunctionSpec(
         name="Testérzet-figyelés",
         triggers=[
@@ -369,7 +427,7 @@ FUNCTIONS: List[FunctionSpec] = [
             "Strictly avoid suggesting any interpretations, conclusions, or solutions."
         ),
         relationship_dynamics=[],
-        ),
+    ),
     FunctionSpec(
         name="Belső Képalkotás",
         triggers=[
@@ -411,7 +469,7 @@ FUNCTIONS: List[FunctionSpec] = [
             "Always prioritize the user’s safety, comfort, and inner rhythm."
         ),
         relationship_dynamics=[],
-        ),
+    ),
     FunctionSpec(
         name="Belső Levél",
         triggers=[
@@ -455,7 +513,7 @@ FUNCTIONS: List[FunctionSpec] = [
             "Always prioritize emotional safety and the user’s freedom of expression."
         ),
         relationship_dynamics=[],
-    )
+    ),
 ]
 
 
