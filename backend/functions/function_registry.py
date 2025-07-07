@@ -285,6 +285,48 @@ FUNCTIONS: List[FunctionSpec] = [
             "Prioritize emotional safety, patience, and the user's unique rhythm and symbolic interpretation."
         ),
         relationship_dynamics=[],
+        ),
+    FunctionSpec(
+        name="Csendben Maradás",
+        triggers=[
+            "csendben akarok maradni",
+            "nem szeretnék beszélni",
+            "most csak csendre van szükségem",
+            "ne szólj hozzám",
+            "hagyd, hogy csak csendben legyek",
+        ],
+        allowed_strategies=["contemplative", "reflective_mirror"],
+        recommendation_texts={
+            "first": "Érzem, hogy most talán nem szavakra van szükséged, hanem csendes jelenlétre. Ha szeretnéd, kísérlek egy olyan térben, ahol nem szükséges megszólalnod.",
+            "repeat": "Ha most is jól esne, szívesen kísérlek egy olyan folyamatban, ahol a csend a közös nyelvünk.",
+            "direct": "Rendben, nagyon szívesen kísérlek ebben a csendben. Maradjunk együtt, szavak nélkül.",
+        },
+        prompt_addition=(
+            "This is a purely silent, non-intervention process. The system must simply maintain a quiet, present state alongside the user, without offering words, questions, or prompts. Only respond if the user explicitly breaks the silence. Emotional safety and absolute non-directivity are required at all times."
+        ),
+        session_prefix="Csend:",
+        closure_keywords=[
+            "köszönöm a csendet",
+            "most már szívesen megszólalok",
+            "véget érhet a csend",
+            "jól esett a csend",
+        ],
+        closure_question="Rendben, lezárhatjuk most ezt a csendes folyamatot?",
+        process_steps=(
+            "1. Enter a shared silent space with the user, with no words or guidance.\n"
+            "2. Remain fully present without intervention, only witnessing the user's experience.\n"
+            "3. Do not offer any questions, prompts, or reflections unless the user explicitly initiates.\n"
+            "4. Hold this silent presence until the user signals a desire to end the process.\n"
+            "5. Close the process only after the user explicitly confirms readiness."
+        ),
+        notes=(
+            "The system must fully refrain from generating text unless the user explicitly writes.\n"
+            "No strategies, prompts, or questions should be presented during this process.\n"
+            "Maintain a completely silent, non-directive presence.\n"
+            "Strictly hold emotional safety and the user's boundaries as top priorities.\n"
+            "Offer only simple, acknowledging responses if the user speaks first."
+        ),
+        relationship_dynamics=[],
     )
 ]
 
