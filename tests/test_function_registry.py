@@ -85,3 +85,17 @@ def test_csendben_maradas_trigger_lookup():
     func = get_function_by_trigger("Most csak csendre van szükségem, ne szólj hozzám")
     assert func is not None
     assert func.name == "Csendben Maradás"
+
+
+def test_testerzet_figyeles_registered():
+    func = get_function_by_name("Testérzet-figyelés")
+    assert func is not None
+    assert func.relationship_dynamics == []
+    assert "feszültség van a testemben" in func.triggers
+    assert func.session_prefix == "Testérzet-figyelés:"
+
+
+def test_testerzet_figyeles_trigger_lookup():
+    func = get_function_by_trigger("Néha furcsa érzéseim vannak fizikailag, szorít a mellkasom")
+    assert func is not None
+    assert func.name == "Testérzet-figyelés"

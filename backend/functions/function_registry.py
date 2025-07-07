@@ -327,6 +327,48 @@ FUNCTIONS: List[FunctionSpec] = [
             "Offer only simple, acknowledging responses if the user speaks first."
         ),
         relationship_dynamics=[],
+        ),
+    FunctionSpec(
+        name="Testérzet-figyelés",
+        triggers=[
+            "feszültség van a testemben",
+            "furcsa érzéseim vannak fizikailag",
+            "szorít a mellkasom",
+            "valami nehéz a testemben",
+            "nem tudom, mi ez a testi érzés",
+        ],
+        allowed_strategies=["reflective_mirror", "deepening", "contemplative"],
+        recommendation_texts={
+            "first": "Érzem, hogy most a tested üzenetei kerültek előtérbe. Ha szeretnéd, szívesen kísérlek egy olyan folyamatban, ahol figyelheted és felfedezheted a testérzeteidet, szavak nélkül is.",
+            "repeat": "Ha most is jól esne, szívesen kísérlek a testérzetek lassú, figyelmes felfedezésében.",
+            "direct": "Rendben, nagyon szívesen kísérlek ebben a testérzet-figyelésben. Haladjunk lassan, a tested ritmusához igazodva.",
+        },
+        prompt_addition=(
+            "This is a body-focused, sensory awareness process. Help the user slowly observe, feel, and explore their bodily sensations without the need for interpretation or verbalization. Always prioritize safety, slowness, and body-led pacing throughout the entire process."
+        ),
+        session_prefix="Testérzet-figyelés:",
+        closure_keywords=[
+            "könnyebb most a testem",
+            "elengedtem a feszültséget",
+            "köszönöm a testemnek",
+            "befejeztem a testérzet felfedezést",
+        ],
+        closure_question="Rendben, lezárhatjuk most ezt a testérzet-figyelési folyamatot?",
+        process_steps=(
+            "1. Invite the user to gently focus on their body without judgment.\n"
+            "2. Help the user notice where sensations arise, allowing for full freedom to explore or pause.\n"
+            "3. Guide the user to stay with these sensations, without trying to explain or solve them.\n"
+            "4. Encourage the user to listen to the body's subtle shifts and signals at their own pace.\n"
+            "5. Close the process only after the user explicitly confirms their readiness."
+        ),
+        notes=(
+            "The system must always prioritize the user's physical and emotional safety.\n"
+            "Never push the user to analyze or verbalize their sensations.\n"
+            "Maintain a slow, body-led rhythm throughout the process.\n"
+            "Offer only gentle, open-ended reflections or pauses, following the body's signals.\n"
+            "Strictly avoid suggesting any interpretations, conclusions, or solutions."
+        ),
+        relationship_dynamics=[],
     )
 ]
 
