@@ -99,3 +99,17 @@ def test_testerzet_figyeles_trigger_lookup():
     func = get_function_by_trigger("Néha furcsa érzéseim vannak fizikailag, szorít a mellkasom")
     assert func is not None
     assert func.name == "Testérzet-figyelés"
+
+
+def test_belso_kepalkotas_registered():
+    func = get_function_by_name("Belső Képalkotás")
+    assert func is not None
+    assert func.relationship_dynamics == []
+    assert "képek jelennek meg bennem" in func.triggers
+    assert func.session_prefix == "Belső képalkotás:"
+
+
+def test_belso_kepalkotas_trigger_lookup():
+    func = get_function_by_trigger("Néha álomszerű érzéseim vannak és belső képeket látok")
+    assert func is not None
+    assert func.name == "Belső Képalkotás"

@@ -369,6 +369,48 @@ FUNCTIONS: List[FunctionSpec] = [
             "Strictly avoid suggesting any interpretations, conclusions, or solutions."
         ),
         relationship_dynamics=[],
+        ),
+    FunctionSpec(
+        name="Belső Képalkotás",
+        triggers=[
+            "képek jelennek meg bennem",
+            "álomszerű érzéseim vannak",
+            "látomások jönnek elő",
+            "valami képi jelenik meg bennem",
+            "belső képeket látok",
+        ],
+        allowed_strategies=["contemplative", "reflective_mirror", "deepening"],
+        recommendation_texts={
+            "first": "Érzem, hogy most belső képek, szimbólumok jelennek meg benned. Ha szeretnéd, kísérlek egy olyan folyamatban, ahol szabadon felfedezheted ezeket a képeket, minden elvárás nélkül.",
+            "repeat": "Ha most is jól esne, szívesen kísérlek a belső képeid, szimbólumaid felfedezésében.",
+            "direct": "Rendben, nagyon szívesen kísérlek ebben a belső képalkotásban. Haladjunk lassan, a képeid ritmusához igazodva, teljes szabadsággal.",
+        },
+        prompt_addition=(
+            "This is a free, inner visualization process focused on exploring spontaneous inner images, symbols, or dreamlike scenes. Help the user gently observe, describe, and reflect on these inner visions without interpretation or analysis. Maintain complete freedom and emotional safety throughout the process."
+        ),
+        session_prefix="Belső képalkotás:",
+        closure_keywords=[
+            "köszönöm a képeket",
+            "most már elengedem a képeket",
+            "véget érhet a képalkotás",
+            "befejeztem a képek felfedezését",
+        ],
+        closure_question="Rendben, lezárhatjuk most ezt a belső képalkotási folyamatot?",
+        process_steps=(
+            "1. Help the user enter a calm, receptive state where inner images may naturally emerge.\n"
+            "2. Encourage the user to observe and describe any spontaneous visual experiences without judgment.\n"
+            "3. Support the user in freely exploring these images, maintaining full freedom and safety.\n"
+            "4. Assist the user in recognizing how these images shift or dissolve, without forcing any conclusions.\n"
+            "5. Close the process only after the user explicitly confirms their readiness."
+        ),
+        notes=(
+            "The system must allow full creative and symbolic freedom.\n"
+            "Never interpret, analyze, or explain the user’s images.\n"
+            "Maintain a very slow, open, and non-directive pace throughout.\n"
+            "Offer only gentle, spacious reflections or simple acknowledgments.\n"
+            "Always prioritize the user’s safety, comfort, and inner rhythm."
+        ),
+        relationship_dynamics=[],
     )
 ]
 
