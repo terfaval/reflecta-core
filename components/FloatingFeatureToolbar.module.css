@@ -1,10 +1,12 @@
 .toolbar {
-  position: fixed;
+  position: absolute;
   top: 8px;
   left: 8px;
   display: flex;
   align-items: center;
   z-index: 200;
+  background: var(--ai-color);
+  border-radius: 9999px;
 }
 
 .items {
@@ -51,9 +53,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 1px solid black;
+  border: 1px solid var(--user-color);
   background: transparent;
-  color: black;
+  color: var(--user-color);
   cursor: pointer;
   position: relative;
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -62,11 +64,11 @@
 .itemButton svg {
   width: 14px;
   height: 14px;
-  stroke: black;
+  stroke: var(--user-color);
 }
 
 .itemButton:hover {
-  background: black;
+  background: var(--user-color);
   color: var(--bg-color);
 }
 
@@ -97,7 +99,7 @@
   top: calc(100% + 4px);
   left: 50%;
   transform: translateX(-50%);
-  background: black;
+  background: var(--user-color);
   color: var(--bg-color);
   padding: 2px 6px;
   border-radius: 4px;
