@@ -158,6 +158,48 @@ FUNCTIONS: List[FunctionSpec] = [
             "Do not suggest premature solutions or exits from the spiral."
         ),
         relationship_dynamics=[],
+        ),
+    FunctionSpec(
+        name="Rejtett Mintázatok",
+        triggers=[
+            "töredezettnek érzem magam",
+            "nem áll össze bennem semmi",
+            "szétszórt vagyok",
+            "összevissza érzések kavarognak",
+            "több téma keveredik bennem",
+        ],
+        allowed_strategies=["analytical", "contemplative", "reflective_mirror"],
+        recommendation_texts={
+            "first": "Érzem, hogy most sok töredék van jelen benned. Ha szeretnéd, szívesen kísérlek egy olyan folyamatban, ahol teret adunk ezeknek a daraboknak, hogy összekapcsolódhassanak.",
+            "repeat": "Ha most is jól esne, szívesen segítek, hogy újra megkeresd a rejtett mintázatokat.",
+            "direct": "Rendben, nagyon szívesen kísérlek ebben a rejtett mintázatok felfedezésében. Haladjunk lassan, engedve, hogy a darabok összeilleszkedjenek.",
+        },
+        prompt_addition=(
+            "This is a gentle, exploratory process aimed at recognizing hidden internal patterns among seemingly disconnected feelings, themes, or experiences. Help the user slowly observe and connect these fragments in a non-forcing, intuitive way. Always maintain a soft, contemplative tone and prioritize emotional safety."
+        ),
+        session_prefix="Rejtett mintázatok:",
+        closure_keywords=[
+            "kész",
+            "valami összeállt bennem",
+            "több rész most már kapcsolatban van",
+            "befejeztem a felfedezést",
+        ],
+        closure_question="Rendben, lezárhatjuk most ezt a rejtett mintázatok felfedezését?",
+        process_steps=(
+            "1. Support the user in identifying their internal fragments or disconnected themes.\n"
+            "2. Help the user gently explore possible subtle connections between these fragments.\n"
+            "3. Guide the user to visualize an internal space where these themes can coexist.\n"
+            "4. Assist the user in recognizing the emotional sense of this internal field and allow loose integration of the patterns.\n"
+            "5. Close the process only when the user explicitly confirms readiness."
+        ),
+        notes=(
+            "The system must maintain a very slow, non-forcing, and intuitive approach throughout the process.\n"
+            "Provide complete freedom for the user to define their own meanings of 'patterns' or 'connections.'\n"
+            "Never impose interpretations or solutions.\n"
+            "Strictly stay within the allowed strategies.\n"
+            "Offer only gentle, open-ended questions that invite reflection, not analysis."
+        ),
+        relationship_dynamics=[],
     )
 ]
 

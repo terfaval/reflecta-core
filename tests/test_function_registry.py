@@ -1,4 +1,8 @@
+import os
+import sys
 import builtins
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from backend.functions.function_registry import (
     get_function_by_name,
     get_function_by_trigger,
@@ -25,3 +29,17 @@ def test_gondolati_spiral_trigger_lookup():
     func = get_function_by_trigger("Időről időre ugyanazokon rágódom, nem tudok kiszállni")
     assert func is not None
     assert func.name == "Gondolati Spirál Felfedezése"
+
+
+def test_rejtett_mintazatok_registered():
+    func = get_function_by_name("Rejtett Mintázatok")
+    assert func is not None
+    assert func.relationship_dynamics == []
+    assert "töredezettnek érzem magam" in func.triggers
+    assert func.session_prefix == "Rejtett mintázatok:"
+
+
+def test_rejtett_mintazatok_trigger_lookup():
+    func = get_function_by_trigger("Mostanában szétszórt vagyok, nem áll össze bennem semmi")
+    assert func is not None
+    assert func.name == "Rejtett Mintázatok"
