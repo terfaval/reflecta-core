@@ -24,6 +24,7 @@
 .icon {
   width: 5rem;
   height: 5rem;
+  border-radius: 9999px;
   fill: var(--card-border, #ccc);
   flex-shrink: 0;
 }
