@@ -25,7 +25,6 @@
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 1px solid var(--user-color);
   background: transparent;
   color: var(--user-color);
   cursor: pointer;
@@ -55,8 +54,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 1px solid var(--user-color);
-  background: transparent;
+  border: 1px solid var(--bg-color);
+  background: var(--user-color);
   color: var(--user-color);
   cursor: pointer;
   position: relative;
@@ -71,7 +70,7 @@
 
 .itemButton:hover {
   background: var(--bg-color);
-  color: var(--user-color);
+  border: 1px solid var(--user-color);
 }
 
 .itemButton:hover svg {
@@ -89,6 +88,7 @@
 
 .helpButton:hover {
   background: var(--user-color);
+  border-color: var(--bg-color);
 }
 
 .helpButton:hover svg {
