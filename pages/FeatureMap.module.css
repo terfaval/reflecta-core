@@ -27,11 +27,11 @@
 
 /* Extra space before the profile slider on the feature map page */
 .profileSliderSpacer {
-  margin-top: 7rem;
+  margin-top: 3rem;
 }
 
 .FeatureTableSpacer {
-  margin-bottom: 10rem;
+  margin-bottom: 7rem;
 }
 
 .pageContainer::-webkit-scrollbar {
