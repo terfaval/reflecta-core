@@ -111,7 +111,9 @@ export default function FunkcioTerkep() {
           A Reflecta profiljai mind egyedi szemléletet és hangot képviselnek.
           Nézd meg, milyen hozzáállással kísérhetnek az önreflexióban.
         </p>
-        <ProfileSlider />
+        <div className={styles.profileSliderSpacer}>
+          <ProfileSlider />
+        </div>
       </section>
 
       <section className="space-y-4">
@@ -129,7 +131,9 @@ export default function FunkcioTerkep() {
           Az alábbi táblázatban megnézheted, hogy a különböző funkciók mely
           felhasználói szinteken érhetők el.
         </p>
-        <FeatureTable access={ACCESS} />
+        <div className={styles.FeatureTableSpacer}>
+          <FeatureTable access={ACCESS} />
+        </div>
       </section>
     </div>
   );

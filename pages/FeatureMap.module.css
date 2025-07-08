@@ -25,6 +25,15 @@
   padding: 0 1rem;
 }
 
+/* Extra space before the profile slider on the feature map page */
+.profileSliderSpacer {
+  margin-top: 3rem;
+}
+
+.FeatureTableSpacer {
+  margin-bottom: 3rem;
+}
+
 .pageContainer::-webkit-scrollbar {
   display: none;
 }
