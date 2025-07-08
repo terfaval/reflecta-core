@@ -112,6 +112,7 @@ export default function ProfileSlider() {
           });
           setProfiles(cards);
         if (cards.length <= visibleCount) setIndex(0);
+        else setIndex(cards.length);
       } else {
         console.error("[profile-list]", meta.error);
         setError("Nem sikerült betölteni a profilokat.");
@@ -127,19 +128,20 @@ export default function ProfileSlider() {
     loadProfiles();
   }, [userId]);
 
-  useEffect(() => {
-    setIndex(0);
-  }, [profiles.length, itemWidth]);
-
   const enableNav = profiles.length > visibleCount;
+
+  useEffect(() => {
+    if (enableNav) {
+      setIndex(profiles.length);
+    } else {
+      setIndex(0);
+    }
+  }, [profiles.length, itemWidth, enableNav]);
+
   const items = React.useMemo(() => {
     if (!profiles.length) return [] as ProfileCardData[];
     if (!enableNav) return profiles;
-    const arr: ProfileCardData[] = [];
-arr.push(profiles[profiles.length - 1]);
-    profiles.forEach((p) => arr.push(p));
-    arr.push(profiles[0]);
-    return arr;
+    return [...profiles, ...profiles, ...profiles];
   }, [profiles, enableNav]);
 
   useLayoutEffect(() => {
@@ -162,15 +164,17 @@ arr.push(profiles[profiles.length - 1]);
     const handle = (e: TransitionEvent) => {
       if (e.target !== el || e.propertyName !== "transform") return;
       if (!enableNav) return;
-      if (index < 0) {
+      const len = profiles.length;
+      if (len === 0) return;
+      if (index < len) {
         el.style.transition = "none";
-        setIndex(profiles.length - 1);
+        setIndex((i) => i + len);
         requestAnimationFrame(() => {
           el.style.transition = "";
         });
-      } else if (index >= profiles.length) {
+      } else if (index >= len * 2) {
         el.style.transition = "none";
-        setIndex(0);
+        setIndex((i) => i - len);
         requestAnimationFrame(() => {
           el.style.transition = "";
         });
@@ -237,7 +241,7 @@ arr.push(profiles[profiles.length - 1]);
     finishDrag(e.clientX, e.timeStamp);
   };
 
-  const baseOffset = enableNav ? -(itemWidth + gap) : 0;
+  const baseOffset = 0;
   const transform = `translateX(${dragX + baseOffset - index * (itemWidth + gap)}px)`;
 
   const handleSelect = async (p: ProfileCardData) => {
