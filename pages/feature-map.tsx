@@ -96,7 +96,7 @@ const ACCESS = [
 
 export default function FunkcioTerkep() {
   return (
-    <div className={`${styles.pageContainer} p-8 space-y-16`}>
+    <div className={`${styles.pageContainer} py-8 space-y-16`}>
       <section className="space-y-4">
         <h1 className={styles.titleText}>Funkciótérkép</h1>
         <p className={styles.transitionText}>
