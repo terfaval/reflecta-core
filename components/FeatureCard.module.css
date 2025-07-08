@@ -9,7 +9,7 @@
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
-    max-height 0.3s ease;
+    max-height 0.2s ease;
   text-align: center;
   max-height: 18rem;
   overflow: hidden;

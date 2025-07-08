@@ -84,7 +84,7 @@
 
 .helpButton:hover {
   background: var(--user-color);
-  border-color: var(--bg-color);
+  border-color: var(--user-color);
 }
 
 .helpButton:hover svg {
