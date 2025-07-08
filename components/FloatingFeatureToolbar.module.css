@@ -1,6 +1,6 @@
 .toolbar {
   position: absolute;
-  bottom: 8px;
+  bottom: 15px;
   right: 15px;
   display: flex;
   flex-direction: row-reverse;
