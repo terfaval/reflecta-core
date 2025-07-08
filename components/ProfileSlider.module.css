@@ -2,7 +2,7 @@
   position: relative;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: start;
   width: 100%;
   max-width: 80vw;
   margin: 0 auto;
