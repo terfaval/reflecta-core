@@ -29,7 +29,6 @@
   background: transparent;
   color: var(--user-color);
   cursor: pointer;
-  margin-left: 4px;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
@@ -67,16 +66,16 @@
 .itemButton svg {
   width: 100%;
   height: 100%;
-  fill: var(--user-color);
+  fill: var(--bg-color);
 }
 
 .itemButton:hover {
-  background: var(--user-color);
-  color: var(--bg-color);
+  background: var(--bg-color);
+  color: var(--user-color);
 }
 
 .itemButton:hover svg {
-  fill: var(--bg-color);
+  fill: var(--user-color);
 }
 
 .helpButton {
@@ -85,8 +84,7 @@
 }
 
 .helpButton svg {
-  stroke: var(--user-color);
-  fill: none;
+  fill: var(--user-color);
 }
 
 .helpButton:hover {
@@ -94,8 +92,7 @@
 }
 
 .helpButton:hover svg {
-  stroke: var(--bg-color);
-  fill: none;
+  fill: var(--bg-color);
 }
 
 .tooltip {

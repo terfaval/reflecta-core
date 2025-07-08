@@ -5,5 +5,6 @@ export { default as IconInnerImage } from './IconInnerImage.svg';
 export { default as IconInnerLetter } from './IconInnerLetter.svg';
 export { default as IconInnerThreshold } from './IconInnerThreshold.svg';
 export { default as IconNotKnowing } from './IconNotKnowing.svg';
+export { default as IconReflectaGuide } from './IconReflectaGuide.svg';
 export { default as IconSilentPresence } from './IconSilentPresence.svg';
 export { default as IconThoughtSpiral } from './IconThoughtSpiral.svg';

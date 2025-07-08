@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import { ChevronLeft, ChevronRight, HelpCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { IconReflectaGuide } from '@/components/icons/functions';
 import styles from './FloatingFeatureToolbar.module.css';
 import { FEATURE_LIST } from '@/lib/features';
 
@@ -51,7 +52,7 @@ export default function FloatingFeatureToolbar({ onTrigger, userColor = 'current
             }}
             aria-label="Reflecta útmutató"
           >
-            <HelpCircle size={14} />
+            <IconReflectaGuide width={20} height={20} />
             <span className={styles.tooltip}>Reflecta útmutató</span>
           </button>
         </div>
