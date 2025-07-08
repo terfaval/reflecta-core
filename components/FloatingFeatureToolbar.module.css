@@ -36,7 +36,7 @@
 .toggle svg {
   width: 100%;
   height: 100%;
-  stroke: var(--user-color);
+  color: var(--user-color);
 }
 
 .toggle:hover {
@@ -45,7 +45,7 @@
 }
 
 .toggle:hover svg {
-  stroke: var(--bg-color);
+  color: var(--bg-color);
 }
 
 .itemButton {
@@ -65,8 +65,8 @@
 }
 
 .itemButton svg {
-  width: 14px;
-  height: 14px;
+  width: 100%;
+  height: 100%;
   fill: var(--user-color);
 }
 
@@ -91,11 +91,11 @@
 
 .helpButton:hover {
   background: var(--user-color);
-  color: var(--bg-color);
 }
 
 .helpButton:hover svg {
   stroke: var(--bg-color);
+  fill: none;
 }
 
 .tooltip {
