@@ -16,22 +16,22 @@
   font-size: 1.5rem;
   font-weight: bold;
   margin: 2rem 0;
-  padding: 0 1rem;
+  padding: 0 10rem;
 }
 
 .transitionText {
   text-align: center;
   margin: 2rem 0;
-  padding: 0 1rem;
+  padding: 0 10rem;
 }
 
 /* Extra space before the profile slider on the feature map page */
 .profileSliderSpacer {
-  margin-top: 3rem;
+  margin-top: 10rem;
 }
 
 .FeatureTableSpacer {
-  margin-bottom: 3rem;
+  margin-bottom: 10rem;
 }
 
 .pageContainer::-webkit-scrollbar {
