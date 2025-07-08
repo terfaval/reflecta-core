@@ -1,0 +1,26 @@
+.accessTable {
+  width: 100%;
+  max-width: 40rem;
+  margin: 0 auto;
+  border-collapse: collapse;
+  background-color: #fff;
+}
+
+.accessTable thead {
+  background-color: #f3f4f6;
+}
+
+.accessTable tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.accessTable th,
+.accessTable td {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+}
+
+.check {
+  color: #16a34a;
+  font-weight: bold;
+}

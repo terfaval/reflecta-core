@@ -1,14 +1,10 @@
 import React from 'react';
 import * as FIcons from '@/components/icons/functions';
 import styles from './FeatureMap.module.css';
-
-interface FunctionInfo {
-  name: string;
-  level: 'basic' | 'advanced' | 'premium';
-  description: string;
-  tip: string;
-  Icon: React.ComponentType<any>;
-}
+import ProfileSlider from '@/components/ProfileSlider';
+import FeatureGrid from '@/components/FeatureGrid';
+import FeatureTable from '@/components/FeatureTable';
+import { FunctionInfo } from '@/components/FeatureCard';
 
 const FUNCTIONS: FunctionInfo[] = [
   {
@@ -98,42 +94,6 @@ const ACCESS = [
   { name: 'Belső Levél', basic: false, premium: true },
 ];
 
-const LEVEL_LABELS = {
-  basic: 'Alap szintű funkció',
-  advanced: 'Haladó szintű funkció',
-  premium: 'Prémium funkció',
-};
-
-const CARD_STYLE = {
-  basic: `${styles.card} ${styles.basic}`,
-  advanced: `${styles.card} ${styles.advanced}`,
-  premium: `${styles.card} ${styles.premium}`,
-};
-
-const DOT_STYLE = {
-  basic: `${styles.dot} ${styles.dotBasic}`,
-  advanced: `${styles.dot} ${styles.dotAdvanced}`,
-  premium: `${styles.dot} ${styles.dotPremium}`,
-};
-
-const Card: React.FC<FunctionInfo> = ({ Icon, name, level, description, tip }) => {
-  return (
-    <div className={CARD_STYLE[level]}>
-      <Icon className={styles.icon} />
-      <h3 className="text-lg font-semibold text-center">{name}</h3>
-      <div className="flex items-center gap-1 text-sm text-gray-700">
-        <span className={DOT_STYLE[level]}></span>
-        <span>{LEVEL_LABELS[level]}</span>
-      </div>
-      <p className="text-sm text-center">{description}</p>
-      <p className="text-sm">
-        <strong>Indítási tipp:</strong> {tip}
-      </p>
-    </div>
-  );
-};
-
-
 export default function FunkcioTerkep() {
   return (
     <div className={`${styles.pageContainer} p-8 space-y-12`}>
@@ -151,7 +111,7 @@ export default function FunkcioTerkep() {
           A Reflecta profiljai mind egyedi szemléletet és hangot képviselnek.
           Nézd meg, milyen hozzáállással kísérhetnek az önreflexióban.
         </p>
-        <p className="italic">Itt jelenik meg a ProfileSlider komponens.</p>
+        <ProfileSlider />
       </section>
 
       <section className="space-y-4">
@@ -161,11 +121,7 @@ export default function FunkcioTerkep() {
           bármelyik funkció közvetlenül is elindítható egyetlen pontos
           üzenettel — ezeket a kártyákon az ‘Indítási tipp’ mezőben találod.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FUNCTIONS.map((f) => (
-            <Card key={f.name} {...f} />
-          ))}
-        </div>
+        <FeatureGrid functions={FUNCTIONS} />
       </section>
 
       <section className="space-y-4">
@@ -173,28 +129,7 @@ export default function FunkcioTerkep() {
           Az alábbi táblázatban megnézheted, hogy a különböző funkciók mely
           felhasználói szinteken érhetők el.
         </p>
-        <table className={styles.accessTable}>
-          <thead>
-            <tr>
-              <th>Funkció</th>
-              <th>Basic felhasználó</th>
-              <th>Prémium felhasználó</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ACCESS.map((row) => (
-              <tr key={row.name}>
-                <td>{row.name}</td>
-                <td className="text-center">
-                  {row.basic ? <span className={styles.check}>✓</span> : ''}
-                </td>
-                <td className="text-center">
-                  {row.premium ? <span className={styles.check}>✓</span> : ''}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <FeatureTable access={ACCESS} />
       </section>
     </div>
   );
