@@ -85,6 +85,7 @@
 
 .helpButton svg {
   stroke: var(--user-color);
+  fill: none;
 }
 
 .helpButton:hover {
