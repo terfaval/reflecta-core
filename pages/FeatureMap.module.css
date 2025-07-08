@@ -1,5 +1,8 @@
 .pageContainer {
   height: 100vh;
   width: 75%;
+  margin: 0 auto;
   overflow-y: auto;
+  overflow-x: hidden;
+  max-width: 100%;
 }

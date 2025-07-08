@@ -17,18 +17,18 @@ export default function FeatureTable({ access }: FeatureTableProps) {
       <thead>
         <tr>
           <th>Funkció</th>
-          <th>Alap</th>
-          <th>Prémium</th>
+          <th className={styles.levelCol}>Alap</th>
+          <th className={styles.levelCol}>Prémium</th>
         </tr>
       </thead>
       <tbody>
         {access.map((row) => (
           <tr key={row.name}>
             <td>{row.name}</td>
-            <td className="text-center">
+            <td className={`${styles.levelCol} text-center`}>
               {row.basic ? <span className={styles.check}>✓</span> : ''}
             </td>
-            <td className="text-center">
+            <td className={`${styles.levelCol} text-center`}>
               {row.premium ? <span className={styles.check}>✓</span> : ''}
             </td>
           </tr>
