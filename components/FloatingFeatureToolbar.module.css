@@ -54,7 +54,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  border: 1px solid var(--bg-color);
+  border: 1px solid var(--user-color);
   background: var(--user-color);
   color: var(--user-color);
   cursor: pointer;
@@ -78,6 +78,7 @@
 }
 
 .helpButton {
+  background: var(--bg-color);
   border-color: var(--user-color);
   color: var(--user-color);
 }
