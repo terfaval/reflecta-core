@@ -98,8 +98,8 @@ export default function FunkcioTerkep() {
   return (
     <div className={`${styles.pageContainer} p-8 space-y-16`}>
       <section className="space-y-4">
-        <h1 className="text-3xl font-bold">Funkciótérkép</h1>
-        <p>
+        <h1 className={styles.titleText}>Funkciótérkép</h1>
+        <p className={styles.transitionText}>
           Itt áttekintheted, milyen funkciók érhetők el a Reflectában. Ez nem
           naplóindító felület, hanem egy térkép, hogy könnyebben eligazodj a
           lehetőségek között.
@@ -107,7 +107,7 @@ export default function FunkcioTerkep() {
       </section>
 
       <section className="space-y-4">
-        <p>
+        <p className={styles.transitionText}>
           A Reflecta profiljai mind egyedi szemléletet és hangot képviselnek.
           Nézd meg, milyen hozzáállással kísérhetnek az önreflexióban.
         </p>
@@ -115,7 +115,7 @@ export default function FunkcioTerkep() {
       </section>
 
       <section className="space-y-4">
-        <p>
+        <p className={styles.transitionText}>
           A Reflecta funkcióit a rendszer automatikusan is javasolhatja a
           beszélgetés során, ha úgy érzékeli, hogy hasznos lehet. Ugyanakkor
           bármelyik funkció közvetlenül is elindítható egyetlen pontos
@@ -125,7 +125,7 @@ export default function FunkcioTerkep() {
       </section>
 
       <section className="space-y-4">
-        <p>
+        <p className={styles.transitionText}>
           Az alábbi táblázatban megnézheted, hogy a különböző funkciók mely
           felhasználói szinteken érhetők el.
         </p>

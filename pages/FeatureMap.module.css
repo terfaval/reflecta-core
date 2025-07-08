@@ -9,6 +9,21 @@
   scrollbar-width: none;
 }
 
+/* Középre igazított átvezető szövegek nagyobb térrel és oldalsó paddinggel */
+.titleText {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 2rem 0;
+  padding: 0 1rem;
+}
+
+.transitionText {
+  text-align: center;
+  margin: 2rem 0;
+  padding: 0 1rem;
+}
+
 .pageContainer::-webkit-scrollbar {
   display: none;
 }
