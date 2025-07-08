@@ -82,7 +82,7 @@ const FUNCTIONS: FunctionInfo[] = [
 ];
 
 const ACCESS = [
-  { name: 'Személyes profil létrehozása', basic: true, premium: true },
+  { name: 'Személyes profil létrehozása', basic: false, premium: true },
   { name: 'Testérzet-figyelés', basic: true, premium: true },
   { name: 'Csendben Maradás', basic: true, premium: true },
   { name: 'Rejtett Mintázatok', basic: true, premium: true },
