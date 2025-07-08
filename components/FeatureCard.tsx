@@ -30,12 +30,12 @@ const FeatureCard: React.FC<FunctionInfo> = ({
 }) => {
   return (
     <div className={CARD_STYLE[level]}>
-      <Icon className={styles.icon} />
-      <h3 className="text-xl font-extrabold text-center">{name}</h3>
-      <div className="text-xs italic text-gray-700">{LEVEL_LABELS[level]}</div>
+      <Icon className={styles.icon} style={{ color: "var(--card-border)" }} />
+      <h3 className={styles.name}>{name}</h3>
+      <div className={styles.level}>{LEVEL_LABELS[level]}</div>
       <div className={styles.descWrap}>
-        <p className="text-xs text-center">{description}</p>
-        <p className="text-xs">
+        <p className={styles.description}>{description}</p>
+        <p className={styles.tip}>
           <strong>Indítási tipp:</strong> {tip}
         </p>
       </div>

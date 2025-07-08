@@ -11,6 +11,8 @@
     transform 0.2s ease,
     box-shadow 0.2s ease;
   text-align: center;
+  height: 18rem;
+  overflow: hidden;
 }
 
 .card:hover {
@@ -21,10 +23,11 @@
 .icon {
   width: 3rem;
   height: 3rem;
+  color: var(--card-border, #ccc);
 }
 
 .descWrap {
-  overflow: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -36,7 +39,7 @@
 }
 
 .card:hover .descWrap {
-  max-height: 8rem;
+  max-height: 100%;
   opacity: 1;
 }
 
@@ -53,4 +56,20 @@
 .premium {
   background-color: #fff4d1;
   --card-border: #fde7a1;
+}
+
+.name {
+  font-weight: 700;
+  text-align: center;
+}
+
+.level,
+.description,
+.tip {
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.level {
+  font-style: italic;
 }
