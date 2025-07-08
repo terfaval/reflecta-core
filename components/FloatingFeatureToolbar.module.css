@@ -1,15 +1,15 @@
 .toolbar {
   position: absolute;
   bottom: 8px;
-  right: 8px;
+  right: 15px;
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
   z-index: 200;
-  background: #D9D9D9;
+  background: white;
   border-radius: 9999px;
-  border: 1px solid var(--user-color);
-  padding: 6px;
+  border: 2px solid var(--user-color);
+  padding: 7px;
 }
 
 .items {
@@ -90,7 +90,8 @@
 }
 
 .helpButton:hover {
-  background: var(--user-color);
+  background: transparent;
+  color: var(--user-color);
 }
 
 .helpButton:hover svg {
