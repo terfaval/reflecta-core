@@ -6,6 +6,7 @@
   flex-direction: column;
   gap: 0.75rem;
   border: 1px solid var(--card-border, #ccc);
+  background-color: var(--card-bg, #fff);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
@@ -25,8 +26,12 @@
   width: 5rem;
   height: 5rem;
   border-radius: 9999px;
-  fill: var(--card-border, #ccc);
+  fill: var(--card-bg, #fff);
+  color: var(--card-bg, #fff);
+  background-color: var(--card-border, #ccc);
   flex-shrink: 0;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
 }
 
 .infoWrap {
@@ -58,18 +63,21 @@
 }
 
 .basic {
-  background-color: #e6f4fa;
+  --card-bg: #e6f4fa;
   --card-border: #91D1EB;
+  background-color: var(--card-bg);
 }
 
 .advanced {
-  background-color: #e6f4fa;
+  --card-bg: #e6f4fa;
   --card-border: #91D1EB;
+  background-color: var(--card-bg);
 }
 
 .premium {
-  background-color: #fff4d1;
+  --card-bg: #fff4d1;
   --card-border: #FCDB70;
+  background-color: var(--card-bg);
 }
 
 .name {

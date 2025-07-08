@@ -33,7 +33,7 @@ const FeatureCard: React.FC<FunctionInfo> = ({
       <div className={styles.infoWrap}>
         <Icon
           className={styles.icon}
-          style={{ color: "var(--card-border)", fill: "var(--card-border)" }}
+          style={{ color: "var(--card-bg)", fill: "var(--card-bg)" }}
         />
         <div className={styles.textWrap}>
           <h3 className={styles.name}>{name}</h3>
