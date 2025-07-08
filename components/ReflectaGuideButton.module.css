@@ -5,10 +5,7 @@
   display: flex;
   align-items: center;
   z-index: 200;
-  background: white;
   border-radius: 9999px;
-  border: 1px solid var(--user-color);
-  padding: 7px;
 }
 
 .button {
