@@ -51,6 +51,7 @@ export default function ProfileSlider() {
 
   const visibleCount = 4;
   const gap = 16;
+  const BUFFER_COPIES = 5; // number of times the profile list is repeated
 
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -112,7 +113,7 @@ export default function ProfileSlider() {
           });
           setProfiles(cards);
         if (cards.length <= visibleCount) setIndex(0);
-        else setIndex(cards.length);
+        else setIndex(cards.length * Math.floor(BUFFER_COPIES / 2));
       } else {
         console.error("[profile-list]", meta.error);
         setError("Nem sikerült betölteni a profilokat.");
@@ -130,18 +131,24 @@ export default function ProfileSlider() {
 
   const enableNav = profiles.length > visibleCount;
 
+  const centerIndex = profiles.length * Math.floor(BUFFER_COPIES / 2);
+
   useEffect(() => {
     if (enableNav) {
-      setIndex(profiles.length);
+      setIndex(centerIndex);
     } else {
       setIndex(0);
     }
-  }, [profiles.length, itemWidth, enableNav]);
+  }, [profiles.length, itemWidth, enableNav, centerIndex]);
 
   const items = React.useMemo(() => {
     if (!profiles.length) return [] as ProfileCardData[];
     if (!enableNav) return profiles;
-    return [...profiles, ...profiles, ...profiles];
+    const arr: ProfileCardData[] = [];
+    for (let i = 0; i < BUFFER_COPIES; i += 1) {
+      arr.push(...profiles);
+    }
+    return arr;
   }, [profiles, enableNav]);
 
   useLayoutEffect(() => {
@@ -157,24 +164,22 @@ export default function ProfileSlider() {
     return () => window.removeEventListener("resize", update);
   }, [profiles.length, itemWidth, enableNav]);
 
-  // handle carousel wrapping when reaching cloned items
+  // reposition into the middle of the buffer when reaching the ends
   useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
     const handle = (e: TransitionEvent) => {
       if (e.target !== el || e.propertyName !== "transform") return;
       if (!enableNav) return;
+      if (dragging) return;
       const len = profiles.length;
       if (len === 0) return;
-      if (index < len) {
+      const min = len;
+      const max = len * (BUFFER_COPIES - 1);
+      if (index < min || index >= max) {
+        const pos = ((index % len) + len) % len + centerIndex;
         el.style.transition = "none";
-        setIndex((i) => i + len);
-        requestAnimationFrame(() => {
-          el.style.transition = "";
-        });
-      } else if (index >= len * 2) {
-        el.style.transition = "none";
-        setIndex((i) => i - len);
+        setIndex(pos);
         requestAnimationFrame(() => {
           el.style.transition = "";
         });
@@ -182,7 +187,7 @@ export default function ProfileSlider() {
     };
     el.addEventListener("transitionend", handle);
     return () => el.removeEventListener("transitionend", handle);
-  }, [index, profiles.length, enableNav]);
+  }, [index, profiles.length, enableNav, dragging, centerIndex]);
 
   const prev = () => {
     if (!enableNav) return;
