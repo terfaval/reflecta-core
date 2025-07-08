@@ -34,16 +34,11 @@
 .toggle svg {
   width: 100%;
   height: 100%;
-  color: var(--user-color);
-}
-
-.toggle:hover {
-  background: var(--user-color);
-  color: var(--bg-color);
+  color: var(--ai-color);
 }
 
 .toggle:hover svg {
-  color: var(--bg-color);
+  color: var(--user-color);
 }
 
 .itemButton {
