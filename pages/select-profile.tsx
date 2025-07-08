@@ -37,6 +37,7 @@ export default function ProfileSelectorPage() {
           textAlign: "center",
           width: "100%",
           padding: "0 1rem 2rem",
+          overflowY: "auto",
         }}
       >
       <h1
