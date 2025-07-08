@@ -36,7 +36,7 @@ def test_active_function_trigger_and_prompt_integration():
     with patch("backend.functions.function_registry.FUNCTIONS", [dummy_function]):
         trigger = dummy_function.triggers[0]
 
-        handle_user_message(session_id, f"Elindul a {trigger}")
+        handle_user_message(session_id, f"Elindul a {trigger}", user_role="premium")
         assert is_active(session_id)
         prompt = get_active_prompt(session_id)
         assert prompt == dummy_function.prompt_addition
@@ -54,7 +54,7 @@ def test_active_function_trigger_and_prompt_integration():
     assert prompt in system_prompt
 
     # Trigger closing after verifying prompt integration
-    handle_user_message(session_id, dummy_function.closure_keywords[0])
+    handle_user_message(session_id, dummy_function.closure_keywords[0], user_role="premium")
     assert not is_active(session_id)
     question = pop_closure_question(session_id)
     assert question == dummy_function.closure_question
@@ -77,10 +77,10 @@ def test_active_function_session_prefix_storage():
     )
 
     with patch("backend.functions.function_registry.FUNCTIONS", [dummy_function]):
-        handle_user_message(session_id, "levél írása")
+        handle_user_message(session_id, "levél írása", user_role="premium")
         assert is_active(session_id)
         # close the function
-        handle_user_message(session_id, "Most lezárom")
+        handle_user_message(session_id, "Most lezárom", user_role="premium")
         assert not is_active(session_id)
         prefix = pop_session_prefix(session_id)
         assert prefix == dummy_function.session_prefix

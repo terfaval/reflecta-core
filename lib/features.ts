@@ -5,6 +5,7 @@ export interface FeatureInfo {
   name: string;
   tip: string;
   Icon: React.ComponentType<any>;
+  requiredRole?: 'basic' | 'premium' | 'admin';
 }
 
 export const FEATURE_LIST: FeatureInfo[] = [
@@ -42,15 +43,18 @@ export const FEATURE_LIST: FeatureInfo[] = [
     name: 'Belső Párbeszéd',
     tip: 'szeretnék egy belső párbeszédet',
     Icon: FIcons.IconInnerDialogue,
+    requiredRole: 'premium',
   },
   {
     name: 'Belső Képalkotás',
     tip: 'szeretnék belső képet alkotni',
     Icon: FIcons.IconInnerImage,
+    requiredRole: 'premium',
   },
   {
     name: 'Belső Levél',
     tip: 'szeretnék írni egy belső levelet',
     Icon: FIcons.IconInnerLetter,
+    requiredRole: 'premium',
   },
 ];

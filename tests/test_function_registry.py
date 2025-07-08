@@ -110,7 +110,10 @@ def test_belso_kepalkotas_registered():
 
 
 def test_belso_kepalkotas_trigger_lookup():
-    func = get_function_by_trigger("Néha álomszerű érzéseim vannak és belső képeket látok")
+    func = get_function_by_trigger(
+        "Néha álomszerű érzéseim vannak és belső képeket látok",
+        user_role="premium",
+    )
     assert func is not None
     assert func.name == "Belső Képalkotás"
 
@@ -124,6 +127,9 @@ def test_belso_level_registered():
 
 
 def test_belso_level_trigger_lookup():
-    func = get_function_by_trigger("Sok kimondatlan érzés van bennem, nem tudom, hogyan mondjam el")
+    func = get_function_by_trigger(
+        "Sok kimondatlan érzés van bennem, nem tudom, hogyan mondjam el",
+        user_role="premium",
+    )
     assert func is not None
     assert func.name == "Belső Levél"

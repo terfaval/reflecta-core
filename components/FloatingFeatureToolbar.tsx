@@ -3,7 +3,8 @@ import { useRouter } from 'next/router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { IconReflectaGuide } from '@/components/icons/functions';
 import styles from './FloatingFeatureToolbar.module.css';
-import { FEATURE_LIST } from '@/lib/features';
+import { FEATURE_LIST, FeatureInfo } from '@/lib/features';
+import { useUserContext } from '@/contexts/UserContext';
 
 interface FloatingFeatureToolbarProps {
   onTrigger: (prompt: string) => void;
@@ -13,6 +14,14 @@ interface FloatingFeatureToolbarProps {
 export default function FloatingFeatureToolbar({ onTrigger, userColor = 'currentColor' }: FloatingFeatureToolbarProps) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const { userRole } = useUserContext();
+
+  const roleOrder = ['basic', 'premium', 'admin'];
+  const allowedFeatures = FEATURE_LIST.filter((f: FeatureInfo) => {
+    if (!f.requiredRole) return true;
+    if (!userRole) return false;
+    return roleOrder.indexOf(userRole) >= roleOrder.indexOf(f.requiredRole);
+  });
 
   const handleClick = (tip: string) => {
     onTrigger(tip);
@@ -33,7 +42,7 @@ export default function FloatingFeatureToolbar({ onTrigger, userColor = 'current
       </button>
       {open && (
         <div className={styles.items}>
-          {FEATURE_LIST.map((f) => (
+          {allowedFeatures.map((f) => (
             <button
               key={f.name}
               className={styles.itemButton}

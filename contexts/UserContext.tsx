@@ -18,6 +18,8 @@ interface UserContextType {
   setUserId: (id: string | null) => void;
   userEmail: string | null;
   setUserEmail: (email: string | null) => void;
+  userRole: string | null;
+  setUserRole: (r: string | null) => void;
   userInitialized: boolean;
   setUserInitialized: (v: boolean) => void;
   userError: string | null;
@@ -29,6 +31,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [userInitialized, setUserInitialized] = useState(false);
   const [userError, setUserError] = useState<string | null>(null);
 
@@ -53,6 +56,15 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUserInitialized(true);
         sessionStorage.setItem('reflecta_user_id', data.user_id);
         sessionStorage.setItem('reflecta_email', email);
+        try {
+          const info = await apiFetch<{ role?: string }>(`/api/user/${data.user_id}`);
+          if (info?.role) {
+            setUserRole(info.role);
+            sessionStorage.setItem('reflecta_role', info.role);
+          }
+        } catch (err) {
+          console.error('[init_user] fetch role', err);
+        }
         if (token) {
           sessionStorage.setItem('reflecta_token', token);
         }
@@ -78,10 +90,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const storedId = sessionStorage.getItem('reflecta_user_id');
     const storedEmail = sessionStorage.getItem('reflecta_email');
+    const storedRole = sessionStorage.getItem('reflecta_role');
     if (storedId) {
       setUserId(storedId);
       setUserInitialized(true);
       if (storedEmail) setUserEmail(storedEmail);
+      if (storedRole) setUserRole(storedRole);
       // eslint-disable-next-line no-console
       console.log('[init_user] restored', storedId, storedEmail);
     }
@@ -151,6 +165,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUserId,
         userEmail,
         setUserEmail,
+        userRole,
+        setUserRole,
         userInitialized,
         setUserInitialized,
         userError,

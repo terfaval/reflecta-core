@@ -23,6 +23,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
+from ..auth import Role
+
 from .function_registry import FunctionSpec, get_function_by_trigger
 
 
@@ -47,8 +49,17 @@ _CLOSURE_QUESTIONS: Dict[str, str] = {}
 _SESSION_PREFIXES: Dict[str, str] = {}
 
 
-def handle_user_message(session_id: str, text: str) -> Optional[ActiveFunction]:
-    """Handle a new user message and update active function state."""
+def handle_user_message(
+    session_id: str,
+    text: str,
+    user_role: str = Role.BASIC,
+    feature_flags: Optional[Dict[str, any]] = None,
+) -> Optional[ActiveFunction]:
+    """Handle a new user message and update active function state.
+
+    Access to premium functions is checked using ``user_role`` and
+    ``feature_flags`` before activation.
+    """
     if session_id in _ACTIVE:
         state = _ACTIVE[session_id]
         state.process_user_text(text)
@@ -61,7 +72,7 @@ def handle_user_message(session_id: str, text: str) -> Optional[ActiveFunction]:
             return None
         return state
 
-    spec = get_function_by_trigger(text)
+    spec = get_function_by_trigger(text, user_role=user_role, feature_flags=feature_flags)
     if spec:
         state = ActiveFunction(spec)
         state.process_user_text(text)

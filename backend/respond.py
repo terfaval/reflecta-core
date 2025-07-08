@@ -25,7 +25,7 @@ from .profile_recommender import (
     detect_requested_profile,
 )
 from lib.entry_utils import get_last_user_entry
-from .supabase_client import _execute
+from .supabase_client import _execute, get_user_by_id
 from .profile_suggester import suggest_profiles
 
 
@@ -273,6 +273,13 @@ async def respond(
         print(f"[respond] error reading request body: {exc}")
 
     client = get_client()
+    try:
+        user_record = get_user_by_id(user["id"])
+    except Exception as exc:  # pragma: no cover - db error
+        print(f"[respond] user fetch error: {exc}")
+        user_record = {"role": user["role"], "feature_flags": {}}
+    user_role = user_record.get("role", user["role"])
+    feature_flags = user_record.get("feature_flags") or {}
 
     if payload.content:
         try:
@@ -280,7 +287,12 @@ async def respond(
         except HTTPException as exc:
             return JSONResponse(status_code=exc.status_code, content={"error": str(exc.detail)})
         # Update the active reflective function state with the new entry
-        handle_user_message(payload.sessionId, payload.content)
+        handle_user_message(
+            payload.sessionId,
+            payload.content,
+            user_role=user_role,
+            feature_flags=feature_flags,
+        )
         question = pop_closure_question(payload.sessionId)
         if question:
             now = datetime.now(timezone.utc).isoformat()
