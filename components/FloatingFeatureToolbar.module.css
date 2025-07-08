@@ -15,7 +15,6 @@
 .items {
   display: flex;
   gap: 6px;
-  margin-right: 4px;
 }
 
 .toggle {
@@ -30,12 +29,13 @@
   background: transparent;
   color: var(--user-color);
   cursor: pointer;
+  margin-left: 4px;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .toggle svg {
-  width: 14px;
-  height: 14px;
+  width: 100%;
+  height: 100%;
   fill: var(--user-color);
 }
 

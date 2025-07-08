@@ -39,7 +39,7 @@ export default function FloatingFeatureToolbar({ onTrigger, userColor = 'current
               onClick={() => handleClick(f.tip)}
               aria-label={f.name}
             >
-              <f.Icon />
+              <f.Icon width={20} height={20} />
               <span className={styles.tooltip}>{f.name}</span>
             </button>
           ))}
