@@ -32,7 +32,7 @@ const FUNCTIONS: FunctionInfo[] = [
     Icon: FIcons.IconHiddenPatterns,
   },
   {
-    name: 'Belső Küszöb Átlépése',
+    name: 'Belső Küszöb',
     level: 'advanced',
     description:
       'Amikor úgy érzed, elérkeztél egy fontos belső határhoz, ez a funkció segít megjeleníteni és átlépni azt. Egy lassú, biztonságos folyamat, amely a belső változásra hív.',
@@ -40,7 +40,7 @@ const FUNCTIONS: FunctionInfo[] = [
     Icon: FIcons.IconInnerThreshold,
   },
   {
-    name: 'A Nem-Tudás Gondozása',
+    name: 'Nem-Tudás Ösvénye',
     level: 'advanced',
     description:
       'Ez a funkció megtanít arra, hogyan maradhatsz jelen a bizonytalanságban. Nem a megoldás a cél, hanem a nem-tudás elfogadása és a belső nyugalom megélése.',
@@ -48,7 +48,7 @@ const FUNCTIONS: FunctionInfo[] = [
     Icon: FIcons.IconNotKnowing,
   },
   {
-    name: 'Gondolati Spirál Felfedezése',
+    name: 'Gondolati Spirál',
     level: 'advanced',
     description:
       'Ha úgy érzed, hogy ugyanazokon a gondolatokon rágódsz újra meg újra, ez a funkció segít felfedezni, mi rejlik a spirál mélyén, és hogyan lehetne továbblépni.',
@@ -82,13 +82,13 @@ const FUNCTIONS: FunctionInfo[] = [
 ];
 
 const ACCESS = [
-  { name: 'Személyes profil létrehozása', basic: false, premium: true },
+  { name: 'Személyes profil', basic: false, premium: true },
   { name: 'Testérzet-figyelés', basic: true, premium: true },
   { name: 'Csendben Maradás', basic: true, premium: true },
   { name: 'Rejtett Mintázatok', basic: true, premium: true },
-  { name: 'Belső Küszöb Átlépése', basic: false, premium: true },
-  { name: 'A Nem-Tudás Gondozása', basic: false, premium: true },
-  { name: 'Gondolati Spirál Felfedezése', basic: false, premium: true },
+  { name: 'Belső Küszöb', basic: false, premium: true },
+  { name: 'Nem-Tudás Ösvénye', basic: false, premium: true },
+  { name: 'Gondolati Spirál', basic: false, premium: true },
   { name: 'Belső Párbeszéd', basic: false, premium: true },
   { name: 'Belső Képalkotás', basic: false, premium: true },
   { name: 'Belső Levél', basic: false, premium: true },

@@ -24,17 +24,17 @@ export const FEATURE_LIST: FeatureInfo[] = [
     Icon: FIcons.IconHiddenPatterns,
   },
   {
-    name: 'Belső Küszöb Átlépése',
+    name: 'Belső Küszöb',
     tip: 'szeretnék belső küszöböt átlépni',
     Icon: FIcons.IconInnerThreshold,
   },
   {
-    name: 'A Nem-Tudás Gondozása',
+    name: 'Nem-Tudás Ösvénye',
     tip: 'szeretném gondozni a nem-tudást',
     Icon: FIcons.IconNotKnowing,
   },
   {
-    name: 'Gondolati Spirál Felfedezése',
+    name: 'Gondolati Spirál',
     tip: 'szeretnék felfedezni egy gondolati spirált',
     Icon: FIcons.IconThoughtSpiral,
   },

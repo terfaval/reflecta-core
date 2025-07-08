@@ -18,7 +18,7 @@ def test_relationship_dynamics_loaded():
 
 
 def test_gondolati_spiral_registered():
-    func = get_function_by_name("Gondolati Spirál Felfedezése")
+    func = get_function_by_name("Gondolati Spirál")
     assert func is not None
     assert func.relationship_dynamics == []
     assert "ugyanazokon rágódom" in func.triggers
@@ -28,7 +28,7 @@ def test_gondolati_spiral_registered():
 def test_gondolati_spiral_trigger_lookup():
     func = get_function_by_trigger("Időről időre ugyanazokon rágódom, nem tudok kiszállni")
     assert func is not None
-    assert func.name == "Gondolati Spirál Felfedezése"
+    assert func.name == "Gondolati Spirál"
 
 
 def test_rejtett_mintazatok_registered():
@@ -46,7 +46,7 @@ def test_rejtett_mintazatok_trigger_lookup():
 
 
 def test_nem_tudas_registered():
-    func = get_function_by_name("Nem-Tudás Gondozása")
+    func = get_function_by_name("Nem-Tudás Ösvénye")
     assert func is not None
     assert func.relationship_dynamics == []
     assert "nem tudom, mit tegyek" in func.triggers
@@ -56,11 +56,11 @@ def test_nem_tudas_registered():
 def test_nem_tudas_trigger_lookup():
     func = get_function_by_trigger("Gyakran elbizonytalanodtam, nem tudom, mit tegyek")
     assert func is not None
-    assert func.name == "Nem-Tudás Gondozása"
+    assert func.name == "Nem-Tudás Ösvénye"
 
 
 def test_belso_kuszob_registered():
-    func = get_function_by_name("Belső Küszöb Átlépése")
+    func = get_function_by_name("Belső Küszöb")
     assert func is not None
     assert func.relationship_dynamics == []
     assert "valaminek a küszöbén állok" in func.triggers
@@ -70,7 +70,7 @@ def test_belso_kuszob_registered():
 def test_belso_kuszob_trigger_lookup():
     func = get_function_by_trigger("Úgy érzem, elágazáshoz érkeztem és nem tudom, mi van a másik oldalon")
     assert func is not None
-    assert func.name == "Belső Küszöb Átlépése"
+    assert func.name == "Belső Küszöb"
 
 
 def test_csendben_maradas_registered():

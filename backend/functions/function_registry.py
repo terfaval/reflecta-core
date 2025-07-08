@@ -178,7 +178,7 @@ FUNCTIONS: List[FunctionSpec] = [
         ],
     ),
     FunctionSpec(
-        name="Gondolati Spirál Felfedezése",
+        name="Gondolati Spirál",
         triggers=[
             "ugyanazokon rágódom",
             "nem tudok kiszállni a fejemből",
@@ -262,7 +262,7 @@ FUNCTIONS: List[FunctionSpec] = [
         relationship_dynamics=[],
     ),
     FunctionSpec(
-        name="Nem-Tudás Gondozása",
+        name="Nem-Tudás Ösvénye",
         triggers=[
             "nem tudom, mit tegyek",
             "elbizonytalanodtam",
@@ -304,7 +304,7 @@ FUNCTIONS: List[FunctionSpec] = [
         relationship_dynamics=[],
     ),
     FunctionSpec(
-        name="Belső Küszöb Átlépése",
+        name="Belső Küszöb",
         triggers=[
             "valaminek a küszöbén állok",
             "átmenetben vagyok",
