@@ -22,8 +22,8 @@
 }
 
 .icon {
-  width: 3rem;
-  height: 3rem;
+  width: 5rem;
+  height: 5rem;
   fill: var(--card-border, #ccc);
   flex-shrink: 0;
 }
@@ -40,7 +40,7 @@
 }
 
 .descWrap {
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -58,17 +58,17 @@
 
 .basic {
   background-color: #e6f4fa;
-  --card-border: #b9e1f2;
+  --card-border: #91D1EB;
 }
 
 .advanced {
   background-color: #e6f4fa;
-  --card-border: #b9e1f2;
+  --card-border: #91D1EB;
 }
 
 .premium {
   background-color: #fff4d1;
-  --card-border: #fde7a1;
+  --card-border: #FCDB70;
 }
 
 .name {
