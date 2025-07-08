@@ -2,4 +2,6 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 2rem;
+  align-items: start;
+  padding: 0 4rem;
 }
