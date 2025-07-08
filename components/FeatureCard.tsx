@@ -30,9 +30,16 @@ const FeatureCard: React.FC<FunctionInfo> = ({
 }) => {
   return (
     <div className={CARD_STYLE[level]}>
-      <Icon className={styles.icon} style={{ color: "var(--card-border)" }} />
-      <h3 className={styles.name}>{name}</h3>
-      <div className={styles.level}>{LEVEL_LABELS[level]}</div>
+      <div className={styles.infoWrap}>
+        <Icon
+          className={styles.icon}
+          style={{ color: "var(--card-border)", fill: "var(--card-border)" }}
+        />
+        <div className={styles.textWrap}>
+          <h3 className={styles.name}>{name}</h3>
+          <div className={styles.level}>{LEVEL_LABELS[level]}</div>
+        </div>
+      </div>
       <div className={styles.descWrap}>
         <p className={styles.description}>{description}</p>
         <p className={styles.tip}>
