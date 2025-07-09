@@ -10,8 +10,13 @@ from fastapi.responses import JSONResponse
 import logging
 from pydantic import BaseModel, Field
 
+from datetime import datetime, timezone
+
 from .profile_utils import validate_profile_name
-from .conversation_manager import create_conversation_and_session
+from .conversation_manager import get_or_create_conversation
+from .session_factory import create_session
+from .supabase_client import supabase, _execute
+from .utils import normalize_profile
 
 router = APIRouter()
 
@@ -20,6 +25,7 @@ class ConversationRequest(BaseModel):
 
     user_id: str
     profile: str = Field(alias="profile_name")
+    force_new_session: bool = False
 
     class Config:
         allow_population_by_field_name = True
@@ -44,18 +50,51 @@ async def conversation_new(payload: ConversationRequest):
         # Validate but keep the original casing for database inserts
         validate_profile_name(payload.profile)
 
-        conv_id, session, created = create_conversation_and_session(
+        conversation, conv_created = get_or_create_conversation(
             payload.user_id, payload.profile
         )
+        conv_id = conversation["id"]
+
+        if not payload.force_new_session:
+            existing = (
+                supabase.table("sessions")
+                .select("*")
+                .eq("conversation_id", conv_id)
+                .is_("ended_at", None)
+                .limit(1)
+                .maybe_single()
+                .execute()
+            )
+            session = _execute(existing)
+            if session:
+                return {
+                    "conversation_id": conv_id,
+                    "session_id": session["id"],
+                    "status": "existing",
+                }
+
+        session = create_session(payload.user_id, payload.profile, conv_id)
         if not session or not session.get("id"):
             logging.exception("[conversation/new] Missing session id")
             raise HTTPException(status_code=500, detail="Hiányzó session azonosító")
 
-        status = "new" if created else "existing"
+        if conv_created:
+            now = datetime.now(timezone.utc).isoformat()
+            try:
+                supabase.table("system_events").insert(
+                    {
+                        "session_id": session["id"],
+                        "event_type": "conversation_started",
+                        "note": f"Profile: {normalize_profile(payload.profile)}",
+                        "timestamp": now,
+                    }
+                ).execute()
+            except Exception:
+                logging.exception("[conversation/new] Failed to log system event")
         return {
             "conversation_id": conv_id,
             "session_id": session["id"],
-            "status": status,
+            "status": "new",
         }
     except HTTPException as exc:
         return JSONResponse(

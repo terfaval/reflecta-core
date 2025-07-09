@@ -1,5 +1,5 @@
 // hooks/useHandleSend.ts
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useToast } from './useToast';
 
 import { apiFetch } from 'lib/api';
@@ -37,6 +37,7 @@ export function useHandleSend({
   setSessionId,
 }: UseHandleSendProps) {
   const toast = useToast();
+  const sessionPromise = useRef<Promise<string> | null>(null);
   const handleSend = useCallback(async (text?: string) => {
     const message = typeof text === 'string' ? text.trim() : '';
     if (!message) {
@@ -51,19 +52,25 @@ export function useHandleSend({
         console.warn('Hiányzó sessionId és user adat – a küldés nem történt meg.');
         return;
       }
-      setLoading(true);
-      try {
-        const data = await apiFetch<{ session?: { id: string } }>('/api/session', {
+      if (!sessionPromise.current) {
+        setLoading(true);
+        sessionPromise.current = apiFetch<{ session?: { id: string } }>('/api/session', {
           method: 'POST',
           body: JSON.stringify({ userId, profile }),
-        });
-        if (!data?.session?.id) {
-          toast('Nem sikerült létrehozni a munkamenetet.');
-          setLoading(false);
-          return;
-        }
-        currentSessionId = data.session.id;
-        setSessionId(currentSessionId);
+        })
+          .then((data) => {
+            if (!data?.session?.id) {
+              throw new Error('create failed');
+            }
+            setSessionId(data.session.id);
+            return data.session.id;
+          })
+          .finally(() => {
+            sessionPromise.current = null;
+          });
+      }
+      try {
+        currentSessionId = await sessionPromise.current;
       } catch (err) {
         console.error('[session create]', err);
         toast('Nem sikerült létrehozni a munkamenetet.');

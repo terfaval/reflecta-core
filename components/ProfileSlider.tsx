@@ -64,6 +64,7 @@ export default function ProfileSlider() {
   const [dragX, setDragX] = useState(0);
   const startX = useRef(0);
   const startTime = useRef(0);
+  const [creating, setCreating] = useState(false);
 
   const loadProfiles = async () => {
     if (!userId) return;
@@ -250,6 +251,8 @@ export default function ProfileSlider() {
   const transform = `translateX(${dragX + baseOffset - index * (itemWidth + gap)}px)`;
 
   const handleSelect = async (p: ProfileCardData) => {
+    if (creating) return;
+    setCreating(true);
     console.log('➡️ Profile selected:', p?.name);
     if (!userId || !p?.name) {
       console.warn('[start conversation] missing userId or profile', {
@@ -289,6 +292,8 @@ export default function ProfileSlider() {
       console.error('[start conversation]', err);
       toast.error('Nem sikerült elindítani a beszélgetést.');
       setError('Nem sikerült elindítani a beszélgetést.');
+      } finally {
+      setCreating(false);
     }
   };
 
@@ -299,12 +304,13 @@ export default function ProfileSlider() {
         <button
           className={`${styles.arrow} ${styles.left}`}
           onClick={prev}
+          disabled={creating}
           aria-label="Előző"
         >
           <ChevronLeft />
         </button>
       )}
-      <div className={styles.viewport}>
+      <div className={styles.viewport} style={{ pointerEvents: creating ? 'none' : 'auto' }}>
         <div
           className={`${styles.track} ${dragging ? styles.dragging : ""}`}
           ref={trackRef}
@@ -315,7 +321,11 @@ export default function ProfileSlider() {
           onPointerCancel={onPointerUp}
         >
           {items.map((p, idx) => (
-            <div key={idx} className={styles.card}>
+            <div
+              key={idx}
+              className={styles.card}
+              style={{ pointerEvents: creating ? 'none' : 'auto', opacity: creating ? 0.6 : 1 }}
+            >
               <ProfileCard {...p} onSelect={() => handleSelect(p)} />
             </div>
           ))}
@@ -325,6 +335,7 @@ export default function ProfileSlider() {
         <button
           className={`${styles.arrow} ${styles.right}`}
           onClick={next}
+          disabled={creating}
           aria-label="Következő"
         >
           <ChevronRight />
