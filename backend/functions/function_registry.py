@@ -480,8 +480,7 @@ FUNCTIONS: List[FunctionSpec] = [
     ),
     FunctionSpec(
         name="Belső Levél",
-        required_role=Role.PREMIUM,
-        feature_flag="inner_letter",
+        required_roles=[Role.PREMIUM, Role.ADMIN],
         triggers=[
             "nem tudom, hogyan mondjam el",
             "kimondatlan",
