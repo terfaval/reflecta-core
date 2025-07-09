@@ -1,7 +1,4 @@
-"""User authentication helpers and role utilities.
-
-Függ tőle: supabase_client.py
-"""
+"""User authentication helpers and role utilities."""
 
 from fastapi import Depends, HTTPException, status, Header
 from typing import Optional
@@ -13,11 +10,6 @@ class Role:
     BASIC = "basic"
     PREMIUM = "premium"
     ADMIN = "admin"
-
-
-FEATURE_FLAGS = {
-    "advanced_ai": [Role.PREMIUM, Role.ADMIN],
-}
 
 
 def get_current_user(
@@ -72,10 +64,3 @@ def role_guard(required_role: str):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient role")
         return user
     return dependency
-
-
-def feature_enabled(feature: str, user_role: str) -> bool:
-    if user_role == Role.ADMIN:
-        return True
-    allowed = FEATURE_FLAGS.get(feature, [])
-    return user_role in allowed

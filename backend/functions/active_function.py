@@ -53,12 +53,10 @@ def handle_user_message(
     session_id: str,
     text: str,
     user_role: str = Role.BASIC,
-    feature_flags: Optional[Dict[str, any]] = None,
 ) -> Optional[ActiveFunction]:
     """Handle a new user message and update active function state.
 
-    Access to premium functions is checked using ``user_role`` and
-    ``feature_flags`` before activation.
+    Access to premium functions is checked using ``user_role`` before activation.
     """
     if session_id in _ACTIVE:
         state = _ACTIVE[session_id]
@@ -72,7 +70,7 @@ def handle_user_message(
             return None
         return state
 
-    spec = get_function_by_trigger(text, user_role=user_role, feature_flags=feature_flags)
+    spec = get_function_by_trigger(text, user_role=user_role)
     if spec:
         state = ActiveFunction(spec)
         state.process_user_text(text)

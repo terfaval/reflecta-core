@@ -61,10 +61,8 @@ class FunctionSpec:
     notes: str = ""
     # List of relationship dynamics with triggers, emotion patterns and styles
     relationship_dynamics: List[Dict[str, Any]] = field(default_factory=list)
-    # Minimum role required to use the function
-    required_role: str = Role.BASIC
-    # Optional feature flag key in the users.feature_flags JSON column
-    feature_flag: Optional[str] = None
+    # List of roles allowed to use the function. Empty means all roles allowed.
+    required_roles: List[str] = field(default_factory=list)
 
 
 # List of registered functions. Each function is represented by a ``FunctionSpec``
@@ -72,8 +70,7 @@ class FunctionSpec:
 FUNCTIONS: List[FunctionSpec] = [
     FunctionSpec(
         name="Belső Dialógus (Kapcsolati Párbeszéd)",
-        required_role=Role.PREMIUM,
-        feature_flag="inner_dialogue",
+        required_roles=[Role.PREMIUM, Role.ADMIN],
         triggers=[
             "nem tudok beszélni vele",
             "nem tudtam elmondani neki",
@@ -440,8 +437,7 @@ FUNCTIONS: List[FunctionSpec] = [
     ),
     FunctionSpec(
         name="Belső Képalkotás",
-        required_role=Role.PREMIUM,
-        feature_flag="inner_visualization",
+        required_roles=[Role.PREMIUM, Role.ADMIN],
         triggers=[
             "képek jelennek meg bennem",
             "álomszerű érzéseim vannak",
@@ -531,32 +527,23 @@ FUNCTIONS: List[FunctionSpec] = [
 ]
 
 
-def _role_allows(user_role: str, required_role: str) -> bool:
-    order = [Role.BASIC, Role.PREMIUM, Role.ADMIN]
-    try:
-        return order.index(user_role) >= order.index(required_role)
-    except ValueError:
+def _function_allowed(func: FunctionSpec, user_role: str) -> bool:
+    if user_role == Role.ADMIN:
+        return True
+    if func.required_roles and user_role not in func.required_roles:
         return False
-
-
-def _function_allowed(func: FunctionSpec, user_role: str, feature_flags: Optional[Dict[str, Any]]) -> bool:
-    if not _role_allows(user_role, func.required_role):
-        return False
-    if func.feature_flag and feature_flags is not None:
-        return bool(feature_flags.get(func.feature_flag))
     return True
 
 
 def get_function_by_trigger(
     user_input: str,
     user_role: str = Role.BASIC,
-    feature_flags: Optional[Dict[str, Any]] = None,
 ) -> Optional[FunctionSpec]:
     """Return the first function whose trigger keyword matches the input and is allowed."""
     for func in FUNCTIONS:
         for keyword in func.triggers:
             if match_trigger(user_input, keyword):
-                if _function_allowed(func, user_role, feature_flags):
+                if _function_allowed(func, user_role):
                     return func
     return None
 

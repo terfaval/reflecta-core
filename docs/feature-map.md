@@ -37,7 +37,6 @@ Ez a dokumentum összefoglalja a frontend és backend által biztosított főbb 
 - A backend `auth.py` modulja szerepköröket kezel (`basic`, `premium`, `admin`).
 - Bizonyos szolgáltatások csak magasabb szerepkörrel érhetők el:
   - **Személyes profil létrehozása** (`create_custom_profile`) prémium vagy admin felhasználóknak engedélyezett.
-  - **Fejlett AI funkciók** (például a válaszgenerálás a `/respond` végpontban) az `advanced_ai` flaggel érhetőek el, ami prémium vagy admin jogosultságot igényel.
 
 ## Főbb komponensek és interakciók
 

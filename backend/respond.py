@@ -14,7 +14,7 @@ from pydantic import BaseModel
 
 from openai import AsyncOpenAI
 
-from .auth import Role, feature_enabled, role_guard
+from .auth import Role, role_guard
 from .db import get_client
 from .prompt_builder import build_system_prompt
 from .functions.active_function import handle_user_message, pop_closure_question
@@ -264,8 +264,6 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
 async def respond(
     payload: RespondRequest, request: Request, user=Depends(role_guard(Role.BASIC))
 ):
-    if not feature_enabled("advanced_ai", user["role"]):
-        raise HTTPException(status_code=403, detail="Feature not available")
     try:
         body = await request.json()
         print(f"[respond] request body: {body}")
@@ -277,9 +275,8 @@ async def respond(
         user_record = get_user_by_id(user["id"])
     except Exception as exc:  # pragma: no cover - db error
         print(f"[respond] user fetch error: {exc}")
-        user_record = {"role": user["role"], "feature_flags": {}}
+        user_record = {"role": user["role"]}
     user_role = user_record.get("role", user["role"])
-    feature_flags = user_record.get("feature_flags") or {}
 
     if payload.content:
         try:
@@ -291,7 +288,6 @@ async def respond(
             payload.sessionId,
             payload.content,
             user_role=user_role,
-            feature_flags=feature_flags,
         )
         question = pop_closure_question(payload.sessionId)
         if question:
