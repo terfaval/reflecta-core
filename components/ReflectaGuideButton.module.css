@@ -1,7 +1,7 @@
 .container {
   position: absolute;
   bottom: 15px;
-  right: 15px;
+  right: 25px;
   display: flex;
   align-items: center;
   z-index: 200;
