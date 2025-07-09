@@ -6,7 +6,10 @@ interface StartingPromptDisplayProps {
   color?: string;
 }
 
-const StartingPromptDisplay: React.FC<StartingPromptDisplayProps> = ({ prompt, color }) => {
+const StartingPromptDisplayComponent: React.FC<StartingPromptDisplayProps> = ({
+  prompt,
+  color,
+}) => {
   if (!prompt) return null;
   return (
     <div className={styles.startingPrompt} style={{ color }}>
@@ -14,5 +17,7 @@ const StartingPromptDisplay: React.FC<StartingPromptDisplayProps> = ({ prompt, c
     </div>
   );
 };
+
+const StartingPromptDisplay = React.memo(StartingPromptDisplayComponent);
 
 export default StartingPromptDisplay;
