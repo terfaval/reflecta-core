@@ -67,10 +67,20 @@ async def conversation_new(payload: ConversationRequest):
             )
             session = _execute(existing)
             if session:
+                entry_check = (
+                    supabase.table("entries")
+                    .select("id")
+                    .eq("session_id", session["id"])
+                    .limit(1)
+                    .maybe_single()
+                    .execute()
+                )
+                has_entries = bool(_execute(entry_check))
                 return {
                     "conversation_id": conv_id,
                     "session_id": session["id"],
                     "status": "existing",
+                    "has_entries": has_entries,
                 }
 
         session = create_session(payload.user_id, payload.profile, conv_id)
@@ -91,6 +101,7 @@ async def conversation_new(payload: ConversationRequest):
                 ).execute()
             except Exception:
                 logging.exception("[conversation/new] Failed to log system event")
+                
         return {
             "conversation_id": conv_id,
             "session_id": session["id"],

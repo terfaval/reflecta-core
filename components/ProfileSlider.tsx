@@ -271,6 +271,7 @@ export default function ProfileSlider() {
 
     try {
       const data = await apiFetch<{
+        status: string;
         conversation_id: string;
         session_id: string;
       }>("/api/conversation/new", {
@@ -283,7 +284,12 @@ export default function ProfileSlider() {
       if (data.conversation_id && data.session_id) {
         setProfile(p.name);
         console.log('🔁 Redirecting to chat');
-        redirectToChat(router, data.conversation_id, data.session_id);
+        redirectToChat(
+          router,
+          data.conversation_id,
+          data.session_id,
+          data.status === 'existing'
+        );
       } else {
         toast.error('Nem sikerült elindítani a beszélgetést.');
         setError('Nem sikerült elindítani a beszélgetést.');

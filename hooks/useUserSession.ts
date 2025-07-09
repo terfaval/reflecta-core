@@ -3,6 +3,13 @@ import { useRouter } from 'next/router';
 
 import { apiFetch } from 'lib/api';
 
+interface Entry {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  created_at: string;
+}
+
 type UseUserSessionParams = {
   profile: string | string[] | undefined;
   onReady: (data: {
@@ -10,6 +17,7 @@ type UseUserSessionParams = {
     sessionId: string;
     startingPrompt: string;
     closingTrigger: string;
+    entries?: Entry[];
   }) => void;
   enabled?: boolean;
   userId?: string | null;
@@ -18,7 +26,7 @@ type UseUserSessionParams = {
 export function useUserSession({ profile, onReady, enabled = true, userId }: UseUserSessionParams) {
   const router = useRouter();
   const initialized = useRef(false);
-  const { session: sessionOverride } = router.query;
+  const { session: sessionOverride, existing } = router.query;
   const storedSessionId =
     typeof profile === 'string'
       ? sessionStorage.getItem(`reflecta_session_${profile}`)
@@ -51,11 +59,23 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
       if (!sessionOverride && storedSessionId) {
         initialized.current = true;
         sessionStorage.setItem(`reflecta_session_${profile}`, storedSessionId);
+        let entries: Entry[] = [];
+        if (existing === '1') {
+          try {
+            const data = await apiFetch<{ entries?: Entry[] }>(
+              `/api/entries?sessionId=${encodeURIComponent(storedSessionId)}`,
+            );
+            entries = data.entries || [];
+          } catch (err) {
+            console.error('[load entries]', err);
+          }
+        }
         onReady({
           userId: uid,
           sessionId: storedSessionId,
           startingPrompt: '',
           closingTrigger,
+          entries,
         });
         return;
       }
@@ -63,11 +83,23 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
       if (typeof sessionOverride === 'string') {
         initialized.current = true;
         sessionStorage.setItem(`reflecta_session_${profile}`, sessionOverride);
+        let entries: Entry[] = [];
+        if (existing === '1') {
+          try {
+            const data = await apiFetch<{ entries?: Entry[] }>(
+              `/api/entries?sessionId=${encodeURIComponent(sessionOverride)}`,
+            );
+            entries = data.entries || [];
+          } catch (err) {
+            console.error('[load entries]', err);
+          }
+        }
         onReady({
           userId: uid,
           sessionId: sessionOverride,
           startingPrompt: '',
           closingTrigger,
+          entries,
         });
         return;
       }

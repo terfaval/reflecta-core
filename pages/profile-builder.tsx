@@ -150,7 +150,9 @@ export default function ProfileBuilder() {
       setStartLoading(true);
       setErrorMsg(null);
       try {
-        const data = await apiFetch<{ conversation_id: string; session_id: string; error?: string }>(
+        const data = await apiFetch<{
+          status: string; conversation_id: string; session_id: string; error?: string 
+}>(
           '/api/conversation/new',
           {
             method: 'POST',
@@ -159,7 +161,12 @@ export default function ProfileBuilder() {
         );
         if (data.conversation_id && data.session_id) {
           setProfile(profile);
-          redirectToChat(router, data.conversation_id, data.session_id);
+          redirectToChat(
+            router,
+            data.conversation_id,
+            data.session_id,
+            data.status === 'existing'
+          );
         } else {
           console.error(data.error);
           setStartLoading(false);

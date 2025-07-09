@@ -31,7 +31,7 @@ export default function LoadingPage() {
         const navigate = () => {
           if (data.conversationId && data.sessionId && !data.endedAt) {
             if (data.profile) setProfile(data.profile);
-            redirectToChat(router, data.conversationId, data.sessionId);
+            redirectToChat(router, data.conversationId, data.sessionId, true);
           } else {
             router.replace('/select-profile');
           }

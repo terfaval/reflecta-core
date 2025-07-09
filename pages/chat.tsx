@@ -147,7 +147,7 @@ export default function ChatPage() {
   }, [debug, entries]);
 
   const handleReady = useCallback(
-    ({ userId, sessionId, startingPrompt, closingTrigger }) => {
+    ({ userId, sessionId, startingPrompt, closingTrigger, entries: initEntries }) => {
       if (debug) {
         console.log("[Debug] session ready", { userId, sessionId });
       }
@@ -157,6 +157,9 @@ export default function ChatPage() {
       setStartingPrompt(startingPrompt);
       setClosingTrigger(closingTrigger);
       setSessionIsFresh(true);
+      if (initEntries && initEntries.length) {
+        setEntries(initEntries);
+      }
     },
     [
       setUserId,
@@ -226,7 +229,9 @@ export default function ChatPage() {
     // eslint-disable-next-line no-console
     console.log('[switch profile]', { userId, profile_name: name });
     try {
-      const data = await apiFetch<{ conversation_id: string; session_id: string }>(
+      const data = await apiFetch<{
+        status: string; conversation_id: string; session_id: string 
+}>(
         "/api/conversation/new",
         {
           method: "POST",
@@ -248,7 +253,12 @@ export default function ChatPage() {
             '--ai-color': p.ai_color,
           }),
         );
-        redirectToChat(router, data.conversation_id, data.session_id);
+        redirectToChat(
+          router,
+          data.conversation_id,
+          data.session_id,
+          data.status === 'existing'
+        );
         // Reset previous entries and prompts for the new session context
         setEntries([]);
         setStartingPrompt('');
