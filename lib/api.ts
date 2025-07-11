@@ -33,7 +33,14 @@ export async function apiFetch<T = any>(
   }
 
   if (!response.ok) {
-    throw new Error(`API hiba: ${response.status}`);
+    let message = `API hiba: ${response.status}`;
+    try {
+      const err = await response.clone().json();
+      message = err.error || err.detail || message;
+    } catch {
+      // ignore parse errors and keep generic message
+    }
+    throw new Error(message);
   }
 
   try {
