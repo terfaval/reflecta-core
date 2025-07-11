@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { v4 as uuidv4 } from 'uuid';
 import { useUserContext } from '@/contexts/UserContext';
+import { useProfileContext } from '@/contexts/ProfileContext';
 import { supabase } from '@/lib/supabaseClient';
 import { apiFetch } from '@/lib/api';
 
@@ -14,6 +15,7 @@ export default function LoginPage() {
     setUserEmail,
     setUserInitialized,
   } = useUserContext();
+  const { setProfile } = useProfileContext();
 
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<string | null>(null);
@@ -64,8 +66,10 @@ export default function LoginPage() {
     setUserId(id);
     setUserRole('guest');
     setUserInitialized(true);
+    setProfile('Reflecta');
     sessionStorage.setItem('reflecta_user_id', id);
     sessionStorage.setItem('reflecta_role', 'guest');
+    sessionStorage.setItem('reflecta_profile', 'Reflecta');
     router.replace('/loading');
   };
 

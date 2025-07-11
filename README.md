@@ -123,6 +123,12 @@ uvicorn backend.main:app --reload
   - `api/ping.py` *(deprecated)*
 - `styles/` – CSS és egyéb stílusfájlok
 
+## Vendég mód
+
+A "Folytatás vendégként" opció mindig a `Reflecta` alapértelmezett profilt állítja be.
+Az érték a böngésző `sessionStorage` tárhelyén `reflecta_profile` kulcson tárolódik,
+így a chat és más komponensek mindig érvényes profilt kapnak a vendégek esetében.
+
 ## 📊 Supabase táblaséma
 
 ### users

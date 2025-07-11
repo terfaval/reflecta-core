@@ -18,6 +18,7 @@ Ez a dokumentum összefoglalja a frontend és backend által biztosított főbb 
    - A `UserProvider` figyeli a WordPress beágyazást vagy az URL paramétereit (`user_id`, `email`, `token`).
    - Sikeres azonosítás után a felhasználó adatai a `sessionStorage`‑ba kerülnek.
    - Ha létezik aktív munkamenet (`/api/last-session`), a felhasználó automatikusan a `/chat` oldalra kerül.
+   - Vendég belépés esetén automatikusan a `Reflecta` profil kerül hozzárendelésre, amelyet a `sessionStorage` `reflecta_profile` kulcsa tárol.
 2. **Profil kiválasztása**
    - A `/select-profile` oldalon a `ProfileSlider` jelenik meg. A kártyák adatai `POST /api/profile-list` segítségével töltődnek be.
    - Egy profil kiválasztása `POST /api/conversation/new` hívást indít, ami létrehozza a beszélgetést és a munkamenetet, majd átirányítás történik a `/chat` oldalra.
