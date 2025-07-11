@@ -30,6 +30,9 @@ def test_conversation_new_internal_error():
         "backend.conversation_new.get_or_create_conversation",
         return_value=({"id": "c1"}, True),
     ), patch(
+        "backend.conversation_new.get_user_by_id",
+        return_value={"id": "u1"},
+    ), patch(
         "backend.conversation_new.safe_call", return_value=None
     ), patch(
         "backend.conversation_new.create_session", side_effect=RuntimeError("boom")
@@ -75,6 +78,9 @@ def test_conversation_new_existing_flag():
         "backend.conversation_new.get_or_create_conversation",
         return_value=({"id": "c1"}, False),
     ), patch(
+        "backend.conversation_new.get_user_by_id",
+        return_value={"id": "u1"},
+    ), patch(
         "backend.conversation_new.supabase", supabase
     ), patch(
         "backend.conversation_new._execute",
@@ -97,6 +103,9 @@ def test_conversation_new_header_user():
     ), patch(
         "backend.conversation_new.get_or_create_conversation",
         return_value=({"id": "c1"}, True),
+    ), patch(
+        "backend.conversation_new.get_user_by_id",
+        return_value={"id": "u1"},
     ), patch(
         "backend.conversation_new.create_session", return_value={"id": "s1"}
     ), patch(

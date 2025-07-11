@@ -1,17 +1,25 @@
 """Endpoints for retrieving and listing sessions."""
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Header
+from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 import logging
 
 from .db import get_client
-from .auth import role_guard, Role
+from .users import get_user_by_id
 from .profile_utils import validate_profile_name
 from .conversation_manager import get_or_create_conversation
 from .session_factory import create_session
 
 router = APIRouter()
 
+
+class SessionRequest(BaseModel):
+    """Request body for ``/session``."""
+
+    user_id: str | None = None
+    profile: str
+    
 
 async def get_or_create_conversation_and_session(
     user_id: str, profile: str
@@ -43,16 +51,20 @@ async def get_or_create_conversation_and_session(
 
 
 @router.post("/session")
-async def session(userId: str, profile: str, user=Depends(role_guard(Role.BASIC))):
-    if not userId:
-        raise HTTPException(status_code=400, detail="Hiányzó adat")
+async def session(
+    payload: SessionRequest,
+    x_user_id: str | None = Header(default=None, alias="X-User-Id"),
+):
+    user_id = payload.user_id or x_user_id
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Hiányzó mező: user_id")
 
-    # Validate but retain original casing for database inserts
-    validate_profile_name(profile)
+    validate_profile_name(payload.profile)
+    get_user_by_id(user_id)
 
     try:
         conv_id, session_data, status = await get_or_create_conversation_and_session(
-            userId, profile
+            user_id, payload.profile
         )
     except HTTPException:
         raise

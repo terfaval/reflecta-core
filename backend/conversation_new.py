@@ -5,7 +5,7 @@ Hívja: frontend POST /api/conversation/new
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Header
 from fastapi.responses import JSONResponse
 import logging
 from pydantic import BaseModel, Field
@@ -16,7 +16,7 @@ from .profile_utils import validate_profile_name
 from .conversation_manager import get_or_create_conversation
 from .session_factory import create_session
 from .supabase_client import supabase, _execute, safe_call
-from .auth import get_current_user
+from .users import get_user_by_id
 from .utils import normalize_profile
 
 router = APIRouter()
@@ -36,18 +36,20 @@ class ConversationRequest(BaseModel):
 @router.post("/conversation/new")
 async def conversation_new(
     payload: ConversationRequest,
-    user=Depends(get_current_user),
+    x_user_id: str | None = Header(default=None, alias="X-User-Id"),
 ):
     """Create a new conversation and session for the given user and profile."""
 
     payload_dict = payload.dict()
     
     try:
-        user_id = payload.user_id or user.get("id")
+        user_id = payload.user_id or x_user_id
         if not user_id:
             raise HTTPException(
                 status_code=400, detail="Hiányzó vagy érvénytelen mező: user_id"
             )
+        # Validate user exists
+        get_user_by_id(user_id)
         if not payload.profile:
             raise HTTPException(
                 status_code=400, detail="Hiányzó vagy érvénytelen mező: profile"
