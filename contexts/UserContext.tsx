@@ -169,18 +169,20 @@ useEffect(() => {
 useEffect(() => {
   if (wpEmbed || userInitialized) return;
   const token = sessionStorage.getItem('reflecta_token');
-  const mail = sessionStorage.getItem('reflecta_email');
-  if (!token || !mail) return;
+  if (!token) return;
   const verify = async () => {
     try {
-      const data = await apiFetch<{ user_id: string; role?: string }>(
-        `/api/login-token?email=${encodeURIComponent(mail)}&token=${encodeURIComponent(token)}`,
+      const data = await apiFetch<{ supabaseToken?: string; user: { id: string; email: string; role?: string } }>(
+        `/api/login-token/validate?token=${encodeURIComponent(token)}`,
       );
-      if (data.user_id) {
-        if (!userId) setUserId(data.user_id);
-        if (data.role) {
-          setUserRole(data.role);
-          sessionStorage.setItem('reflecta_role', data.role);
+      if (data.user) {
+        if (!userId) setUserId(data.user.id);
+        if (!userEmail) setUserEmail(data.user.email);
+        if (data.supabaseToken)
+          sessionStorage.setItem('reflecta_token', data.supabaseToken);
+        if (data.user.role) {
+          setUserRole(data.user.role);
+          sessionStorage.setItem('reflecta_role', data.user.role);
         }
         setUserInitialized(true);
       }

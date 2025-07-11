@@ -157,3 +157,25 @@ create table if not exists conversation_arcs (
   depth_estimate text,      -- "felszínes", "közepes", "mély", "archetípusos"
   profile_sequence jsonb    -- résztvevő profilok
 );
+
+-- új tábla: aktív funkciók
+create table if not exists active_functions (
+  session_id uuid primary key references sessions(id) on delete cascade,
+  function_name text not null,
+  history jsonb default '[]',
+  is_closed boolean default false,
+  closure_question text,
+  session_prefix text,
+  updated_at timestamp default now()
+);
+
+-- Reflecta: login_tokens table migration
+create table if not exists login_tokens (
+  token uuid primary key default gen_random_uuid(),
+  user_id uuid references users(id) on delete cascade,
+  expires_at timestamp not null,
+  used boolean default false,
+  created_at timestamp default now()
+);
+
+create index if not exists login_tokens_user_idx on login_tokens(user_id);

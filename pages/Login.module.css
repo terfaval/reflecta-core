@@ -98,6 +98,11 @@
   font-size: 0.875rem;
 }
 
+.info {
+  color: var(--user-color, #7D9EDF);
+  font-size: 0.875rem;
+}
+
 .submitButton {
   background-color: var(--user-color, #7D9EDF);
   color: #fff;

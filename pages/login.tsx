@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useUserContext } from '@/contexts/UserContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { ReflectaIcon } from '@/components/icons';
+import ReflectaMandala from '@/public/ReflectaMandala.svg';
 import { apiFetch } from '@/lib/api';
 import styles from './Login.module.css';
 
@@ -22,7 +23,7 @@ export default function LoginPage() {
   const { setProfile } = useProfileContext();
 
   const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   
   // If already logged in redirect to loading
@@ -34,21 +35,21 @@ export default function LoginPage() {
   useEffect(() => {
     if (!router.isReady) return;
     const token = router.query.token as string | undefined;
-    const mail = router.query.email as string | undefined;
-    if (!token || !mail || userId) return;
+    if (!token || userId) return;
     const verify = async () => {
       try {
-        const data = await apiFetch<{ user_id: string; role?: string }>(
-          `/api/login-token?email=${encodeURIComponent(mail)}&token=${encodeURIComponent(token)}`,
+        const data = await apiFetch<{ supabaseToken?: string; user: { id: string; email: string; role?: string } }>(
+          `/api/login-token/validate?token=${encodeURIComponent(token)}`,
         );
-        setUserId(data.user_id);
-        setUserEmail(mail);
-        sessionStorage.setItem('reflecta_user_id', data.user_id);
-        sessionStorage.setItem('reflecta_email', mail);
-        sessionStorage.setItem('reflecta_token', token);
-        if (data.role) {
-          setUserRole(data.role);
-          sessionStorage.setItem('reflecta_role', data.role);
+        const { user, supabaseToken } = data;
+        setUserId(user.id);
+        setUserEmail(user.email);
+        sessionStorage.setItem('reflecta_user_id', user.id);
+        sessionStorage.setItem('reflecta_email', user.email);
+        if (supabaseToken) sessionStorage.setItem('reflecta_token', supabaseToken);
+        if (user.role) {
+          setUserRole(user.role);
+          sessionStorage.setItem('reflecta_role', user.role);
         }
         setUserInitialized(true);
         router.replace('/loading');
@@ -79,14 +80,19 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-        setSent(false);
+        setMessage(null);
     try {
-      await apiFetch('/api/login-token', {
+      const res = await fetch('/api/login-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
-      setSent(true);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.detail || 'Nem sikerült elküldeni a belépési linket.');
+        return;
+      }
+      setMessage(data.message || 'Login link sent successfully.');
     } catch (err) {
       console.error('[login-token]', err);
       setError('Nem sikerült elküldeni a belépési linket.');
@@ -103,7 +109,11 @@ export default function LoginPage() {
 
   return (
     <div className={styles.container}>
-      {/* Background image removed, using ai-color instead */}
+      {/* Mandala background */}
+      <ReflectaMandala
+        className={styles.mandala}
+        style={{ color: '#fff', fill: 'currentColor' }}
+      />
       <div className={styles.content}>
         <div
           className={styles.box}
@@ -127,9 +137,7 @@ export default function LoginPage() {
               required
               className={styles.input}
             />
-            {sent && (
-              <p className={styles.info}>E-mailes belépési link elküldve.</p>
-            )}
+            {message && <p className={styles.info}>{message}</p>}
             {error && <p className={styles.error}>{error}</p>}
             <button
               type="submit"
