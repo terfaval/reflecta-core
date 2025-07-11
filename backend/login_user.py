@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict
+from typing import Dict, Any
 import re
 
 from fastapi import APIRouter, HTTPException
@@ -23,7 +23,7 @@ class LoginUserRequest(BaseModel):
 
 
 @router.post("/login-user")
-async def login_user(payload: LoginUserRequest) -> Dict[str, Dict[str, str]]:
+async def login_user(payload: LoginUserRequest) -> Dict[str, Any]:
     """Look up a user by email and return user data."""
 
     email = payload.email.strip().lower()

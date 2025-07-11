@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Dict
+from typing import Dict, Any
 import re
 
 from fastapi import APIRouter, HTTPException
@@ -27,7 +27,7 @@ class RegisterUserRequest(BaseModel):
 
 
 @router.post("/register-user")
-async def register_user(payload: RegisterUserRequest) -> Dict[str, Dict[str, str]]:
+async def register_user(payload: RegisterUserRequest) -> Dict[str, Any]:
     """Create a new user row with the provided email and return it."""
 
     email = payload.email.strip().lower()
