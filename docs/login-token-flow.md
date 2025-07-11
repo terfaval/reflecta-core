@@ -48,6 +48,14 @@ Used by the frontend when landing on Reflecta after the magic link login.
 
 The frontend will then store the returned token and user info in `sessionStorage` just like the current login flow does.
 
+### POST `/api/register-user`
+
+Registers a new user row in the `users` table when only an email address is provided. Used if the login page detects that the email does not exist yet.
+
+**Body:** `{ email: string }`
+
+Responds with `{ message: "Registration successful." }` on success. Returns 400 if the user already exists.
+
 ## Frontend adjustments
 
 ### Login page

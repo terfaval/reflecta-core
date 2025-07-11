@@ -1,0 +1,44 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dialog {
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 20rem;
+  text-align: center;
+  font-family: 'Raleway', sans-serif;
+}
+
+.message {
+  margin-bottom: 1rem;
+}
+
+.buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-family: 'Raleway', sans-serif;
+}
+
+.cancel {
+  background: #e5e7eb;
+}
+
+.confirm {
+  background: var(--user-color, #7D9EDF);
+  color: #fff;
+}

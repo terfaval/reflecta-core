@@ -7,6 +7,8 @@ import { useProfileContext } from '@/contexts/ProfileContext';
 import { ReflectaIcon } from '@/components/icons';
 import ReflectaMandala from '@/public/ReflectaMandala.svg';
 import { apiFetch } from '@/lib/api';
+import PopupDialog from '@/components/PopupDialog';
+import { useToast } from '@/hooks/useToast';
 import styles from './Login.module.css';
 
 export default function LoginPage() {
@@ -21,10 +23,12 @@ export default function LoginPage() {
     setGuestSessionId,
   } = useUserContext();
   const { setProfile } = useProfileContext();
+  const toast = useToast();
 
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showRegisterPrompt, setShowRegisterPrompt] = useState(false);
   
   // If already logged in redirect to loading
   useEffect(() => {
@@ -80,7 +84,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-        setMessage(null);
+    setMessage(null);
     try {
       const res = await fetch('/api/login-token', {
         method: 'POST',
@@ -89,13 +93,38 @@ export default function LoginPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.detail || 'Nem sikerült elküldeni a belépési linket.');
+        if (res.status === 404) {
+          setShowRegisterPrompt(true);
+        } else {
+          setError(data.detail || 'Nem sikerült elküldeni a belépési linket.');
+        }
         return;
       }
       setMessage(data.message || 'Login link sent successfully.');
     } catch (err) {
       console.error('[login-token]', err);
       setError('Nem sikerült elküldeni a belépési linket.');
+    }
+  };
+
+  const handleRegister = async () => {
+    try {
+      const res = await fetch('/api/register-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.detail || 'Nem sikerült regisztrálni a felhasználót.');
+      } else {
+        toast('Registration successful. Please enter your email again to log in.');
+      }
+    } catch (err) {
+      console.error('[register-user]', err);
+      setError('Nem sikerült regisztrálni a felhasználót.');
+    } finally {
+      setShowRegisterPrompt(false);
     }
   };
 
@@ -109,9 +138,19 @@ export default function LoginPage() {
 
   return (
     <div className={styles.container}>
+      <PopupDialog
+        open={showRegisterPrompt}
+        message="Nincs felhasználó ezzel az e-mail címmel. Szeretnél regisztrálni?"
+        cancelLabel="Mégsem"
+        confirmLabel="Igen"
+        onCancel={() => setShowRegisterPrompt(false)}
+        onConfirm={handleRegister}
+      />
       {/* Mandala background */}
       <ReflectaMandala
         className={styles.mandala}
+        width={400}
+        height={400}
         style={{ color: '#fff', fill: 'currentColor' }}
       />
       <div className={styles.content}>
