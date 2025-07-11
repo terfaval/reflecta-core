@@ -40,7 +40,7 @@ const QUESTIONS = [
 const COLORS = ['#4C6EF5', '#E59866', '#5DAE8B', '#A26EBA', '#CD5C5C'];
 
 export default function ProfileBuilder() {
-  const { userId, userInitialized, userError } = useUserContext();
+  const { userId, userInitialized, userError, userRole } = useUserContext();
   const { setProfile } = useProfileContext();
   const toast = useToast();
   const {
@@ -65,7 +65,7 @@ export default function ProfileBuilder() {
   // user initialization handled globally in UserProvider
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || userRole === 'guest') return;
     apiFetch<{ role?: string; personalProfiles?: string[] }>('/api/profile-list', {
       method: 'POST',
       body: JSON.stringify({ userId })
@@ -81,7 +81,7 @@ export default function ProfileBuilder() {
         }
       })
       .catch(console.error);
-  }, [userId, router]);
+  }, [userId, userRole, router]);
 
   const handleChange = (value: string) => {
     setAnswer(value);
@@ -96,7 +96,7 @@ export default function ProfileBuilder() {
   };
 
   const submit = async () => {
-    if (!userId) return;
+    if (!userId || userRole === 'guest') return;
     try {
       const data = await apiFetch<{ name: string }>(
         '/api/profile/from-survey',
@@ -146,7 +146,7 @@ export default function ProfileBuilder() {
 
   if (finished) {
     const handleStart = async () => {
-      if (!userId || startLoading) return;
+      if (!userId || startLoading || userRole === 'guest') return;
       setStartLoading(true);
       setErrorMsg(null);
       try {

@@ -22,6 +22,7 @@ interface UseHandleSendProps {
   setSessionIsFresh: (v: boolean) => void;
   setIsClosing: (v: boolean) => void;
   setSessionId: (id: string | null) => void;
+  userRole: string | null;
 }
 
 export function useHandleSend({
@@ -35,10 +36,14 @@ export function useHandleSend({
   setSessionIsFresh,
   setIsClosing,
   setSessionId,
+  userRole,
 }: UseHandleSendProps) {
   const toast = useToast();
   const sessionPromise = useRef<Promise<string> | null>(null);
   const handleSend = useCallback(async (text?: string) => {
+    if (userRole === 'guest') {
+      return;
+    }
     const message = typeof text === 'string' ? text.trim() : '';
     if (!message) {
       // eslint-disable-next-line no-console
@@ -182,7 +187,7 @@ export function useHandleSend({
       return;
     }
     setLoading(false);
-  }, [sessionId, userId, profile, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing, setSessionId, toast]);
+  }, [sessionId, userId, profile, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing, setSessionId, userRole, toast]);
 
   useEffect(() => {
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;

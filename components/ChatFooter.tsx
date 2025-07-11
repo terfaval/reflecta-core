@@ -5,6 +5,7 @@ import buttonStyles from './buttons.module.css';
 import { apiFetch } from 'lib/api';
 import { useToast } from '../hooks/useToast';
 import { useProfileContext } from '@/contexts/ProfileContext';
+import { useUserContext } from '@/contexts/UserContext';
 
 interface ChatFooterProps {
   message: string;
@@ -39,6 +40,7 @@ export function ChatFooter({
 
   const toast = useToast();
   const { profile } = useProfileContext();
+  const { userRole } = useUserContext();
 
   return (
     <>
@@ -68,6 +70,7 @@ export function ChatFooter({
           {closingTrigger && (
             <button
               onClick={async () => {
+                if (userRole === 'guest') return;
                 if (!sessionId || isClosing || assistantReplyCount < 3) return;
                 setIsClosing(true);
                 try {

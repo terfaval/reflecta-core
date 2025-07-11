@@ -22,10 +22,8 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
   const [loading, setLoading] = useState(true);
   const { userRole } = useUserContext();
 
-  if (userRole === 'guest') return null;
-
   useEffect(() => {
-    if (!sessionId) return;
+    if (!sessionId || userRole === 'guest') return;
     const load = async () => {
       setLoading(true);
       try {
@@ -42,7 +40,7 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
       setLoading(false);
     };
     load();
-  }, [sessionId]);
+  }, [sessionId, userRole]);
 
   const reconnect = (label: string) => {
     const msg = `Múltkor már meséltem neked ${label} témáról, most szeretnék erről tovább beszélni.`;
@@ -61,6 +59,8 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
     </svg>
   );
 
+  if (userRole === 'guest') return null;
+  
   return (
     <div className={styles.panel}>
       {loading && !error && <p className={styles.loading}>Töltés...</p>}

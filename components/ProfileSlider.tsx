@@ -41,7 +41,7 @@ const ICON_MAP: Record<string, string | undefined> = {
 };
 
 export default function ProfileSlider() {
-  const { userId } = useUserContext();
+  const { userId, userRole } = useUserContext();
   const { setProfile } = useProfileContext();
   const router = useRouter();
 
@@ -67,7 +67,7 @@ export default function ProfileSlider() {
   const [creating, setCreating] = useState(false);
 
   const loadProfiles = async () => {
-    if (!userId) return;
+    if (!userId || userRole === 'guest') return;
     setError(null);
     try {
       const names = BASE_ORDER;
@@ -126,9 +126,9 @@ export default function ProfileSlider() {
   };
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || userRole === 'guest') return;
     loadProfiles();
-  }, [userId]);
+  }, [userId, userRole]);
 
   const enableNav = profiles.length > visibleCount;
 

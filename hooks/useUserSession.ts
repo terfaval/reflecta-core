@@ -21,9 +21,10 @@ type UseUserSessionParams = {
   }) => void;
   enabled?: boolean;
   userId?: string | null;
+  userRole?: string | null;
 };
 
-export function useUserSession({ profile, onReady, enabled = true, userId }: UseUserSessionParams) {
+export function useUserSession({ profile, onReady, enabled = true, userId, userRole }: UseUserSessionParams) {
   const router = useRouter();
   const initialized = useRef(false);
   const { session: sessionOverride, existing } = router.query;
@@ -33,7 +34,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
       : null;
 
   useEffect(() => {
-    if (!enabled || !router.isReady) return;
+    if (!enabled || !router.isReady || userRole === 'guest') return;
     if (!userId || typeof profile !== 'string') return;
 
     const startSession = async (uid: string) => {
@@ -156,5 +157,6 @@ export function useUserSession({ profile, onReady, enabled = true, userId }: Use
     router.isReady,
     sessionOverride,
     storedSessionId,
+    userRole,
   ]);
 }

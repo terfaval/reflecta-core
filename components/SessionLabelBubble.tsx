@@ -1,6 +1,7 @@
 // File: components/SessionLabelBubble.tsx
 
 import { useState } from 'react';
+import { useUserContext } from '@/contexts/UserContext';
 import styles from './SessionLabelBubble.module.css';
 
 import { apiFetch } from 'lib/api';
@@ -23,8 +24,10 @@ export default function SessionLabelBubble({
   const [tempLabel, setTempLabel] = useState(label);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { userRole } = useUserContext();
 
   const handleSave = async () => {
+    if (userRole === 'guest') return;
     if (!tempLabel.trim()) return;
     if (!entryId) {
       // eslint-disable-next-line no-console

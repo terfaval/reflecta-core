@@ -81,7 +81,7 @@ export default function ChatPage() {
   }, [debug, profile]);
 
   useEffect(() => {
-    if (!profile || !userId) return;
+    if (!profile || !userId || userRole === 'guest') return;
     const loadColors = async () => {
       try {
         const data = await apiFetch<{
@@ -105,14 +105,14 @@ export default function ChatPage() {
       }
     };
     loadColors();
-  }, [profile, userId]);
+  }, [profile, userId, userRole]);
   
   useEffect(() => {
     if (debug) console.log("[Debug] userId", userId);
   }, [debug, userId]);
 
   useEffect(() => {
-    if (!userId || profile) return;
+    if (!userId || profile || userRole === 'guest') return;
     const load = async () => {
       try {
         const data = await apiFetch<{
@@ -173,8 +173,9 @@ export default function ChatPage() {
   useUserSession({
     profile,
     onReady: handleReady,
-    enabled: !!userId && !!profile && !sessionId,
+    enabled: !!userId && !!profile && !sessionId && userRole !== 'guest',
     userId,
+    userRole,
   });
 
   useAutoTextareaResize();
@@ -203,6 +204,7 @@ export default function ChatPage() {
     setSessionIsFresh,
     setIsClosing,
     setSessionId,
+    userRole,
   });
 
   useEffect(() => {
@@ -221,7 +223,7 @@ export default function ChatPage() {
 
   const handleSidebarSelect = async (p: Profile) => {
     const name = p.id;
-    if (!userId || !name) {
+    if (!userId || !name || userRole === 'guest') {
       // eslint-disable-next-line no-console
       console.warn('[switch profile] missing userId or profile');
       return;
@@ -287,7 +289,7 @@ export default function ChatPage() {
   }, []);
 
   const fetchMoreEntries = async (pageIndex: number) => {
-    if (!userId || !profile || isFetchingRef.current) return;
+    if (!userId || !profile || isFetchingRef.current || userRole === 'guest') return;
 
     if (debug) console.log("[Debug] fetching page", pageIndex);
 
@@ -345,12 +347,12 @@ export default function ChatPage() {
   }, [debug, page]);
 
   useEffect(() => {
-    if (!profile || typeof profile !== "string" || !userId || !sessionId)
+    if (!profile || typeof profile !== "string" || !userId || !sessionId || userRole === 'guest')
       return;
     setPage(0);
     setEntries([]);
     fetchMoreEntries(0);
-  }, [profile, userId, sessionId]);
+  }, [profile, userId, sessionId, userRole]);
 
   useEffect(() => {
     if (
@@ -358,7 +360,8 @@ export default function ChatPage() {
       startingPrompt ||
       !userId ||
       !profile ||
-      entries.length !== 0
+      entries.length !== 0 ||
+      userRole === 'guest'
     )
       return;
     const loadPrompt = async () => {
@@ -373,7 +376,7 @@ export default function ChatPage() {
       }
     };
     loadPrompt();
-  }, [sessionIsFresh, startingPrompt, userId, profile, entries.length]);
+  }, [sessionIsFresh, startingPrompt, userId, profile, entries.length, userRole]);
 
 
   if (userError) {

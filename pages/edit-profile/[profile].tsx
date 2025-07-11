@@ -14,7 +14,7 @@ interface StyleData {
 export default function EditProfilePage() {
   const router = useRouter();
   const { profile } = router.query;
-  const { userId } = useUserContext();
+  const { userId, userRole } = useUserContext();
   const toast = useToast();
 
   const [name, setName] = useState('');
@@ -26,7 +26,7 @@ export default function EditProfilePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!profile || !userId) return;
+    if (!profile || !userId || userRole === 'guest') return;
     const load = async () => {
       try {
         const info = await apiFetch<any>('/api/profile', {
@@ -50,7 +50,7 @@ export default function EditProfilePage() {
       }
     };
     load();
-  }, [profile, userId]);
+  }, [profile, userId, userRole]);
 
   const handleAddInspiration = () => {
     if (inspirations.length >= 8) return;
@@ -58,7 +58,7 @@ export default function EditProfilePage() {
   };
 
   const handleSave = async () => {
-    if (!userId || !profile) return;
+    if (!userId || !profile || userRole === 'guest') return;
     try {
       await apiFetch('/api/profile/update', {
         method: 'POST',
