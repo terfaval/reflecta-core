@@ -14,6 +14,7 @@ import { useScrollHandler } from "../hooks/useScrollHandler";
 import { useHandleSend } from "../hooks/useHandleSend";
 import { useUserContext } from "@/contexts/UserContext";
 import { useProfileContext } from "@/contexts/ProfileContext";
+import { v4 as uuidv4 } from 'uuid';
 
 import { apiFetch } from "@/lib/api";
 import { redirectToChat } from "@/lib/navigation";
@@ -35,7 +36,7 @@ export default function ChatPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [closingTrigger, setClosingTrigger] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const { userId, setUserId, userInitialized, userError, userRole } = useUserContext();
+  const { userId, setUserId, userInitialized, userError, userRole, guestSessionId, setGuestSessionId } = useUserContext();
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [entriesError, setEntriesError] = useState<string | null>(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
@@ -80,6 +81,20 @@ export default function ChatPage() {
     if (debug) console.log("[Debug] profile", profile);
   }, [debug, profile]);
 
+  useEffect(() => {
+    if (userRole !== 'guest' || !profile) return;
+    let sid = guestSessionId || sessionStorage.getItem(`reflecta_session_${profile}`) || sessionStorage.getItem('reflecta_guest_session_id');
+    if (!sid) {
+      sid = `guest-session-${uuidv4()}`;
+    }
+    sessionStorage.setItem(`reflecta_session_${profile}`, sid);
+    setGuestSessionId(sid);
+    if (!sessionId) {
+      setSessionId(sid);
+      setSessionIsFresh(true);
+    }
+  }, [userRole, profile, guestSessionId, sessionId]);
+  
   useEffect(() => {
     if (!profile || !userId || userRole === 'guest') return;
     const loadColors = async () => {

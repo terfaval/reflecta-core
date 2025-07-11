@@ -128,6 +128,12 @@ uvicorn backend.main:app --reload
 A "Folytatás vendégként" opció mindig a `Reflecta` alapértelmezett profilt állítja be.
 Az érték a böngésző `sessionStorage` tárhelyén `reflecta_profile` kulcson tárolódik,
 így a chat és más komponensek mindig érvényes profilt kapnak a vendégek esetében.
+Vendég belépéskor egy ideiglenes munkamenet‑azonosító is létrejön
+(`guest-session-<uuid>`). Ez azonosító a `sessionStorage` `reflecta_guest_session_id`
+kulcsa alatt, illetve profilhoz kötve `reflecta_session_Reflecta` néven kerül
+eltárolásra, és a React felhasználói kontextusban `guestSessionId` mezőn keresztül
+elérhető. A chat felület így ugyanúgy sessionId-t kap, mint a bejelentkezett
+felhasználók esetén.
 
 ## 📊 Supabase táblaséma
 

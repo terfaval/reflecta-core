@@ -14,6 +14,7 @@ export default function LoginPage() {
     setUserRole,
     setUserEmail,
     setUserInitialized,
+    setGuestSessionId,
   } = useUserContext();
   const { setProfile } = useProfileContext();
 
@@ -63,12 +64,16 @@ export default function LoginPage() {
 
   const handleGuest = () => {
     const id = `guest-${uuidv4()}`;
+    const session = `guest-session-${uuidv4()}`;
     setUserId(id);
     setUserRole('guest');
     setUserInitialized(true);
+    setGuestSessionId(session);
     setProfile('Reflecta');
     sessionStorage.setItem('reflecta_user_id', id);
     sessionStorage.setItem('reflecta_role', 'guest');
+    sessionStorage.setItem('reflecta_guest_session_id', session);
+    sessionStorage.setItem('reflecta_session_Reflecta', session);
     sessionStorage.setItem('reflecta_profile', 'Reflecta');
     router.replace('/loading');
   };

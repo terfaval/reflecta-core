@@ -21,6 +21,8 @@ interface UserContextType {
   setUserEmail: (email: string | null) => void;
   userRole: string | null;
   setUserRole: (r: string | null) => void;
+  guestSessionId: string | null;
+  setGuestSessionId: (id: string | null) => void;
   userInitialized: boolean;
   setUserInitialized: (v: boolean) => void;
   userError: string | null;
@@ -34,6 +36,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [guestSessionId, setGuestSessionId] = useState<string | null>(null);
   const [userInitialized, setUserInitialized] = useState(false);
   const [userError, setUserError] = useState<string | null>(null);
   const [wpEmbed, setWpEmbed] = useState(false);
@@ -122,11 +125,13 @@ useEffect(() => {
   const storedId = sessionStorage.getItem('reflecta_user_id');
   const storedEmail = sessionStorage.getItem('reflecta_email');
   const storedRole = sessionStorage.getItem('reflecta_role');
+  const storedGuestSession = sessionStorage.getItem('reflecta_guest_session_id');
   if (storedId) {
     setUserId(storedId);
     setUserInitialized(true);
     if (storedEmail) setUserEmail(storedEmail);
     if (storedRole) setUserRole(storedRole);
+    if (storedGuestSession) setGuestSessionId(storedGuestSession);
     // eslint-disable-next-line no-console
     console.log('[init_user] restored', storedId, storedEmail);
   }
@@ -197,14 +202,20 @@ useEffect(() => {
 }, [userInitialized, wpEmbed]);
 
 useEffect(() => {
-  if (!wpEmbed || userInitialized || userError) return;
-  const id = setTimeout(() => {
-    if (!userInitialized && !userError) {
-      setUserError('Nem érkezett bejelentkezési adat a WordPress oldalról. Kérlek frissítsd az oldalt vagy próbáld újra.');
+    if (!wpEmbed || userInitialized || userError) return;
+    const id = setTimeout(() => {
+      if (!userInitialized && !userError) {
+        setUserError('Nem érkezett bejelentkezési adat a WordPress oldalról. Kérlek frissítsd az oldalt vagy próbáld újra.');
+      }
+    }, 5000);
+    return () => clearTimeout(id);
+  }, [userInitialized, userError, wpEmbed]);
+
+  useEffect(() => {
+    if (guestSessionId) {
+      sessionStorage.setItem('reflecta_guest_session_id', guestSessionId);
     }
-  }, 5000);
-  return () => clearTimeout(id);
-}, [userInitialized, userError, wpEmbed]);
+  }, [guestSessionId]);
 
   return (
     <UserContext.Provider
@@ -215,6 +226,8 @@ useEffect(() => {
         setUserEmail,
         userRole,
         setUserRole,
+        guestSessionId,
+        setGuestSessionId,
         userInitialized,
         setUserInitialized,
         userError,
