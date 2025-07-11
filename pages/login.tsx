@@ -55,20 +55,10 @@ export default function LoginPage() {
     setError(null);
     
     try {
-      const res = await fetch('/api/login-user', {
+      const data = await apiFetch<{ user: { id: string; email: string; role?: string } }>('/api/login-user', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        if (res.status === 404) {
-          setShowRegisterPrompt(true);
-        } else {
-          setError(data.detail || 'Nem sikerült bejelentkezni.');
-        }
-        return;
-      }
       const { user } = data;
       setUserId(user.id);
       setUserEmail(user.email);
@@ -78,34 +68,23 @@ export default function LoginPage() {
       sessionStorage.setItem('reflecta_email', user.email);
       if (user.role) sessionStorage.setItem('reflecta_role', user.role);
       router.replace('/loading');
-    } catch (err) {
-      console.error('[login-user]', err);
-      setError('Nem sikerült bejelentkezni.');
+    } catch (err: any) {
+      if (err.message?.includes('404')) {
+        setShowRegisterPrompt(true);
+      } else {
+        console.error('[login-user]', err);
+        setError('Nem sikerült bejelentkezni.');
+      }
     }
   };
 
   const handleRegister = async () => {
     try {
-      const res = await fetch('/api/register-user', {
+      const data = await apiFetch<{ user: { id: string; email: string; role?: string } }>('/api/register-user', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setError(data.detail || 'Nem sikerült regisztrálni a felhasználót.');
-      } else {
-        const { user } = data;
-        setUserId(user.id);
-        setUserEmail(user.email);
-        if (user.role) setUserRole(user.role);
-        setUserInitialized(true);
-        sessionStorage.setItem('reflecta_user_id', user.id);
-        sessionStorage.setItem('reflecta_email', user.email);
-        if (user.role) sessionStorage.setItem('reflecta_role', user.role);
-        router.replace('/loading');
-      }
-    } catch (err) {
+      } catch (err) {
       console.error('[register-user]', err);
       setError('Nem sikerült regisztrálni a felhasználót.');
     } finally {
