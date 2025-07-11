@@ -14,7 +14,9 @@ client = TestClient(app)
 
 
 def test_conversation_new_missing_fields():
-    resp = client.post("/api/conversation/new", json={"user_id": "", "profile_name": "Reflecta"})
+    resp = client.post(
+        "/api/conversation/new", json={"user_id": "", "profile_name": "Reflecta"}
+    )
     assert resp.status_code == 400
     data = resp.json()
     assert data["status"] == "error"
@@ -22,10 +24,19 @@ def test_conversation_new_missing_fields():
 
 
 def test_conversation_new_internal_error():
-    with patch("backend.conversation_new.validate_profile_name", return_value="Reflecta"), \
-         patch("backend.conversation_new.get_or_create_conversation", return_value=({"id": "c1"}, True)), \
-         patch("backend.conversation_new.create_session", side_effect=RuntimeError("boom")):
-        resp = client.post("/api/conversation/new", json={"user_id": "u1", "profile_name": "Reflecta"})
+    with patch(
+        "backend.conversation_new.validate_profile_name", return_value="Reflecta"
+    ), patch(
+        "backend.conversation_new.get_or_create_conversation",
+        return_value=({"id": "c1"}, True),
+    ), patch(
+        "backend.conversation_new.safe_call", return_value=None
+    ), patch(
+        "backend.conversation_new.create_session", side_effect=RuntimeError("boom")
+    ):
+        resp = client.post(
+            "/api/conversation/new", json={"user_id": "u1", "profile_name": "Reflecta"}
+        )
     assert resp.status_code == 500
     data = resp.json()
     assert data["status"] == "error"
@@ -58,11 +69,20 @@ def test_conversation_new_existing_flag():
     chain_entries.maybe_single.return_value = chain_entries
     chain_entries.execute.return_value = "entries_result"
 
-    with patch("backend.conversation_new.validate_profile_name", return_value="Reflecta"), \
-         patch("backend.conversation_new.get_or_create_conversation", return_value=({"id": "c1"}, False)), \
-         patch("backend.conversation_new.supabase", supabase), \
-         patch("backend.conversation_new._execute", side_effect=lambda x: {"id": "s1"} if x == "session_result" else [{"id": "e1"}]):
-        resp = client.post("/api/conversation/new", json={"user_id": "u1", "profile_name": "Reflecta"})
+    with patch(
+        "backend.conversation_new.validate_profile_name", return_value="Reflecta"
+    ), patch(
+        "backend.conversation_new.get_or_create_conversation",
+        return_value=({"id": "c1"}, False),
+    ), patch(
+        "backend.conversation_new.supabase", supabase
+    ), patch(
+        "backend.conversation_new._execute",
+        side_effect=lambda x: {"id": "s1"} if x == "session_result" else [{"id": "e1"}],
+    ):
+        resp = client.post(
+            "/api/conversation/new", json={"user_id": "u1", "profile_name": "Reflecta"}
+        )
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "existing"
@@ -72,11 +92,18 @@ def test_conversation_new_existing_flag():
 def test_conversation_new_header_user():
     supabase = MagicMock()
     supabase.table.return_value.insert.return_value.execute.return_value = None
-    with patch("backend.conversation_new.validate_profile_name", return_value="Reflecta"), \
-         patch("backend.conversation_new.get_or_create_conversation", return_value=({"id": "c1"}, True)), \
-         patch("backend.conversation_new.create_session", return_value={"id": "s1"}), \
-         patch("backend.conversation_new.supabase", supabase), \
-         patch("backend.conversation_new._execute", return_value=None):
+    with patch(
+        "backend.conversation_new.validate_profile_name", return_value="Reflecta"
+    ), patch(
+        "backend.conversation_new.get_or_create_conversation",
+        return_value=({"id": "c1"}, True),
+    ), patch(
+        "backend.conversation_new.create_session", return_value={"id": "s1"}
+    ), patch(
+        "backend.conversation_new.supabase", supabase
+    ), patch(
+        "backend.conversation_new._execute", return_value=None
+    ):
         resp = client.post(
             "/api/conversation/new",
             json={"profile_name": "Reflecta"},

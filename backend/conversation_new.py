@@ -15,11 +15,12 @@ from datetime import datetime, timezone
 from .profile_utils import validate_profile_name
 from .conversation_manager import get_or_create_conversation
 from .session_factory import create_session
-from .supabase_client import supabase, _execute
+from .supabase_client import supabase, _execute, safe_call
 from .auth import get_current_user
 from .utils import normalize_profile
 
 router = APIRouter()
+
 
 class ConversationRequest(BaseModel):
     """Request body for ``/conversation/new``."""
@@ -32,12 +33,10 @@ class ConversationRequest(BaseModel):
         allow_population_by_field_name = True
 
 
-
-
 @router.post("/conversation/new")
 async def conversation_new(
     payload: ConversationRequest,
-    user = Depends(get_current_user),
+    user=Depends(get_current_user),
 ):
     """Create a new conversation and session for the given user and profile."""
 
@@ -46,9 +45,13 @@ async def conversation_new(
     try:
         user_id = payload.user_id or user.get("id")
         if not user_id:
-            raise HTTPException(status_code=400, detail="Hiányzó vagy érvénytelen mező: user_id")
+            raise HTTPException(
+                status_code=400, detail="Hiányzó vagy érvénytelen mező: user_id"
+            )
         if not payload.profile:
-            raise HTTPException(status_code=400, detail="Hiányzó vagy érvénytelen mező: profile")
+            raise HTTPException(
+                status_code=400, detail="Hiányzó vagy érvénytelen mező: profile"
+            )
 
         payload_dict["user_id"] = user_id
 
@@ -63,26 +66,32 @@ async def conversation_new(
         conv_id = conversation["id"]
 
         if not payload.force_new_session:
-            existing = (
-                supabase.table("sessions")
-                .select("*")
-                .eq("conversation_id", conv_id)
-                .is_("ended_at", None)
-                .limit(1)
-                .maybe_single()
-                .execute()
-            )
-            session = _execute(existing)
-            if session:
-                entry_check = (
-                    supabase.table("entries")
-                    .select("id")
-                    .eq("session_id", session["id"])
+            existing_result = safe_call(
+                lambda: (
+                    supabase.table("sessions")
+                    .select("*")
+                    .eq("conversation_id", conv_id)
+                    .is_("ended_at", None)
                     .limit(1)
                     .maybe_single()
                     .execute()
+                    ),
+                context="session_lookup",
+            )
+            session = _execute(existing_result)
+            if session:
+                entry_result = safe_call(
+                    lambda: (
+                        supabase.table("entries")
+                        .select("id")
+                        .eq("session_id", session["id"])
+                        .limit(1)
+                        .maybe_single()
+                        .execute()
+                    ),
+                    context="entry_lookup",
                 )
-                has_entries = bool(_execute(entry_check))
+                has_entries = bool(_execute(entry_result))
                 return {
                     "conversation_id": conv_id,
                     "session_id": session["id"],
@@ -123,5 +132,8 @@ async def conversation_new(
         logging.exception("[conversation/new] Hiba történt")
         return JSONResponse(
             status_code=500,
-            content={"status": "error", "error": "Nem sikerült új beszélgetést indítani."},
+            content={
+                "status": "error",
+                "error": "Nem sikerült új beszélgetést indítani.",
+            },
         )
