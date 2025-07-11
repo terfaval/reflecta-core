@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { v4 as uuidv4 } from 'uuid';
@@ -124,19 +123,18 @@ export default function LoginPage() {
 
   return (
     <div className={styles.container}>
-      <Image
-        src="/ReflectaLoginBackground.png"
-        alt="background"
-        fill
-        className={styles.background}
-      />
+      {/* Background image removed, using ai-color instead */}
       <div className={styles.content}>
         <div
           className={styles.box}
           style={{ borderColor: 'var(--user-color, #7D9EDF)' }}
         >
           <div className={styles.iconRow}>
-            <ReflectaIcon width={48} height={48} />
+            <ReflectaIcon
+              width={54}
+              height={54}
+              style={{ color: 'var(--user-color, #7D9EDF)', fill: 'currentColor' }}
+            />
             <h1 className={styles.title}>Reflecta</h1>
           </div>
           <h2 className={styles.subtitle}>Benned kezdődik</h2>
