@@ -43,15 +43,37 @@ const ICON_MAP: Record<string, string | undefined> = {
 const DEFAULT_BG_COLOR = "#ffffff";
 const DEFAULT_USER_COLOR = "#7D9EDF";
 
-const GUEST_PROFILES: ProfileCardData[] = BASE_ORDER.map((name) => ({
-  name,
-  iconName: ICON_MAP[name],
-  description: "",
-  role: "",
-  color: DEFAULT_BG_COLOR,
-  userColor: DEFAULT_USER_COLOR,
-  bgColor: DEFAULT_BG_COLOR,
-}));
+// Fallback colors for guest users when profile data is not loaded
+const DEFAULT_PROFILE_COLORS: Record<
+  string,
+  { bg: string; user: string }
+> = {
+  Reflecta: { bg: "#ffffff", user: "#7D9EDF" },
+  Akasza: { bg: "#F5E8D3", user: "#E1A97F" },
+  "Éana": { bg: "#F0F9FF", user: "#5DAE8B" },
+  Luma: { bg: "#FFF5D6", user: "#F7B500" },
+  Sylva: { bg: "#E9F5F1", user: "#3CB371" },
+  "Zentó": { bg: "#F5F0E5", user: "#A26EBA" },
+  Oneiros: { bg: "#F4EEFF", user: "#8B5CF6" },
+  Kairos: { bg: "#E8F6F6", user: "#00ACC1" },
+  Noe: { bg: "#ECEFF1", user: "#455A64" },
+};
+
+const GUEST_PROFILES: ProfileCardData[] = BASE_ORDER.map((name) => {
+  const colors = DEFAULT_PROFILE_COLORS[name] || {
+    bg: DEFAULT_BG_COLOR,
+    user: DEFAULT_USER_COLOR,
+  };
+  return {
+    name,
+    iconName: ICON_MAP[name],
+    description: "",
+    role: "",
+    color: colors.bg,
+    userColor: colors.user,
+    bgColor: colors.bg,
+  };
+});
 
 
 export default function ProfileSlider() {
