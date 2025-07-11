@@ -36,6 +36,7 @@ from .login_user import router as login_user_router
 
 DEFAULT_ALLOWED_ORIGINS = [
     "https://reflecta-core.vercel.app",
+    "https://reflecta-core.onrender.com",
     "https://beenook.hu/reflecta",
     "https://beenook.hu/",
     "https://reflecta-core-mates-projects-bda608e3.vercel.app",
