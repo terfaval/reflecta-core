@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { v4 as uuidv4 } from 'uuid';
 import { useUserContext } from '@/contexts/UserContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
+import { ReflectaIcon } from '@/components/icons';
 import { supabase } from '@/lib/supabaseClient';
 import { apiFetch } from '@/lib/api';
 
@@ -10,6 +13,7 @@ export default function LoginPage() {
   const router = useRouter();
   const {
     userId,
+    wpEmbed,
     setUserId,
     setUserRole,
     setUserEmail,
@@ -19,8 +23,10 @@ export default function LoginPage() {
   const { setProfile } = useProfileContext();
 
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<string | null>(null);
+  const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [unknownEmail, setUnknownEmail] = useState(false);
 
   // If already logged in redirect to loading
   useEffect(() => {
@@ -49,7 +55,7 @@ export default function LoginPage() {
     } catch (err) {
       console.error('[login role]', err);
     }
-    router.replace('/guest-chat');
+    router.replace('/loading');
   };
 
   useEffect(() => {
@@ -81,41 +87,112 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const { error: err } = await supabase.auth.signInWithOtp({
+        setUnknownEmail(false);
+    const { data, error: err } = await supabase.auth.signInWithPassword({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/login` },
+      password,
     });
     if (err) {
-      setError(err.message);
-    } else {
-      setStatus('Ellenőrizd az emailed a belépési linkért.');
+      if (err.message && err.message.toLowerCase().includes('invalid')) {
+        setUnknownEmail(true);
+      } else {
+        setError(err.message);
+      }
+      return;
+    }
+    if (data.session) {
+      if (!remember) {
+        const match = process.env.NEXT_PUBLIC_SUPABASE_URL?.match(
+          /https?:\/\/(.*?)\.supabase\.co/,
+        );
+        if (match) {
+          localStorage.removeItem(`sb-${match[1]}-auth-token`);
+        }
+      }
+      finalize(data.session);
     }
   };
 
+  if (wpEmbed) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Bejelentkezés…</p>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
-      <h1 className="mb-4 text-xl font-semibold">Reflecta belépés</h1>
-      {status ? (
-        <p>{status}</p>
-      ) : (
-        <form onSubmit={handleSubmit} className="mb-4">
+    <div className="relative flex items-center justify-center min-h-screen w-full">
+      <Image
+        src="/ReflectaLoginBackground.png"
+        alt="background"
+        fill
+        className="object-cover"
+      />
+      <Image
+        src="/ReflectaMandala.svg"
+        alt="mandala"
+        width={300}
+        height={300}
+        className="absolute z-10 opacity-80"
+      />
+      <div
+        className="relative z-20 bg-white bg-opacity-90 rounded-lg shadow-md p-6 flex flex-col items-center w-80"
+        style={{ border: '1px solid #7D9EDF' }}
+      >
+        <ReflectaIcon width={48} height={48} className="mb-2" />
+        <h1 className="text-2xl font-semibold mb-4">Reflecta</h1>
+        <h2 className="text-lg font-medium mb-4">Jelentkezz be</h2>
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3">
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             required
-            className="border p-2 mr-2"
+            className="border rounded p-2"
           />
-          <button type="submit" className="px-4 py-2 border rounded">
-            Küldés
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            required
+            className="border rounded p-2"
+          />
+          <label className="flex items-center text-sm gap-2">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              className=""
+            />
+            Remember me
+          </label>
+          {unknownEmail && (
+            <p className="text-red-600 text-sm">
+              A megadott e‑mail nem található.{' '}
+              <Link href="/register" className="underline">
+                Regisztráció
+              </Link>
+            </p>
+          )}
+          {error && <p className="text-red-600 text-sm">{error}</p>}
+          <button
+            type="submit"
+            className="mt-2 py-2 px-4 rounded text-white"
+            style={{ backgroundColor: '#7D9EDF' }}
+          >
+            Login
           </button>
+          <Link href="/register" className="text-center text-sm underline">
+            Create account
+          </Link>
         </form>
-      )}
-      {error && <p className="text-red-600 mb-2">{error}</p>}
-      <button onClick={handleGuest} className="underline">
-        Folytatás vendégként
-      </button>
+        <button onClick={handleGuest} className="mt-4 text-sm underline">
+          Folytatás vendégként
+        </button>
+      </div>
     </div>
   );
 }

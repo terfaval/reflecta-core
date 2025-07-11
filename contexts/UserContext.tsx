@@ -49,6 +49,35 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setWpEmbed(params.get('wp_embed') === 'true');
   }, []);
 
+  // Detect WordPress embed via postMessage even if query param missing
+  useEffect(() => {
+    const rawOrigin =
+      process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://beenook.hu/reflecta';
+    const WP_ORIGIN = (() => {
+      try {
+        return new URL(rawOrigin).origin;
+      } catch {
+        return rawOrigin.replace(/\/+$/, '');
+      }
+    })();
+
+    const detectWp = (event: MessageEvent) => {
+      if (event.origin !== WP_ORIGIN) return;
+      if (event.data?.type === 'init_user' || event.data?.type === 'wp_user') {
+        setWpEmbed(true);
+        const { wp_user_id, email, token } = event.data;
+        if (wp_user_id && email) {
+          processUserInit(wp_user_id, email, event.origin, token);
+        }
+      }
+    };
+
+    window.addEventListener('message', detectWp);
+    return () => {
+      window.removeEventListener('message', detectWp);
+    };
+  }, []);
+  
   const processUserInit = async (
     wp_user_id: string,
     email: string,
