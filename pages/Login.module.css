@@ -8,16 +8,17 @@
 .container {
   position: relative;
   min-height: 100vh;
+  height: 100vh;
   width: 100%;
   background-color: var(--ai-color, #C5DAF1);
+  overflow: hidden;
 }
 
 .mandalaContainer {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: 20;
 }
