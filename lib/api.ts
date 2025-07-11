@@ -18,10 +18,9 @@ export async function apiFetch<T = any>(
 
   if (typeof window !== 'undefined') {
     const uid = sessionStorage.getItem('reflecta_user_id');
-    const token = sessionStorage.getItem('reflecta_token');
+    const role = sessionStorage.getItem('reflecta_role');
     if (uid && !('X-User-Id' in headers)) headers['X-User-Id'] = uid;
-    if (token && !('Authorization' in headers))
-      headers['Authorization'] = `Bearer ${token}`;
+    if (role && !('X-Role' in headers)) headers['X-Role'] = role;
   }
 
   const response = await fetch(url, { ...options, headers });

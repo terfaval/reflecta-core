@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { v4 as uuidv4 } from 'uuid';
 import { useUserContext } from '@/contexts/UserContext';
@@ -26,7 +25,6 @@ export default function LoginPage() {
   const toast = useToast();
 
   const [email, setEmail] = useState('');
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showRegisterPrompt, setShowRegisterPrompt] = useState(false);
   
@@ -35,36 +33,7 @@ export default function LoginPage() {
     if (userId) router.replace('/loading');
   }, [userId, router]);
 
-  // Handle magic link redirect
-  useEffect(() => {
-    if (!router.isReady) return;
-    const token = router.query.token as string | undefined;
-    if (!token || userId) return;
-    const verify = async () => {
-      try {
-        const data = await apiFetch<{ supabaseToken?: string; user: { id: string; email: string; role?: string } }>(
-          `/api/login-token/validate?token=${encodeURIComponent(token)}`,
-        );
-        const { user, supabaseToken } = data;
-        setUserId(user.id);
-        setUserEmail(user.email);
-        sessionStorage.setItem('reflecta_user_id', user.id);
-        sessionStorage.setItem('reflecta_email', user.email);
-        if (supabaseToken) sessionStorage.setItem('reflecta_token', supabaseToken);
-        if (user.role) {
-          setUserRole(user.role);
-          sessionStorage.setItem('reflecta_role', user.role);
-        }
-        setUserInitialized(true);
-        router.replace('/loading');
-      } catch (err) {
-        console.error('[magic-link]', err);
-        setError('Hibás vagy lejárt bejelentkezési link.');
-      }
-    };
-    verify();
-  }, [router, userId, setUserId, setUserEmail, setUserRole, setUserInitialized]);
-
+  
   const handleGuest = () => {
     const id = `guest-${uuidv4()}`;
     const session = `guest-session-${uuidv4()}`;
@@ -84,9 +53,9 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setMessage(null);
+    
     try {
-      const res = await fetch('/api/login-token', {
+      const res = await fetch('/api/login-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -96,14 +65,22 @@ export default function LoginPage() {
         if (res.status === 404) {
           setShowRegisterPrompt(true);
         } else {
-          setError(data.detail || 'Nem sikerült elküldeni a belépési linket.');
+          setError(data.detail || 'Nem sikerült bejelentkezni.');
         }
         return;
       }
-      setMessage(data.message || 'Login link sent successfully.');
+      const { user } = data;
+      setUserId(user.id);
+      setUserEmail(user.email);
+      if (user.role) setUserRole(user.role);
+      setUserInitialized(true);
+      sessionStorage.setItem('reflecta_user_id', user.id);
+      sessionStorage.setItem('reflecta_email', user.email);
+      if (user.role) sessionStorage.setItem('reflecta_role', user.role);
+      router.replace('/loading');
     } catch (err) {
-      console.error('[login-token]', err);
-      setError('Nem sikerült elküldeni a belépési linket.');
+      console.error('[login-user]', err);
+      setError('Nem sikerült bejelentkezni.');
     }
   };
 
@@ -118,7 +95,15 @@ export default function LoginPage() {
       if (!res.ok) {
         setError(data.detail || 'Nem sikerült regisztrálni a felhasználót.');
       } else {
-        toast('Registration successful. Please enter your email again to log in.');
+        const { user } = data;
+        setUserId(user.id);
+        setUserEmail(user.email);
+        if (user.role) setUserRole(user.role);
+        setUserInitialized(true);
+        sessionStorage.setItem('reflecta_user_id', user.id);
+        sessionStorage.setItem('reflecta_email', user.email);
+        if (user.role) sessionStorage.setItem('reflecta_role', user.role);
+        router.replace('/loading');
       }
     } catch (err) {
       console.error('[register-user]', err);
@@ -176,17 +161,13 @@ export default function LoginPage() {
               required
               className={styles.input}
             />
-            {message && <p className={styles.info}>{message}</p>}
             {error && <p className={styles.error}>{error}</p>}
             <button
               type="submit"
               className={styles.submitButton}
             >
-              Belépési link küldése
+              Belépés
             </button>
-            <Link href="/register" className={styles.registerLink}>
-              Regisztráció
-            </Link>
           </form>
         </div>
         <button onClick={handleGuest} className={styles.guestButton}>

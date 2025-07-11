@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 from typing import Dict
-
 import re
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, validator
 
-from .supabase_client import supabase, _execute
+from .supabase_client import supabase, _execute, insert_single
 
 router = APIRouter()
 
@@ -27,8 +27,8 @@ class RegisterUserRequest(BaseModel):
 
 
 @router.post("/register-user")
-async def register_user(payload: RegisterUserRequest) -> Dict[str, str]:
-    """Create a new user row with the provided email."""
+async def register_user(payload: RegisterUserRequest) -> Dict[str, Dict[str, str]]:
+    """Create a new user row with the provided email and return it."""
 
     email = payload.email.strip().lower()
 
@@ -48,10 +48,10 @@ async def register_user(payload: RegisterUserRequest) -> Dict[str, str]:
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
 
-    # Insert user record
+    # Insert user record and return the created row
     try:
-        supabase.table("users").insert({"email": email}).execute()
+        user = insert_single("users", {"email": email})
     except Exception as exc:  # pragma: no cover - db failure
         raise HTTPException(500, f"Failed to create user: {exc}") from exc
 
-    return {"message": "Registration successful."}
+    return {"user": {"id": user.get("id"), "email": user.get("email"), "role": user.get("role")}, "message": "Registration successful."}

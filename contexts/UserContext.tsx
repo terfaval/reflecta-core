@@ -4,7 +4,6 @@ import {
   useState,
   ReactNode,
   useEffect,
-  useRef,
 } from 'react';
 
 import { useRouter } from 'next/router';
@@ -12,7 +11,6 @@ import { useRouter } from 'next/router';
 import { apiFetch } from 'lib/api';
 import { redirectToChat } from 'lib/navigation';
 import { useProfileContext } from '@/contexts/ProfileContext';
-import { supabase } from '@/lib/supabaseClient';
 
 interface UserContextType {
   userId: string | null;
@@ -65,9 +63,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       if (event.origin !== WP_ORIGIN) return;
       if (event.data?.type === 'init_user' || event.data?.type === 'wp_user') {
         setWpEmbed(true);
-        const { wp_user_id, email, token } = event.data;
+        const { wp_user_id, email } = event.data;
         if (wp_user_id && email) {
-          processUserInit(wp_user_id, email, event.origin, token);
+          processUserInit(wp_user_id, email, event.origin);
         }
       }
     };
@@ -82,7 +80,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     wp_user_id: string,
     email: string,
     origin?: string,
-    token?: string,
   ) => {
     try {
       const data = await apiFetch<{ user_id?: string }>('/api/user', {
@@ -105,9 +102,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         } catch (err) {
           console.error('[init_user] fetch role', err);
         }
-        if (token) {
-          sessionStorage.setItem('reflecta_token', token);
-        }
         // eslint-disable-next-line no-console
         console.log('[init_user] stored', data.user_id, email);
         if (origin) {
@@ -127,28 +121,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const handleSupabaseSession = async (session: any) => {
-    if (!session?.user) return;
-    const uid = session.user.id as string;
-    const email = session.user.email as string | null;
-    const token = session.access_token as string;
-    setUserId(uid);
-    if (email) setUserEmail(email);
-    setUserInitialized(true);
-    sessionStorage.setItem('reflecta_user_id', uid);
-    if (email) sessionStorage.setItem('reflecta_email', email);
-    sessionStorage.setItem('reflecta_token', token);
-    try {
-      const info = await apiFetch<{ role?: string }>(`/api/user/${uid}`);
-      if (info?.role) {
-        setUserRole(info.role);
-        sessionStorage.setItem('reflecta_role', info.role);
-      }
-    } catch (err) {
-      console.error('[supabase role]', err);
-    }
-  };
-
 // Restore any stored credentials
 useEffect(() => {
   const storedId = sessionStorage.getItem('reflecta_user_id');
@@ -164,38 +136,6 @@ useEffect(() => {
     console.log('[init_user] restored', storedId, storedEmail);
   }
   }, []);
-
-// Validate stored login token
-useEffect(() => {
-  if (wpEmbed || userInitialized) return;
-  const token = sessionStorage.getItem('reflecta_token');
-  if (!token) return;
-  const verify = async () => {
-    try {
-      const data = await apiFetch<{ supabaseToken?: string; user: { id: string; email: string; role?: string } }>(
-        `/api/login-token/validate?token=${encodeURIComponent(token)}`,
-      );
-      if (data.user) {
-        if (!userId) setUserId(data.user.id);
-        if (!userEmail) setUserEmail(data.user.email);
-        if (data.supabaseToken)
-          sessionStorage.setItem('reflecta_token', data.supabaseToken);
-        if (data.user.role) {
-          setUserRole(data.user.role);
-          sessionStorage.setItem('reflecta_role', data.user.role);
-        }
-        setUserInitialized(true);
-      }
-    } catch (err) {
-      console.error('[token-validate]', err);
-      sessionStorage.removeItem('reflecta_token');
-      sessionStorage.removeItem('reflecta_user_id');
-      sessionStorage.removeItem('reflecta_email');
-      sessionStorage.removeItem('reflecta_role');
-    }
-  };
-  verify();
-}, [wpEmbed, userInitialized, userId]);
 
   // In WordPress embed mode listen for user info via postMessage
   useEffect(() => {
@@ -214,8 +154,8 @@ useEffect(() => {
   const handleInitUser = async (event: MessageEvent) => {
     if (event.origin !== WP_ORIGIN) return;
     if (event.data?.type === 'init_user' || event.data?.type === 'wp_user') {
-      const { wp_user_id, email, token } = event.data;
-      processUserInit(wp_user_id, email, event.origin, token);
+      const { wp_user_id, email } = event.data;
+      processUserInit(wp_user_id, email, event.origin);
     }
   };
 
@@ -232,32 +172,16 @@ useEffect(() => {
   };
   }, [wpEmbed]);
 
-  // In standalone mode check Supabase auth state
-  useEffect(() => {
-    if (wpEmbed) return;
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session && !userInitialized) handleSupabaseSession(data.session);
-    });
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) handleSupabaseSession(session);
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [wpEmbed, userInitialized]);
 
 useEffect(() => {
   if (!wpEmbed || userInitialized) return;
   const params = new URLSearchParams(window.location.search);
   const wpUserId = params.get('user_id');
   const email = params.get('email');
-  const token = params.get('token');
   if (wpUserId && email) {
     // eslint-disable-next-line no-console
     console.log('[init_user] from query', wpUserId, email);
-    processUserInit(wpUserId, email, undefined, token || undefined);
+    processUserInit(wpUserId, email, undefined);
   }
 }, [userInitialized, wpEmbed]);
 
