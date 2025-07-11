@@ -54,14 +54,14 @@
 
 .itemHeader {
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.875rem;
   line-height: 1.2;
   display: block;
   white-space: normal;
 }
 
 .itemSubtext {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   line-height: 1.1;
   color: #6b7280;
   display: block;
@@ -107,4 +107,21 @@
   cursor: pointer;
   color: #D1D5DB;
   display: none;
+}
+
+.toggle {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  color: #6b7280;
+}
+
+.closed {
+  padding: 0.5rem;
 }

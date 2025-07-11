@@ -1,5 +1,5 @@
 import React from "react";
-import { LucidePlusCircle } from "lucide-react";
+import { LucidePlusCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/router";
 
 import SidebarProfileItem from "./SidebarProfileItem";
@@ -61,6 +61,7 @@ export default function ProfileSelectorSidebar({
   const router = useRouter();
   const { profiles: availableProfiles, personalNames, role } = useAvailableProfiles();
   const { userRole } = useUserContext();
+  const [open, setOpen] = React.useState(true);
 
   if (userRole === 'guest') return null;
 
@@ -105,8 +106,15 @@ export default function ProfileSelectorSidebar({
         userRole !== 'guest' && (role === 'admin' || (role !== 'basic' && customProfiles.length === 0));
   
   return (
-    <aside className={styles.sidebar}>
-      {activeProfile && (
+    <aside className={`${styles.sidebar} ${open ? '' : styles.closed}`}>
+      <button
+        className={styles.toggle}
+        onClick={() => setOpen(!open)}
+        aria-label={open ? 'Összecsukás' : 'Megnyitás'}
+      >
+        {open ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+      </button>
+      {open && activeProfile && (
         (() => {
           const list = entries[activeProfile.id] || [];
           const lastUser = [...list].reverse().find((e) => e.role === "user");
@@ -125,7 +133,7 @@ export default function ProfileSelectorSidebar({
           );
         })()
       )}
-      {showCreateButton && (
+      {open && showCreateButton && (
         <button
           key="create-custom"
           onClick={() => userRole !== 'guest' && onCreateCustomProfile()}
@@ -139,7 +147,7 @@ export default function ProfileSelectorSidebar({
           </span>
         </button>
       )}
-      {otherProfiles.map((p) => {
+      {open && otherProfiles.map((p) => {
         const list = entries[p.id] || [];
         const lastUser = [...list].reverse().find((e) => e.role === "user");
         const bottomText = lastUser ? lastUser.content : p.role;
