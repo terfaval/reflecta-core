@@ -111,12 +111,14 @@ export default function LoginPage() {
         onConfirm={handleRegister}
       />
       {/* Mandala background */}
-      <ReflectaMandala
-        className={styles.mandala}
-        width={400}
-        height={400}
-        style={{ color: '#fff', fill: 'currentColor' }}
-      />
+      <div className={styles.mandalaContainer}>
+        <ReflectaMandala
+          className={styles.mandala}
+          width={400}
+          height={400}
+          style={{ color: '#fff', fill: 'currentColor' }}
+        />
+      </div>
       <div className={styles.content}>
         <div
           className={styles.box}
