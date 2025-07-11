@@ -130,13 +130,6 @@ export default function LoginPage() {
         fill
         className={styles.background}
       />
-      <Image
-        src="/ReflectaMandala.svg"
-        alt="mandala"
-        width={360}
-        height={360}
-        className={styles.mandala}
-      />
       <div className={styles.content}>
         <div
           className={styles.box}
@@ -146,7 +139,7 @@ export default function LoginPage() {
             <ReflectaIcon width={48} height={48} />
             <h1 className={styles.title}>Reflecta</h1>
           </div>
-          <h2 className={styles.subtitle}>Jelentkezz be</h2>
+          <h2 className={styles.subtitle}>Benned kezdődik</h2>
           <form onSubmit={handleSubmit} className={styles.form}>
             <input
               type="email"
@@ -160,7 +153,7 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
+              placeholder="Jelszó"
               required
               className={styles.input}
             />
@@ -170,7 +163,7 @@ export default function LoginPage() {
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
               />
-              Remember me
+              Emlékezz rám!
             </label>
             {unknownEmail && (
               <p className={styles.error}>
@@ -188,7 +181,7 @@ export default function LoginPage() {
               Login
             </button>
             <Link href="/register" className={styles.registerLink}>
-              Create account
+              Regisztráció
             </Link>
           </form>
         </div>
