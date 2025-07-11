@@ -253,6 +253,11 @@ export default function ProfileSlider() {
   const handleSelect = async (p: ProfileCardData) => {
     if (creating) return;
     setCreating(true);
+    if (userRole === 'guest') {
+      console.warn('[select profile] guest user cannot start conversation');
+      setCreating(false);
+      return;
+    }
     console.log('➡️ Profile selected:', p?.name);
     if (!userId || !p?.name) {
       console.warn('[start conversation] missing userId or profile', {

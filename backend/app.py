@@ -35,6 +35,7 @@ ALLOWED_ORIGINS = [
     "https://reflecta-core.vercel.app",
     "https://beenook.hu/reflecta",
     "https://beenook.hu/",
+    "https://reflecta-core-mates-projects-bda608e3.vercel.app",
 ]
 
 app = FastAPI(title="Reflecta API")
