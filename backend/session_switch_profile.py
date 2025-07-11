@@ -5,11 +5,12 @@ from __future__ import annotations
 import logging
 from typing import Dict
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
 from .profile_utils import validate_profile_name
 from .session_migrate import migrate_session_to_profile
+from .auth import role_guard, Role
 
 router = APIRouter()
 
@@ -20,7 +21,7 @@ class SwitchProfileRequest(BaseModel):
 
 
 @router.post("/session/switch-profile")
-async def switch_profile(payload: SwitchProfileRequest) -> Dict[str, str]:
+async def switch_profile(payload: SwitchProfileRequest, user=Depends(role_guard(Role.BASIC))) -> Dict[str, str]:
     """Migrate the given session to a new profile, creating a new session."""
     session_id = payload.sessionId
     # Validate but keep original case

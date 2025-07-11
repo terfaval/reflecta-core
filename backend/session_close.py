@@ -9,12 +9,13 @@ import os
 from datetime import datetime, timezone
 from typing import Any, Dict
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from openai import OpenAI
 
 from .supabase_client import supabase, _execute
 from .metadata_fallback import get_profile_metadata
 from .prompt_builder import build_system_prompt
+from .auth import role_guard, Role
 from .utils import normalize_profile
 from .conversation_arcs import record_conversation_arc
 from .functions.active_function import close_function, pop_session_prefix
@@ -261,7 +262,7 @@ def close_session(session_id: str) -> Dict[str, str]:
 
 
 @router.post("/session/close")
-async def session_close(sessionId: str):
+async def session_close(sessionId: str, user=Depends(role_guard(Role.BASIC))):
     result = close_session(sessionId)
     if result["label"] == "[már lezárt]":
         raise HTTPException(status_code=409, detail="Session already closed")

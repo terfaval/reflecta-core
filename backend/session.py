@@ -1,10 +1,11 @@
 """Endpoints for retrieving and listing sessions."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
 import logging
 
 from .db import get_client
+from .auth import role_guard, Role
 from .profile_utils import validate_profile_name
 from .conversation_manager import get_or_create_conversation
 from .session_factory import create_session
@@ -42,7 +43,7 @@ async def get_or_create_conversation_and_session(
 
 
 @router.post("/session")
-async def session(userId: str, profile: str):
+async def session(userId: str, profile: str, user=Depends(role_guard(Role.BASIC))):
     if not userId:
         raise HTTPException(status_code=400, detail="Hiányzó adat")
 

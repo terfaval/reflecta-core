@@ -18,6 +18,7 @@ def test_session_switch_profile_success():
         resp = client.post(
             "/api/session/switch-profile",
             json={"sessionId": "s1", "newProfile": "Éana"},
+            headers={"X-User-Id": "u1"},
         )
     assert resp.status_code == 200
     data = resp.json()

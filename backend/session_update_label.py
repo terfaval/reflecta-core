@@ -1,9 +1,10 @@
 """Endpoint for updating session labels."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
 from .supabase_client import supabase, _execute
+from .auth import role_guard, Role
 
 router = APIRouter()
 
@@ -14,7 +15,7 @@ class UpdateLabelRequest(BaseModel):
 
 
 @router.post("/session/update-label")
-async def update_label(payload: UpdateLabelRequest):
+async def update_label(payload: UpdateLabelRequest, user=Depends(role_guard(Role.BASIC))):
     entry_id = payload.entryId
     label = payload.label
 

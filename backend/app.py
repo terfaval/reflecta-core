@@ -29,6 +29,7 @@ from .starting_prompt import router as starting_prompt_router
 from .profile_update import router as profile_update_router
 from .profile_metadata_api import router as profile_metadata_router
 from .ping import router as ping_router
+from .guest import router as guest_router
 
 ALLOWED_ORIGINS = [
     "https://reflecta-core.vercel.app",
@@ -75,6 +76,7 @@ api_router.include_router(starting_prompt_router)
 api_router.include_router(profile_update_router)
 api_router.include_router(profile_metadata_router)
 api_router.include_router(ping_router)
+api_router.include_router(guest_router)
 
 app.include_router(api_router)
 
