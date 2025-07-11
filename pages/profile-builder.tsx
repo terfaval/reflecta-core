@@ -62,6 +62,13 @@ export default function ProfileBuilder() {
   const router = useRouter();
   const [accessError, setAccessError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (userRole === 'guest') {
+      router.replace('/guest-chat');
+    }
+  }, [router, userRole]);
+  
   // user initialization handled globally in UserProvider
 
   useEffect(() => {

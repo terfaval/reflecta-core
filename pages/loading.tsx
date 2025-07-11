@@ -21,7 +21,7 @@ export default function LoadingPage() {
     if (!userId || !userInitialized) return;
 
     if (userRole === 'guest') {
-      router.replace('/chat');
+      router.replace('/guest-chat');
       return;
     }
 

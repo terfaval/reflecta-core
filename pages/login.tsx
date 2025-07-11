@@ -49,7 +49,7 @@ export default function LoginPage() {
     } catch (err) {
       console.error('[login role]', err);
     }
-    router.replace('/loading');
+    router.replace('/guest-chat');
   };
 
   useEffect(() => {

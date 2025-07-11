@@ -15,6 +15,13 @@ export default function EditProfilePage() {
   const router = useRouter();
   const { profile } = router.query;
   const { userId, userRole } = useUserContext();
+  
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (userRole === 'guest') {
+      router.replace('/guest-chat');
+    }
+  }, [router, userRole]);
   const toast = useToast();
 
   const [name, setName] = useState('');

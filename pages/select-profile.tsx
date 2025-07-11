@@ -1,13 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import Head from "next/head";
 import ProfileSlider from "@/components/ProfileSlider";
 import SpiralLoader from "@/components/SpiralLoader";
 import UserErrorDisplay from "@/components/UserErrorDisplay";
 import { useUserContext } from "@/contexts/UserContext";
+import { useRouter } from "next/router";
 
 export default function ProfileSelectorPage() {
-  const { userInitialized, userError } = useUserContext();
+  const router = useRouter();
+  const { userInitialized, userError, userRole } = useUserContext();
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (userRole === 'guest') {
+      router.replace('/guest-chat');
+    }
+  }, [router, userRole]);
   
 
   if (userError)

@@ -37,6 +37,12 @@ export default function ChatPage() {
   const [closingTrigger, setClosingTrigger] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const { userId, setUserId, userInitialized, userError, userRole, guestSessionId, setGuestSessionId } = useUserContext();
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (userRole === 'guest') {
+      router.replace('/guest-chat');
+    }
+  }, [router, userRole]);
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [entriesError, setEntriesError] = useState<string | null>(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
