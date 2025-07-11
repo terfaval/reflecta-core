@@ -7,15 +7,18 @@ import { ProfileProvider } from '@/contexts/ProfileContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastProvider } from '@/contexts/ToastContext';
+import { SupabaseProvider } from '@/contexts/SupabaseContext';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <ToastProvider>
-      <ProfileProvider>
-        <UserProvider>
-          <Component {...pageProps} />
-        </UserProvider>
-      </ProfileProvider>
-    </ToastProvider>
+    <SupabaseProvider>
+      <ToastProvider>
+        <ProfileProvider>
+          <UserProvider>
+            <Component {...pageProps} />
+          </UserProvider>
+        </ProfileProvider>
+      </ToastProvider>
+    </SupabaseProvider>
   );
 }

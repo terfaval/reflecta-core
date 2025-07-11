@@ -6,6 +6,7 @@ import SidebarProfileItem from "./SidebarProfileItem";
 import styles from "./ProfileSelectorSidebar.module.css";
 import { useProfileContext } from "@/contexts/ProfileContext";
 import { useAvailableProfiles } from "@/hooks/useAvailableProfiles";
+import { useUserContext } from "@/contexts/UserContext";
 
 const MAX_TEXT_LENGTH = 32;
 
@@ -59,6 +60,9 @@ export default function ProfileSelectorSidebar({
   const { profile: activeProfileId } = useProfileContext();
   const router = useRouter();
   const { profiles: availableProfiles, personalNames, role } = useAvailableProfiles();
+  const { userRole } = useUserContext();
+
+  if (userRole === 'guest') return null;
 
   const customProfiles = React.useMemo(() => {
     if (!personalNames.length) return [] as Profile[];
@@ -98,7 +102,7 @@ export default function ProfileSelectorSidebar({
   }, [baseProfiles, customProfiles, activeProfileId]);
 
   const showCreateButton =
-    role === "admin" || (role !== "basic" && customProfiles.length === 0);
+        userRole !== 'guest' && (role === 'admin' || (role !== 'basic' && customProfiles.length === 0));
   
   return (
     <aside className={styles.sidebar}>
@@ -124,7 +128,7 @@ export default function ProfileSelectorSidebar({
       {showCreateButton && (
         <button
           key="create-custom"
-          onClick={onCreateCustomProfile}
+          onClick={() => userRole !== 'guest' && onCreateCustomProfile()}
           className={`${styles.item} ${styles.create}`}
         >
           <div className={styles.icon}>

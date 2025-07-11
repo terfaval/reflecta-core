@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styles from './ReflectiveMemoryPanel.module.css';
 
 import { apiFetch } from 'lib/api';
+import { useUserContext } from '@/contexts/UserContext';
 
 interface MemoryLabel {
   id: string;
@@ -19,6 +20,9 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
   const [items, setItems] = useState<MemoryLabel[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const { userRole } = useUserContext();
+
+  if (userRole === 'guest') return null;
 
   useEffect(() => {
     if (!sessionId) return;

@@ -39,13 +39,13 @@ const NAME_TO_ICON: Record<string, string | undefined> = {
 };
 
 export function useAvailableProfiles() {
-  const { userId } = useUserContext();
+  const { userId, userRole } = useUserContext();
   const [profiles, setProfiles] = useState<AvailableProfile[]>([]);
   const [personalNames, setPersonalNames] = useState<string[]>([]);
   const [role, setRole] = useState<'basic' | 'premium' | 'admin'>('basic');
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || userRole === 'guest') return;
     const load = async () => {
       try {
         const data = await apiFetch<{
@@ -128,7 +128,7 @@ export function useAvailableProfiles() {
       }
     };
     load();
-  }, [userId]);
+  }, [userId, userRole]);
 
   return { profiles, personalNames, role };
 }

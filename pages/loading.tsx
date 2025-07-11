@@ -10,11 +10,20 @@ import { redirectToChat } from '@/lib/navigation';
 export default function LoadingPage() {
   const router = useRouter();
   const { setProfile } = useProfileContext();
-  const { userId, userInitialized, userError } = useUserContext();
+  const { userId, userInitialized, userError, userRole, wpEmbed } = useUserContext();
 
   useEffect(() => {
     if (!router.isReady) return;
+    if (!wpEmbed && !userId && !userInitialized) {
+      router.replace('/login');
+      return;
+    }
     if (!userId || !userInitialized) return;
+
+    if (userRole === 'guest') {
+      router.replace('/chat');
+      return;
+    }
 
     const check = async () => {
       try {
@@ -51,7 +60,7 @@ export default function LoadingPage() {
     };
 
     check();
-  }, [router, userId, userInitialized, setProfile]);
+  }, [router, userId, userInitialized, userRole, wpEmbed, setProfile]);
 
   if (userError) {
     return (

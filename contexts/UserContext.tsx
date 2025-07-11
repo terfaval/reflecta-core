@@ -12,6 +12,7 @@ import { useRouter } from 'next/router';
 import { apiFetch } from 'lib/api';
 import { redirectToChat } from 'lib/navigation';
 import { useProfileContext } from '@/contexts/ProfileContext';
+import { supabase } from '@/lib/supabaseClient';
 
 interface UserContextType {
   userId: string | null;
@@ -24,6 +25,7 @@ interface UserContextType {
   setUserInitialized: (v: boolean) => void;
   userError: string | null;
   setUserError: (err: string | null) => void;
+  wpEmbed: boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -34,9 +36,15 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userInitialized, setUserInitialized] = useState(false);
   const [userError, setUserError] = useState<string | null>(null);
+  const [wpEmbed, setWpEmbed] = useState(false);
 
   const router = useRouter();
   const { setProfile } = useProfileContext();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setWpEmbed(params.get('wp_embed') === 'true');
+  }, []);
 
   const processUserInit = async (
     wp_user_id: string,
@@ -87,76 +95,116 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  useEffect(() => {
-    const storedId = sessionStorage.getItem('reflecta_user_id');
-    const storedEmail = sessionStorage.getItem('reflecta_email');
-    const storedRole = sessionStorage.getItem('reflecta_role');
-    if (storedId) {
-      setUserId(storedId);
-      setUserInitialized(true);
-      if (storedEmail) setUserEmail(storedEmail);
-      if (storedRole) setUserRole(storedRole);
-      // eslint-disable-next-line no-console
-      console.log('[init_user] restored', storedId, storedEmail);
+  const handleSupabaseSession = async (session: any) => {
+    if (!session?.user) return;
+    const uid = session.user.id as string;
+    const email = session.user.email as string | null;
+    const token = session.access_token as string;
+    setUserId(uid);
+    if (email) setUserEmail(email);
+    setUserInitialized(true);
+    sessionStorage.setItem('reflecta_user_id', uid);
+    if (email) sessionStorage.setItem('reflecta_email', email);
+    sessionStorage.setItem('reflecta_token', token);
+    try {
+      const info = await apiFetch<{ role?: string }>(`/api/user/${uid}`);
+      if (info?.role) {
+        setUserRole(info.role);
+        sessionStorage.setItem('reflecta_role', info.role);
+      }
+    } catch (err) {
+      console.error('[supabase role]', err);
     }
+  };
 
-    // WordPress sends postMessage from the parent iframe. Default to the
-    // production WP origin when the env variable is not provided so that
-    // origin checks do not silently fail during local development.
-    const rawOrigin =
-      process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://beenook.hu/reflecta';
-    const WP_ORIGIN = (() => {
-      try {
-        return new URL(rawOrigin).origin;
-      } catch {
-        return rawOrigin.replace(/\/+$/, '');
-      }
-    })();
-
-    const handleInitUser = async (event: MessageEvent) => {
-      if (event.origin !== WP_ORIGIN) return;
-      if (event.data?.type === 'init_user' || event.data?.type === 'wp_user') {
-        const { wp_user_id, email, token } = event.data;
-        processUserInit(wp_user_id, email, event.origin, token);
-      }
-    };
-
-    // Temporary debug block to trace incoming postMessage events.
-    const debugMessage = (event: MessageEvent) => {
-      // eslint-disable-next-line no-console
-      console.log('[postMessage]', event.origin, event.data);
-    };
-
-    window.addEventListener('message', handleInitUser);
-    window.addEventListener('message', debugMessage);
-    return () => {
-      window.removeEventListener('message', handleInitUser);
-      window.removeEventListener('message', debugMessage);
-    };
+// Restore any stored credentials
+useEffect(() => {
+  const storedId = sessionStorage.getItem('reflecta_user_id');
+  const storedEmail = sessionStorage.getItem('reflecta_email');
+  const storedRole = sessionStorage.getItem('reflecta_role');
+  if (storedId) {
+    setUserId(storedId);
+    setUserInitialized(true);
+    if (storedEmail) setUserEmail(storedEmail);
+    if (storedRole) setUserRole(storedRole);
+    // eslint-disable-next-line no-console
+    console.log('[init_user] restored', storedId, storedEmail);
+  }
   }, []);
 
+  // In WordPress embed mode listen for user info via postMessage
   useEffect(() => {
-    if (userInitialized) return;
-    const params = new URLSearchParams(window.location.search);
-    const wpUserId = params.get('user_id');
-    const email = params.get('email');
-    const token = params.get('token');
-    if (wpUserId && email) {
-      // eslint-disable-next-line no-console
-      console.log('[init_user] from query', wpUserId, email);
-      processUserInit(wpUserId, email, undefined, token || undefined);
-    }
-  }, [userInitialized]);
+    if (!wpEmbed) return;
 
+  const rawOrigin =
+    process.env.NEXT_PUBLIC_WP_ORIGIN || 'https://beenook.hu/reflecta';
+  const WP_ORIGIN = (() => {
+    try {
+      return new URL(rawOrigin).origin;
+    } catch {
+      return rawOrigin.replace(/\/+$/, '');
+    }
+  })();
+
+  const handleInitUser = async (event: MessageEvent) => {
+    if (event.origin !== WP_ORIGIN) return;
+    if (event.data?.type === 'init_user' || event.data?.type === 'wp_user') {
+      const { wp_user_id, email, token } = event.data;
+      processUserInit(wp_user_id, email, event.origin, token);
+    }
+  };
+
+  const debugMessage = (event: MessageEvent) => {
+    // eslint-disable-next-line no-console
+    console.log('[postMessage]', event.origin, event.data);
+  };
+
+  window.addEventListener('message', handleInitUser);
+  window.addEventListener('message', debugMessage);
+  return () => {
+    window.removeEventListener('message', handleInitUser);
+    window.removeEventListener('message', debugMessage);
+  };
+  }, [wpEmbed]);
+
+  // In standalone mode check Supabase auth state
   useEffect(() => {
-    if (userInitialized || userError) return;
-    const id = setTimeout(() => {
-      if (!userInitialized && !userError) {
-        setUserError('Nem érkezett bejelentkezési adat a WordPress oldalról. Kérlek frissítsd az oldalt vagy próbáld újra.');
-      }
-    }, 5000);
-    return () => clearTimeout(id);
-  }, [userInitialized, userError]);
+    if (wpEmbed) return;
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session && !userInitialized) handleSupabaseSession(data.session);
+    });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) handleSupabaseSession(session);
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [wpEmbed, userInitialized]);
+
+useEffect(() => {
+  if (!wpEmbed || userInitialized) return;
+  const params = new URLSearchParams(window.location.search);
+  const wpUserId = params.get('user_id');
+  const email = params.get('email');
+  const token = params.get('token');
+  if (wpUserId && email) {
+    // eslint-disable-next-line no-console
+    console.log('[init_user] from query', wpUserId, email);
+    processUserInit(wpUserId, email, undefined, token || undefined);
+  }
+}, [userInitialized, wpEmbed]);
+
+useEffect(() => {
+  if (!wpEmbed || userInitialized || userError) return;
+  const id = setTimeout(() => {
+    if (!userInitialized && !userError) {
+      setUserError('Nem érkezett bejelentkezési adat a WordPress oldalról. Kérlek frissítsd az oldalt vagy próbáld újra.');
+    }
+  }, 5000);
+  return () => clearTimeout(id);
+}, [userInitialized, userError, wpEmbed]);
 
   return (
     <UserContext.Provider
@@ -171,6 +219,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUserInitialized,
         userError,
         setUserError,
+        wpEmbed,
       }}
     >
       {children}

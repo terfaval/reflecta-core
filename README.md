@@ -22,6 +22,8 @@ NEXT_PUBLIC_BACKEND_URL=https://reflecta-core.onrender.com
 NEXT_PUBLIC_API_HOST=https://reflecta-backend.vercel.app
 NEXT_PUBLIC_WP_ORIGIN=https://beenook.hu/reflecta
 SUPABASE_URL=https://lqgmzgglyymnbdrqbtjz.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://lqgmzgglyymnbdrqbtjz.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZ216Z2dseXltbmJkcnFidGp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczMTA3NzksImV4cCI6MjA2Mjg4Njc3OX0.XjCHjlEwkKxMUhk33ml8zI-MXelEY_MylugLMdKpum4
 ```
 
 ### Trigger detection konfigurálása

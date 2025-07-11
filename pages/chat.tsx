@@ -35,7 +35,7 @@ export default function ChatPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [closingTrigger, setClosingTrigger] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const { userId, setUserId, userInitialized, userError } = useUserContext();
+  const { userId, setUserId, userInitialized, userError, userRole } = useUserContext();
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [entriesError, setEntriesError] = useState<string | null>(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
@@ -270,6 +270,7 @@ export default function ChatPage() {
   };
 
   const handleCreateCustomProfile = () => {
+    if (userRole === 'guest') return;
     router.push("/profile-builder");
   };
 
@@ -395,11 +396,13 @@ export default function ChatPage() {
   return (
     <div className="reflecta-chat chat-layout" style={currentStyle}>
       <div className="chat-profile-sidebar">
-        <ProfileSelectorSidebar
-          entries={entriesByProfile}
-          onProfileSelect={handleSidebarSelect}
-          onCreateCustomProfile={handleCreateCustomProfile}
-        />
+        {userRole !== 'guest' && (
+          <ProfileSelectorSidebar
+            entries={entriesByProfile}
+            onProfileSelect={handleSidebarSelect}
+            onCreateCustomProfile={handleCreateCustomProfile}
+          />
+        )}
       </div>
       <div className="chat-area">
         <ChatMessagesList
@@ -433,7 +436,9 @@ export default function ChatPage() {
         />
       </div>
       <div className="chat-memory-panel">
-        <ReflectiveMemoryPanel sessionId={sessionId} handleSend={handleSend} />
+        {userRole !== 'guest' && (
+          <ReflectiveMemoryPanel sessionId={sessionId} handleSend={handleSend} />
+        )}
       </div>
     </div>
   );
