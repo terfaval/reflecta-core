@@ -42,6 +42,11 @@ export function useHandleSend({
 }: UseHandleSendProps) {
   const toast = useToast();
   const sessionPromise = useRef<Promise<string> | null>(null);
+  const storedUserId =
+    typeof window !== 'undefined'
+      ? sessionStorage.getItem('reflecta_user_id')
+      : null;
+  const uid = userId || storedUserId;
   const handleSend = useCallback(async (text?: string) => {
     const message = typeof text === 'string' ? text.trim() : '';
     if (!message) {
@@ -109,7 +114,7 @@ export function useHandleSend({
         setLoading(true);
         sessionPromise.current = apiFetch<{ session?: { id: string } }>('/api/session', {
           method: 'POST',
-          body: JSON.stringify({ userId, profile }),
+          body: JSON.stringify({ userId: uid, profile }),
         })
           .then((data) => {
             if (!data?.session?.id) {
@@ -143,7 +148,7 @@ export function useHandleSend({
           '/api/session/close',
           {
             method: 'POST',
-            body: JSON.stringify({ sessionId: currentSessionId }),
+            body: JSON.stringify({ sessionId: currentSessionId, userId: uid || undefined }),
           }
         );
         if (data?.closureEntry && data?.label) {
@@ -194,7 +199,11 @@ export function useHandleSend({
     try {
       await apiFetch('/api/entries', {
         method: 'POST',
-        body: JSON.stringify({ sessionId: currentSessionId, entry: userEntry }),
+        body: JSON.stringify({
+          sessionId: currentSessionId,
+          entry: userEntry,
+          userId: uid || undefined,
+        }),
       });
     } catch (err) {
       console.error('[entries]', err);
@@ -215,7 +224,11 @@ export function useHandleSend({
     try {
       const resp = await apiFetch<{ content?: string }>('/api/respond', {
         method: 'POST',
-        body: JSON.stringify({ sessionId: currentSessionId, content: userEntry.content }),
+        body: JSON.stringify({
+          sessionId: currentSessionId,
+          content: userEntry.content,
+          userId: uid || undefined,
+        }),
       });
 
       const reply = resp?.content ?? '';

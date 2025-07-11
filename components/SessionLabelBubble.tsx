@@ -37,10 +37,14 @@ export default function SessionLabelBubble({
     }
     setLoading(true);
 
+    const uid =
+      typeof window !== 'undefined'
+        ? sessionStorage.getItem('reflecta_user_id')
+        : null;
     try {
       await apiFetch('/api/session/update-label', {
         method: 'POST',
-        body: JSON.stringify({ entryId, label: tempLabel }),
+        body: JSON.stringify({ entryId, label: tempLabel, userId: uid || undefined }),
       });
       setLabel(tempLabel);
       setEditing(false);setError(null);

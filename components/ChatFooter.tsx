@@ -40,7 +40,12 @@ export function ChatFooter({
 
   const toast = useToast();
   const { profile } = useProfileContext();
-  const { userRole } = useUserContext();
+  const { userRole, userId } = useUserContext();
+  const storedUserId =
+    typeof window !== 'undefined'
+      ? sessionStorage.getItem('reflecta_user_id')
+      : null;
+  const uid = userId || storedUserId;
 
   return (
     <>
@@ -78,7 +83,7 @@ export function ChatFooter({
                     '/api/session/close',
                     {
                       method: 'POST',
-                      body: JSON.stringify({ sessionId }),
+                      body: JSON.stringify({ sessionId, userId: uid || undefined }),
                     }
                   );
 
