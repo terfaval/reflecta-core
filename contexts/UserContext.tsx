@@ -157,7 +157,6 @@ useEffect(() => {
   const storedGuestSession = sessionStorage.getItem('reflecta_guest_session_id');
   if (storedId) {
     setUserId(storedId);
-    setUserInitialized(true);
     if (storedEmail) setUserEmail(storedEmail);
     if (storedRole) setUserRole(storedRole);
     if (storedGuestSession) setGuestSessionId(storedGuestSession);
@@ -165,6 +164,36 @@ useEffect(() => {
     console.log('[init_user] restored', storedId, storedEmail);
   }
   }, []);
+
+// Validate stored login token
+useEffect(() => {
+  if (wpEmbed || userInitialized) return;
+  const token = sessionStorage.getItem('reflecta_token');
+  const mail = sessionStorage.getItem('reflecta_email');
+  if (!token || !mail) return;
+  const verify = async () => {
+    try {
+      const data = await apiFetch<{ user_id: string; role?: string }>(
+        `/api/login-token?email=${encodeURIComponent(mail)}&token=${encodeURIComponent(token)}`,
+      );
+      if (data.user_id) {
+        if (!userId) setUserId(data.user_id);
+        if (data.role) {
+          setUserRole(data.role);
+          sessionStorage.setItem('reflecta_role', data.role);
+        }
+        setUserInitialized(true);
+      }
+    } catch (err) {
+      console.error('[token-validate]', err);
+      sessionStorage.removeItem('reflecta_token');
+      sessionStorage.removeItem('reflecta_user_id');
+      sessionStorage.removeItem('reflecta_email');
+      sessionStorage.removeItem('reflecta_role');
+    }
+  };
+  verify();
+}, [wpEmbed, userInitialized, userId]);
 
   // In WordPress embed mode listen for user info via postMessage
   useEffect(() => {

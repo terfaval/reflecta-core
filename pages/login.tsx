@@ -5,7 +5,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { useUserContext } from '@/contexts/UserContext';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { ReflectaIcon } from '@/components/icons';
-import { supabase } from '@/lib/supabaseClient';
 import { apiFetch } from '@/lib/api';
 import styles from './Login.module.css';
 
@@ -23,50 +22,43 @@ export default function LoginPage() {
   const { setProfile } = useProfileContext();
 
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [remember, setRemember] = useState(true);
+  const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [unknownEmail, setUnknownEmail] = useState(false);
-
+  
   // If already logged in redirect to loading
   useEffect(() => {
     if (userId) router.replace('/loading');
   }, [userId, router]);
 
-  // Finalize supabase session
-  const finalize = async (session: any) => {
-    const uid = session.user.id as string;
-    const mail = session.user.email as string | null;
-    const token = session.access_token as string;
-    setUserId(uid);
-    setUserInitialized(true);
-    if (mail) {
-      setUserEmail(mail);
-      sessionStorage.setItem('reflecta_email', mail);
-    }
-    sessionStorage.setItem('reflecta_user_id', uid);
-    sessionStorage.setItem('reflecta_token', token);
-    try {
-      const info = await apiFetch<{ role?: string }>(`/api/user/${uid}`);
-      if (info?.role) {
-        setUserRole(info.role);
-        sessionStorage.setItem('reflecta_role', info.role);
-      }
-    } catch (err) {
-      console.error('[login role]', err);
-    }
-    router.replace('/loading');
-  };
-
+  // Handle magic link redirect
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) finalize(data.session);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_evt, session) => {
-      if (session) finalize(session);
-    });
-    return () => { subscription.unsubscribe(); };
-  }, []);
+    if (!router.isReady) return;
+    const token = router.query.token as string | undefined;
+    const mail = router.query.email as string | undefined;
+    if (!token || !mail || userId) return;
+    const verify = async () => {
+      try {
+        const data = await apiFetch<{ user_id: string; role?: string }>(
+          `/api/login-token?email=${encodeURIComponent(mail)}&token=${encodeURIComponent(token)}`,
+        );
+        setUserId(data.user_id);
+        setUserEmail(mail);
+        sessionStorage.setItem('reflecta_user_id', data.user_id);
+        sessionStorage.setItem('reflecta_email', mail);
+        sessionStorage.setItem('reflecta_token', token);
+        if (data.role) {
+          setUserRole(data.role);
+          sessionStorage.setItem('reflecta_role', data.role);
+        }
+        setUserInitialized(true);
+        router.replace('/loading');
+      } catch (err) {
+        console.error('[magic-link]', err);
+        setError('Hibás vagy lejárt bejelentkezési link.');
+      }
+    };
+    verify();
+  }, [router, userId, setUserId, setUserEmail, setUserRole, setUserInitialized]);
 
   const handleGuest = () => {
     const id = `guest-${uuidv4()}`;
@@ -87,29 +79,17 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-        setUnknownEmail(false);
-    const { data, error: err } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (err) {
-      if (err.message && err.message.toLowerCase().includes('invalid')) {
-        setUnknownEmail(true);
-      } else {
-        setError(err.message);
-      }
-      return;
-    }
-    if (data.session) {
-      if (!remember) {
-        const match = process.env.NEXT_PUBLIC_SUPABASE_URL?.match(
-          /https?:\/\/(.*?)\.supabase\.co/,
-        );
-        if (match) {
-          localStorage.removeItem(`sb-${match[1]}-auth-token`);
-        }
-      }
-      finalize(data.session);
+        setSent(false);
+    try {
+      await apiFetch('/api/login-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      setSent(true);
+    } catch (err) {
+      console.error('[login-token]', err);
+      setError('Nem sikerült elküldeni a belépési linket.');
     }
   };
 
@@ -147,36 +127,15 @@ export default function LoginPage() {
               required
               className={styles.input}
             />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Jelszó"
-              required
-              className={styles.input}
-            />
-            <label className={styles.checkbox}>
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-              />
-              Emlékezz rám!
-            </label>
-            {unknownEmail && (
-              <p className={styles.error}>
-                A megadott e‑mail nem található.{' '}
-                <Link href="/register" className={styles.registerLink}>
-                  Regisztráció
-                </Link>
-              </p>
+            {sent && (
+              <p className={styles.info}>E-mailes belépési link elküldve.</p>
             )}
             {error && <p className={styles.error}>{error}</p>}
             <button
               type="submit"
               className={styles.submitButton}
             >
-              Login
+              Belépési link küldése
             </button>
             <Link href="/register" className={styles.registerLink}>
               Regisztráció
