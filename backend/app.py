@@ -6,6 +6,7 @@ Függ tőle: session.py, respond.py
 
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 from .users import router as users_router
 from .user_create import router as user_create_router
@@ -33,12 +34,19 @@ from .guest import router as guest_router
 from .register_user import router as register_user_router
 from .login_user import router as login_user_router
 
-ALLOWED_ORIGINS = [
+DEFAULT_ALLOWED_ORIGINS = [
     "https://reflecta-core.vercel.app",
     "https://beenook.hu/reflecta",
     "https://beenook.hu/",
     "https://reflecta-core-mates-projects-bda608e3.vercel.app",
 ]
+
+env_origins = os.getenv("ALLOWED_ORIGINS")
+ALLOWED_ORIGINS = (
+    [o.strip() for o in env_origins.split(",") if o.strip()]
+    if env_origins
+    else DEFAULT_ALLOWED_ORIGINS
+)
 
 app = FastAPI(title="Reflecta API")
 
