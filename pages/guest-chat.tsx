@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+
 import { ChatMessagesList } from '@/components/ChatMessagesList';
 import { ChatFooter } from '@/components/ChatFooter';
 import { useProfileContext } from '@/contexts/ProfileContext';
@@ -15,16 +17,14 @@ interface Entry {
 
 export default function GuestChatPage() {
   const { setProfile } = useProfileContext();
-  const [entries, setEntries] = useState<Entry[]>([{
-    id: 'welcome',
-    role: 'assistant',
-    content: 'Welcome! You can chat with Reflecta here as a guest.',
-    created_at: new Date().toISOString(),
-  }]);
+  const [entries, setEntries] = useState<Entry[]>([]);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [startingPrompt, setStartingPrompt] = useState('');
+  const [sessionIsFresh, setSessionIsFresh] = useState(true);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
+  const guestIdRef = useRef<string>(uuidv4());
   const [showScrollDown, setShowScrollDown] = useState(false);
 
   const DEFAULT_STYLE: Record<string, string> = {
@@ -36,8 +36,22 @@ export default function GuestChatPage() {
 
   useEffect(() => {
     setProfile('Reflecta');
-    sessionStorage.setItem('reflecta_profile', 'Reflecta');
   }, [setProfile]);
+
+  useEffect(() => {
+    const loadPrompt = async () => {
+      try {
+        const data = await apiFetch<{ prompt: string }>('/api/starting-prompt', {
+          method: 'POST',
+          body: JSON.stringify({ userId: 'guest', profile: 'Reflecta' }),
+        });
+        if (data?.prompt) setStartingPrompt(data.prompt);
+      } catch (err) {
+        console.error('[guest starting prompt]', err);
+      }
+    };
+    loadPrompt();
+  }, []);
 
   useAutoTextareaResize();
 
@@ -57,6 +71,7 @@ export default function GuestChatPage() {
     if (!content) return;
 
     setMessage('');
+    setSessionIsFresh(false);
     const userEntry: Entry = {
       id: `${Date.now()}`,
       role: 'user',
@@ -73,7 +88,7 @@ export default function GuestChatPage() {
     try {
       const resp = await apiFetch<{ content?: string }>('/api/guest/respond', {
         method: 'POST',
-        body: JSON.stringify({ guestId: 'reflecta-guest', profile: 'Reflecta', history, message: content }),
+        body: JSON.stringify({ guestId: guestIdRef.current, profile: 'Reflecta', history, message: content }),
       });
       const reply = resp?.content ?? '';
       setEntries(prev => prev.map(e => e.id === thinkingId ? { ...e, content: reply } : e));
@@ -88,14 +103,17 @@ export default function GuestChatPage() {
 
   return (
     <div className="reflecta-chat chat-layout" style={currentStyle}>
+        <div className="chat-profile-sidebar">
+        <div className="reflecta-placeholder"></div>
+      </div>
       <div className="chat-area">
         <ChatMessagesList
           entries={entries}
           loadingEntries={false}
           loadError={null}
           onRetryLoad={undefined}
-          sessionIsFresh={false}
-          startingPrompt=""
+          sessionIsFresh={sessionIsFresh}
+          startingPrompt={startingPrompt}
           onSelectPrompt={handleSend}
           onTweak={handleSend}
           currentStyle={currentStyle}
@@ -118,6 +136,9 @@ export default function GuestChatPage() {
           setEntries={setEntries}
           currentStyle={currentStyle}
         />
+      </div>
+      <div className="chat-memory-panel">
+        <div className="reflecta-placeholder"> </div>
       </div>
     </div>
   );

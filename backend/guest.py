@@ -28,6 +28,7 @@ async def create_guest_session(payload: GuestSessionRequest) -> Dict[str, str]:
 
 class GuestRespondRequest(BaseModel):
     guestId: str
+    profile: str
     history: List[Dict[str, str]]
     message: str
 
@@ -36,10 +37,13 @@ class GuestRespondRequest(BaseModel):
 async def guest_respond(payload: GuestRespondRequest) -> Dict[str, str]:
     if not payload.guestId:
         raise HTTPException(status_code=400, detail="Missing guestId")
+    if not payload.profile:
+        raise HTTPException(status_code=400, detail="Missing profile")
     if not payload.message:
         raise HTTPException(status_code=400, detail="Missing message")
 
     messages = payload.history or []
+    messages.insert(0, {"role": "system", "content": f"Active profile: {payload.profile}"})
     messages.append({"role": "user", "content": payload.message})
 
     try:

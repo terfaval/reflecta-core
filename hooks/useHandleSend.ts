@@ -85,7 +85,7 @@ export function useHandleSend({
       try {
         const resp = await apiFetch<{ content?: string }>('/api/guest/respond', {
           method: 'POST',
-          body: JSON.stringify({ guestId: sessionId, history, message }),
+          body: JSON.stringify({ guestId: sessionId, profile: profile || 'Reflecta', history, message }),
         });
 
         const reply = resp?.content ?? '';
