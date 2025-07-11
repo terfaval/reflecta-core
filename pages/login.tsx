@@ -122,74 +122,76 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen w-full">
+    <div className="relative min-h-screen w-full">
       <Image
         src="/ReflectaLoginBackground.png"
         alt="background"
         fill
-        className="object-cover"
+        className="object-cover object-center select-none pointer-events-none z-10"
       />
       <Image
         src="/ReflectaMandala.svg"
         alt="mandala"
-        width={300}
-        height={300}
-        className="absolute z-10 opacity-80"
+        width={360}
+        height={360}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 opacity-30 z-20 pointer-events-none"
       />
-      <div
-        className="relative z-20 bg-white bg-opacity-90 rounded-lg shadow-md p-6 flex flex-col items-center w-80"
-        style={{ border: '1px solid #7D9EDF' }}
-      >
-        <ReflectaIcon width={48} height={48} className="mb-2" />
-        <h1 className="text-2xl font-semibold mb-4">Reflecta</h1>
-        <h2 className="text-lg font-medium mb-4">Jelentkezz be</h2>
-        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            required
-            className="border rounded p-2"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            required
-            className="border rounded p-2"
-          />
-          <label className="flex items-center text-sm gap-2">
+      <div className="relative z-30 flex flex-col items-center justify-center min-h-screen w-full">
+        <div
+          className="bg-white bg-opacity-90 rounded-2xl shadow-lg border p-8 flex flex-col items-center w-full max-w-sm"
+          style={{ borderColor: 'var(--user-color, #7D9EDF)' }}
+        >
+          <div className="flex items-center space-x-2 mb-4">
+            <ReflectaIcon width={48} height={48} />
+            <h1 className="text-2xl font-semibold">Reflecta</h1>
+          </div>
+          <h2 className="text-lg font-medium mb-4">Jelentkezz be</h2>
+          <form onSubmit={handleSubmit} className="w-full flex flex-col space-y-4">
             <input
-              type="checkbox"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-              className=""
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              required
+              className="border rounded p-2 w-full"
             />
-            Remember me
-          </label>
-          {unknownEmail && (
-            <p className="text-red-600 text-sm">
-              A megadott e‑mail nem található.{' '}
-              <Link href="/register" className="underline">
-                Regisztráció
-              </Link>
-            </p>
-          )}
-          {error && <p className="text-red-600 text-sm">{error}</p>}
-          <button
-            type="submit"
-            className="mt-2 py-2 px-4 rounded text-white"
-            style={{ backgroundColor: '#7D9EDF' }}
-          >
-            Login
-          </button>
-          <Link href="/register" className="text-center text-sm underline">
-            Create account
-          </Link>
-        </form>
-        <button onClick={handleGuest} className="mt-4 text-sm underline">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              required
+              className="border rounded p-2 w-full"
+            />
+            <label className="flex items-center text-sm gap-2">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+              />
+              Remember me
+            </label>
+            {unknownEmail && (
+              <p className="text-red-600 text-sm">
+                A megadott e‑mail nem található.{' '}
+                <Link href="/register" className="underline">
+                  Regisztráció
+                </Link>
+              </p>
+            )}
+            {error && <p className="text-red-600 text-sm">{error}</p>}
+            <button
+              type="submit"
+              className="bg-[var(--user-color,#7D9EDF)] text-white rounded-md px-4 py-2 shadow-md"
+            >
+              Login
+            </button>
+            <Link href="/register" className="text-center text-sm underline">
+              Create account
+            </Link>
+          </form>
+        </div>
+        <button onClick={handleGuest} className="mt-8 text-sm underline">
           Folytatás vendégként
         </button>
       </div>
