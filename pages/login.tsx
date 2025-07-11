@@ -8,6 +8,7 @@ import { useProfileContext } from '@/contexts/ProfileContext';
 import { ReflectaIcon } from '@/components/icons';
 import { supabase } from '@/lib/supabaseClient';
 import { apiFetch } from '@/lib/api';
+import styles from './Login.module.css';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -115,45 +116,45 @@ export default function LoginPage() {
 
   if (wpEmbed) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className={styles.loadingContainer}>
         <p>Bejelentkezés…</p>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen w-full">
+    <div className={styles.container}>
       <Image
         src="/ReflectaLoginBackground.png"
         alt="background"
         fill
-        className="object-cover object-center select-none pointer-events-none z-10"
+        className={styles.background}
       />
       <Image
         src="/ReflectaMandala.svg"
         alt="mandala"
         width={360}
         height={360}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 opacity-30 z-20 pointer-events-none"
+        className={styles.mandala}
       />
-      <div className="relative z-30 flex flex-col items-center justify-center min-h-screen w-full">
+      <div className={styles.content}>
         <div
-          className="bg-white bg-opacity-90 rounded-2xl shadow-lg border p-8 flex flex-col items-center w-full max-w-sm"
+          className={styles.box}
           style={{ borderColor: 'var(--user-color, #7D9EDF)' }}
         >
-          <div className="flex items-center space-x-2 mb-4">
+          <div className={styles.iconRow}>
             <ReflectaIcon width={48} height={48} />
-            <h1 className="text-2xl font-semibold">Reflecta</h1>
+            <h1 className={styles.title}>Reflecta</h1>
           </div>
-          <h2 className="text-lg font-medium mb-4">Jelentkezz be</h2>
-          <form onSubmit={handleSubmit} className="w-full flex flex-col space-y-4">
+          <h2 className={styles.subtitle}>Jelentkezz be</h2>
+          <form onSubmit={handleSubmit} className={styles.form}>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               required
-              className="border rounded p-2 w-full"
+              className={styles.input}
             />
             <input
               type="password"
@@ -161,9 +162,9 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required
-              className="border rounded p-2 w-full"
+              className={styles.input}
             />
-            <label className="flex items-center text-sm gap-2">
+            <label className={styles.checkbox}>
               <input
                 type="checkbox"
                 checked={remember}
@@ -172,26 +173,26 @@ export default function LoginPage() {
               Remember me
             </label>
             {unknownEmail && (
-              <p className="text-red-600 text-sm">
+              <p className={styles.error}>
                 A megadott e‑mail nem található.{' '}
-                <Link href="/register" className="underline">
+                <Link href="/register" className={styles.registerLink}>
                   Regisztráció
                 </Link>
               </p>
             )}
-            {error && <p className="text-red-600 text-sm">{error}</p>}
+            {error && <p className={styles.error}>{error}</p>}
             <button
               type="submit"
-              className="bg-[var(--user-color,#7D9EDF)] text-white rounded-md px-4 py-2 shadow-md"
+              className={styles.submitButton}
             >
               Login
             </button>
-            <Link href="/register" className="text-center text-sm underline">
+            <Link href="/register" className={styles.registerLink}>
               Create account
             </Link>
           </form>
         </div>
-        <button onClick={handleGuest} className="mt-8 text-sm underline">
+        <button onClick={handleGuest} className={styles.guestButton}>
           Folytatás vendégként
         </button>
       </div>
