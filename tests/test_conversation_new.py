@@ -67,3 +67,21 @@ def test_conversation_new_existing_flag():
     data = resp.json()
     assert data["status"] == "existing"
     assert data["has_entries"] is True
+
+
+def test_conversation_new_header_user():
+    supabase = MagicMock()
+    supabase.table.return_value.insert.return_value.execute.return_value = None
+    with patch("backend.conversation_new.validate_profile_name", return_value="Reflecta"), \
+         patch("backend.conversation_new.get_or_create_conversation", return_value=({"id": "c1"}, True)), \
+         patch("backend.conversation_new.create_session", return_value={"id": "s1"}), \
+         patch("backend.conversation_new.supabase", supabase), \
+         patch("backend.conversation_new._execute", return_value=None):
+        resp = client.post(
+            "/api/conversation/new",
+            json={"profile_name": "Reflecta"},
+            headers={"X-User-Id": "u1"},
+        )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "new"

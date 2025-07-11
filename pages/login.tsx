@@ -55,26 +55,23 @@ export default function LoginPage() {
     setError(null);
     
     try {
-      const data = await apiFetch<{ user: { id: string; email: string; role?: string } }>('/api/login-user', {
+      const data = await apiFetch<{ user_id?: string }>('/api/user', {
         method: 'POST',
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ wp_user_id: email, email }),
       });
-      const { user } = data;
-      setUserId(user.id);
-      setUserEmail(user.email);
-      if (user.role) setUserRole(user.role);
-      setUserInitialized(true);
-      sessionStorage.setItem('reflecta_user_id', user.id);
-      sessionStorage.setItem('reflecta_email', user.email);
-      if (user.role) sessionStorage.setItem('reflecta_role', user.role);
-      router.replace('/loading');
-    } catch (err: any) {
-      if (err.message?.includes('404')) {
-        setShowRegisterPrompt(true);
+      if (data?.user_id) {
+        setUserId(data.user_id);
+        setUserEmail(email);
+        setUserInitialized(true);
+        sessionStorage.setItem('reflecta_user_id', data.user_id);
+        sessionStorage.setItem('reflecta_email', email);
+        router.replace('/loading');
       } else {
-        console.error('[login-user]', err);
         setError('Nem sikerült bejelentkezni.');
       }
+    } catch (err: any) {
+      console.error('[user]', err);
+      setError('Nem sikerült bejelentkezni.');
     }
   };
 

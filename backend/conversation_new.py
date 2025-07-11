@@ -5,7 +5,7 @@ Hívja: frontend POST /api/conversation/new
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
 import logging
 from pydantic import BaseModel, Field
@@ -16,6 +16,7 @@ from .profile_utils import validate_profile_name
 from .conversation_manager import get_or_create_conversation
 from .session_factory import create_session
 from .supabase_client import supabase, _execute
+from .auth import get_current_user
 from .utils import normalize_profile
 
 router = APIRouter()
@@ -23,7 +24,7 @@ router = APIRouter()
 class ConversationRequest(BaseModel):
     """Request body for ``/conversation/new``."""
 
-    user_id: str
+    user_id: str | None = None
     profile: str = Field(alias="profile_name")
     force_new_session: bool = False
 
@@ -34,16 +35,22 @@ class ConversationRequest(BaseModel):
 
 
 @router.post("/conversation/new")
-async def conversation_new(payload: ConversationRequest):
+async def conversation_new(
+    payload: ConversationRequest,
+    user = Depends(get_current_user),
+):
     """Create a new conversation and session for the given user and profile."""
 
     payload_dict = payload.dict()
     
     try:
-        required_fields = ["user_id", "profile"]
-        for field in required_fields:
-            if field not in payload_dict or not payload_dict[field]:
-                raise HTTPException(status_code=400, detail=f"Hiányzó vagy érvénytelen mező: {field}")
+        user_id = payload.user_id or user.get("id")
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Hiányzó vagy érvénytelen mező: user_id")
+        if not payload.profile:
+            raise HTTPException(status_code=400, detail="Hiányzó vagy érvénytelen mező: profile")
+
+        payload_dict["user_id"] = user_id
 
         logging.info(f"[conversation/new] payload: {payload_dict}")
 
@@ -51,7 +58,7 @@ async def conversation_new(payload: ConversationRequest):
         validate_profile_name(payload.profile)
 
         conversation, conv_created = get_or_create_conversation(
-            payload.user_id, payload.profile
+            user_id, payload.profile
         )
         conv_id = conversation["id"]
 
@@ -83,7 +90,7 @@ async def conversation_new(payload: ConversationRequest):
                     "has_entries": has_entries,
                 }
 
-        session = create_session(payload.user_id, payload.profile, conv_id)
+        session = create_session(user_id, payload.profile, conv_id)
         if not session or not session.get("id"):
             logging.exception("[conversation/new] Missing session id")
             raise HTTPException(status_code=500, detail="Hiányzó session azonosító")
