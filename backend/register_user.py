@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Dict, Any
 import re
+from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, validator
@@ -50,7 +51,14 @@ async def register_user(payload: RegisterUserRequest) -> Dict[str, Any]:
 
     # Insert user record and return the created row
     try:
-        user = insert_single("users", {"email": email})
+                user = insert_single(
+            "users",
+            {
+                "email": email,
+                # anon_token is required by the schema so generate a random one
+                "anon_token": str(uuid4()),
+            },
+        )
     except Exception as exc:  # pragma: no cover - db failure
         raise HTTPException(500, f"Failed to create user: {exc}") from exc
 
