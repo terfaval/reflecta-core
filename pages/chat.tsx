@@ -83,18 +83,33 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (userRole !== 'guest' || !profile) return;
-    let sid = guestSessionId || sessionStorage.getItem(`reflecta_session_${profile}`) || sessionStorage.getItem('reflecta_guest_session_id');
+    let sid =
+      guestSessionId ||
+      sessionStorage.getItem(`reflecta_session_${profile}`) ||
+      sessionStorage.getItem('reflecta_guest_session_id');
     if (!sid) {
       sid = `guest-session-${uuidv4()}`;
     }
     sessionStorage.setItem(`reflecta_session_${profile}`, sid);
+    sessionStorage.setItem('reflecta_guest_session_id', sid);
     setGuestSessionId(sid);
     if (!sessionId) {
       setSessionId(sid);
       setSessionIsFresh(true);
     }
-  }, [userRole, profile, guestSessionId, sessionId]);
-  
+  const verify = async () => {
+      try {
+        await apiFetch('/api/guest-session', {
+          method: 'POST',
+          body: JSON.stringify({ guestId: sid }),
+        });
+      } catch (err) {
+        console.error('[guest-session]', err);
+      }
+    };
+    verify();
+  }, [userRole, profile]);
+
   useEffect(() => {
     if (!profile || !userId || userRole === 'guest') return;
     const loadColors = async () => {
@@ -220,6 +235,7 @@ export default function ChatPage() {
     setIsClosing,
     setSessionId,
     userRole,
+    entries,
   });
 
   useEffect(() => {

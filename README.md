@@ -135,6 +135,12 @@ eltárolásra, és a React felhasználói kontextusban `guestSessionId` mezőn k
 elérhető. A chat felület így ugyanúgy sessionId-t kap, mint a bejelentkezett
 felhasználók esetén.
 
+A frontend minden betöltéskor meghívja a `/api/guest-session` végpontot,
+amely visszaigazolja vagy létrehozza ezt az ideiglenes azonosítót. Üzenetküldéskor
+a `/api/guest/respond` hívódik meg, ahol a korábbi beszélgetési előzmény és az új
+üzenet kerül továbbításra. Ez a folyamat nem használ adatbázist, teljesen
+elkülönül a bejelentkezett felhasználók `/api/respond` alapú munkameneteitől.
+
 ## 📊 Supabase táblaséma
 
 ### users

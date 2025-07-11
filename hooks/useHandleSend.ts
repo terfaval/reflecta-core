@@ -23,6 +23,7 @@ interface UseHandleSendProps {
   setIsClosing: (v: boolean) => void;
   setSessionId: (id: string | null) => void;
   userRole: string | null;
+  entries: Entry[];
 }
 
 export function useHandleSend({
@@ -37,17 +38,64 @@ export function useHandleSend({
   setIsClosing,
   setSessionId,
   userRole,
+  entries,
 }: UseHandleSendProps) {
   const toast = useToast();
   const sessionPromise = useRef<Promise<string> | null>(null);
   const handleSend = useCallback(async (text?: string) => {
-    if (userRole === 'guest') {
-      return;
-    }
     const message = typeof text === 'string' ? text.trim() : '';
     if (!message) {
       // eslint-disable-next-line no-console
       console.warn('Hiányzó üzenet – a küldés nem történt meg.');
+      return;
+    }
+
+    if (userRole === 'guest') {
+      if (!sessionId) {
+        console.warn('[guest send] missing sessionId');
+        return;
+      }
+      setLoading(true);
+      setSessionIsFresh(false);
+
+      const userEntry: Entry = {
+        id: `${Date.now()}`,
+        role: 'user',
+        content: message,
+        created_at: new Date().toISOString(),
+      };
+
+      setEntries(prev => [...prev, userEntry]);
+      setMessage('');
+
+      const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
+      if (textarea) textarea.style.height = 'auto';
+
+      const history = [
+        ...entries.map(e => ({ role: e.role, content: e.content })),
+        { role: 'user', content: message },
+      ];
+
+      const thinkingId = `${Date.now()}-thinking`;
+      setEntries(prev => [
+        ...prev,
+        { id: thinkingId, role: 'assistant', content: '__thinking__', created_at: new Date().toISOString() },
+      ]);
+
+      try {
+        const resp = await apiFetch<{ content?: string }>('/api/guest/respond', {
+          method: 'POST',
+          body: JSON.stringify({ guestId: sessionId, history, message }),
+        });
+
+        const reply = resp?.content ?? '';
+        setEntries(prev => prev.map(e => (e.id === thinkingId ? { ...e, content: reply } : e)));
+      } catch (err) {
+        console.error('[guest/respond]', err);
+        setEntries(prev => prev.map(e => (e.id === thinkingId ? { ...e, content: 'Hiba történt' } : e)));
+        toast('Nem sikerült válaszolni. Kérlek próbáld újra.');
+      }
+      setLoading(false);
       return;
     }
     let currentSessionId = sessionId;
@@ -187,7 +235,7 @@ export function useHandleSend({
       return;
     }
     setLoading(false);
-  }, [sessionId, userId, profile, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing, setSessionId, userRole, toast]);
+  }, [sessionId, userId, profile, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing, setSessionId, userRole, entries, toast]);
 
   useEffect(() => {
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;
