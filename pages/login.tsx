@@ -84,7 +84,17 @@ export default function LoginPage() {
         method: 'POST',
         body: JSON.stringify({ email }),
       });
-      } catch (err) {
+      const { user } = data;
+      setUserId(user.id);
+      setUserEmail(user.email);
+      if (user.role) setUserRole(user.role);
+      setUserInitialized(true);
+      sessionStorage.setItem('reflecta_user_id', user.id);
+      sessionStorage.setItem('reflecta_email', user.email);
+      if (user.role) sessionStorage.setItem('reflecta_role', user.role);
+      toast('Sikeres regisztráció!');
+      router.replace('/loading');
+    } catch (err) {
       console.error('[register-user]', err);
       setError('Nem sikerült regisztrálni a felhasználót.');
     } finally {
