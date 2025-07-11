@@ -40,6 +40,20 @@ const ICON_MAP: Record<string, string | undefined> = {
   Preceptor: "PreceptorIcon",
 };
 
+const DEFAULT_BG_COLOR = "#ffffff";
+const DEFAULT_USER_COLOR = "#7D9EDF";
+
+const GUEST_PROFILES: ProfileCardData[] = BASE_ORDER.map((name) => ({
+  name,
+  iconName: ICON_MAP[name],
+  description: "",
+  role: "",
+  color: DEFAULT_BG_COLOR,
+  userColor: DEFAULT_USER_COLOR,
+  bgColor: DEFAULT_BG_COLOR,
+}));
+
+
 export default function ProfileSlider() {
   const { userId, userRole } = useUserContext();
   const { setProfile } = useProfileContext();
@@ -126,7 +140,12 @@ export default function ProfileSlider() {
   };
 
   useEffect(() => {
-    if (!userId || userRole === 'guest') return;
+    if (userRole === 'guest') {
+      setProfiles(GUEST_PROFILES);
+      setHasPersonal(false);
+      return;
+    }
+    if (!userId) return;
     loadProfiles();
   }, [userId, userRole]);
 
