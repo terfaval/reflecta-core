@@ -22,10 +22,6 @@
   max-height: 18rem;
 }
 
-.card:hover {
-  max-height: 100rem;
-}
-
 .iconWrap {
   width: 8rem;
   height: 8rem;
@@ -42,12 +38,6 @@
   display: block;
   max-width: 100%;
   max-height: 100%; 
-}
-
-.card:hover .iconWrap svg {
-  filter:
-    drop-shadow(0 0 6px var(--glow-color))
-    drop-shadow(0 0 12px var(--glow-color));
 }
 
 .name {
@@ -76,10 +66,23 @@
     opacity 0.3s ease;
 }
 
-.card:hover .descWrap {
-  max-height: 4rem;
-  opacity: 1;
+@media (min-width: 768px) {
+  .card:hover {
+  max-height: 100rem;
+  }
+
+  .card:hover .iconWrap svg {
+    filter:
+      drop-shadow(0 0 6px var(--glow-color))
+      drop-shadow(0 0 12px var(--glow-color));
+  }
+
+  .card:hover .descWrap {
+    max-height: 4rem;
+    opacity: 1;
+  }
 }
+
 
 .desc {
   font-size: 0.875rem;
