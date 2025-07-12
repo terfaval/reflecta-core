@@ -14,6 +14,8 @@ interface ToastState {
   type: 'info' | 'error';
   errorType?: 'network' | 'system' | 'ai' | 'auth';
   retryCallback?: () => Promise<void> | void;
+  retryLabel?: string;
+  cancelLabel?: string;
 }
 
 interface ErrorToastOptions {
@@ -22,6 +24,8 @@ interface ErrorToastOptions {
   retry?: () => Promise<void> | void;
   duration?: number;
   error?: unknown;
+  retryLabel?: string;
+  cancelLabel?: string;
 }
 
 interface ToastContextValue {
@@ -54,6 +58,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         retry,
         duration = 5000,
         error,
+        retryLabel,
+        cancelLabel,
       } = options;
 
       const msg = ERROR_MESSAGES[message] || message;
@@ -61,7 +67,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         // eslint-disable-next-line no-console
         console.error(error);
       }
-      setToast({ msg, duration, type: 'error', errorType, retryCallback: retry });
+      setToast({
+        msg,
+        duration,
+        type: 'error',
+        errorType,
+        retryCallback: retry,
+        retryLabel,
+        cancelLabel,
+      });
     },
     [],
   );
@@ -78,6 +92,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           errorType={toast.errorType}
           type={toast.type}
           retryCallback={toast.retryCallback}
+          retryLabel={toast.retryLabel}
+          cancelLabel={toast.cancelLabel}
           onClose={handleClose}
         />
       )}

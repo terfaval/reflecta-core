@@ -8,6 +8,8 @@ interface ToastProps {
   type?: 'info' | 'error';
   errorType?: 'network' | 'system' | 'ai' | 'auth';
   retryCallback?: () => Promise<void> | void;
+  retryLabel?: string;
+  cancelLabel?: string;
 }
 
 export default function Toast({
@@ -17,6 +19,8 @@ export default function Toast({
   type = 'info',
   errorType,
   retryCallback,
+  retryLabel,
+  cancelLabel,
 }: ToastProps) {
   const [retrying, setRetrying] = useState(false);
 
@@ -52,7 +56,12 @@ export default function Toast({
           className={styles.retry}
           disabled={retrying}
         >
-          {retrying ? 'Betöltés…' : 'Próbáld újra'}
+          {retrying ? 'Betöltés…' : retryLabel || 'Próbáld újra'}
+        </button>
+      )}
+      {cancelLabel && !retrying && (
+        <button onClick={onClose} className={styles.retry}>
+          {cancelLabel}
         </button>
       )}
     </div>
