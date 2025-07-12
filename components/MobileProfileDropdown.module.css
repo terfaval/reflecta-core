@@ -17,7 +17,7 @@
   align-items: center;
   justify-content: space-between;
   background: white;
-  border: 1px solid #d1d5db;
+  border: none;
   border-radius: 0.5rem;
   padding: 0.5rem 0.75rem;
   color: #000;
@@ -45,10 +45,10 @@
   left: 0;
   width: 100%;
   background: white;
-  border: 1px solid #d1d5db;
+  border: none;
   border-radius: 0.5rem;
   z-index: 20;
-  max-height: 50vh;
+  max-height: 40vh;
   overflow-y: auto;
 }
 
