@@ -34,6 +34,7 @@ from .ping import router as ping_router
 from .guest import router as guest_router
 from .register_user import router as register_user_router
 from .login_user import router as login_user_router
+from .analyze import router as analyze_router
 
 DEFAULT_ALLOWED_ORIGINS = [
     "https://reflecta-core.vercel.app",
@@ -93,6 +94,7 @@ api_router.include_router(ping_router)
 api_router.include_router(guest_router)
 api_router.include_router(register_user_router)
 api_router.include_router(login_user_router)
+api_router.include_router(analyze_router)
 
 
 app.include_router(api_router)
