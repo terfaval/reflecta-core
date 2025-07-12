@@ -85,11 +85,10 @@
 
 @media (max-width: 767px) {
   .descWrap {
-    max-height: 4rem;
+    max-height: 100%;
     opacity: 1;
   }
 }
-
 .desc {
   font-size: 0.875rem;
 }
