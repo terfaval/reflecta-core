@@ -59,7 +59,7 @@ export default function ChatPage() {
   const isFetchingRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
-  const DEFAULT_STYLE: Record<string, string> = {
+  const FALLBACK_STYLE: Record<string, string> = {
     '--bg-color': '#ffffff',
     '--user-color': '#7D9EDF',
     '--ai-color': '#C5DAF1',
@@ -75,11 +75,9 @@ export default function ChatPage() {
     }
   };
 
-  const [currentStyle, setCurrentStyle] = useState<Record<string, string>>(getStoredColors() || DEFAULT_STYLE);
-
-  useEffect(() => {
-    sessionStorage.removeItem('reflecta_colors');
-  }, []);
+  const [currentStyle, setCurrentStyle] = useState<Record<string, string>>(
+    getStoredColors() || FALLBACK_STYLE,
+  );
   const entriesByProfile = useMemo(
     () => (profile ? { [profile]: entries } : {}),
     [profile, entries]
@@ -122,32 +120,46 @@ export default function ChatPage() {
     verify();
   }, [userRole, profile]);
 
+  const colorFetchTimeout = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     if (!profile || !userId || userRole === 'guest') return;
-    const loadColors = async () => {
-      try {
-        const data = await apiFetch<{
-          bg_color: string;
-          user_color: string;
-          ai_color: string;
-        }>(
-          '/api/profile',
-          {
+    if (colorFetchTimeout.current) clearTimeout(colorFetchTimeout.current);
+
+    colorFetchTimeout.current = setTimeout(() => {
+      const loadColors = async () => {
+        try {
+          const data = await apiFetch<{
+            bg_color: string;
+            user_color: string;
+            ai_color: string;
+          }>('/api/profile', {
             method: 'POST',
             body: JSON.stringify({ name: profile, userId }),
-          },
-        );
-        setCurrentStyle({
-          '--bg-color': data.bg_color,
-          '--user-color': data.user_color,
-          '--ai-color': data.ai_color,
-        });
-      } catch (err) {
-        console.error('[profile colors]', err);
-        errorToast({ message: 'Nem sikerült betölteni a színbeállításokat.', type: 'network' });
+          });
+          const style = {
+            '--bg-color': data.bg_color,
+            '--user-color': data.user_color,
+            '--ai-color': data.ai_color,
+          } as Record<string, string>;
+          setCurrentStyle(style);
+          sessionStorage.setItem('reflecta_colors', JSON.stringify(style));
+        } catch (err) {
+          console.error('[profile colors]', err);
+          const stored = getStoredColors();
+          setCurrentStyle(stored || FALLBACK_STYLE);
+          errorToast({ message: 'Nem sikerült betölteni a profil megjelenését.', type: 'network' });
+        }
+      };
+      loadColors();
+    }, 300);
+
+    return () => {
+      if (colorFetchTimeout.current) {
+        clearTimeout(colorFetchTimeout.current);
+        colorFetchTimeout.current = null;
       }
     };
-    loadColors();
   }, [profile, userId, userRole]);
   
   useEffect(() => {
@@ -293,14 +305,13 @@ export default function ChatPage() {
 
         setProfile(name);
         setSessionId(data.session_id);
-        sessionStorage.setItem(
-          'reflecta_colors',
-          JSON.stringify({
-            '--bg-color': p.bg_color,
-            '--user-color': p.user_color,
-            '--ai-color': p.ai_color,
-          }),
-        );
+        const style = {
+          '--bg-color': p.bg_color,
+          '--user-color': p.user_color,
+          '--ai-color': p.ai_color,
+        } as Record<string, string>;
+        sessionStorage.setItem('reflecta_colors', JSON.stringify(style));
+        setCurrentStyle(style);
         redirectToChat(
           router,
           data.conversation_id,
