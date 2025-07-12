@@ -1,4 +1,5 @@
 import React from 'react';
+import BackToLogsButton from '@/components/BackToLogsButton';
 import * as FIcons from '@/components/icons/functions';
 import styles from './FeatureMap.module.css';
 import ProfileSlider from '@/components/ProfileSlider';
@@ -97,6 +98,7 @@ const ACCESS = [
 export default function FunkcioTerkep() {
   return (
     <div className={`${styles.pageContainer} py-8 space-y-16`}>
+      <BackToLogsButton />
       <section className="space-y-4">
         <h1 className={styles.titleText}>Reflecta útmutató</h1>
         <p className={styles.transitionText}>
