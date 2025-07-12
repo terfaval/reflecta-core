@@ -85,7 +85,11 @@ export default function ProfileSlider() {
   const [error, setError] = useState<string | null>(null);
   const [hasPersonal, setHasPersonal] = useState(false);
 
-  const visibleCount = 4;
+  const MOBILE_BREAKPOINT = 768;
+  const MOBILE_VISIBLE_COUNT = 1;
+  const DESKTOP_VISIBLE_COUNT = 4;
+
+  const [visibleCount, setVisibleCount] = useState(DESKTOP_VISIBLE_COUNT);
   const gap = 16;
   const BUFFER_COPIES = 5; // number of times the profile list is repeated
 
@@ -196,15 +200,20 @@ export default function ProfileSlider() {
   useLayoutEffect(() => {
     function update() {
       if (!containerRef.current || !trackRef.current) return;
+      const count =
+        window.innerWidth <= MOBILE_BREAKPOINT
+          ? MOBILE_VISIBLE_COUNT
+          : DESKTOP_VISIBLE_COUNT;
+      setVisibleCount(count);
       const w = containerRef.current.offsetWidth;
-      const width = (w - gap * (visibleCount - 1)) / visibleCount;
+      const width = (w - gap * (count - 1)) / count;
       setItemWidth(width);
       trackRef.current.style.setProperty("--card-width", `${width}px`);
     }
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
-  }, [profiles.length, itemWidth, enableNav]);
+  }, [profiles.length]);
 
   // reposition into the middle of the buffer when reaching the ends
   useEffect(() => {
