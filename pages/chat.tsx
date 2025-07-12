@@ -114,7 +114,7 @@ export default function ChatPage() {
         });
       } catch (err) {
         console.error('[guest-session]', err);
-        errorToast('Nem sikerült elindítani a vendég munkamenetet.');
+        errorToast({ message: 'Nem sikerült elindítani a vendég munkamenetet.', type: 'network' });
       }
     };
     verify();
@@ -142,7 +142,7 @@ export default function ChatPage() {
         });
       } catch (err) {
         console.error('[profile colors]', err);
-        errorToast('Nem sikerült betölteni a színbeállításokat.');
+        errorToast({ message: 'Nem sikerült betölteni a színbeállításokat.', type: 'network' });
       }
     };
     loadColors();
@@ -173,7 +173,7 @@ export default function ChatPage() {
         }
       } catch (err) {
         console.error("[last-session]", err);
-        errorToast('Nem sikerült betölteni az előző munkamenetet.');
+        errorToast({ message: 'Nem sikerült betölteni az előző munkamenetet.', type: 'network' });
       }
       setShowProfileSelect(true);
     };
@@ -311,7 +311,7 @@ export default function ChatPage() {
       }
     } catch (err) {
       console.error("[switch profile]", err);
-      errorToast('Nem sikerült váltani a profilok között.');
+      errorToast({ message: 'Nem sikerült váltani a profilok között.', type: 'network' });
     }
   };
 
@@ -377,7 +377,7 @@ export default function ChatPage() {
     } catch (err) {
       console.error("[chatload] fetch error:", err);
       setEntriesError('Hiba történt az üzenetek betöltésekor.');
-      errorToast('Hiba történt az üzenetek betöltésekor.');
+      errorToast({ message: 'Hiba történt az üzenetek betöltésekor.', type: 'network', retry: () => fetchMoreEntries(pageIndex) });
       setLoadingEntries(false);
     } finally {
       clearTimeout(timeout);
@@ -418,7 +418,7 @@ export default function ChatPage() {
         setStartingPrompt(data.prompt);
       } catch (err) {
         console.error("[starting-prompt]", err);
-        errorToast('Nem sikerült betölteni az indító üzenetet.');
+        errorToast({ message: 'Nem sikerült betölteni az indító üzenetet.', type: 'network' });
       }
     };
     loadPrompt();

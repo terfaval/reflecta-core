@@ -73,7 +73,7 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error('[login-user]', err);
       setError('Nem sikerült bejelentkezni.');
-      errorToast('Nem sikerült bejelentkezni.');
+      errorToast({ message: 'Nem sikerült bejelentkezni.', type: 'auth' });
     }
   };
 
@@ -96,7 +96,7 @@ export default function LoginPage() {
     } catch (err) {
       console.error('[register-user]', err);
       setError('Nem sikerült regisztrálni a felhasználót.');
-      errorToast('Nem sikerült regisztrálni a felhasználót.');
+      errorToast({ message: 'Nem sikerült regisztrálni a felhasználót.', type: 'network' });
     } finally {
       setShowRegisterPrompt(false);
     }

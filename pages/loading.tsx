@@ -58,7 +58,7 @@ export default function LoadingPage() {
       } catch (err) {
         console.error('[last-session]', err);
         setTimeout(() => router.replace('/select-profile'), 500);
-        errorToast('Nem sikerült betölteni az előző munkamenetet.');
+        errorToast({ message: 'Nem sikerült betölteni az előző munkamenetet.', type: 'network', retry: check });
       }
     };
 

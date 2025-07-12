@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './Toast.module.css';
 
 interface ToastProps {
@@ -6,7 +6,8 @@ interface ToastProps {
   onClose: () => void;
   duration?: number;
   type?: 'info' | 'error';
-  retryCallback?: () => void;
+  errorType?: 'network' | 'system' | 'ai' | 'auth';
+  retryCallback?: () => Promise<void> | void;
 }
 
 export default function Toast({
@@ -14,25 +15,44 @@ export default function Toast({
   onClose,
   duration = 3000,
   type = 'info',
+  errorType,
   retryCallback,
 }: ToastProps) {
+  const [retrying, setRetrying] = useState(false);
+
   useEffect(() => {
+    if (retrying) return;
     const id = setTimeout(onClose, duration);
     return () => clearTimeout(id);
-  }, [duration, onClose]);
+  }, [duration, onClose, retrying]);
 
   return (
-    <div className={`${styles.toast} ${type === 'error' ? styles.error : ''}`}> 
+    <div
+      className={`${styles.toast} ${
+        type === 'error' ? styles.error : ''
+      } ${errorType ? styles[errorType] : ''}`}
+    >
+      {errorType && (
+        <span className={styles.icon} aria-hidden="true">
+          {{ network: '🌐', system: '⚙️', ai: '🧠', auth: '🔐' }[errorType]}
+        </span>
+      )}
       <span>{message}</span>
       {retryCallback && (
         <button
-          onClick={() => {
-            onClose();
-            retryCallback();
+          onClick={async () => {
+            setRetrying(true);
+            try {
+              await retryCallback();
+            } finally {
+              setRetrying(false);
+              onClose();
+            }
           }}
           className={styles.retry}
+          disabled={retrying}
         >
-          Próbáld újra
+          {retrying ? 'Betöltés…' : 'Próbáld újra'}
         </button>
       )}
     </div>

@@ -51,7 +51,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
           router.push('/non-authorized');
           return;
         }
-        errorToast('Nem sikerült betölteni a profilt.');
+        errorToast({ message: 'Nem sikerült betölteni a profilt.', type: 'network' });
         return;
       }
 
@@ -71,7 +71,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
             entries = data.entries || [];
           } catch (err) {
             console.error('[load entries]', err);
-            errorToast('Az előzmények betöltése nem sikerült.');
+            errorToast({ message: 'Az előzmények betöltése nem sikerült.', type: 'network' });
           }
         }
         onReady({
@@ -96,7 +96,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
             entries = data.entries || [];
           } catch (err) {
             console.error('[load entries]', err);
-            errorToast('Az előzmények betöltése nem sikerült.');
+            errorToast({ message: 'Az előzmények betöltése nem sikerült.', type: 'network' });
           }
         }
         onReady({
@@ -116,7 +116,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
           body: JSON.stringify({ userId: uid, profile }),
         });
       } catch (err) {
-        errorToast('Nem sikerült lekérni az indító üzenetet.');
+        errorToast({ message: 'Nem sikerült lekérni az indító üzenetet.', type: 'network' });
         return;
       }
 
@@ -129,12 +129,12 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
           body: JSON.stringify({ userId: uid, profile }),
         });
       } catch (err) {
-        errorToast('Nem sikerült létrehozni a munkamenetet.');
+        errorToast({ message: 'Nem sikerült létrehozni a munkamenetet.', type: 'network' });
         return;
       }
 
       if (!sessionData?.session?.id) {
-        errorToast('Nem sikerült létrehozni a munkamenetet.');
+        errorToast({ message: 'Nem sikerült létrehozni a munkamenetet.', type: 'network' });
         return;
       }
       initialized.current = true;

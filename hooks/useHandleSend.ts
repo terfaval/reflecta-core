@@ -98,7 +98,7 @@ export function useHandleSend({
       } catch (err) {
         console.error('[guest/respond]', err);
         setEntries(prev => prev.map(e => (e.id === thinkingId ? { ...e, content: 'Hiba történt' } : e)));
-        errorToast('Nem sikerült válaszolni. Kérlek próbáld újra.');
+        errorToast({ message: 'Nem sikerült válaszolni. Kérlek próbáld újra.', type: 'ai' });
       }
       setLoading(false);
       return;
@@ -131,7 +131,7 @@ export function useHandleSend({
         currentSessionId = await sessionPromise.current;
       } catch (err) {
         console.error('[session create]', err);
-        errorToast('Nem sikerült létrehozni a munkamenetet.');
+        errorToast({ message: 'Nem sikerült létrehozni a munkamenetet.', type: 'network' });
         setLoading(false);
         return;
       }
@@ -161,7 +161,7 @@ export function useHandleSend({
           ]);
         } else {
           console.error('[Zárás] Hiba:');
-          errorToast('A lezárás nem sikerült. Kérlek próbáld újra később.');
+          errorToast({ message: 'A lezárás nem sikerült. Kérlek próbáld újra később.', type: 'system' });
           setIsClosing(false);
           setMessage('');
           setLoading(false);
@@ -169,7 +169,7 @@ export function useHandleSend({
         }
       } catch (err) {
         console.error('[Zárás] Kivétel:', err);
-        errorToast('A lezárás nem sikerült. Kérlek próbáld újra később.');
+        errorToast({ message: 'A lezárás nem sikerült. Kérlek próbáld újra később.', type: 'system' });
         setIsClosing(false);
         setMessage('');
         setLoading(false);
@@ -207,7 +207,7 @@ export function useHandleSend({
       });
     } catch (err) {
       console.error('[entries]', err);
-      errorToast('Az üzenet mentése nem sikerült.');
+      errorToast({ message: 'Az üzenet mentése nem sikerült.', type: 'network' });
       setEntries(prev => prev.filter(e => e.id !== userEntry.id));
       setLoading(false);
       return;
@@ -243,7 +243,7 @@ export function useHandleSend({
           e.id === thinkingId ? { ...e, content: 'Hiba történt' } : e,
         ),
       );
-      errorToast('Nem sikerült válaszolni. Kérlek próbáld újra.');
+      errorToast({ message: 'Nem sikerült válaszolni. Kérlek próbáld újra.', type: 'ai' });
       setLoading(false);
       return;
     }

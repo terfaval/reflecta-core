@@ -91,7 +91,7 @@ export default function ProfileBuilder() {
       })
       .catch(err => {
         console.error(err);
-        errorToast('Hiba történt a profil betöltésekor.');
+        errorToast({ message: 'Hiba történt a profil betöltésekor.', type: 'network' });
       });
   }, [userId, userRole, router]);
 
@@ -123,7 +123,7 @@ export default function ProfileBuilder() {
     } catch (err) {
       console.error(err);
       setErrorMsg('Hiba történt a profil mentésekor. Kérlek, próbáld újra.');
-      errorToast('Hiba történt a profil mentésekor. Kérlek, próbáld újra.');
+      errorToast({ message: 'Hiba történt a profil mentésekor. Kérlek, próbáld újra.', type: 'network' });
     }
   };
 
@@ -183,13 +183,13 @@ export default function ProfileBuilder() {
           console.error(data.error);
           setStartLoading(false);
           setErrorMsg('A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.');
-          errorToast('A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.');
+          errorToast({ message: 'A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.', type: 'network' });
         }
       } catch (err) {
         console.error(err);
         setStartLoading(false);
         setErrorMsg('A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.');
-        errorToast('A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.');
+        errorToast({ message: 'A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.', type: 'network' });
       }
     };
 

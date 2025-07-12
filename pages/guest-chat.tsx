@@ -50,7 +50,7 @@ export default function GuestChatPage() {
         if (data?.prompt) setStartingPrompt(data.prompt);
       } catch (err) {
         console.error('[guest starting prompt]', err);
-        errorToast('Nem sikerült betölteni az indító üzenetet.');
+        errorToast({ message: 'Nem sikerült betölteni az indító üzenetet.', type: 'network' });
       }
     };
     loadPrompt();
@@ -98,7 +98,7 @@ export default function GuestChatPage() {
     } catch (err) {
       console.error('[guest/respond]', err);
       setEntries(prev => prev.map(e => e.id === thinkingId ? { ...e, content: 'Hiba történt' } : e));
-      errorToast('Nem sikerült válaszolni. Kérlek próbáld újra.');
+      errorToast({ message: 'Nem sikerült válaszolni. Kérlek próbáld újra.', type: 'ai' });
     }
     setLoading(false);
   };

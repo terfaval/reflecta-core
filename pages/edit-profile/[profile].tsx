@@ -54,7 +54,7 @@ export default function EditProfilePage() {
         setStyleData({ ...meta, ...info.style_data });
       } catch (err) {
         console.error(err);
-        errorToast('Nem sikerült betölteni a profil adatokat.');
+        errorToast({ message: 'Nem sikerült betölteni a profil adatokat.', type: 'network' });
       } finally {
         setLoading(false);
       }
@@ -87,7 +87,7 @@ export default function EditProfilePage() {
       router.push('/select-profile');
     } catch (err) {
       console.error(err);
-      errorToast('Hiba a mentés közben');
+      errorToast({ message: 'Hiba a mentés közben.', type: 'network' });
     }
   };
 
