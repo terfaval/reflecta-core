@@ -7,6 +7,18 @@
   table-layout: fixed;
 }
 
+@media (max-width: 768px) {
+  .accessTable {
+    display: block;
+    overflow-x: auto;
+    font-size: 0.875rem;
+  }
+
+  .levelCol {
+    width: 6rem;
+  }
+}
+
 .accessTable thead {
   background-color: #f3f4f6;
 }

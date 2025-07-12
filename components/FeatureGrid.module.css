@@ -5,3 +5,10 @@
   align-items: start;
   padding: 0 4rem;
 }
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+}

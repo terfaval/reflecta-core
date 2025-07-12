@@ -10,6 +10,17 @@
   scrollbar-width: none;
 }
 
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 0 1rem;
+  }
+
+  .titleText,
+  .transitionText {
+    padding: 0 1rem;
+  }
+}
+
 /* Középre igazított átvezető szövegek nagyobb térrel és oldalsó paddinggel */
 .titleText {
   text-align: center;
