@@ -12,12 +12,14 @@
 
 @media (max-width: 768px) {
   .pageContainer {
-    padding: 0 0rem;
+    width: 90%;
+    padding: 0;
+    margin: 0 auto;
   }
 
   .titleText,
   .transitionText {
-    padding: 0 0rem;
+    padding: 0;
   }
 }
 
@@ -27,13 +29,13 @@
   font-size: 1.5rem;
   font-weight: bold;
   margin: 2rem 0;
-  padding: 0 10rem;
+  padding: 0;
 }
 
 .transitionText {
   text-align: center;
   margin: 2rem 0;
-  padding: 0 10rem;
+  padding: 0;
 }
 
 /* Extra space before the profile slider on the feature map page */
