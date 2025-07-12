@@ -48,7 +48,7 @@ def test_recommend_profile_from_analysis_mismatch():
     assert suggested == "Éana"
 
 
-def test_recommend_profile_from_analysis_no_match():
+def test_recommend_profile_from_analysis_no_conflict():
     analysis = {"topics": ["Kapcsolat"]}
     metadata_map = {
         "Reflecta": {"avoidance_logic": [], "preferred_context": ["kapcsolat"]},
@@ -60,6 +60,23 @@ def test_recommend_profile_from_analysis_no_match():
     ), patch(
         "backend.profile_recommender.list_available_profiles",
         return_value=["Reflecta", "Éana"],
+    ):
+        suggested = recommend_profile_from_analysis(analysis, "Reflecta", "u1")
+    assert suggested is None
+
+
+def test_recommend_profile_from_analysis_conflict_no_profile():
+    analysis = {"topics": ["Gyász"]}
+    metadata_map = {
+        "Reflecta": {"avoidance_logic": ["gyász"], "preferred_context": []},
+        "Luma": {"avoidance_logic": [], "preferred_context": ["kapcsolat"]},
+    }
+    with patch(
+        "backend.profile_recommender.get_profile_metadata",
+        side_effect=lambda name: metadata_map.get(name, {}),
+    ), patch(
+        "backend.profile_recommender.list_available_profiles",
+        return_value=["Reflecta", "Luma"],
     ):
         suggested = recommend_profile_from_analysis(analysis, "Reflecta", "u1")
     assert suggested is None

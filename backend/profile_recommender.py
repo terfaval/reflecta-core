@@ -97,24 +97,25 @@ def recommend_profile_from_analysis(
     if not topics:
         return None
 
-    # Profiles available to the user (fallback to basic profiles if user unknown)
+    # Fetch accessible profiles for the user
     try:
         available = list_available_profiles(user_id) if user_id else BASIC_PROFILES
     except Exception:
         available = BASIC_PROFILES
 
-    best_name = None
-    best_score = 0
-
-    # Metadata for the current profile to detect mismatch
+    # Metadata of the current profile
     try:
         current_meta = get_profile_metadata(current_profile)
     except Exception:
         current_meta = {}
     current_avoid = {s.lower() for s in current_meta.get("avoidance_logic", [])}
-    current_pref = {s.lower() for s in current_meta.get("preferred_context", [])}
-    current_score = len(current_pref.intersection(topics))
-    mismatch = bool(current_avoid.intersection(topics))
+    
+    # Recommend only if current profile avoids a detected topic
+    conflict_topics = current_avoid.intersection(topics)
+    if not conflict_topics:
+        return None
+
+    candidates = []
 
     for name in available:
         norm = normalize_profile(name)
@@ -124,19 +125,23 @@ def recommend_profile_from_analysis(
             meta = get_profile_metadata(name)
         except Exception:
             continue
+
+        prefs = {s.lower() for s in meta.get("preferred_context", [])}
         avoid = {s.lower() for s in meta.get("avoidance_logic", [])}
+
+        # Skip if the profile also avoids the topic
+
         if avoid.intersection(topics):
             continue
-        prefs = {s.lower() for s in meta.get("preferred_context", [])}
-        score = len(prefs.intersection(topics))
-        if score > best_score:
-            best_score = score
-            best_name = name
+        
+        if not prefs.intersection(conflict_topics):
+            continue
 
-    if not best_name:
+        score = len(prefs.intersection(topics))
+        candidates.append((score, name))
+
+    if not candidates:
         return None
 
-    if mismatch and best_score >= current_score and best_score > 0:
-        return best_name
-
-    return None
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    return candidates[0][1]
