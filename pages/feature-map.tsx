@@ -98,7 +98,7 @@ export default function FunkcioTerkep() {
   return (
     <div className={`${styles.pageContainer} py-8 space-y-16`}>
       <section className="space-y-4">
-        <h1 className={styles.titleText}>Funkciótérkép</h1>
+        <h1 className={styles.titleText}>Reflecta útmutató</h1>
         <p className={styles.transitionText}>
           Itt áttekintheted, milyen funkciók érhetők el a Reflectában. Ez nem
           naplóindító felület, hanem egy térkép, hogy könnyebben eligazodj a
