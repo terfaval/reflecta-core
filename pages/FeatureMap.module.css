@@ -12,12 +12,12 @@
 
 @media (max-width: 768px) {
   .pageContainer {
-    padding: 0 1rem;
+    padding: 0 0rem;
   }
 
   .titleText,
   .transitionText {
-    padding: 0 1rem;
+    padding: 0 0rem;
   }
 }
 
