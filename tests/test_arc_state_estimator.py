@@ -1,10 +1,9 @@
 import os
-import os
 import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from backend.arc_state_estimator import classify_depth
+from backend.arc_state_estimator import classify_depth, estimate_arc_state
 
 
 def test_classify_depth_shallow():
@@ -33,3 +32,8 @@ def test_classify_depth_medium():
     strategies = ["explorative", "analytical", "affirmative"]
     label, _ = classify_depth(entries, strategies, [300, 300])
     assert label in {"közepes", "felszínes"}
+
+def test_estimate_arc_state_variations():
+    assert estimate_arc_state(2, ["explorative"]) == "starting"
+    assert estimate_arc_state(6, ["deepening"]) == "deepening"
+    assert estimate_arc_state(10, ["concluding"]) == "closing"

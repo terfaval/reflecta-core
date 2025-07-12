@@ -21,7 +21,7 @@ from .conversation_arcs import record_conversation_arc
 from .functions.active_function import close_function, pop_session_prefix
 from .arc_pivot_detector import find_pivot_points
 from .language import strategy as strategy_detector
-from .arc_state_estimator import classify_depth
+from .arc_state_estimator import classify_depth, estimate_arc_state
 
 router = APIRouter()
 
@@ -35,6 +35,17 @@ def log_token_usage(session_id: str, model: str, prompt_tokens: int, completion_
     print(f"⬅️ Completion tokens: {completion_tokens}")
     print(f"📦 Total tokens: {total}")
     print(f"📎 Session: {session_id}")
+
+
+def _compute_arc_type(message_count: int, strategies: list[str]) -> str:
+    """Return a Hungarian arc type label based on conversation shape."""
+    state = estimate_arc_state(message_count, strategies)
+    mapping = {
+        "starting": "kezdő",
+        "deepening": "elmélyülő",
+        "closing": "lezáró",
+    }
+    return mapping.get(state, "elmélyülő")
 
 def label_session(session_id: str) -> str:
     """Return the stored session label or a generic fallback."""
@@ -274,9 +285,11 @@ def close_session(session_id: str) -> Dict[str, str]:
     # Attempt to store a conversation arc for this session.
     # Errors are logged inside the called function and do not
     # interrupt the session closure.
+    message_entries = [e for e in entries if e.get("role") in {"user", "assistant"}]
+    arc_type = _compute_arc_type(len(message_entries), strategies)
     record_conversation_arc(
         session_id,
-        arc_type="elmélyülő",
+        arc_type=arc_type,
         depth_estimate=depth_label,
         depth_confidence=depth_conf,
         strategy_summary=strategies,
