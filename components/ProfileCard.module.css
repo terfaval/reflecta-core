@@ -83,6 +83,12 @@
   }
 }
 
+@media (max-width: 767px) {
+  .descWrap {
+    max-height: 4rem;
+    opacity: 1;
+  }
+}
 
 .desc {
   font-size: 0.875rem;
