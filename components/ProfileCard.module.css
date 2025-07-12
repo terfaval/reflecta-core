@@ -84,13 +84,13 @@
 }
 
 @media (max-width: 767px) {
+  .card {
+    max-height: none;
+  }
   .descWrap {
-    max-height: 100%;
+    max-height: none;
     opacity: 1;
   }
-}
-.desc {
-  font-size: 0.875rem;
 }
 
 .personalBadge {

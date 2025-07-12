@@ -48,10 +48,3 @@
 .pageContainer::-webkit-scrollbar {
   display: none;
 }
-
-@media (max-width: 767px) {
-  .descWrap {
-    max-height: 100%;
-    opacity: 1;
-  }
-}

@@ -100,3 +100,13 @@
   font-style: italic;
   text-align: left;
 }
+
+@media (max-width: 767px) {
+  .card {
+    max-height: none;
+  }
+  .descWrap {
+    max-height: none;
+    opacity: 1;
+  }
+}
