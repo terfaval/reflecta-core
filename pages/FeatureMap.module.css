@@ -41,6 +41,9 @@
 /* Extra space before the profile slider on the feature map page */
 .profileSliderSpacer {
   margin-top: 3rem;
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .FeatureTableSpacer {
