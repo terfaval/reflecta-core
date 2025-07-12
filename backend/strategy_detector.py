@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Any
 from collections import Counter
 
 
@@ -134,6 +134,11 @@ SCORING_WEIGHTS = {
     "tone": 1.0,
 }
 
+# Mapping from detected emotion or topic cues to recommended strategies
+_ANALYSIS_FALLBACKS = {
+    "emotion": {"düh": "deconstructive"},
+}
+
 
 # Fixed priority order used when several strategies have the same score.
 PRIORITY = [
@@ -160,7 +165,22 @@ def _match_count(patterns: Iterable[str], text: str) -> int:
     return count
 
 
-def detect_strategy(entry_text: str, session_position: str | None = None) -> str:
+def _fallback_strategy_from_analysis(analysis: Dict[str, Any] | None) -> str | None:
+    """Return a strategy hint derived from language analysis."""
+    if not analysis:
+        return None
+    emotion_map = _ANALYSIS_FALLBACKS.get("emotion", {})
+    emotion = analysis.get("emotion")
+    if emotion and emotion in emotion_map:
+        return emotion_map[emotion]
+    return None
+
+
+def detect_strategy(
+    entry_text: str,
+    session_position: str | None = None,
+    analysis: Dict[str, Any] | None = None,
+) -> str:
     """Detect the reflective strategy for the given entry."""
 
     # ------------------------------------------------------------------
@@ -197,23 +217,36 @@ def detect_strategy(entry_text: str, session_position: str | None = None) -> str
 
     max_score = max(scores.values())
     if max_score == 0:
+        fallback = _fallback_strategy_from_analysis(analysis)
+        if fallback:
+            return fallback
         return "explorative"
 
     candidates = [s for s, sc in scores.items() if sc == max_score]
 
     if len(candidates) == 1:
-        return candidates[0]
+        result = candidates[0]
+    else:
+        for strat in PRIORITY:
+            if strat in candidates:
+                result = strat
+                break
+        else:
+            result = candidates[0]
 
-    for strat in PRIORITY:
-        if strat in candidates:
-            return strat
-
-    # Fallback in the unlikely event none of the priority keys matched
-    return candidates[0]
+    if result == "explorative":
+        fallback = _fallback_strategy_from_analysis(analysis)
+        if fallback:
+            return fallback
+    return result
 
 
 def detect_top_strategies(
-    entry_text: str, session_position: str | None = None, top_n: int = 2
+    entry_text: str,
+    session_position: str | None = None,
+    top_n: int = 2,
+    *,
+    analysis: Dict[str, Any] | None = None,
 ) -> list[str]:
     """Return the highest scoring strategies in priority order."""
 
@@ -248,6 +281,9 @@ def detect_top_strategies(
         scores[strat] = total
 
     if max(scores.values()) == 0:
+        fb = _fallback_strategy_from_analysis(analysis)
+        if fb:
+            return [fb]
         return ["explorative"]
 
     ranked = sorted(
@@ -258,11 +294,20 @@ def detect_top_strategies(
         ),
     )
 
-    return [s for s, _ in ranked[:top_n]]
+    result = [s for s, _ in ranked[:top_n]]
+    if result and result[0] == "explorative":
+        fb = _fallback_strategy_from_analysis(analysis)
+        if fb:
+            result[0] = fb
+    return result
 
 
 def detect_strategy_smoothed(
-    entries: List[str], session_position: str | None = None, window: int = 3
+    entries: List[str],
+    session_position: str | None = None,
+    window: int = 3,
+    *,
+    analysis: Dict[str, Any] | None = None,
 ) -> str:
     """Return a stabilised strategy considering recent entries.
 
@@ -281,7 +326,11 @@ def detect_strategy_smoothed(
 
     recent = entries[-window:]
     strategies = [
-        detect_strategy(text, session_position if i == len(recent) - 1 else None)
+        detect_strategy(
+            text,
+            session_position if i == len(recent) - 1 else None,
+            analysis if i == len(recent) - 1 else None,
+        )
         for i, text in enumerate(recent)
     ]
 
@@ -294,4 +343,9 @@ def detect_strategy_smoothed(
         return top
 
     # If no strategy repeats, keep the previous one
-    return strategies[-2]
+    result = strategies[-2]
+    if result == "explorative":
+        fb = _fallback_strategy_from_analysis(analysis)
+        if fb:
+            return fb
+    return result

@@ -59,7 +59,7 @@ def _dedup(values: List[str]) -> List[str]:
     return out
 
 
-def generate_followup_prompt(session_id: str) -> str:
+def generate_followup_prompt(session_id: str, analysis: Dict[str, Any] | None = None) -> str:
     """Return a short user-style summary of a previous session."""
     entries = _fetch_entries(session_id)
     user_entries = [e for e in entries if e.get("role") == "user"]
@@ -81,6 +81,16 @@ def generate_followup_prompt(session_id: str) -> str:
     emotions = _dedup(label_map.get("emotion", []))
     strategies = _dedup(label_map.get("strategy", []))
 
+    if analysis:
+        topics = set(analysis.get("topics") or [])
+        if topics:
+            filtered = [t for t in themes if t in topics]
+            if filtered:
+                themes = filtered
+        emo = analysis.get("emotion")
+        if emo and emo in emotions:
+            emotions = [emo]
+            
     first = user_entries[0]["content"].strip().replace("\n", " ")
     last = user_entries[-1]["content"].strip().replace("\n", " ")
 

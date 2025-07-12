@@ -23,7 +23,9 @@ from .arc_state_estimator import estimate_arc_state
 from .profile_recommender import (
     recommend_profile_switch,
     detect_requested_profile,
+    recommend_profile_from_analysis,
 )
+from .language.analyzer import analyze_message
 from lib.entry_utils import get_last_user_entry
 from .supabase_client import _execute, get_user_by_id
 from .profile_suggester import suggest_profiles
@@ -142,13 +144,33 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
     user_entries = [e for e in entries if e.get("role") == "user"]
     position = "start" if len(user_entries) <= 1 and session["profile"].lower() == "reflecta" else None
 
-    suggestions = suggest_profiles(user_input, session["profile"])
-
     history_texts = [e["content"] for e in user_entries]
     if not history_texts or history_texts[-1] != user_input:
         history_texts.append(user_input)
 
-    strategy = detect_strategy_smoothed(history_texts, session_position=position)
+    analysis: Dict[str, Any] = {}
+    try:
+        analysis = analyze_message(user_input, history_texts[:-1])
+        logging.info(
+            "[respond] analysis topics=%s emotion=%s tone=%s",
+            analysis.get("topics"),
+            analysis.get("emotion"),
+            analysis.get("tone"),
+        )
+    except Exception as exc:  # pragma: no cover - analysis failure
+        logging.warning("[respond] language analysis failed: %s", exc)
+        analysis = {}
+
+    suggestions = suggest_profiles(user_input, session["profile"])
+    analysis_suggestion = recommend_profile_from_analysis(analysis, session["profile"])
+    if analysis_suggestion and analysis_suggestion not in suggestions:
+        suggestions.append(analysis_suggestion)
+
+    strategy = detect_strategy_smoothed(
+        history_texts, session_position=position, analysis=analysis
+    )
+    if analysis.get("suggested_strategy") and strategy == "explorative":
+        strategy = analysis["suggested_strategy"]
 
     message_entries = [e for e in entries if e.get("role") in {"user", "assistant"}]
     strategy_history = [detect_strategy(text) for text in history_texts]

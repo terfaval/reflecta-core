@@ -77,3 +77,24 @@ def update_session_profile(session_id: str, new_profile: str) -> bool:
         return False
 
     return True
+
+
+def recommend_profile_from_analysis(analysis: dict | None, current_profile: str) -> Optional[str]:
+    """Return a suggested profile based on language analysis."""
+    if not analysis:
+        return None
+
+    current = normalize_profile(current_profile)
+    try:
+        topics = analysis.get("topics") or []
+        relationship = analysis.get("relationship_mode")
+    except Exception:
+        return None
+
+    if relationship == "támogatást keres" and current != "éana":
+        return "Éana"
+
+    if "gyász" in topics and current != "éana":
+        return "Éana"
+
+    return None
