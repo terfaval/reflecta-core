@@ -25,9 +25,19 @@ const journeySteps: JourneyStep[] = [
 
 function JourneyCard({ title, description }: JourneyStep) {
   return (
-    <div className="rounded-2xl p-4 shadow-sm flex flex-col gap-2">
+    <div className="rounded-2xl p-6 flex flex-col gap-3">
       <h3 className="font-semibold">{title}</h3>
       <p className="text-sm">{description}</p>
+    </div>
+  );
+}
+
+export default function JourneyGrid() {
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      {journeySteps.map((step) => (
+        <JourneyCard key={step.title} {...step} />
+      ))}
     </div>
   );
 }
