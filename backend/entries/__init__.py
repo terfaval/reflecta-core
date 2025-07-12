@@ -7,10 +7,10 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
-from .db import get_client
-from .supabase_client import _execute, get_session
-from .metadata_fallback import get_profile_metadata
-from .auth import role_guard, Role
+from ..db import get_client
+from ..supabase_client import _execute, get_session
+from ..metadata_fallback import get_profile_metadata
+from ..auth import role_guard, Role
 
 router = APIRouter()
 
