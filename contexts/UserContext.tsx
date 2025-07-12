@@ -132,6 +132,7 @@ useEffect(() => {
     if (storedEmail) setUserEmail(storedEmail);
     if (storedRole) setUserRole(storedRole);
     if (storedGuestSession) setGuestSessionId(storedGuestSession);
+    setUserInitialized(true);
     // eslint-disable-next-line no-console
     console.log('[init_user] restored', storedId, storedEmail);
   }
