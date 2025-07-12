@@ -15,6 +15,8 @@ def record_conversation_arc(
     session_id: str,
     arc_type: str,
     depth_estimate: str,
+    depth_confidence: float | None = None,
+    strategy_summary: Optional[List[str]] = None,
     pivot_points: Optional[List[str]] = None,
 ) -> None:
     """Store a reflection arc for a session.
@@ -27,6 +29,10 @@ def record_conversation_arc(
         "arc_type": arc_type,
         "depth_estimate": depth_estimate,
     }
+    if depth_confidence is not None:
+        row["depth_confidence"] = depth_confidence
+    if strategy_summary:
+        row["strategy_summary"] = strategy_summary
     if pivot_points:
         row["pivot_points"] = pivot_points
 

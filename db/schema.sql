@@ -155,6 +155,8 @@ create table if not exists conversation_arcs (
   arc_type text,            -- pl. "elmélyülő", "spirális", "átfordító"
   pivot_points jsonb,       -- fontos entry_id-k
   depth_estimate text,      -- "felszínes", "közepes", "mély", "archetípusos"
+  depth_confidence numeric,
+  strategy_summary jsonb,
   profile_sequence jsonb    -- résztvevő profilok
 );
 

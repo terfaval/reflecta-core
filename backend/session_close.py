@@ -19,6 +19,8 @@ from .auth import role_guard, Role
 from .utils import normalize_profile
 from .conversation_arcs import record_conversation_arc
 from .functions.active_function import close_function, pop_session_prefix
+from .strategy_detector import detect_strategy
+from .arc_state_estimator import classify_depth
 
 router = APIRouter()
 
@@ -209,6 +211,19 @@ def close_session(session_id: str) -> Dict[str, str]:
     metadata = get_profile_metadata(session_row["profile"])
     closing_trigger = (metadata.get("closing_trigger") or "").strip()
 
+    user_entries = [e for e in entries if e.get("role") == "user"]
+    strategies = [detect_strategy(e.get("content", "")) for e in user_entries]
+    durations = []
+    for a, b in zip(user_entries, user_entries[1:]):
+        try:
+            t1 = datetime.fromisoformat(a["created_at"].replace("Z", "+00:00"))
+            t2 = datetime.fromisoformat(b["created_at"].replace("Z", "+00:00"))
+            durations.append((t2 - t1).total_seconds())
+        except Exception:
+            durations = []
+            break
+    depth_label, depth_conf = classify_depth(user_entries, strategies, durations)
+
     now = datetime.now(timezone.utc).isoformat()
 
     try:
@@ -255,7 +270,9 @@ def close_session(session_id: str) -> Dict[str, str]:
     record_conversation_arc(
         session_id,
         arc_type="elmélyülő",
-        depth_estimate="közepes",
+        depth_estimate=depth_label,
+        depth_confidence=depth_conf,
+        strategy_summary=strategies,
     )
 
     return {"label": label, "closureEntry": closure_reply}

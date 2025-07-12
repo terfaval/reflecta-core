@@ -42,7 +42,7 @@ def _fetch_labels(entry_ids: List[str]) -> List[Dict[str, Any]]:
 def _fetch_arcs(session_id: str) -> List[Dict[str, Any]]:
     result = (
         supabase.table("conversation_arcs")
-        .select("arc_type, depth_estimate")
+        .select("arc_type, depth_estimate, depth_confidence, strategy_summary")
         .eq("session_id", session_id)
         .execute()
     )

@@ -119,6 +119,10 @@ def _update_row(session_id: str, data: Dict[str, Any]) -> None:
         _cache_set(session_id, row)
     except Exception as exc:
         print(f"[active_function] update error: {exc}")
+        row = _cache_get(session_id) or {}
+        row.update(data)
+        row["session_id"] = session_id
+        _cache_set(session_id, row)
 
 
 def _delete_row(session_id: str) -> None:

@@ -494,7 +494,7 @@ FUNCTIONS: List[FunctionSpec] = [
             "direct": "Rendben, nagyon szívesen kísérlek a következő belső leveledben, hogy könnyebben ki tudd mondani, amit most nehéz lehet.",
         },
         prompt_addition=(
-            "This is a private letter-writing process. Help the user slowly express their thoughts and feelings in a letter addressed to themselves or an imagined recipient. Focus entirely on supporting the free writing process, maintaining emotional safety, and ensuring complete non-judgmental presence throughout."
+            "When active, guide the user to write a letter to themselves."
         ),
         session_prefix="Belső levél:",
         closure_keywords=[
@@ -505,6 +505,7 @@ FUNCTIONS: List[FunctionSpec] = [
             "most jobb",
             "most könnyebb",
             "elengedtem",
+            "levél zárás",
         ],
         closure_question="Rendben, lezárhatjuk most ezt a belső levelet?",
         process_steps=(

@@ -2,6 +2,10 @@ import os
 import sys
 import builtins
 
+os.environ.setdefault("SUPABASE_URL", "http://localhost")
+os.environ.setdefault("SUPABASE_KEY", "dummy")
+os.environ.setdefault("OPENAI_API_KEY", "dummy")
+
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from backend.functions.function_registry import (
     get_function_by_name,
