@@ -41,10 +41,15 @@ def analyze_message(message: str, history: Optional[List[str]] = None) -> Dict[s
 
     result = {
         "topics": patterns.get("topics", []),
-        "emotion": patterns.get("emotions", [None])[0] if patterns.get("emotions") else None,
-        "tone": patterns.get("tones", [None])[0] if patterns.get("tones") else None,
-        "relationship_mode": patterns.get("relationship_modes", [None])[0
-            ] if patterns.get("relationship_modes") else None,
+        "emotion": patterns.get("emotions", [None])[0]
+        if patterns.get("emotions")
+        else None,
+        "tone": patterns.get("tones", [None])[0]
+        if patterns.get("tones")
+        else None,
+        "relationship_mode": patterns.get("relationship_modes", [None])[0]
+        if patterns.get("relationship_modes")
+        else None,
         "suggested_profile": None,
         "suggested_strategy": None,
         "tweak_suggestion": None,
