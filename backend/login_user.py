@@ -6,7 +6,9 @@ import re
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, validator
 
-from .supabase_client import supabase, _execute
+from uuid import uuid4
+
+from .supabase_client import supabase, _execute, insert_single
 
 router = APIRouter()
 
@@ -37,10 +39,16 @@ async def login_user(payload: LoginUserRequest) -> Dict[str, Any]:
             .execute()
         )
         user = _execute(result)
-    except Exception as exc:
+    except Exception as exc:  # pragma: no cover - network/database issue
         raise HTTPException(500, f"Failed to fetch user: {exc}") from exc
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        try:
+            user = insert_single(
+                "users",
+                {"email": email, "wp_user_id": None, "anon_token": str(uuid4())},
+            )
+        except Exception as exc:  # pragma: no cover - network/database issue
+            raise HTTPException(500, f"Failed to create user: {exc}") from exc
 
     return {"user": user, "message": "Login successful."}

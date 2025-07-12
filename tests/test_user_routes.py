@@ -34,13 +34,18 @@ def test_login_user_success():
     assert data["user"]["role"] == "basic"
 
 
-def test_login_user_not_found():
+def test_login_user_creates_when_missing():
     supabase = make_supabase()
     with patch("backend.login_user.supabase", supabase), patch(
         "backend.login_user._execute", return_value=None
+        ), patch(
+        "backend.login_user.insert_single",
+        return_value={"id": "u2", "email": "missing@example.com", "role": "basic"},
     ):
         resp = client.post("/api/login-user", json={"email": "missing@example.com"})
-    assert resp.status_code == 404
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["user"]["email"] == "missing@example.com"
 
 
 def test_register_user_success():
