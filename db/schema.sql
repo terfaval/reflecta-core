@@ -6,7 +6,6 @@ create table if not exists users (
   email text,
   created_at timestamp default now(),
   role text DEFAULT 'basic',
-  feature_flags jsonb DEFAULT '{}'
 );
 
 create table if not exists user_profiles (
@@ -49,43 +48,6 @@ create table if not exists profile_metadata (
   style_absorption_style TEXT
 );
 
-
--- PROFILE REACTIONS TABLE
-create table IF NOT EXISTS profile_reactions (
-  id SERIAL PRIMARY KEY,
-  profile TEXT,
-  rarity TEXT,
-  trigger_context TEXT,
-  reaction TEXT,
-  activation_condition JSONB,
-  priority_score NUMERIC,
-  response_block_type TEXT,
-  cooldown_seconds INTEGER,
-  min_session_span INTEGER
-);
-
--- PROFILE RECOMMENDATIONS TABLE
-CREATE TABLE IF NOT EXISTS profile_recommendations (
-  id SERIAL PRIMARY KEY,
-  profile TEXT NOT NULL,
-  name TEXT NOT NULL,
-  type TEXT,
-  trigger_text TEXT,
-  activation_tags TEXT,
-  guidance_direction TEXT,
-  target_mode TEXT,
-  intensity TEXT,
-  can_lead BOOLEAN
-);
-
--- PROFILE RECOMMENDATION STEPS
-CREATE TABLE IF NOT EXISTS recommendation_steps (
-  id SERIAL PRIMARY KEY,
-  recommendation_id INTEGER NOT NULL REFERENCES profile_recommendations(id) ON DELETE CASCADE,
-  step_index INTEGER NOT NULL,
-  instruction TEXT NOT NULL,
-  completion_condition TEXT
-);
 
 -- PROFILE STARTING PROMPTS
 CREATE TABLE IF NOT EXISTS profile_starting_prompts (

@@ -52,7 +52,6 @@ uvicorn backend.main:app --reload
 ## Fájlszerkezet
 - `backend/` – FastAPI alapú szerverkód
   - `__init__.py`
-  - `access.py`
   - `app.py`
   - `auth.py`
   - `chatload.py`
@@ -64,12 +63,11 @@ uvicorn backend.main:app --reload
   - `description_role_generator.py`
   - `entries.py`
   - `generate_personal_profile.py`
-  - `has_history.py`
   - `last_session.py`
   - `main.py`
   - `memory_prompt_utils.py`
   - `memory_summary.py`
-    `ping.py`
+  - `ping.py`
   - `profile_from_survey.py`
   - `profile_handler.py`
   - `profile_list.py`
@@ -79,7 +77,6 @@ uvicorn backend.main:app --reload
   - `session_close.py`
   - `session_create.py`
   - `session_update_label.py`
-  - `strategy_detector.py`
   - `strategy_prompt_map.py`
   - `strategy_response_templates.py`
   - `style_summary_block.py`
@@ -152,7 +149,6 @@ elkülönül a bejelentkezett felhasználók `/api/respond` alapú munkameneteit
 - email: TEXT
 - created_at: TIMESTAMP
 - role: TEXT (default: 'basic')
-- feature_flags: JSONB
 
 ### user_profiles
 - id: UUID (PK)
@@ -184,21 +180,6 @@ elkülönül a bejelentkezett felhasználók `/api/respond` alapú munkameneteit
 - user_color: TEXT
 - ai_color: TEXT
 - created_at: timestamp
-
-### profile_reactions
-- id: SERIAL (PK)
-- profile: TEXT
-- + extra mezők
-
-### profile_recommendations
-- id: SERIAL (PK)
-- profile: TEXT
-- + extra mezők
-
-### recommendation_steps
-- id: SERIAL (PK)
-- recommendation_id: INT → profile_recommendations(id)
-- + extra mezők
 
 ### conversations
 - id: UUID (PK)

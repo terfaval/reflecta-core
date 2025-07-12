@@ -48,7 +48,6 @@ The helper `migrate_session_to_profile` closes the old session, creates a new on
 
 ## Optional tuning
 
-- Keep an in‑memory flag or database record in `profile_recommendations` so that only one suggestion is shown per session.
 - Log user decision (accept or decline) in `system_events` for future analytics.
 
 This approach allows Reflecta to gently guide the user towards the most relevant profile without losing conversation history.

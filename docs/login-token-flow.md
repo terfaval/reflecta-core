@@ -82,7 +82,7 @@ Backend (`backend/`):
 - `db/schema.sql` – add `login_tokens` table.
 - `login_token.py` – new router with `/login-token` and `/login-token/validate` endpoints.
 - `app.py` – include the new router.
-- Possibly update `auth.py` or `access.py` with admin guard utilities.
+- Possibly update `auth.py` with admin guard utilities.
 
 Frontend (`pages/` and `contexts/`):
 - `pages/login.tsx` – rewrite form to send the login link and handle magic link redirect.

@@ -17,7 +17,6 @@ router = APIRouter()
 class StartingPromptRequest(BaseModel):
     userId: str
     profile: str
-    journalMode: str | None = None
 
 
 _STRATEGY_QUESTIONS: Dict[str, str] = {

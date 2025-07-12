@@ -10,8 +10,6 @@ router = APIRouter()
 TABLES_TO_UPDATE = [
     ("profiles", "name"),
     ("profile_metadata", "profile"),
-    ("profile_reactions", "profile"),
-    ("profile_recommendations", "profile"),
     ("profile_starting_prompts", "profile"),
     ("user_profiles", "profile_name"),
     ("profile_colors", "profile"),
