@@ -28,6 +28,7 @@ from .profile_recommender import (
     recommend_profile_from_analysis,
 )
 from .language.analyzer import analyze_message
+from .entry_label_store import store_entry_labels
 from lib.entry_utils import get_last_user_entry
 from .supabase_client import _execute, get_user_by_id
 from .profile_suggester import suggest_profiles
@@ -81,11 +82,15 @@ async def _fetch_entries(client: Any, session_id: str) -> List[Dict[str, Any]]:
     return entries or []
 
 
-async def _maybe_insert_user_entry(client: Any, session_id: str, content: str) -> None:
-    """Insert a user entry if it does not yet exist."""
+async def _maybe_insert_user_entry(
+    client: Any, session_id: str, content: str
+) -> Optional[str]:
+    """Insert a user entry if it does not yet exist and return its id."""
     last_user = await get_last_user_entry(session_id, client=client)
     if last_user and last_user.get("content") == content:
-        return
+        # We don't know the id here, so return None
+        return None
+    
     now = datetime.now(timezone.utc).isoformat()
     try:
         result = (
@@ -100,7 +105,10 @@ async def _maybe_insert_user_entry(client: Any, session_id: str, content: str) -
             )
             .execute()
         )
-        _execute(result)
+        data = _execute(result) or []
+        if isinstance(data, list) and data:
+            return data[0].get("id")
+        return None
     except Exception as exc:
         logger.warning("[respond] error inserting user entry: %s", exc)
         raise HTTPException(status_code=500, detail="Failed to store user entry")
@@ -321,10 +329,25 @@ async def respond(
     user_role = user_record.get("role", user["role"])
 
     if payload.content:
+        # Load previous user messages for contextual analysis
         try:
-            await _maybe_insert_user_entry(client, payload.sessionId, payload.content)
+            history_entries = await _fetch_entries(client, payload.sessionId)
         except HTTPException as exc:
             return JSONResponse(status_code=exc.status_code, content={"error": str(exc.detail)})
+        user_history = [e["content"] for e in history_entries if e.get("role") == "user"]
+
+        try:
+            entry_id = await _maybe_insert_user_entry(client, payload.sessionId, payload.content)
+        except HTTPException as exc:
+            return JSONResponse(status_code=exc.status_code, content={"error": str(exc.detail)})
+
+        # Analyze and label the message. Failures are logged but ignored
+        try:
+            analysis = analyze_message(payload.content, user_history)
+            store_entry_labels(entry_id, analysis)
+        except Exception as exc:  # pragma: no cover - analysis failure
+            logger.warning("[respond] entry analysis failed: %s", exc)
+            
         # Update the active reflective function state with the new entry
         handle_user_message(
             payload.sessionId,
