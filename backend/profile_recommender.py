@@ -8,6 +8,8 @@ from typing import Optional
 
 from .supabase_client import supabase, _execute
 from .utils import normalize_profile
+from .profile_utils import list_available_profiles, BASIC_PROFILES
+from .metadata_fallback import get_profile_metadata
 
 # Simple keyword-based patterns for profile detection. This can
 # be expanded later with a more sophisticated NLP approach.
@@ -79,22 +81,62 @@ def update_session_profile(session_id: str, new_profile: str) -> bool:
     return True
 
 
-def recommend_profile_from_analysis(analysis: dict | None, current_profile: str) -> Optional[str]:
-    """Return a suggested profile based on language analysis."""
+def recommend_profile_from_analysis(
+    analysis: dict | None, current_profile: str, user_id: str | None = None
+) -> Optional[str]:
+    """Return a suggested profile based on topics and profile metadata."""
     if not analysis:
         return None
 
-    current = normalize_profile(current_profile)
+    current_norm = normalize_profile(current_profile)
     try:
-        topics = analysis.get("topics") or []
-        relationship = analysis.get("relationship_mode")
+        topics = [t.lower() for t in (analysis.get("topics") or [])]
     except Exception:
+        topics = []
+
+    if not topics:
         return None
 
-    if relationship == "támogatást keres" and current != "éana":
-        return "Éana"
+    # Profiles available to the user (fallback to basic profiles if user unknown)
+    try:
+        available = list_available_profiles(user_id) if user_id else BASIC_PROFILES
+    except Exception:
+        available = BASIC_PROFILES
 
-    if "gyász" in topics and current != "éana":
-        return "Éana"
+    best_name = None
+    best_score = 0
+
+    # Metadata for the current profile to detect mismatch
+    try:
+        current_meta = get_profile_metadata(current_profile)
+    except Exception:
+        current_meta = {}
+    current_avoid = {s.lower() for s in current_meta.get("avoidance_logic", [])}
+    current_pref = {s.lower() for s in current_meta.get("preferred_context", [])}
+    current_score = len(current_pref.intersection(topics))
+    mismatch = bool(current_avoid.intersection(topics))
+
+    for name in available:
+        norm = normalize_profile(name)
+        if norm == current_norm:
+            continue
+        try:
+            meta = get_profile_metadata(name)
+        except Exception:
+            continue
+        avoid = {s.lower() for s in meta.get("avoidance_logic", [])}
+        if avoid.intersection(topics):
+            continue
+        prefs = {s.lower() for s in meta.get("preferred_context", [])}
+        score = len(prefs.intersection(topics))
+        if score > best_score:
+            best_score = score
+            best_name = name
+
+    if not best_name:
+        return None
+
+    if mismatch and best_score >= current_score and best_score > 0:
+        return best_name
 
     return None

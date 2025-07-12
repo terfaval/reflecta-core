@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 from datetime import datetime, timezone
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 import asyncio
 import logging
 
@@ -31,6 +31,7 @@ from .language.analyzer import analyze_message
 from lib.entry_utils import get_last_user_entry
 from .supabase_client import _execute, get_user_by_id
 from .profile_suggester import suggest_profiles
+from .metadata_fallback import get_profile_metadata
 
 
 router = APIRouter()
@@ -165,10 +166,20 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
         logging.warning("[respond] language analysis failed: %s", exc)
         analysis = {}
 
-    suggestions = suggest_profiles(user_input, session["profile"])
-    analysis_suggestion = recommend_profile_from_analysis(analysis, session["profile"])
-    if analysis_suggestion and analysis_suggestion not in suggestions:
-        suggestions.append(analysis_suggestion)
+    metadata = get_profile_metadata(session["profile"])
+    topics = [t.lower() for t in analysis.get("topics") or []]
+    avoid = {s.lower() for s in metadata.get("avoidance_logic", [])}
+    misaligned = bool(set(topics) & avoid)
+
+    suggestions: List[str] = []
+    analysis_suggestion: Optional[str] = None
+    if session["profile"].lower() == "reflecta" or misaligned:
+        suggestions = suggest_profiles(user_input, session["profile"])
+        analysis_suggestion = recommend_profile_from_analysis(
+            analysis, session["profile"], session.get("user_id")
+        )
+        if analysis_suggestion and analysis_suggestion not in suggestions:
+            suggestions.append(analysis_suggestion)
 
     detected = strategy_detector.analyze_text(user_input)
     strategy = detected[0]["strategy"] if detected else "explorative"
@@ -186,7 +197,7 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
             user_input,
             strategy,
             session_position=position,
-            suggested_profiles=suggestions,
+            suggested_profiles=suggestions if analysis_suggestion else None,
             arc_state=arc_state,
             session_id=session_id,
         )

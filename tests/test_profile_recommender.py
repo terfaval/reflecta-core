@@ -8,6 +8,7 @@ from backend.profile_recommender import (
     recommend_profile_switch,
     detect_requested_profile,
     update_session_profile,
+    recommend_profile_from_analysis,
 )
 
 
@@ -29,3 +30,36 @@ def test_recommend_profile_switch_ignores_plain_mentions():
 def test_detect_requested_profile():
     text = "Mit mondana erre Éana?"
     assert detect_requested_profile(text, "Reflecta") == "Éana"
+
+def test_recommend_profile_from_analysis_mismatch():
+    analysis = {"topics": ["Gyász"]}
+    metadata_map = {
+        "Reflecta": {"avoidance_logic": ["gyász"], "preferred_context": []},
+        "Éana": {"avoidance_logic": [], "preferred_context": ["gyász"]},
+    }
+    with patch(
+        "backend.profile_recommender.get_profile_metadata",
+        side_effect=lambda name: metadata_map.get(name, {}),
+    ), patch(
+        "backend.profile_recommender.list_available_profiles",
+        return_value=["Reflecta", "Éana"],
+    ):
+        suggested = recommend_profile_from_analysis(analysis, "Reflecta", "u1")
+    assert suggested == "Éana"
+
+
+def test_recommend_profile_from_analysis_no_match():
+    analysis = {"topics": ["Kapcsolat"]}
+    metadata_map = {
+        "Reflecta": {"avoidance_logic": [], "preferred_context": ["kapcsolat"]},
+        "Éana": {"avoidance_logic": [], "preferred_context": ["gyász"]},
+    }
+    with patch(
+        "backend.profile_recommender.get_profile_metadata",
+        side_effect=lambda name: metadata_map.get(name, {}),
+    ), patch(
+        "backend.profile_recommender.list_available_profiles",
+        return_value=["Reflecta", "Éana"],
+    ):
+        suggested = recommend_profile_from_analysis(analysis, "Reflecta", "u1")
+    assert suggested is None
