@@ -19,6 +19,7 @@ from .auth import role_guard, Role
 from .utils import normalize_profile
 from .conversation_arcs import record_conversation_arc
 from .functions.active_function import close_function, pop_session_prefix
+from .arc_pivot_detector import find_pivot_points
 from .strategy_detector import detect_strategy
 from .arc_state_estimator import classify_depth
 
@@ -223,6 +224,9 @@ def close_session(session_id: str) -> Dict[str, str]:
             durations = []
             break
     depth_label, depth_conf = classify_depth(user_entries, strategies, durations)
+    pivot_points = find_pivot_points(user_entries, strategies, durations)
+    if os.getenv("DEV_MODE"):
+        print(f"[session_close] Detected {len(pivot_points)} pivot points")
 
     now = datetime.now(timezone.utc).isoformat()
 
@@ -273,6 +277,7 @@ def close_session(session_id: str) -> Dict[str, str]:
         depth_estimate=depth_label,
         depth_confidence=depth_conf,
         strategy_summary=strategies,
+        pivot_points=pivot_points,
     )
 
     return {"label": label, "closureEntry": closure_reply}
