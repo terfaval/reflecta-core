@@ -24,6 +24,7 @@ interface UseHandleSendProps {
   setSessionId: (id: string | null) => void;
   userRole: string | null;
   entries: Entry[];
+  onRecommendedProfile?: (profile: string) => void;
 }
 
 export function useHandleSend({
@@ -39,6 +40,7 @@ export function useHandleSend({
   setSessionId,
   userRole,
   entries,
+  onRecommendedProfile,
 }: UseHandleSendProps) {
   const errorToast = useErrorToast();
   const sessionPromise = useRef<Promise<string> | null>(null);
@@ -222,7 +224,7 @@ export function useHandleSend({
     }]);
 
     try {
-      const resp = await apiFetch<{ content?: string }>('/api/respond', {
+      const resp = await apiFetch<{ content?: string; recommendedProfile?: string }>('/api/respond', {
         method: 'POST',
         body: JSON.stringify({
           sessionId: currentSessionId,
@@ -232,6 +234,10 @@ export function useHandleSend({
       });
 
       const reply = resp?.content ?? '';
+
+      if (resp?.recommendedProfile) {
+        onRecommendedProfile?.(resp.recommendedProfile);
+      }
 
       setEntries(prev =>
         prev.map(e => (e.id === thinkingId ? { ...e, content: reply } : e)),
@@ -248,7 +254,7 @@ export function useHandleSend({
       return;
     }
     setLoading(false);
-  }, [sessionId, userId, profile, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing, setSessionId, userRole, entries, errorToast]);
+  }, [sessionId, userId, profile, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing, setSessionId, userRole, entries, errorToast, onRecommendedProfile]);
 
   useEffect(() => {
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;

@@ -16,6 +16,7 @@ import { useHandleSend } from "../hooks/useHandleSend";
 import { useUserContext } from "@/contexts/UserContext";
 import { useProfileContext } from "@/contexts/ProfileContext";
 import { v4 as uuidv4 } from 'uuid';
+import ProfileSwitchSuggestion from "@/components/ProfileSwitchSuggestion";
 
 import { apiFetch } from "@/lib/api";
 import { redirectToChat } from "@/lib/navigation";
@@ -38,6 +39,7 @@ export default function ChatPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [closingTrigger, setClosingTrigger] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [pendingProfileSuggestion, setPendingProfileSuggestion] = useState<string | null>(null);
   const { userId, setUserId, userInitialized, userError, userRole, guestSessionId, setGuestSessionId } = useUserContext();
   const errorToast = useErrorToast();
   useEffect(() => {
@@ -248,6 +250,7 @@ export default function ChatPage() {
     setSessionId,
     userRole,
     entries,
+    onRecommendedProfile: setPendingProfileSuggestion,
   });
 
   useEffect(() => {
@@ -313,6 +316,38 @@ export default function ChatPage() {
       console.error("[switch profile]", err);
       errorToast({ message: 'Nem sikerült váltani a profilok között.', type: 'network' });
     }
+  };
+
+  const handleAcceptProfileSuggestion = async () => {
+    if (!pendingProfileSuggestion || !sessionId || userRole === 'guest') {
+      setPendingProfileSuggestion(null);
+      return;
+    }
+    try {
+      const data = await apiFetch<{
+        newProfile: string;
+        newSessionId: string;
+        conversationId: string;
+      }>('/api/session/switch-profile', {
+        method: 'POST',
+        body: JSON.stringify({
+          sessionId,
+          newProfile: pendingProfileSuggestion,
+        }),
+      });
+      setProfile(data.newProfile);
+      setSessionId(data.newSessionId);
+      redirectToChat(router, data.conversationId, data.newSessionId, false);
+      setPendingProfileSuggestion(null);
+    } catch (err) {
+      console.error('[switch-profile]', err);
+      errorToast({ message: 'Nem sikerült átváltani a profilra.', type: 'network' });
+      setPendingProfileSuggestion(null);
+    }
+  };
+
+  const handleDeclineProfileSuggestion = () => {
+    setPendingProfileSuggestion(null);
   };
 
   const handleCreateCustomProfile = () => {
@@ -444,6 +479,13 @@ export default function ChatPage() {
 
   return (
     <div className="reflecta-chat chat-layout" style={currentStyle}>
+      {pendingProfileSuggestion && (
+        <ProfileSwitchSuggestion
+          profileName={pendingProfileSuggestion}
+          onAccept={handleAcceptProfileSuggestion}
+          onDecline={handleDeclineProfileSuggestion}
+        />
+      )}
       <div className="chat-profile-sidebar">
         {userRole !== 'guest' && (
           <ProfileSelectorSidebar
