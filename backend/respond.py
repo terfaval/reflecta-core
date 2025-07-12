@@ -8,6 +8,8 @@ from typing import Any, Dict, List
 import asyncio
 import logging
 
+logger = logging.getLogger(__name__)
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -99,7 +101,7 @@ async def _maybe_insert_user_entry(client: Any, session_id: str, content: str) -
         )
         _execute(result)
     except Exception as exc:
-        print(f"[respond] error inserting user entry: {exc}")
+        logger.warning("[respond] error inserting user entry: %s", exc)
         raise HTTPException(status_code=500, detail="Failed to store user entry")
 
 
@@ -108,7 +110,7 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
 
     client = get_client()
 
-    print(f"[respond] ▶️ generate_ai_reply start | session={session_id}")
+    logger.debug("[respond] ▶️ generate_ai_reply start | session=%s", session_id)
 
     try:
         session = await _fetch_session(client, session_id)
@@ -117,25 +119,27 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
             raise HTTPException(status_code=400, detail="Érvénytelen sessionId")
         raise
 
-    print(f"[respond] ▶️ session: {session_id} | profile: {session.get('profile')}")
+    logger.debug(
+        "[respond] ▶️ session: %s | profile: %s", session_id, session.get("profile")
+    )
 
     if session.get("ended_at"):
         logging.warning(f"[respond] Attempt to reply to closed session {session_id}")
         raise HTTPException(status_code=403, detail="Session is already closed")
     
     if not session.get("profile"):
-        print(f"[respond] session missing profile: {session}")
+        logger.warning("[respond] session missing profile: %s", session)
         raise HTTPException(status_code=422, detail="Hiányzó profil")
     entries = await _fetch_entries(client, session_id)
-    print(f"[respond] 🧾 entries loaded: {len(entries)}")
+    logger.debug("[respond] 🧾 entries loaded: %s", len(entries))
 
     # Recreate client to avoid potential caching delay
     last_user = await get_last_user_entry(session_id, client=client)
     if not last_user:
-        print("[respond] ❌ last user entry not found")
+        logger.warning("[respond] ❌ last user entry not found")
         raise HTTPException(status_code=400, detail="No user input found")
 
-    print(f"[respond] 🧠 last_user found: {last_user['content'][:40]}...")
+    logger.debug("[respond] 🧠 last_user found: %s...", last_user["content"][:40])
 
     user_input = last_user["content"]
 
@@ -187,16 +191,18 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
             session_id=session_id,
         )
     except Exception as exc:
-        print(f"[respond] system prompt build failed: {exc}")
+        logger.error("[respond] system prompt build failed: %s", exc)
         raise HTTPException(
             status_code=422, detail="Hiányzó prompt_core vagy profil"
         ) from exc
     
-    print(f"[respond] 📌 system_prompt built, length: {len(system_prompt)}")
+    logger.debug("[respond] 📌 system_prompt built, length: %s", len(system_prompt))
 
     if not system_prompt or not system_prompt.strip():
-        print(
-            f"[respond] empty system prompt | profile={session['profile']} | user={session['user_id']}"
+        logger.warning(
+            "[respond] empty system prompt | profile=%s | user=%s",
+            session["profile"],
+            session["user_id"],
         )
         raise HTTPException(status_code=422, detail="Hiányzó prompt_core vagy profil")
 
@@ -216,7 +222,7 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
     except Exception as exc:
         # Log and surface the exact error to help debugging when
         # the assistant reply cannot be generated.
-        print(f"[respond] OpenAI error: {exc}")
+        logger.error("[respond] OpenAI error: %s", exc)
         raise HTTPException(
             status_code=502,
             detail=f"OpenAI request failed: {exc}"
@@ -225,11 +231,14 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
     reply = chat.choices[0].message.content or ""
     reply = reply.strip()
 
-    print(f"[respond] 💬 reply ready, {len(reply)} chars")
+    logger.debug("[respond] 💬 reply ready, %s chars", len(reply))
 
     if chat.usage:
-        print(
-            f"[respond] \U0001F4CA OpenAI: {elapsed:.2f}s prompt={chat.usage.prompt_tokens} / completion={chat.usage.completion_tokens}"
+        logger.debug(
+            "[respond] \U0001F4CA OpenAI: %.2fs prompt=%s / completion=%s",
+            elapsed,
+            chat.usage.prompt_tokens,
+            chat.usage.completion_tokens,
         )
 
     now = datetime.now(timezone.utc).isoformat()
@@ -249,9 +258,9 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
             .execute()
         )
         _execute(result)
-        print(f"[respond] ✅ reply INSERT success")
+        logger.debug("[respond] ✅ reply INSERT success")
     except Exception as exc:
-        print(f"[respond] error inserting reply: {exc}")
+        logger.warning("[respond] error inserting reply: %s", exc)
         raise HTTPException(status_code=500, detail="Failed to store AI reply")
 
     # Optional system event about strategy detection
@@ -288,15 +297,15 @@ async def respond(
 ):
     try:
         body = await request.json()
-        print(f"[respond] request body: {body}")
+        logger.debug("[respond] request body: %s", body)
     except Exception as exc:
-        print(f"[respond] error reading request body: {exc}")
+        logger.warning("[respond] error reading request body: %s", exc)
 
     client = get_client()
     try:
         user_record = get_user_by_id(user["id"])
     except Exception as exc:  # pragma: no cover - db error
-        print(f"[respond] user fetch error: {exc}")
+        logger.warning("[respond] user fetch error: %s", exc)
         user_record = {"role": user["role"]}
     user_role = user_record.get("role", user["role"])
 
@@ -329,7 +338,7 @@ async def respond(
                 )
                 _execute(result)
             except Exception as exc:
-                print(f"[respond] error inserting closure question: {exc}")
+                logger.warning("[respond] error inserting closure question: %s", exc)
                 raise HTTPException(500, "Failed to store closure question") from exc
             return {"content": question}
         
@@ -340,7 +349,7 @@ async def respond(
             status_code=exc.status_code, content={"error": str(exc.detail)}
         )
     except Exception as exc:
-        print(f"[respond] unexpected error: {exc}")
+        logger.warning("[respond] unexpected error: %s", exc)
         return JSONResponse(
             status_code=500, content={"error": "Nem sikerült választ generálni."}
         )

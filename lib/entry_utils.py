@@ -3,6 +3,8 @@ import asyncio
 import logging
 from backend.supabase_client import _execute
 
+logger = logging.getLogger(__name__)
+
 FETCH_RETRY_DELAY = 0.4  # seconds
 FETCH_RETRY_ATTEMPTS = 3
 
@@ -32,8 +34,10 @@ async def get_last_user_entry(
     client: Any,  # mostantól KÖTELEZŐ paraméter!
 ) -> Dict[str, Any] | None:
     """Try to fetch the last user entry with retries."""
-    print(
-        f"[entry_utils] get_last_user_entry start session={session_id} client_id={id(client)}"
+    logger.debug(
+        "[entry_utils] get_last_user_entry start session=%s client_id=%s",
+        session_id,
+        id(client),
     )
     for attempt in range(FETCH_RETRY_ATTEMPTS):
         try:
@@ -44,8 +48,7 @@ async def get_last_user_entry(
                 .order("created_at", desc=False)
                 .execute()
             )
-            print(f"\n\n🚨 [entry_utils] RAW RESULT: {result}\n\n")
-            logging.info(f"[entry_utils] raw result: {result}")
+            logger.debug("[entry_utils] raw result: %s", result)
             entries = _execute(result)
         except Exception as exc:
             logging.info(f"[entry_utils] raw result fetch error: {exc}")

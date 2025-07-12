@@ -8,6 +8,7 @@ from __future__ import annotations
 import os
 from datetime import datetime, timezone
 from typing import Any, Dict
+import logging
 
 from fastapi import APIRouter, HTTPException, Depends
 from openai import OpenAI
@@ -27,14 +28,16 @@ router = APIRouter()
 
 _openai = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+logger = logging.getLogger(__name__)
+
 def log_token_usage(session_id: str, model: str, prompt_tokens: int, completion_tokens: int) -> None:
     """Print token usage statistics to the console."""
     total = prompt_tokens + completion_tokens
-    print(f"[🧠 OpenAI] Model: {model}")
-    print(f"➡️ Prompt tokens: {prompt_tokens}")
-    print(f"⬅️ Completion tokens: {completion_tokens}")
-    print(f"📦 Total tokens: {total}")
-    print(f"📎 Session: {session_id}")
+    logger.debug("[🧠 OpenAI] Model: %s", model)
+    logger.debug("➡️ Prompt tokens: %s", prompt_tokens)
+    logger.debug("⬅️ Completion tokens: %s", completion_tokens)
+    logger.debug("📦 Total tokens: %s", total)
+    logger.debug("📎 Session: %s", session_id)
 
 
 def _compute_arc_type(message_count: int, strategies: list[str]) -> str:
@@ -207,7 +210,7 @@ def close_session(session_id: str) -> Dict[str, str]:
             ]
         ).execute()
     except Exception as exc:
-        print(f"[session_close] system events insert error: {exc}")
+        logger.warning("[session_close] system events insert error: %s", exc)
 
     closure_reply = generate_session_closure_response(session_id)
     if not closure_reply or len(closure_reply.strip()) < 8:
@@ -240,7 +243,7 @@ def close_session(session_id: str) -> Dict[str, str]:
     depth_label, depth_conf = classify_depth(user_entries, strategies, durations)
     pivot_points = find_pivot_points(user_entries, strategies, durations)
     if os.getenv("DEV_MODE"):
-        print(f"[session_close] Detected {len(pivot_points)} pivot points")
+        logger.debug("[session_close] Detected %s pivot points", len(pivot_points))
 
     now = datetime.now(timezone.utc).isoformat()
 
@@ -280,7 +283,7 @@ def close_session(session_id: str) -> Dict[str, str]:
     if not updated:
         raise HTTPException(500, "Session lezárása sikertelen")
 
-    print(f"[session_close] Session closed: {session_id}")
+    logger.info("[session_close] Session closed: %s", session_id)
 
     # Attempt to store a conversation arc for this session.
     # Errors are logged inside the called function and do not

@@ -9,7 +9,6 @@ from .functions.active_function import get_active_prompt, get_active_dynamic
 from .utils import normalize_profile
 from .style_summary_block import style_summary_block
 from .language import strategy as strategy_detector
-from .strategy_detector import detect_strategy, detect_top_strategies
 from .strategy_prompt_map import get_structure_hint
 from .strategy_response_templates import get_strategy_template
 from .system_prompt_base import (
