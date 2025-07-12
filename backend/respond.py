@@ -18,7 +18,7 @@ from .auth import Role, role_guard
 from .db import get_client
 from .prompt_builder import build_system_prompt
 from .functions.active_function import handle_user_message, pop_closure_question
-from .strategy_detector import detect_strategy, detect_strategy_smoothed
+from .language import strategy as strategy_detector
 from .arc_state_estimator import estimate_arc_state
 from .profile_recommender import (
     recommend_profile_switch,
@@ -166,14 +166,14 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
     if analysis_suggestion and analysis_suggestion not in suggestions:
         suggestions.append(analysis_suggestion)
 
-    strategy = detect_strategy_smoothed(
-        history_texts, session_position=position, analysis=analysis
-    )
-    if analysis.get("suggested_strategy") and strategy == "explorative":
-        strategy = analysis["suggested_strategy"]
+    detected = strategy_detector.analyze_text(user_input)
+    strategy = detected[0]["strategy"] if detected else "explorative"
 
     message_entries = [e for e in entries if e.get("role") in {"user", "assistant"}]
-    strategy_history = [detect_strategy(text) for text in history_texts]
+    strategy_history = []
+    for text in history_texts:
+        det = strategy_detector.analyze_text(text)
+        strategy_history.append(det[0]["strategy"] if det else "explorative")
     arc_state = estimate_arc_state(len(message_entries), strategy_history)
     try:
         system_prompt = build_system_prompt(

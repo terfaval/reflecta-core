@@ -20,7 +20,7 @@ from .utils import normalize_profile
 from .conversation_arcs import record_conversation_arc
 from .functions.active_function import close_function, pop_session_prefix
 from .arc_pivot_detector import find_pivot_points
-from .strategy_detector import detect_strategy
+from .language import strategy as strategy_detector
 from .arc_state_estimator import classify_depth
 
 router = APIRouter()
@@ -213,7 +213,10 @@ def close_session(session_id: str) -> Dict[str, str]:
     closing_trigger = (metadata.get("closing_trigger") or "").strip()
 
     user_entries = [e for e in entries if e.get("role") == "user"]
-    strategies = [detect_strategy(e.get("content", "")) for e in user_entries]
+    strategies = []
+    for e in user_entries:
+        det = strategy_detector.analyze_text(e.get("content", ""))
+        strategies.append(det[0]["strategy"] if det else "explorative")
     durations = []
     for a, b in zip(user_entries, user_entries[1:]):
         try:

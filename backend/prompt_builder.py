@@ -8,6 +8,7 @@ from .metadata_fallback import get_profile_metadata
 from .functions.active_function import get_active_prompt, get_active_dynamic
 from .utils import normalize_profile
 from .style_summary_block import style_summary_block
+from .language import strategy as strategy_detector
 from .strategy_detector import detect_strategy, detect_top_strategies
 from .strategy_prompt_map import get_structure_hint
 from .strategy_response_templates import get_strategy_template
@@ -55,8 +56,9 @@ def build_system_prompt(
     metadata = fetch_profile_metadata(profile)
 
     if not strategy:
-        strategies = detect_top_strategies(user_input, session_position, top_n=2)
-        strategy = strategies[0]
+        detected = strategy_detector.analyze_text(user_input)
+        strategies = [d.get("strategy") for d in detected[:2]]
+        strategy = strategies[0] if strategies else "explorative"
     else:
         strategies = [strategy]
 

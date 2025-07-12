@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from .last_session import _fetch_last_session
 from .memory_prompt_utils import generate_followup_prompt
-from .strategy_detector import detect_strategy
+from .language import strategy as strategy_detector
 
 router = APIRouter()
 
@@ -43,7 +43,8 @@ def generate_starting_prompt(user_id: str, profile: str) -> str:
             text = generate_followup_prompt(last["sessionId"])
         except Exception:
             text = ""
-    strategy = detect_strategy(text or "", session_position="start")
+    detected = strategy_detector.analyze_text(text or "")
+    strategy = detected[0]["strategy"] if detected else "explorative"
     return _STRATEGY_QUESTIONS.get(strategy, _STRATEGY_QUESTIONS["explorative"])
 
 

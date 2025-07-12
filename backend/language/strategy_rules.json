@@ -1,0 +1,24 @@
+{
+  "deepening": [
+    {"weight": 1.0, "patterns": ["melyen", "erzek", "testemben"]},
+    {"weight": 0.8, "patterns": ["almodtam", "melyebb", "mozog bennem"]}
+  ],
+  "analytical": [
+    {"weight": 1.0, "patterns": ["miert", "osszefugg"]},
+    {"weight": 0.7, "patterns": ["mindig", "ujra", "ismet"]}
+  ],
+  "integrative": [
+    {"weight": 1.0, "patterns": ["egyreszt", "masreszt", "ellentet"]},
+    {"weight": 0.8, "patterns": ["osszeer", "osszekapcsol"]}
+  ],
+  "concluding": [
+    {"weight": 1.0, "patterns": ["megtanultam", "lezarult"]},
+    {"weight": 0.7, "patterns": ["most mar tudom", "osszegzem"]}
+  ],
+  "affirmative": [
+    {"weight": 1.0, "patterns": ["kepes vagyok", "eros voltam"]}
+  ],
+  "explorative": [
+    {"weight": 0.5, "patterns": ["csak irtam", "nem tudom mi ez"]}
+  ]
+}
