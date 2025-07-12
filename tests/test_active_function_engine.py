@@ -48,7 +48,7 @@ def test_active_function_trigger_and_prompt_integration():
     session_id = "s1"
     dummy_function = function_registry.FunctionSpec(
         name="Bels\u0151 lev\u00e9l",
-        triggers=["bels\u0151 lev\u00e9l"],
+        triggers=["bels\u0151 Lev\u00e9l"],
         allowed_strategies=[],
         recommendation_texts={"first": "", "repeat": "", "direct": ""},
         closure_keywords=["lev\u00e9l z\u00e1r\u00e1s"],
@@ -79,7 +79,10 @@ def test_active_function_trigger_and_prompt_integration():
     with patch(
             "backend.prompt_builder.fetch_profile",
             return_value={"name": "Reflecta", "prompt_core": ""},
-        ), patch("backend.prompt_builder.fetch_profile_metadata", return_value={}):
+        ), patch("backend.prompt_builder.fetch_profile_metadata", return_value={}), patch(
+            "backend.functions.function_registry.FUNCTIONS",
+            [dummy_function],
+        ):
             system_prompt = build_system_prompt(
                 "u1",
                 "Reflecta",
@@ -90,7 +93,21 @@ def test_active_function_trigger_and_prompt_integration():
     assert prompt in system_prompt
 
     # Trigger closing after verifying prompt integration
-    handle_user_message(session_id, dummy_function.closure_keywords[0], user_role="premium")
+    with patch.object(active_function, "_fetch_row", side_effect=fetch), patch.object(
+        active_function,
+        "_upsert_row",
+        side_effect=upsert,
+    ), patch.object(active_function, "_update_row", side_effect=update), patch.object(
+        active_function,
+        "_delete_row",
+        side_effect=delete,
+    ), patch(
+        "backend.functions.function_registry.FUNCTIONS",
+        [dummy_function],
+    ):
+        handle_user_message(
+            session_id, dummy_function.closure_keywords[0], user_role="premium"
+        )
     assert not is_active(session_id)
     question = pop_closure_question(session_id)
     assert question == dummy_function.closure_question

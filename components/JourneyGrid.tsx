@@ -1,4 +1,6 @@
-import React from 'react';
+import React from "react";
+import gridStyles from "./JourneyGrid.module.css";
+import cardStyles from "./JourneyCard.module.css";
 
 interface JourneyStep {
   title: string;
@@ -25,16 +27,16 @@ const journeySteps: JourneyStep[] = [
 
 function JourneyCard({ title, description }: JourneyStep) {
   return (
-    <div className="rounded-2xl p-6 flex flex-col gap-3">
-      <h3 className="font-semibold">{title}</h3>
-      <p className="text-sm">{description}</p>
+<div className={cardStyles.card}>
+      <h3 className={cardStyles.title}>{title}</h3>
+      <p className={cardStyles.description}>{description}</p>
     </div>
   );
 }
 
 export default function JourneyGrid() {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <div className={gridStyles.grid}>
       {journeySteps.map((step) => (
         <JourneyCard key={step.title} {...step} />
       ))}
