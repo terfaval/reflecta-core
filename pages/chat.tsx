@@ -57,7 +57,6 @@ export default function ChatPage() {
   const [isClosing, setIsClosing] = useState(false);
   const limit = 20;
   const isFetchingRef = useRef(false);
-  const validatedRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const DEFAULT_STYLE: Record<string, string> = {
@@ -182,44 +181,6 @@ export default function ChatPage() {
     };
     load();
   }, [userId, profile, setProfile]);
-
-  useEffect(() => {
-    if (!router.isReady || !profile || userRole === 'guest' || validatedRef.current)
-      return;
-    const stored = sessionStorage.getItem(`reflecta_session_${profile}`);
-    if (!stored) {
-      validatedRef.current = true;
-      return;
-    }
-    validatedRef.current = true;
-    const conv = sessionStorage.getItem(`reflecta_conversation_${profile}`);
-    const params = new URLSearchParams({ sessionId: stored });
-    if (conv) params.append('conversationId', conv);
-    const check = async () => {
-      try {
-        const data = await apiFetch<{ valid: boolean }>(
-          `/api/session/validate?${params.toString()}`,
-        );
-        if (!data.valid) {
-          errorToast({
-            message:
-              'A korábbi napló már nem elérhető. Szeretnél új naplót indítani?',
-            type: 'system',
-            retry: () => {
-              sessionStorage.removeItem(`reflecta_session_${profile}`);
-              if (conv) sessionStorage.removeItem(`reflecta_conversation_${profile}`);
-              window.location.reload();
-            },
-            retryLabel: 'Új napló indítása',
-            cancelLabel: 'Bezárás',
-          });
-        }
-      } catch (err) {
-        console.error('[session/validate]', err);
-      }
-    };
-    check();
-  }, [router.isReady, profile, userRole, errorToast]);
   
   useEffect(() => {
     if (debug) console.log("[Debug] sessionId", sessionId);

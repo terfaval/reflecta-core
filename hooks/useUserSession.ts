@@ -29,7 +29,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
   const router = useRouter();
   const initialized = useRef(false);
   const errorToast = useErrorToast();
-  const { session: sessionOverride, existing } = router.query;
+  const { session: sessionOverride } = router.query;
   const storedSessionId =
     typeof profile === 'string'
       ? sessionStorage.getItem(`reflecta_session_${profile}`)
@@ -58,46 +58,55 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
       const closingTrigger = profileData?.closing_trigger || '';
 
       // If we have a stored session and no override in the URL,
-      // resume that session without creating a new one.
+            // validate and resume that session without creating a new one.
       if (!sessionOverride && storedSessionId) {
-        initialized.current = true;
-        sessionStorage.setItem(`reflecta_session_${profile}`, storedSessionId);
-        let entries: Entry[] = [];
-        if (existing === '1') {
-          try {
-            const data = await apiFetch<{ entries?: Entry[] }>(
-              `/api/entries?sessionId=${encodeURIComponent(storedSessionId)}`,
-            );
-            entries = data.entries || [];
-          } catch (err) {
-            console.error('[load entries]', err);
-            errorToast({ message: 'Az előzmények betöltése nem sikerült.', type: 'network' });
+        const params = new URLSearchParams({ sessionId: storedSessionId });
+        try {
+          const valid = await apiFetch<{ valid: boolean }>(
+            `/api/session/validate?${params.toString()}`,
+          );
+          if (valid.valid) {
+            initialized.current = true;
+            sessionStorage.setItem(`reflecta_session_${profile}`, storedSessionId);
+            let entries: Entry[] = [];
+            try {
+              const data = await apiFetch<{ entries?: Entry[] }>(
+                `/api/entries?sessionId=${encodeURIComponent(storedSessionId)}`,
+              );
+              entries = data.entries || [];
+            } catch (err) {
+              console.error('[load entries]', err);
+              errorToast({ message: 'Az előzmények betöltése nem sikerült.', type: 'network' });
+            }
+            onReady({
+              userId: uid,
+              sessionId: storedSessionId,
+              startingPrompt: '',
+              closingTrigger,
+              entries,
+            });
+            return;
           }
+          // invalid session - clear stored data
+          sessionStorage.removeItem(`reflecta_session_${profile}`);
+          errorToast({ message: 'A korábbi napló már nem elérhető.', type: 'system' });
+        } catch (err) {
+          console.error('[session/validate]', err);
         }
-        onReady({
-          userId: uid,
-          sessionId: storedSessionId,
-          startingPrompt: '',
-          closingTrigger,
-          entries,
-        });
-        return;
       }
 
       if (typeof sessionOverride === 'string') {
         initialized.current = true;
         sessionStorage.setItem(`reflecta_session_${profile}`, sessionOverride);
         let entries: Entry[] = [];
-        if (existing === '1') {
-          try {
-            const data = await apiFetch<{ entries?: Entry[] }>(
-              `/api/entries?sessionId=${encodeURIComponent(sessionOverride)}`,
-            );
-            entries = data.entries || [];
-          } catch (err) {
-            console.error('[load entries]', err);
-            errorToast({ message: 'Az előzmények betöltése nem sikerült.', type: 'network' });
-          }
+        try {
+          const data = await apiFetch<{ entries?: Entry[] }>(
+            `/api/entries?sessionId=${encodeURIComponent(sessionOverride)}`,
+          );
+          entries = data.entries || [];
+        } catch (err) {
+          console.error('[load entries]', err);
+          errorToast({ message: 'Az előzmények betöltése nem sikerült.', type: 'network' });
         }
         onReady({
           userId: uid,
