@@ -7,6 +7,7 @@ import { useProfileContext } from '@/contexts/ProfileContext';
 import { apiFetch } from '@/lib/api';
 import { useAutoTextareaResize } from '@/hooks/useAutoTextareaResize';
 import { useScrollHandler } from '@/hooks/useScrollHandler';
+import { useErrorToast } from '@/hooks/useErrorToast';
 
 interface Entry {
   id: string;
@@ -26,6 +27,7 @@ export default function GuestChatPage() {
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const guestIdRef = useRef<string>(uuidv4());
   const [showScrollDown, setShowScrollDown] = useState(false);
+  const errorToast = useErrorToast();
 
   const DEFAULT_STYLE: Record<string, string> = {
     '--bg-color': '#ffffff',
@@ -48,6 +50,7 @@ export default function GuestChatPage() {
         if (data?.prompt) setStartingPrompt(data.prompt);
       } catch (err) {
         console.error('[guest starting prompt]', err);
+        errorToast('Nem sikerült betölteni az indító üzenetet.');
       }
     };
     loadPrompt();
@@ -95,6 +98,7 @@ export default function GuestChatPage() {
     } catch (err) {
       console.error('[guest/respond]', err);
       setEntries(prev => prev.map(e => e.id === thinkingId ? { ...e, content: 'Hiba történt' } : e));
+      errorToast('Nem sikerült válaszolni. Kérlek próbáld újra.');
     }
     setLoading(false);
   };

@@ -8,6 +8,7 @@ import ReflectaMandala from '@/public/ReflectaMandala.svg';
 import { apiFetch } from '@/lib/api';
 import PopupDialog from '@/components/PopupDialog';
 import { useToast } from '@/hooks/useToast';
+import { useErrorToast } from '@/hooks/useErrorToast';
 import styles from './Login.module.css';
 
 export default function LoginPage() {
@@ -23,6 +24,7 @@ export default function LoginPage() {
   } = useUserContext();
   const { setProfile } = useProfileContext();
   const toast = useToast();
+  const errorToast = useErrorToast();
 
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +73,7 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error('[login-user]', err);
       setError('Nem sikerült bejelentkezni.');
+      errorToast('Nem sikerült bejelentkezni.');
     }
   };
 
@@ -93,6 +96,7 @@ export default function LoginPage() {
     } catch (err) {
       console.error('[register-user]', err);
       setError('Nem sikerült regisztrálni a felhasználót.');
+      errorToast('Nem sikerült regisztrálni a felhasználót.');
     } finally {
       setShowRegisterPrompt(false);
     }

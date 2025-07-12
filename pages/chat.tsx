@@ -19,6 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { apiFetch } from "@/lib/api";
 import { redirectToChat } from "@/lib/navigation";
+import { useErrorToast } from "@/hooks/useErrorToast";
 
 interface Entry {
   id: string;
@@ -38,6 +39,7 @@ export default function ChatPage() {
   const [closingTrigger, setClosingTrigger] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const { userId, setUserId, userInitialized, userError, userRole, guestSessionId, setGuestSessionId } = useUserContext();
+  const errorToast = useErrorToast();
   useEffect(() => {
     if (!router.isReady) return;
     if (userRole === 'guest') {
@@ -112,6 +114,7 @@ export default function ChatPage() {
         });
       } catch (err) {
         console.error('[guest-session]', err);
+        errorToast('Nem sikerült elindítani a vendég munkamenetet.');
       }
     };
     verify();
@@ -139,6 +142,7 @@ export default function ChatPage() {
         });
       } catch (err) {
         console.error('[profile colors]', err);
+        errorToast('Nem sikerült betölteni a színbeállításokat.');
       }
     };
     loadColors();
@@ -169,6 +173,7 @@ export default function ChatPage() {
         }
       } catch (err) {
         console.error("[last-session]", err);
+        errorToast('Nem sikerült betölteni az előző munkamenetet.');
       }
       setShowProfileSelect(true);
     };
@@ -306,6 +311,7 @@ export default function ChatPage() {
       }
     } catch (err) {
       console.error("[switch profile]", err);
+      errorToast('Nem sikerült váltani a profilok között.');
     }
   };
 
@@ -371,6 +377,7 @@ export default function ChatPage() {
     } catch (err) {
       console.error("[chatload] fetch error:", err);
       setEntriesError('Hiba történt az üzenetek betöltésekor.');
+      errorToast('Hiba történt az üzenetek betöltésekor.');
       setLoadingEntries(false);
     } finally {
       clearTimeout(timeout);
@@ -411,6 +418,7 @@ export default function ChatPage() {
         setStartingPrompt(data.prompt);
       } catch (err) {
         console.error("[starting-prompt]", err);
+        errorToast('Nem sikerült betölteni az indító üzenetet.');
       }
     };
     loadPrompt();

@@ -1,6 +1,6 @@
 // hooks/useHandleSend.ts
 import { useCallback, useEffect, useRef } from 'react';
-import { useToast } from './useToast';
+import { useErrorToast } from './useErrorToast';
 
 import { apiFetch } from 'lib/api';
 
@@ -40,7 +40,7 @@ export function useHandleSend({
   userRole,
   entries,
 }: UseHandleSendProps) {
-  const toast = useToast();
+  const errorToast = useErrorToast();
   const sessionPromise = useRef<Promise<string> | null>(null);
   const storedUserId =
     typeof window !== 'undefined'
@@ -98,7 +98,7 @@ export function useHandleSend({
       } catch (err) {
         console.error('[guest/respond]', err);
         setEntries(prev => prev.map(e => (e.id === thinkingId ? { ...e, content: 'Hiba történt' } : e)));
-        toast('Nem sikerült válaszolni. Kérlek próbáld újra.');
+        errorToast('Nem sikerült válaszolni. Kérlek próbáld újra.');
       }
       setLoading(false);
       return;
@@ -131,7 +131,7 @@ export function useHandleSend({
         currentSessionId = await sessionPromise.current;
       } catch (err) {
         console.error('[session create]', err);
-        toast('Nem sikerült létrehozni a munkamenetet.');
+        errorToast('Nem sikerült létrehozni a munkamenetet.');
         setLoading(false);
         return;
       }
@@ -161,7 +161,7 @@ export function useHandleSend({
           ]);
         } else {
           console.error('[Zárás] Hiba:');
-          toast('A lezárás nem sikerült. Kérlek próbáld újra később.');
+          errorToast('A lezárás nem sikerült. Kérlek próbáld újra később.');
           setIsClosing(false);
           setMessage('');
           setLoading(false);
@@ -169,7 +169,7 @@ export function useHandleSend({
         }
       } catch (err) {
         console.error('[Zárás] Kivétel:', err);
-        toast('A lezárás nem sikerült. Kérlek próbáld újra később.');
+        errorToast('A lezárás nem sikerült. Kérlek próbáld újra később.');
         setIsClosing(false);
         setMessage('');
         setLoading(false);
@@ -207,7 +207,7 @@ export function useHandleSend({
       });
     } catch (err) {
       console.error('[entries]', err);
-      toast('Az üzenet mentése nem sikerült.');
+      errorToast('Az üzenet mentése nem sikerült.');
       setEntries(prev => prev.filter(e => e.id !== userEntry.id));
       setLoading(false);
       return;
@@ -243,12 +243,12 @@ export function useHandleSend({
           e.id === thinkingId ? { ...e, content: 'Hiba történt' } : e,
         ),
       );
-      toast('Nem sikerült válaszolni. Kérlek próbáld újra.');
+      errorToast('Nem sikerült válaszolni. Kérlek próbáld újra.');
       setLoading(false);
       return;
     }
     setLoading(false);
-  }, [sessionId, userId, profile, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing, setSessionId, userRole, entries, toast]);
+  }, [sessionId, userId, profile, closingTrigger, setMessage, setEntries, setLoading, setSessionIsFresh, setIsClosing, setSessionId, userRole, entries, errorToast]);
 
   useEffect(() => {
     const textarea = document.querySelector('.reflecta-input textarea') as HTMLTextAreaElement | null;

@@ -12,6 +12,7 @@ import { useSurveyState } from '@/hooks/useSurveyState';
 import { apiFetch } from '@/lib/api';
 import { redirectToChat } from '@/lib/navigation';
 import { useToast } from '@/hooks/useToast';
+import { useErrorToast } from '@/hooks/useErrorToast';
 import styles from './ProfileBuilder.module.css';
 
 const QUESTIONS = [
@@ -43,6 +44,7 @@ export default function ProfileBuilder() {
   const { userId, userInitialized, userError, userRole } = useUserContext();
   const { setProfile } = useProfileContext();
   const toast = useToast();
+  const errorToast = useErrorToast();
   const {
     currentQuestion,
     answers,
@@ -87,7 +89,10 @@ export default function ProfileBuilder() {
           router.push('/profile-limit');
         }
       })
-      .catch(console.error);
+      .catch(err => {
+        console.error(err);
+        errorToast('Hiba történt a profil betöltésekor.');
+      });
   }, [userId, userRole, router]);
 
   const handleChange = (value: string) => {
@@ -118,7 +123,7 @@ export default function ProfileBuilder() {
     } catch (err) {
       console.error(err);
       setErrorMsg('Hiba történt a profil mentésekor. Kérlek, próbáld újra.');
-      toast('Hiba történt a profil mentésekor. Kérlek, próbáld újra.');
+      errorToast('Hiba történt a profil mentésekor. Kérlek, próbáld újra.');
     }
   };
 
@@ -178,13 +183,13 @@ export default function ProfileBuilder() {
           console.error(data.error);
           setStartLoading(false);
           setErrorMsg('A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.');
-          toast('A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.');
+          errorToast('A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.');
         }
       } catch (err) {
         console.error(err);
         setStartLoading(false);
         setErrorMsg('A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.');
-        toast('A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.');
+        errorToast('A beszélgetés indítása sikertelen. Ellenőrizd a kapcsolatot és próbáld újra.');
       }
     };
 

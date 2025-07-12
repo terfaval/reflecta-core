@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 
 import { apiFetch } from 'lib/api';
+import { useErrorToast } from './useErrorToast';
 
 interface Entry {
   id: string;
@@ -27,6 +28,7 @@ type UseUserSessionParams = {
 export function useUserSession({ profile, onReady, enabled = true, userId, userRole }: UseUserSessionParams) {
   const router = useRouter();
   const initialized = useRef(false);
+  const errorToast = useErrorToast();
   const { session: sessionOverride, existing } = router.query;
   const storedSessionId =
     typeof profile === 'string'
@@ -49,7 +51,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
           router.push('/non-authorized');
           return;
         }
-        alert('Nem sikerült betölteni a profilt.');
+        errorToast('Nem sikerült betölteni a profilt.');
         return;
       }
 
@@ -69,6 +71,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
             entries = data.entries || [];
           } catch (err) {
             console.error('[load entries]', err);
+            errorToast('Az előzmények betöltése nem sikerült.');
           }
         }
         onReady({
@@ -93,6 +96,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
             entries = data.entries || [];
           } catch (err) {
             console.error('[load entries]', err);
+            errorToast('Az előzmények betöltése nem sikerült.');
           }
         }
         onReady({
@@ -112,7 +116,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
           body: JSON.stringify({ userId: uid, profile }),
         });
       } catch (err) {
-        alert('Nem sikerült lekérni az indító üzenetet.');
+        errorToast('Nem sikerült lekérni az indító üzenetet.');
         return;
       }
 
@@ -125,12 +129,12 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
           body: JSON.stringify({ userId: uid, profile }),
         });
       } catch (err) {
-        alert('Nem sikerült létrehozni a munkamenetet.');
+        errorToast('Nem sikerült létrehozni a munkamenetet.');
         return;
       }
 
       if (!sessionData?.session?.id) {
-        alert('Nem sikerült létrehozni a munkamenetet.');
+        errorToast('Nem sikerült létrehozni a munkamenetet.');
         return;
       }
       initialized.current = true;

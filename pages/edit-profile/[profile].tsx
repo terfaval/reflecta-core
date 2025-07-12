@@ -6,6 +6,7 @@ import { apiFetch } from '@/lib/api';
 import { HexColorPicker } from 'react-colorful';
 import { STYLE_OPTIONS } from '@/lib/styleOptions';
 import { useToast } from '@/hooks/useToast';
+import { useErrorToast } from '@/hooks/useErrorToast';
 
 interface StyleData {
   [key: string]: string | null;
@@ -23,6 +24,7 @@ export default function EditProfilePage() {
     }
   }, [router, userRole]);
   const toast = useToast();
+  const errorToast = useErrorToast();
 
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
@@ -52,6 +54,7 @@ export default function EditProfilePage() {
         setStyleData({ ...meta, ...info.style_data });
       } catch (err) {
         console.error(err);
+        errorToast('Nem sikerült betölteni a profil adatokat.');
       } finally {
         setLoading(false);
       }
@@ -84,7 +87,7 @@ export default function EditProfilePage() {
       router.push('/select-profile');
     } catch (err) {
       console.error(err);
-      toast('Hiba a mentés közben');
+      errorToast('Hiba a mentés közben');
     }
   };
 

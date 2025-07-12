@@ -6,11 +6,13 @@ import { apiFetch } from '@/lib/api';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { useUserContext } from '@/contexts/UserContext';
 import { redirectToChat } from '@/lib/navigation';
+import { useErrorToast } from '@/hooks/useErrorToast';
 
 export default function LoadingPage() {
   const router = useRouter();
   const { setProfile } = useProfileContext();
   const { userId, userInitialized, userError, userRole, wpEmbed } = useUserContext();
+  const errorToast = useErrorToast();
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -56,6 +58,7 @@ export default function LoadingPage() {
       } catch (err) {
         console.error('[last-session]', err);
         setTimeout(() => router.replace('/select-profile'), 500);
+        errorToast('Nem sikerült betölteni az előző munkamenetet.');
       }
     };
 

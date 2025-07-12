@@ -9,4 +9,20 @@
   border-radius: 4px;
   font-family: 'Raleway', sans-serif;
   z-index: 1000;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.error {
+  background: #dc2626;
+}
+
+.retry {
+  background: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
 }
