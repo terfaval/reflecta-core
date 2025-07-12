@@ -181,13 +181,15 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
 
     suggestions: List[str] = []
     analysis_suggestion: Optional[str] = None
-    if session["profile"].lower() == "reflecta" or misaligned:
-        suggestions = suggest_profiles(user_input, session["profile"])
+    if misaligned:
         analysis_suggestion = recommend_profile_from_analysis(
             analysis, session["profile"], session.get("user_id")
         )
-        if analysis_suggestion and analysis_suggestion not in suggestions:
-            suggestions.append(analysis_suggestion)
+
+    if (
+        session["profile"].lower() == "reflecta" and analysis_suggestion is None
+    ):
+        suggestions = suggest_profiles(user_input, session["profile"])
 
     detected = strategy_detector.analyze_text(user_input)
     strategy = detected[0]["strategy"] if detected else "explorative"
@@ -205,7 +207,7 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
             user_input,
             strategy,
             session_position=position,
-            suggested_profiles=suggestions if analysis_suggestion else None,
+            suggested_profiles=suggestions if suggestions else None,
             arc_state=arc_state,
             session_id=session_id,
         )
@@ -296,8 +298,8 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
         pass
 
     recommended = requested or recommend_profile_switch(reply, session["profile"])
-    if not recommended and suggestions:
-        recommended = suggestions[0]
+    if not recommended:
+        recommended = analysis_suggestion
 
     return {
         "reply": reply,

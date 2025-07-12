@@ -137,7 +137,7 @@ def recommend_profile_from_analysis(
         if not prefs.intersection(conflict_topics):
             continue
 
-        score = len(prefs.intersection(topics))
+        score = len(prefs.intersection(conflict_topics))
         candidates.append((score, name))
 
     if not candidates:
