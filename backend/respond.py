@@ -114,8 +114,17 @@ async def _maybe_insert_user_entry(
         raise HTTPException(status_code=500, detail="Failed to store user entry")
 
 
-async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
-    """Generate an AI reply and persist it."""
+async def generate_ai_reply(session_id: str, is_admin: bool) -> Dict[str, Any]:
+    """Generate an AI reply and persist it.
+
+    Parameters
+    ----------
+    session_id: str
+        ID of the session to respond to.
+    is_admin: bool
+        Whether the calling user has admin privileges. Non-admin users will
+        not receive profile switching suggestions.
+    """
 
     client = get_client()
 
@@ -181,13 +190,15 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
 
     suggestions: List[str] = []
     analysis_suggestion: Optional[str] = None
-    if misaligned:
+    if is_admin and misaligned:
         analysis_suggestion = recommend_profile_from_analysis(
             analysis, session["profile"], session.get("user_id")
         )
 
     if (
-        session["profile"].lower() == "reflecta" and analysis_suggestion is None
+        is_admin
+        and session["profile"].lower() == "reflecta"
+        and analysis_suggestion is None
     ):
         suggestions = suggest_profiles(user_input, session["profile"])
 
@@ -207,7 +218,7 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
             user_input,
             strategy,
             session_position=position,
-            suggested_profiles=suggestions if suggestions else None,
+            suggested_profiles=suggestions if is_admin and suggestions else None,
             arc_state=arc_state,
             session_id=session_id,
         )
@@ -297,7 +308,9 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
     except Exception:
         pass
 
-    recommended = requested or recommend_profile_switch(reply, session["profile"])
+    recommended = requested or (
+        recommend_profile_switch(reply, session["profile"]) if is_admin else None
+    )
     if not recommended:
         recommended = analysis_suggestion
 
@@ -308,7 +321,7 @@ async def generate_ai_reply(session_id: str) -> Dict[str, Any]:
         "system_prompt": system_prompt,
         "generated_at": now,
         "recommended_profile": recommended,
-        "suggested_profiles": suggestions,
+        "suggested_profiles": suggestions if is_admin else [],
     }
 
 
@@ -329,6 +342,7 @@ async def respond(
         logger.warning("[respond] user fetch error: %s", exc)
         user_record = {"role": user["role"]}
     user_role = user_record.get("role", user["role"])
+    is_admin = user_role == "admin"
 
     if payload.content:
         # Load previous user messages for contextual analysis
@@ -379,7 +393,7 @@ async def respond(
             return {"content": question}
         
     try:
-        result = await generate_ai_reply(payload.sessionId)
+        result = await generate_ai_reply(payload.sessionId, is_admin)
     except HTTPException as exc:
         return JSONResponse(
             status_code=exc.status_code, content={"error": str(exc.detail)}
