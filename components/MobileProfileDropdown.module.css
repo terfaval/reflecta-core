@@ -1,0 +1,68 @@
+.dropdownWrapper {
+  position: relative;
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .dropdownWrapper {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-family: 'Raleway', sans-serif;
+  }
+}
+
+.toggleButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  color: #000;
+}
+
+.profileInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profileName {
+  font-weight: 600;
+}
+
+.iconPlaceholder {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+}
+
+.list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  z-index: 20;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: white;
+  border: none;
+  text-align: left;
+}
+
+.item:hover {
+  background: #f3f4f6;
+}

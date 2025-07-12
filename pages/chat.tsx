@@ -6,6 +6,7 @@ import UserErrorDisplay from "../components/UserErrorDisplay";
 import ReflectiveMemoryPanel from "../components/ReflectiveMemoryPanel";
 import ProfileSelectorSidebar, { Profile } from "../components/ProfileSelectorSidebar";
 import ProfileSlider from "@/components/ProfileSlider";
+import MobileProfileDropdown from "@/components/MobileProfileDropdown";
 import { useUserSession } from "../hooks/useUserSession";
 import { useAutoTextareaResize } from "../hooks/useAutoTextareaResize";
 import { ChatFooter } from "../components/ChatFooter";
@@ -445,6 +446,7 @@ export default function ChatPage() {
         )}
       </div>
       <div className="chat-area">
+        <MobileProfileDropdown onProfileSelect={handleSidebarSelect} />
         <ChatMessagesList
           entries={entries}
           loadingEntries={loadingEntries}
