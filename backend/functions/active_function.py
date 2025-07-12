@@ -33,13 +33,28 @@ from .function_registry import (
     get_function_by_trigger,
     get_function_by_name,
 )
+from .trigger_detector import match_trigger
 from ..supabase_client import supabase, _execute
+
+
+def detect_dynamic(spec: FunctionSpec, text: str) -> Optional[Dict[str, Any]]:
+    """Return dynamic entry matching the text."""
+    lowered = text.lower()
+    for dyn in spec.relationship_dynamics:
+        for trig in dyn.get("triggers", []):
+            if match_trigger(lowered, trig):
+                return dyn
+        for pattern in dyn.get("emotion_patterns", []):
+            if match_trigger(lowered, pattern):
+                return dyn
+    return None
 
 
 @dataclass
 class ActiveFunction:
     spec: FunctionSpec
     history: List[str] = field(default_factory=list)
+    current_dynamic: Optional[Dict[str, Any]] = None
     closed: bool = False
 
     def process_user_text(self, text: str) -> None:
@@ -48,6 +63,12 @@ class ActiveFunction:
             if kw.lower() in text.lower():
                 self.closed = True
                 break
+        dynamic = detect_dynamic(self.spec, text)
+        if dynamic:
+            self.current_dynamic = {
+                "type": dynamic.get("type"),
+                "guidance_style": dynamic.get("guidance_style"),
+            }
 
 
 # TTL cache for active function rows to reduce database queries.
@@ -155,7 +176,11 @@ def handle_user_message(
         if not spec:
             _delete_row(session_id)
             return None
-        state = ActiveFunction(spec, history=row.get("history") or [])
+        state = ActiveFunction(
+            spec,
+            history=row.get("history") or [],
+            current_dynamic=row.get("current_dynamic"),
+        )
         state.process_user_text(text)
         now = datetime.now(timezone.utc).isoformat()
         if state.closed:
@@ -167,10 +192,18 @@ def handle_user_message(
                     "closure_question": spec.closure_question or None,
                     "session_prefix": spec.session_prefix or None,
                     "updated_at": now,
+                    "current_dynamic": state.current_dynamic,
                 },
             )
             return None
-        _update_row(session_id, {"history": state.history, "updated_at": now})
+        _update_row(
+            session_id,
+            {
+                "history": state.history,
+                "current_dynamic": state.current_dynamic,
+                "updated_at": now,
+            },
+        )
         return state
 
     spec = get_function_by_trigger(text, user_role=user_role)
@@ -188,6 +221,7 @@ def handle_user_message(
                     "closure_question": spec.closure_question or None,
                     "session_prefix": spec.session_prefix or None,
                     "updated_at": now,
+                    "current_dynamic": state.current_dynamic,
                 }
             )
             return None
@@ -200,6 +234,7 @@ def handle_user_message(
                 "closure_question": None,
                 "session_prefix": None,
                 "updated_at": now,
+                "current_dynamic": state.current_dynamic,
             }
         )
         return state
@@ -212,6 +247,14 @@ def get_active_prompt(session_id: str) -> Optional[str]:
         spec = get_function_by_name(row.get("function_name", ""))
         if spec:
             return spec.prompt_addition
+    return None
+
+
+def get_active_dynamic(session_id: str) -> Optional[Dict[str, Any]]:
+    """Return current relationship dynamic if active."""
+    row = _cache_get(session_id) or _fetch_row(session_id)
+    if row and not row.get("is_closed"):
+        return row.get("current_dynamic")
     return None
 
 

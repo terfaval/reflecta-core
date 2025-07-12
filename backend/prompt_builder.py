@@ -5,7 +5,7 @@ from typing import List, Dict, Any, Optional
 
 from .supabase_client import get_profile_by_name
 from .metadata_fallback import get_profile_metadata
-from .functions.active_function import get_active_prompt
+from .functions.active_function import get_active_prompt, get_active_dynamic
 from .utils import normalize_profile
 from .style_summary_block import style_summary_block
 from .strategy_detector import detect_strategy, detect_top_strategies
@@ -74,6 +74,15 @@ def build_system_prompt(
         if function_prompt:
             lines.append("")
             lines.append(function_prompt)
+        dynamic = get_active_dynamic(session_id)
+        if dynamic:
+            lines.append("")
+            if dynamic.get("type"):
+                lines.append(
+                    f"The current relationship dynamic is: {dynamic.get('type')}."
+                )
+            if dynamic.get("guidance_style"):
+                lines.append(dynamic.get("guidance_style"))
 
     if normalize_profile(profile_data.get("name")) == "reflecta":
         lines.append(

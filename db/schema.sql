@@ -168,6 +168,7 @@ create table if not exists active_functions (
   is_closed boolean default false,
   closure_question text,
   session_prefix text,
+  current_dynamic jsonb,
   updated_at timestamp default now()
 );
 
