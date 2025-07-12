@@ -25,7 +25,7 @@ const journeySteps: JourneyStep[] = [
 
 function JourneyCard({ title, description }: JourneyStep) {
   return (
-    <div className="rounded-2xl p-4 shadow-sm bg-white border flex flex-col gap-2">
+    <div className="rounded-2xl p-4 shadow-sm flex flex-col gap-2">
       <h3 className="font-semibold">{title}</h3>
       <p className="text-sm">{description}</p>
     </div>

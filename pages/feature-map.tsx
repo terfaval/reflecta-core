@@ -4,6 +4,7 @@ import * as FIcons from '@/components/icons/functions';
 import styles from './FeatureMap.module.css';
 import ProfileSlider from '@/components/ProfileSlider';
 import FeatureGrid from '@/components/FeatureGrid';
+import JourneyGrid from '@/components/JourneyGrid';
 import FeatureTable from '@/components/FeatureTable';
 import { FunctionInfo } from '@/components/FeatureCard';
 
@@ -108,6 +109,10 @@ export default function FunkcioTerkep() {
         </p>
       </section>
 
+      <section className="space-y-4">
+        <JourneyGrid />
+      </section>
+      
       <section className="space-y-4">
         <p className={styles.transitionText}>
           A Reflecta profiljai mind egyedi szemléletet és hangot képviselnek.
