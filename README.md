@@ -241,6 +241,7 @@ elkülönül a bejelentkezett felhasználók `/api/respond` alapú munkameneteit
 
 ## Specifikációs dokumentáció forrása
 A részletes tervek és követelmények a gyökérkönyvtárban található `Reflecta_Spec_*` Word-dokumentumokban olvashatók.
+További háttér: a `docs/profile-switching.md` fájl összefoglalja a profilajánlás és váltás tervezett folyamatát.
 
 ## További fejlesztési tervek
 - A Python FastAPI backend teljeskörű bevezetése és mélyebb integrációja
