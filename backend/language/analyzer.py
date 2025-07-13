@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional
 import logging
 
 from . import lemmatizer, matchers
+from .intent_classifier import meta_intent_classifier
 
 _VERBOSE = False
 
@@ -39,6 +40,10 @@ def analyze_message(message: str, history: Optional[List[str]] = None) -> Dict[s
 
     patterns = matchers.detect_patterns(message, lemmas)
 
+    meta_intent = None
+    if message and len(lemmas) >= 5:
+        meta_intent = meta_intent_classifier.classify(message)
+
     result = {
         "topics": patterns.get("topics", []),
         "emotion": patterns.get("emotions", [None])[0]
@@ -53,6 +58,7 @@ def analyze_message(message: str, history: Optional[List[str]] = None) -> Dict[s
         "suggested_profile": None,
         "suggested_strategy": None,
         "tweak_suggestion": None,
+        "meta_intent": meta_intent,
     }
 
     _log_analysis_result(result)

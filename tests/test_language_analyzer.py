@@ -4,11 +4,13 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from backend.language import analyzer
+from unittest.mock import patch
 
 
 def test_analyze_message_basic():
     text = "Elegem van, nagyon dühös vagyok a szakítás óta."
-    result = analyzer.analyze_message(text)
+    with patch("backend.language.intent_classifier.meta_intent_classifier.classify", return_value=None):
+        result = analyzer.analyze_message(text)
     assert "kapcsolat" in result["topics"]
     assert result["emotion"] == "düh"
     assert result["tone"] == "feladó"
@@ -16,3 +18,4 @@ def test_analyze_message_basic():
     assert result["suggested_profile"] is None
     assert result["suggested_strategy"] is None
     assert result["tweak_suggestion"] is None
+    assert result["meta_intent"] is None
