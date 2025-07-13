@@ -21,6 +21,32 @@ def get_structure_guideline_lines() -> List[str]:
     return STRUCTURE_GUIDELINE_LINES.copy()
 
 
+def get_strategy_formatting_lines(strategy_template: dict) -> List[str]:
+    """Return natural language lines describing formatting cues."""
+    lines: List[str] = []
+
+    tone = strategy_template.get("preferred_tone")
+    if tone:
+        lines.append(f"Keep the tone {tone}.")
+
+    layout = strategy_template.get("layout")
+    if layout:
+        lines.append(f"Use {layout}.")
+
+    invitation = strategy_template.get("invitation_type")
+    if invitation:
+        lines.append(f"Invite the user to {invitation}.")
+
+    emphasis = strategy_template.get("emphasis_pattern")
+    if emphasis:
+        line = emphasis.capitalize()
+        if not line.endswith("."):
+            line += "."
+        lines.append(line)
+
+    return lines
+
+
 def get_strategy_section_lines(strategy: str) -> List[str]:
     """Return lines describing the strategy structure and example."""
     template = STRATEGY_TEMPLATES.get(strategy)
@@ -29,8 +55,12 @@ def get_strategy_section_lines(strategy: str) -> List[str]:
     lines: List[str] = []
     if template.get("structure_description"):
         lines.append(template["structure_description"])
+    
+    lines.extend(get_strategy_formatting_lines(template))
+
     if template.get("example_outline"):
         lines.append(template["example_outline"])
+        
     return lines
 
 
