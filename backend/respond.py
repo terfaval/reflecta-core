@@ -33,12 +33,19 @@ from lib.entry_utils import get_last_user_entry
 from .supabase_client import _execute, get_user_by_id
 from .profile_suggester import suggest_profiles
 from .metadata_fallback import get_profile_metadata
+from .profile_intro import get_profile_intro
 
 
 router = APIRouter()
 
 
 _openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# Short explanation text for questions about the system itself.
+SYSTEM_EXPLANATION_TEXT = (
+    "A Reflecta egy önreflexiós AI-naplórendszer, ahol különböző profilokon "
+    "keresztül beszélgethetsz a GPT-alapú asszisztensekkel."
+)
 
 
 class RespondRequest(BaseModel):
@@ -363,6 +370,27 @@ async def respond(
             store_entry_labels(entry_id, analysis)
         except Exception as exc:  # pragma: no cover - analysis failure
             logger.warning("[respond] entry analysis failed: %s", exc)
+            analysis = {}
+
+        meta_intent = analysis.get("meta_intent") if isinstance(analysis, dict) else None
+        if meta_intent in {"system", "profile"}:
+            if meta_intent == "system":
+                content = SYSTEM_EXPLANATION_TEXT
+                flag = "system_explanation"
+            else:
+                try:
+                    session_row = await _fetch_session(client, payload.sessionId)
+                    profile_name = session_row.get("profile")
+                except HTTPException as exc:
+                    return JSONResponse(status_code=exc.status_code, content={"error": str(exc.detail)})
+                content = get_profile_intro(profile_name)
+                flag = "profile_explanation"
+            return {
+                "content": content,
+                "recommendedProfile": None,
+                "suggestedProfiles": [],
+                "metaFlag": flag,
+            }
             
         # Update the active reflective function state with the new entry
         handle_user_message(
