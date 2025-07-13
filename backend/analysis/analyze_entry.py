@@ -8,7 +8,11 @@ import logging
 from ..language.analyzer import analyze_message
 from ..strategy_detector_v2 import detect_strategy
 from ..strategy_detector import detect_strategy
-from ..arc_state_estimator import classify_depth, estimate_arc_state
+from ..arc_state_estimator import (
+    classify_depth as deprecated_classify_depth,  # deprecated
+    estimate_arc_state,
+)
+from ..language.depth_estimator import estimate_depth
 from ..arc_pivot_detector import find_pivot_points
 from ..profile_recommender import recommend_profile_from_analysis
 from ..functions.trigger_detector import detect_trigger
@@ -67,12 +71,13 @@ def analyze_entry(content: str, session_id: str, previous_entries: List[str]) ->
         arc_state = "starting"
 
     try:
-        depth_estimate, _ = classify_depth(
-            [{"content": t} for t in all_entries], strategy_history
-        )
+        res = estimate_depth(content)
+        depth_estimate = res["depth"]
+        depth_confidence = res["confidence"]
     except Exception as exc:  # pragma: no cover - depth failure
         logger.exception("[analyze_entry] depth estimation failed: %s", exc)
         depth_estimate = "felszínes"
+        depth_confidence = 0.0
 
     try:
         pivot_points = find_pivot_points(
@@ -112,6 +117,7 @@ def analyze_entry(content: str, session_id: str, previous_entries: List[str]) ->
         "strategy": strategy,
         "arc_state": arc_state,
         "depth_estimate": depth_estimate,
+        "depth_confidence": depth_confidence,
         "pivot_points": pivot_points,
         "labels": labels,
         "suggested_profile": suggested_profile,

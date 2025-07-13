@@ -26,6 +26,7 @@ def test_update_conversation_arc_insert():
     analysis = {
         "arc_state": "starting",
         "depth_estimate": "shallow",
+        "depth_confidence": 0.7,
         "pivot_points": ["p1"],
         "strategy": "explorative",
     }
@@ -39,6 +40,7 @@ def test_update_conversation_arc_insert():
     assert row["session_id"] == "s1"
     assert row["arc_type"] == "starting"
     assert row["depth_estimate"] == "shallow"
+    assert row["depth_confidence"] == 0.7
     assert row["pivot_points"] == ["p1"]
     assert row["strategy_summary"] == ["explorative"]
 
@@ -49,12 +51,14 @@ def test_update_conversation_arc_update():
         "session_id": "s1",
         "arc_type": "starting",
         "depth_estimate": "shallow",
+        "depth_confidence": 0.6,
         "pivot_points": ["a"],
         "strategy_summary": ["explorative"],
     }
     analysis = {
         "arc_state": "deepening",
         "depth_estimate": "medium",
+        "depth_confidence": 0.8,
         "pivot_points": ["b"],
         "strategy": "deepening",
     }
@@ -67,5 +71,6 @@ def test_update_conversation_arc_update():
     update_fields = table.update.call_args[0][0]
     assert update_fields["arc_type"] == "deepening"
     assert update_fields["depth_estimate"] == "medium"
+    assert update_fields["depth_confidence"] == 0.8
     assert update_fields["pivot_points"] == ["a", "b"]
     assert update_fields["strategy_summary"] == ["explorative", "deepening"]

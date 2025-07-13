@@ -29,7 +29,11 @@ def classify_depth(
     strategies: List[str],
     durations: Iterable[float] | None = None,
 ) -> Tuple[str, float]:
-    """Return a depth label and confidence based on multiple heuristics."""
+    """Return a depth label and confidence based on multiple heuristics.
+
+    DEPRECATED: use :func:`backend.language.depth_estimator.estimate_depth` for
+    new embedding-based depth detection.
+    """
 
     if not entries:
         return "felszínes", 0.5

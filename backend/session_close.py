@@ -22,7 +22,11 @@ from .functions.active_function import close_function, pop_session_prefix
 from .arc_pivot_detector import find_pivot_points
 from .language import strategy as strategy_detector  # deprecated rule-based detection
 from .strategy_detector_v2 import detect_strategy
-from .arc_state_estimator import classify_depth, estimate_arc_state
+from .arc_state_estimator import (
+    classify_depth as deprecated_classify_depth,  # deprecated
+    estimate_arc_state,
+)
+from .language.depth_estimator import estimate_depth
 
 router = APIRouter()
 
@@ -228,7 +232,10 @@ def close_session(session_id: str) -> Dict[str, str]:
         except Exception:
             durations = []
             break
-    depth_label, depth_conf = classify_depth(user_entries, strategies, durations)
+    joined_text = "\n".join(e.get("content", "") for e in user_entries)
+    res = estimate_depth(joined_text)
+    depth_label = res["depth"]
+    depth_conf = res["confidence"]
     pivot_points = find_pivot_points(user_entries, strategies, durations)
     if os.getenv("DEV_MODE"):
         logger.debug("[session_close] Detected %s pivot points", len(pivot_points))
