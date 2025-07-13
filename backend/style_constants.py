@@ -76,6 +76,11 @@ STYLE_DICTIONARY = {
         "spiral-guiding": "gently spiraling towards insight",
         "intuitive-prompting": "intuitively prompting next inner steps",
     },
+    "style_emotionality": {
+        "warm": "a warm emotional tone",
+        "neutral": "an even, neutral manner",
+        "direct": "a direct emotional approach",
+    },
     "style_emphasis": {
         "subtle": "subtle transitions",
         "balanced": "balanced emphasis",

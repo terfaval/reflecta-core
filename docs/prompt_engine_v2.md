@@ -80,7 +80,7 @@ STRATEGY_TEMPLATES = {
 
 - `domain` and `worldview` – merged into a short context line.
 - `tone_examples` – up to two example sentences demonstrating style.
-- `style_pace`, `style_rhythm`, `style_emphasis`, `style_breaks` – contribute to the style summary line.
+- `style_pace`, `style_rhythm`, `style_emotionality`, `style_emphasis`, `style_breaks` – contribute to the style summary line.
 - Additional fields such as `highlight_keywords`, `preferred_context` or `question_archetypes` can be surfaced via `get_profile_context_lines`.
 
 ## 4. Prompt Composition Flow

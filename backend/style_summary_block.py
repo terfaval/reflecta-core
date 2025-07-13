@@ -96,6 +96,11 @@ def style_summary_block(metadata: Dict[str, Dict[str, str]] | dict) -> str:
             "spiral-guiding": "gently spiraling towards insight",
             "intuitive-prompting": "intuitively prompting next inner steps"
         },
+        "style_emotionality": {
+            "warm": "with a warm emotional tone",
+            "neutral": "in a neutral emotional manner",
+            "direct": "with a direct emotional approach"
+        },
         "style_emphasis": {
             "subtle": "with subtle transitions",
             "balanced": "with balanced emphasis",

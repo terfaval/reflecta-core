@@ -17,7 +17,13 @@ def get_style_summary_line(profile: dict) -> str:
 
     style_src = profile.get("style_data") or profile.get("style_options") or profile
     fragments: List[str] = []
-    for key in ["style_pace", "style_rhythm", "style_emphasis", "style_breaks"]:
+    for key in [
+        "style_pace",
+        "style_rhythm",
+        "style_emotionality",
+        "style_emphasis",
+        "style_breaks",
+    ]:
         value = style_src.get(key)
         phrase = STYLE_DICTIONARY.get(key, {}).get(value)
         if phrase and phrase not in line:

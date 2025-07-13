@@ -38,7 +38,8 @@ The builder expects a profile dictionary loaded via `get_profile(name)` with fie
 
 - `tone_examples: List[str]` – short demonstration lines.
 - `worldview: str` and `domain: str` – used by `get_profile_context_lines`.
-- `style_pace`, `style_rhythm`, `style_emphasis`, `style_breaks` – used for style summaries.
+- `style_pace`, `style_rhythm`, `style_emotionality`, `style_emphasis`, `style_breaks` – used for style summaries.
+
 
 The session dictionary may contain:
 

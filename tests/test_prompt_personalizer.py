@@ -13,6 +13,7 @@ def test_get_style_summary_line_basic():
         "style_data": {
             "style_pace": "slow",
             "style_rhythm": "fluid",
+            "style_emotionality": "warm",
             "style_emphasis": "subtle",
             "style_breaks": "after key points",
         }
@@ -20,6 +21,7 @@ def test_get_style_summary_line_basic():
     line = get_style_summary_line(profile)
     assert line.startswith("Style summary:")
     assert "slow" in line and "flowing" in line
+    assert "warm" in line
     assert "subtle" in line
 
 

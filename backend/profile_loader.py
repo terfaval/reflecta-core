@@ -12,6 +12,7 @@ STYLE_FIELDS = [
     "style_tone",
     "style_pace",
     "style_rhythm",
+    "style_emotionality",
     "style_emphasis",
     "style_breaks",
 ]
