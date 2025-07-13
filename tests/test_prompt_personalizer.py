@@ -18,19 +18,19 @@ def test_get_style_summary_line_basic():
         }
     }
     line = get_style_summary_line(profile)
+    assert line.startswith("Style summary:")
     assert "slow" in line and "flowing" in line
     assert "subtle" in line
 
 
-def test_get_profile_context_lines():
-    profile = {
-        "domain": "psychological",
-        "worldview": "symbolic",
-        "highlight_keywords": ["clarity", "transformation"],
-        "question_archetypes": ["compass"],
-    }
+def test_get_profile_context_lines_combinations():
+    profile = {"domain": "interpersonal", "worldview": "dialogue is healing"}
     lines = get_profile_context_lines(profile)
-    assert any("psychological" in ln for ln in lines)
-    assert any("clarity" in ln for ln in lines)
-    assert any("compass" in ln for ln in lines)
+    assert lines == [
+        "Context: This profile focuses on interpersonal.",
+        "The worldview is that dialogue is healing.",
+    ]
 
+    single = {"domain": "creative"}
+    lines = get_profile_context_lines(single)
+    assert lines == ["Context: This profile focuses on creative."]

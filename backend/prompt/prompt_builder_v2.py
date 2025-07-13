@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from typing import List
 
-from .prompt_personalizer import get_style_summary_line, get_tone_example_lines
+from .prompt_personalizer import (
+    get_style_summary_line,
+    get_tone_example_lines,
+    get_profile_context_lines,
+)
 from .prompt_sections import (
     get_core_essence_lines,
     get_structure_guideline_lines,
@@ -33,19 +37,22 @@ def build_system_prompt_v2(profile: dict, session: dict, strategy: str) -> str:
     # 4. Profile tone examples
     lines.extend(get_tone_example_lines(profile))
 
-    # 5. User preferences
+    # 5. Profile domain/worldview context
+    lines.extend(get_profile_context_lines(profile))
+
+    # 6. User preferences
     lines.extend(get_preferences_lines(session))
 
-    # 6. Recent strategies recap
+    # 7. Recent strategies recap
     lines.extend(get_recent_strategy_lines(session))
 
-    # 7. Strategy block
+    # 8. Strategy block
     lines.extend(get_strategy_section_lines(strategy))
 
-     # 8. Transition line, if applicable
+     # 9. Transition line, if applicable
     lines.extend(get_transition_lines(session))
 
-    # 9. Function state line
+    # 10. Function state line
     lines.extend(get_function_state_lines(session))
 
     return safe_join_lines(lines)

@@ -26,41 +26,37 @@ def get_style_summary_line(profile: dict) -> str:
     if fragments:
         extra = human_list(fragments, "and")
         if line:
-            return f"{line}, with {extra}."
-        return f"Your voice tends to be {extra}."
+            result = f"{line}, with {extra}."
+        else:
+            result = f"Your voice tends to be {extra}."
+    else:
+        result = line if line else ""
 
-    return line if line else ""
+    return f"Style summary: {result}" if result else ""
 
 
 def get_tone_example_lines(profile: dict) -> List[str]:
     """Return up to two tone example lines from the profile."""
 
-    examples = profile.get("tone_examples") or []
-    return [str(ex).strip() for ex in examples[:2] if ex]
+    examples = [str(ex).strip() for ex in (profile.get("tone_examples") or []) if ex]
+    if not examples:
+        return []
+    return ["Tone examples:"] + examples[:2]
 
 
 def get_profile_context_lines(profile: dict) -> List[str]:
-    """Return up to three lines describing the profile's worldview and domain."""
+    """Return domain and worldview context lines if available."""
     if not profile:
         return []
 
     lines: List[str] = []
 
     domain = profile.get("domain")
+    if domain:
+        lines.append(f"Context: This profile focuses on {domain}.")
+
     worldview = profile.get("worldview")
-    angle = human_list([domain, worldview], "and")
-    if angle:
-        lines.append(f"You tend to approach topics from a {angle} angle.")
+    if worldview:
+        lines.append(f"The worldview is that {worldview}.")
 
-    keywords = human_list(profile.get("highlight_keywords"), "and")
-    if keywords:
-        lines.append(f"You often explore themes like {keywords}.")
-
-    contexts = human_list(profile.get("preferred_context"), "and")
-    q_types = human_list(profile.get("question_archetypes"), "or")
-    if q_types:
-        lines.append(f"Your questions often follow a {q_types} orientation.")
-    elif contexts:
-        lines.append(f"You come alive in settings such as {contexts}.")
-
-    return lines[:3]
+    return lines

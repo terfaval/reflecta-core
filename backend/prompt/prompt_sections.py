@@ -10,6 +10,23 @@ from .strategy_templates import STRATEGY_TEMPLATES
 from .prompt_utils import human_list
 
 
+def format_function_state_line(state_dict: dict) -> str:
+    """Return a human readable sentence for the active function state."""
+    try:
+        name = state_dict.get("name")
+        if not name:
+            return ""
+        label = str(name).replace("_", " ")
+        status = state_dict.get("status")
+        if status == "open":
+            return f"You are currently guiding the user through a “{label}” reflection."
+        if status == "closing":
+            return f"You are closing the ongoing “{label}” reflection."
+        return f"The current reflection is “{label}”."
+    except Exception:
+        return ""
+    
+
 def get_core_essence_lines() -> List[str]:
     """Return the core essence section lines."""
     return CORE_ESSENCE_LINES.copy()
@@ -74,9 +91,16 @@ def get_strategy_section_lines(strategy: str) -> List[str]:
 def get_function_state_lines(session: dict) -> List[str]:
     """Return the active function state line if present."""
     state = session.get("active_function_state")
-    if state:
+    if not state:
+        return []
+
+    if isinstance(state, dict):
+        line = format_function_state_line(state)
+        if line:
+            return [line]
         return [str(state)]
-    return []
+
+    return [str(state)]
 
 
 def get_transition_lines(session: dict) -> List[str]:
