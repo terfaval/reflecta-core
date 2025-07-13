@@ -49,9 +49,18 @@ def get_strategy_formatting_lines(strategy_template: dict) -> List[str]:
     if body:
         lines.append(f"Structure the body as {body}.")
         
-    tone = strategy_template.get("preferred_tone")
-    if tone:
-        lines.append(f"Use a {tone} tone.")
+    speed = strategy_template.get("tone_speed")
+    attitude = strategy_template.get("tone_attitude")
+    if speed and attitude:
+        lines.append(f"Use a {attitude} tone with a {speed} pace.")
+    elif attitude:
+        lines.append(f"Use a {attitude} tone.")
+    elif speed:
+        lines.append(f"Maintain a {speed} pace.")
+
+    voice_hint = strategy_template.get("voice_hint")
+    if voice_hint:
+        lines.append(f"Your voice should sound {voice_hint}.")
 
     layout = strategy_template.get("layout")
     if layout:
