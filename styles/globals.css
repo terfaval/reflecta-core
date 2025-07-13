@@ -70,6 +70,7 @@ body,
 .reflecta-message p {
   margin: 0;
   padding: 0;
+  white-space: pre-line;
 }
 
 /* Új wrapper az üzenetekhez, hogy a válaszmódosító gombok a buborék alatt jelenjenek meg */
