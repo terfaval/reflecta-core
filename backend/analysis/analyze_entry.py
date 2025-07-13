@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional
 import logging
 
 from ..language.analyzer import analyze_message
+from ..strategy_detector_v2 import detect_strategy
 from ..strategy_detector import detect_strategy
 from ..arc_state_estimator import classify_depth, estimate_arc_state
 from ..arc_pivot_detector import find_pivot_points

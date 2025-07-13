@@ -21,7 +21,8 @@ from .auth import Role, role_guard
 from .db import get_client
 from .prompt.prompt_builder_v2 import build_system_prompt_v2
 from .functions.active_function import handle_user_message, pop_closure_question
-from .language import strategy as strategy_detector
+from .language import strategy as strategy_detector  # deprecated rule-based detection
+from .strategy_detector_v2 import detect_strategy
 from .arc_state_estimator import estimate_arc_state
 from .profile_recommender import (
     recommend_profile_switch,
@@ -226,7 +227,8 @@ async def generate_ai_reply(session_id: str, is_admin: bool) -> Dict[str, Any]:
         ):
             suggestions = suggest_profiles(user_input, session["profile"])
 
-    detected = strategy_detector.analyze_text(user_input)
+    # Use the new embedding-based strategy detector
+    detected = detect_strategy(user_input)
     strategy = detected[0]["strategy"] if detected else "explorative"
 
     session["recent_strategies"] = (
@@ -246,7 +248,7 @@ async def generate_ai_reply(session_id: str, is_admin: bool) -> Dict[str, Any]:
     message_entries = [e for e in entries if e.get("role") in {"user", "assistant"}]
     strategy_history = []
     for text in history_texts:
-        det = strategy_detector.analyze_text(text)
+        det = detect_strategy(text)
         strategy_history.append(det[0]["strategy"] if det else "explorative")
     arc_state = estimate_arc_state(len(message_entries), strategy_history)
     try:
