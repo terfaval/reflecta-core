@@ -35,7 +35,7 @@ def build_system_prompt_v2(profile: dict, session: dict, strategy: str) -> str:
         lines.append(style_line)
 
     # 4. Profile tone examples
-    lines.extend(get_tone_example_lines(profile))
+    lines.extend(get_tone_example_lines(profile, session))
 
     # 5. Profile domain/worldview context
     lines.extend(get_profile_context_lines(profile))

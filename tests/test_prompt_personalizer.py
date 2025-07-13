@@ -36,3 +36,20 @@ def test_get_profile_context_lines_combinations():
     single = {"domain": "creative"}
     lines = get_profile_context_lines(single)
     assert lines == ["Context: This profile focuses on creative."]
+
+
+def test_get_tone_example_lines_default_limit():
+    profile = {"tone_examples": ["A", "B", "C"]}
+    lines = get_tone_example_lines(profile, {})
+    assert lines == ["Tone examples:", "A", "B"]
+
+
+def test_get_tone_example_lines_long_form_priority():
+    profile = {
+        "tone_examples": ["One", "Two", "Three", "Four"],
+        "tone_example_metadata": ["neutral", "emotional", "neutral", "emotional"],
+    }
+    session = {"preferences": {"long_form": True}}
+    lines = get_tone_example_lines(profile, session)
+    assert lines[1] == "Two" and lines[2] == "Four"
+    assert len(lines) == 5

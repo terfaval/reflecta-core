@@ -20,7 +20,7 @@ This design makes it easier to add new strategies or style options without chang
 lines.extend(get_core_essence_lines())          # 1
 lines.extend(get_structure_guideline_lines())   # 2
 style_line = get_style_summary_line(profile)    # 3
-lines.extend(get_tone_example_lines(profile))   # 4
+lines.extend(get_tone_example_lines(profile, session))   # 4
 lines.extend(get_preferences_lines(session))    # 5
 lines.extend(get_recent_strategy_lines(session))# 6
 lines.extend(get_strategy_section_lines(strategy, session, profile)) # 7
