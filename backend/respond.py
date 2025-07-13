@@ -28,6 +28,8 @@ from .profile_recommender import (
     recommend_profile_from_analysis,
 )
 from .language.analyzer import analyze_message
+from .language.profile_name_detector import extract_profile_names
+from .profiles.profile_comparisons import generate_profile_comparison
 from .entry_label_store import store_entry_labels
 from lib.entry_utils import get_last_user_entry
 from .supabase_client import _execute, get_user_by_id
@@ -382,11 +384,11 @@ async def respond(
             analysis = {}
 
         meta_intent = analysis.get("meta_intent") if isinstance(analysis, dict) else None
-        if meta_intent in {"system", "profile"}:
+        if meta_intent in {"system", "profile", "compare_profiles"}:
             if meta_intent == "system":
                 content = SYSTEM_EXPLANATION_TEXT
                 flag = "system_explanation"
-            else:
+            elif meta_intent == "profile":
                 try:
                     session_row = await _fetch_session(client, payload.sessionId)
                     profile_name = session_row.get("profile")
@@ -394,6 +396,16 @@ async def respond(
                     return JSONResponse(status_code=exc.status_code, content={"error": str(exc.detail)})
                 content = get_profile_intro(profile_name)
                 flag = "profile_explanation"
+            else:
+                names = extract_profile_names(payload.content)
+                if len(names) == 2:
+                    content = generate_profile_comparison(names[0], names[1])
+                    flag = "profile_comparison"
+                else:
+                    content = (
+                        "Ha szeretnéd, szívesen segítek összehasonlítani két profilt, csak írd le őket név szerint."
+                    )
+                    flag = "profile_comparison_fallback"
             return {
                 "content": content,
                 "recommendedProfile": None,
