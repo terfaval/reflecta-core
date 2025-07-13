@@ -96,6 +96,16 @@ def style_summary_block(metadata: Dict[str, Dict[str, str]] | dict) -> str:
             "spiral-guiding": "gently spiraling towards insight",
             "intuitive-prompting": "intuitively prompting next inner steps"
         },
+        "style_emphasis": {
+            "subtle": "with subtle transitions",
+            "balanced": "with balanced emphasis",
+            "strong": "highlighting each point"
+        },
+        "style_breaks": {
+            "after key points": "with pauses after key points",
+            "frequent": "with frequent short breaks",
+            "minimal": "with minimal explicit breaks"
+        },
     }
 
     style_options: Dict[str, str] = metadata.get("style_options") or {}

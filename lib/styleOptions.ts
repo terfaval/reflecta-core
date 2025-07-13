@@ -76,4 +76,14 @@ export const STYLE_OPTIONS: Record<string, Record<string, string>> = {
     'spiral-guiding': 'gently spiraling towards insight',
     'intuitive-prompting': 'intuitively prompting next inner steps',
   },
+  style_emphasis: {
+    subtle: 'subtle transitions',
+    balanced: 'balanced emphasis',
+    strong: 'strong emphasis',
+  },
+  style_breaks: {
+    'after key points': 'pauses after key points',
+    frequent: 'frequent short breaks',
+    minimal: 'minimal explicit breaks',
+  },
 };
