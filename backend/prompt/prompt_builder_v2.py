@@ -47,7 +47,7 @@ def build_system_prompt_v2(profile: dict, session: dict, strategy: str) -> str:
     lines.extend(get_recent_strategy_lines(session))
 
     # 8. Strategy block
-    lines.extend(get_strategy_section_lines(strategy))
+    lines.extend(get_strategy_section_lines(strategy, session, profile))
 
      # 9. Transition line, if applicable
     lines.extend(get_transition_lines(session))

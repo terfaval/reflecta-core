@@ -80,7 +80,9 @@ def get_strategy_formatting_lines(strategy_template: dict) -> List[str]:
     return lines
 
 
-def get_strategy_section_lines(strategy: str) -> List[str]:
+def get_strategy_section_lines(
+    strategy: str, session: dict | None = None, profile: dict | None = None
+) -> List[str]:
     """Return lines describing the strategy structure and example."""
     template = STRATEGY_TEMPLATES.get(strategy)
     if not template:
@@ -90,6 +92,18 @@ def get_strategy_section_lines(strategy: str) -> List[str]:
         lines.append(template["structure_description"])
     
     lines.extend(get_strategy_formatting_lines(template))
+
+    hint = template.get("emotional_intro_hint")
+    if hint:
+        inviting_pref = False
+        if session and isinstance(session.get("preferences"), dict):
+            inviting_pref = session["preferences"].get("inviting") is True
+        tone_value = None
+        if profile:
+            style_src = profile.get("style_data") or profile
+            tone_value = style_src.get("style_tone")
+        if inviting_pref or tone_value == "warm":
+            lines.append(hint)
 
     if template.get("example_outline"):
         lines.append(template["example_outline"])

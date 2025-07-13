@@ -23,7 +23,7 @@ style_line = get_style_summary_line(profile)    # 3
 lines.extend(get_tone_example_lines(profile))   # 4
 lines.extend(get_preferences_lines(session))    # 5
 lines.extend(get_recent_strategy_lines(session))# 6
-lines.extend(get_strategy_section_lines(strategy)) # 7
+lines.extend(get_strategy_section_lines(strategy, session, profile)) # 7
 lines.extend(get_transition_lines(session))     # 8
 lines.extend(get_function_state_lines(session)) # 9
 return safe_join_lines(lines)
@@ -50,7 +50,10 @@ STRATEGY_TEMPLATES = {
         "intro_type": "short reflection",
         "body_type": "divergent questions",
         "layout": "paragraph + bullet",
-        "preferred_tone": "open and mirroring",
+        "tone_speed": "medium",
+        "tone_attitude": "mirroring",
+        "visual_structure": "bullet after paragraph",
+        "voice_hint": "like a curious companion who gently opens up new directions",
         "structure_description": "Start with a short reflective sentence...",
         "example_outline": "It sounds like this topic is very present..."
     },
