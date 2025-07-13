@@ -58,7 +58,9 @@ async def _fetch_session(client: Any, session_id: str) -> Dict[str, Any]:
     try:
         result = (
             client.table("sessions")
-            .select("id, user_id, profile, ended_at, preferences, recent_strategies, active_function_state")
+            .select(
+                "id, user_id, profile, ended_at, preferences, recent_strategies, active_function_state"
+            )
             .eq("id", session_id)
             .maybe_single()
             .execute()
@@ -69,6 +71,12 @@ async def _fetch_session(client: Any, session_id: str) -> Dict[str, Any]:
         session = None
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
+    if session.get("preferences") is None:
+        session["preferences"] = {}
+    if session.get("recent_strategies") is None:
+        session["recent_strategies"] = []
+    if session.get("active_function_state") is None:
+        session["active_function_state"] = None
     return session
 
 
