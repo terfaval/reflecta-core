@@ -13,8 +13,8 @@ import logging
 from fastapi import APIRouter, HTTPException, Depends
 from openai import OpenAI
 
-from .supabase_client import supabase, _execute, get_profile_by_name
-from .metadata_fallback import get_profile_metadata
+from .supabase_client import supabase, _execute
+from .profile_loader import get_profile
 from .prompt.prompt_builder_v2 import build_system_prompt_v2
 from .auth import role_guard, Role
 from .conversation_arcs import record_conversation_arc
@@ -87,9 +87,7 @@ def generate_session_closure_response(session_id: str) -> str:
     session.setdefault("recent_strategies", [])
     session.setdefault("active_function_state", None)
     
-    profile_row = get_profile_by_name(session["profile"])
-
-    metadata = get_profile_metadata(session["profile"])
+    profile = get_profile(session["profile"])
 
     entries = _execute(
         supabase.table("entries")
@@ -109,8 +107,6 @@ def generate_session_closure_response(session_id: str) -> str:
         return (
             "Köszönöm a megosztásaidat. Mint egy csendes sóhaj a térben, ez a szakasz most lezárul."
         )
-
-    profile = {**profile_row, **metadata}
 
     language_tone_prefix = (
         "Kérlek, minden válaszodat magyar nyelven írd. "
@@ -214,8 +210,8 @@ def close_session(session_id: str) -> Dict[str, str]:
         .maybe_single()
         .execute()
     )
-    metadata = get_profile_metadata(session_row["profile"])
-    closing_trigger = (metadata.get("closing_trigger") or "").strip()
+    profile = get_profile(session_row["profile"])
+    closing_trigger = (profile.get("closing_trigger") or "").strip()
 
     user_entries = [e for e in entries if e.get("role") == "user"]
     strategies = []

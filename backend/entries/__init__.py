@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from ..db import get_client
 from ..supabase_client import _execute, get_session
-from ..metadata_fallback import get_profile_metadata
+from ..profile_loader import get_profile
 from ..auth import role_guard, Role
 
 router = APIRouter()
@@ -66,8 +66,8 @@ def _session_belongs_to_user(session_id: str, user_id: str) -> bool:
 def _fetch_closing_trigger(profile: str) -> str:
     if not profile:
         return ""
-    metadata = get_profile_metadata(profile)
-    return metadata.get("closing_trigger") or ""
+    record = get_profile(profile)
+    return record.get("closing_trigger") or ""
 
 
 def _insert_entry(session_id: str, item: EntryItem) -> None:

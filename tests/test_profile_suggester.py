@@ -20,33 +20,28 @@ METADATA = {
 }
 
 
-def fake_get_profile_by_name(name: str):
-    return PROFILES.get(name)
+def fake_get_profile(name: str):
+    profile = PROFILES.get(name, {}).copy()
+    profile.update(METADATA.get(name, {}))
+    return profile
 
 
-def fake_get_profile_metadata(name: str):
-    return METADATA.get(name, {})
-
-
-@patch("backend.profile_suggester.get_profile_by_name", side_effect=fake_get_profile_by_name)
-@patch("backend.profile_suggester.get_profile_metadata", side_effect=fake_get_profile_metadata)
-def test_suggest_profiles_loss(mock_meta, mock_prof):
+@patch("backend.profile_suggester.get_profile", side_effect=fake_get_profile)
+def test_suggest_profiles_loss(mock_get):
     text = "nagy veszteseg ert"
     result = suggest_profiles(text, "Reflecta")
     assert result and result[0] == "Éana"
 
 
-@patch("backend.profile_suggester.get_profile_by_name", side_effect=fake_get_profile_by_name)
-@patch("backend.profile_suggester.get_profile_metadata", side_effect=fake_get_profile_metadata)
-def test_suggest_profiles_time(mock_meta, mock_prof):
+@patch("backend.profile_suggester.get_profile", side_effect=fake_get_profile)
+def test_suggest_profiles_time(mock_get):
     text = "döntésidő szorít"
     result = suggest_profiles(text, "Reflecta")
     assert result and result[0] == "Kairos"
 
 
-@patch("backend.profile_suggester.get_profile_by_name", side_effect=fake_get_profile_by_name)
-@patch("backend.profile_suggester.get_profile_metadata", side_effect=fake_get_profile_metadata)
-def test_suggest_profiles_lemma(mock_meta, mock_prof):
+@patch("backend.profile_suggester.get_profile", side_effect=fake_get_profile)
+def test_suggest_profiles_lemma(mock_get):
     text = "nagy veszteségeimet dolgozom fel"
     result = suggest_profiles(text, "Reflecta")
     assert result and result[0] == "Éana"

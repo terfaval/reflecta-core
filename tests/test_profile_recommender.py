@@ -38,7 +38,7 @@ def test_recommend_profile_from_analysis_mismatch():
         "Éana": {"avoidance_logic": [], "preferred_context": ["gyász"]},
     }
     with patch(
-        "backend.profile_recommender.get_profile_metadata",
+        "backend.profile_recommender.get_profile",
         side_effect=lambda name: metadata_map.get(name, {}),
     ), patch(
         "backend.profile_recommender.list_available_profiles",
@@ -55,7 +55,7 @@ def test_recommend_profile_from_analysis_no_conflict():
         "Éana": {"avoidance_logic": [], "preferred_context": ["gyász"]},
     }
     with patch(
-        "backend.profile_recommender.get_profile_metadata",
+        "backend.profile_recommender.get_profile",
         side_effect=lambda name: metadata_map.get(name, {}),
     ), patch(
         "backend.profile_recommender.list_available_profiles",
@@ -72,7 +72,7 @@ def test_recommend_profile_from_analysis_conflict_no_profile():
         "Luma": {"avoidance_logic": [], "preferred_context": ["kapcsolat"]},
     }
     with patch(
-        "backend.profile_recommender.get_profile_metadata",
+        "backend.profile_recommender.get_profile",
         side_effect=lambda name: metadata_map.get(name, {}),
     ), patch(
         "backend.profile_recommender.list_available_profiles",

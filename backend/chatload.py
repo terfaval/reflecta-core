@@ -9,7 +9,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from .supabase_client import supabase, _execute
-from .metadata_fallback import get_profile_metadata
+from .profile_loader import get_profile
 from .utils import normalize_profile
 
 
@@ -63,8 +63,8 @@ def _fetch_entries(session_ids: List[str], offset: int, limit: int) -> List[Dict
 
 
 def _fetch_closing_trigger(profile: str) -> str:
-    metadata = get_profile_metadata(profile)
-    return metadata.get("closing_trigger", "")
+    record = get_profile(profile)
+    return record.get("closing_trigger", "")
 
 
 def _fetch_scroll_anchors(session_ids: List[str], session_map: Dict[str, str]) -> List[Dict[str, str]]:

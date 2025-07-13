@@ -9,7 +9,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from .supabase_client import get_profile_by_name, get_profile_colors
-from .metadata_fallback import get_profile_metadata
+from .profile_loader import get_profile
 from .profile_utils import is_valid_profile_for_user
 from .utils import normalize_profile
 
@@ -92,7 +92,7 @@ def _fetch_profile(profile: str) -> Dict[str, Any] | None:
 def _fetch_metadata(profile: str) -> Dict[str, Any] | None:
     """Return profile metadata or ``None`` if not found."""
 
-    data = get_profile_metadata(profile)
+    data = get_profile(profile)
     if not data:
         return None
     return {key: data.get(key) for key in ["closing_trigger", *STYLE_FIELDS] if key in data}

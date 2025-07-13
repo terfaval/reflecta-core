@@ -30,9 +30,9 @@ from .profile_recommender import (
 from .language.analyzer import analyze_message
 from .entry_label_store import store_entry_labels
 from lib.entry_utils import get_last_user_entry
-from .supabase_client import _execute, get_user_by_id, get_profile_by_name
+from .supabase_client import _execute, get_user_by_id
 from .profile_suggester import suggest_profiles
-from .metadata_fallback import get_profile_metadata
+from .profile_loader import get_profile
 from .profile_intro import get_profile_intro
 
 
@@ -198,9 +198,9 @@ async def generate_ai_reply(session_id: str, is_admin: bool) -> Dict[str, Any]:
         logging.warning("[respond] language analysis failed: %s", exc)
         analysis = {}
 
-    metadata = get_profile_metadata(session["profile"])
+    profile = get_profile(session["profile"])
     topics = [t.lower() for t in analysis.get("topics") or []]
-    avoid = {s.lower() for s in metadata.get("avoidance_logic", [])}
+    avoid = {s.lower() for s in profile.get("avoidance_logic", [])}
     misaligned = bool(set(topics) & avoid)
 
     suggestions: List[str] = []
@@ -227,8 +227,6 @@ async def generate_ai_reply(session_id: str, is_admin: bool) -> Dict[str, Any]:
         strategy_history.append(det[0]["strategy"] if det else "explorative")
     arc_state = estimate_arc_state(len(message_entries), strategy_history)
     try:
-        profile_row = get_profile_by_name(session["profile"])
-        profile = {**profile_row, **metadata}
         system_prompt = build_system_prompt_v2(profile, session, strategy)
         # system_prompt = build_system_prompt(
         #     session["user_id"],

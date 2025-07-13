@@ -9,7 +9,7 @@ from typing import Optional
 from .supabase_client import supabase, _execute
 from .utils import normalize_profile
 from .profile_utils import list_available_profiles, BASIC_PROFILES
-from .metadata_fallback import get_profile_metadata
+from .profile_loader import get_profile
 
 # Simple keyword-based patterns for profile detection. This can
 # be expanded later with a more sophisticated NLP approach.
@@ -105,7 +105,7 @@ def recommend_profile_from_analysis(
 
     # Metadata of the current profile
     try:
-        current_meta = get_profile_metadata(current_profile)
+        current_meta = get_profile(current_profile)
     except Exception:
         current_meta = {}
     current_avoid = {s.lower() for s in current_meta.get("avoidance_logic", [])}
@@ -122,7 +122,7 @@ def recommend_profile_from_analysis(
         if norm == current_norm:
             continue
         try:
-            meta = get_profile_metadata(name)
+            meta = get_profile(name)
         except Exception:
             continue
 

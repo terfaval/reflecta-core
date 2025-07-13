@@ -3,8 +3,7 @@
 from __future__ import annotations
 from typing import List, Dict, Any, Optional
 
-from .supabase_client import get_profile_by_name
-from .metadata_fallback import get_profile_metadata
+from .profile_loader import get_profile
 from .functions.active_function import get_active_prompt, get_active_dynamic
 from .utils import normalize_profile
 from .style_summary_block import style_summary_block
@@ -31,12 +30,11 @@ def human_list(items: List[str] | None, conjunction: str = "and") -> str:
 
 
 def fetch_profile(profile: str) -> Dict[str, Any]:
-    record = get_profile_by_name(profile)
-    return {"name": record.get("name"), "prompt_core": record.get("prompt_core")}
+    return get_profile(profile)
 
 
 def fetch_profile_metadata(profile: str) -> Dict[str, Any]:
-    return get_profile_metadata(profile)
+    return get_profile(profile)
 
 
 def build_system_prompt(

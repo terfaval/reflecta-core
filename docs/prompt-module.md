@@ -33,7 +33,7 @@ The `prompt/` directory provides helper utilities for composing a full system pr
 
 ## 4. Data sources
 
-The builder expects a minimal profile dictionary with fields such as:
+The builder expects a profile dictionary loaded via `get_profile(name)` with fields such as:
 
 - `tone_examples: List[str]` – short demonstration lines.
 - `worldview: str` and `domain: str` – used by `get_profile_context_lines`.

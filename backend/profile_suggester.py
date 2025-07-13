@@ -33,8 +33,7 @@ def _init_lemmatizer() -> None:
                 "[profile_suggester] snowball stemmer missing: %s", exc2
             )
 
-from .supabase_client import get_profile_by_name
-from .metadata_fallback import get_profile_metadata
+from .profile_loader import get_profile
 from .profile_utils import BASIC_PROFILES
 from .utils import normalize_profile
 
@@ -85,19 +84,18 @@ def _load_profiles() -> List[Dict[str, Any]]:
     items: List[Dict[str, Any]] = []
     for name in BASIC_PROFILES:
         try:
-            profile = get_profile_by_name(name)
+            profile = get_profile(name)
         except Exception:
             logging.warning("[profile_suggester] missing profile: %s", name)
             continue
         if not profile:
             continue
-        meta = get_profile_metadata(name)
         record = {
             "name": profile.get("name"),
             "prompt_core": profile.get("prompt_core", ""),
-            "domain": meta.get("domain", ""),
-            "preferred_context": meta.get("preferred_context", []),
-        "inspirations": meta.get("inspirations", []),
+            "domain": profile.get("domain", ""),
+            "preferred_context": profile.get("preferred_context", []),
+            "inspirations": profile.get("inspirations", []),
         }
         keywords = _build_keywords(record)
         items.append({"name": record["name"], "lemmas": set(_lemmatize(" ".join(keywords)))} )
