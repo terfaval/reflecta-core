@@ -34,6 +34,7 @@ from .profiles.profile_comparisons import generate_profile_comparison
 from .entry_label_store import store_entry_labels
 from lib.entry_utils import get_last_user_entry
 from .supabase_client import _execute, get_user_by_id
+from .memory_summary import summarize_messages
 from .profile_suggester import suggest_profiles
 from .profile_loader import get_profile
 from .profile_intro import get_profile_intro
@@ -277,7 +278,38 @@ async def generate_ai_reply(session_id: str, is_admin: bool) -> Dict[str, Any]:
         raise HTTPException(status_code=422, detail="Hiányzó prompt_core vagy profil")
 
     messages = [{"role": "system", "content": system_prompt}]
-    for e in entries:
+    summary_text: Optional[str] = None
+    trimmed_entries = message_entries
+    if len(message_entries) > 40:
+        try:
+            summary_text = await summarize_messages(message_entries[:-20])
+        except Exception as exc:  # pragma: no cover - network error
+            logger.warning("[respond] summary generation failed: %s", exc)
+            summary_text = None
+        if summary_text:
+            messages.append({"role": "system", "content": summary_text})
+            now_sum = datetime.now(timezone.utc).isoformat()
+            try:
+                result = (
+                    client.table("session_summaries")
+                    .upsert(
+                        {
+                            "session_id": session_id,
+                            "summary_text": summary_text,
+                            "updated_at": now_sum,
+                        },
+                        on_conflict="session_id",
+                    )
+                    .execute()
+                )
+                _execute(result)
+                logger.debug(
+                    "[respond] 📝 session summary created and injected"
+                )
+            except Exception as exc:  # pragma: no cover - db failure
+                logger.warning("[respond] session summary insert error: %s", exc)
+            trimmed_entries = message_entries[-20:]
+    for e in trimmed_entries:
         if e["role"] in {"user", "assistant"}:
             messages.append({"role": e["role"], "content": e["content"]})
 
