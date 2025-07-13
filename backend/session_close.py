@@ -13,11 +13,10 @@ import logging
 from fastapi import APIRouter, HTTPException, Depends
 from openai import OpenAI
 
-from .supabase_client import supabase, _execute
+from .supabase_client import supabase, _execute, get_profile_by_name
 from .metadata_fallback import get_profile_metadata
-from .prompt_builder import build_system_prompt
+from .prompt.prompt_builder_v2 import build_system_prompt_v2
 from .auth import role_guard, Role
-from .utils import normalize_profile
 from .conversation_arcs import record_conversation_arc
 from .functions.active_function import close_function, pop_session_prefix
 from .arc_pivot_detector import find_pivot_points
@@ -74,7 +73,9 @@ def generate_session_closure_response(session_id: str) -> str:
     """Create a short closing reflection for the session."""
     session = _execute(
         supabase.table("sessions")
-        .select("id, profile, user_id")
+        .select(
+            "id, profile, user_id, preferences, recent_strategies, active_function_state"
+        )
         .eq("id", session_id)
         .maybe_single()
         .execute()
@@ -82,14 +83,11 @@ def generate_session_closure_response(session_id: str) -> str:
     if not session:
         raise HTTPException(404, "Session not found")
     
-    normalized = normalize_profile(session["profile"])
-    profile_row = _execute(
-        supabase.table("profiles")
-        .select("name, prompt_core, description, role")
-        .ilike("name", normalized)
-        .maybe_single()
-        .execute()
-    )
+    session.setdefault("preferences", None)
+    session.setdefault("recent_strategies", [])
+    session.setdefault("active_function_state", None)
+    
+    profile_row = get_profile_by_name(session["profile"])
 
     metadata = get_profile_metadata(session["profile"])
 
@@ -112,11 +110,7 @@ def generate_session_closure_response(session_id: str) -> str:
             "Köszönöm a megosztásaidat. Mint egy csendes sóhaj a térben, ez a szakasz most lezárul."
         )
 
-    profile = {
-        "name": profile_row.get("name"),
-        "prompt_core": profile_row.get("prompt_core"),
-        "metadata": metadata,
-    }
+    profile = {**profile_row, **metadata}
 
     language_tone_prefix = (
         "Kérlek, minden válaszodat magyar nyelven írd. "
@@ -126,15 +120,12 @@ def generate_session_closure_response(session_id: str) -> str:
     )
 
     # Build the system prompt using the closing strategy
-    full_prompt = build_system_prompt(
-        session["user_id"],
-        session["profile"],
-        "",
-        strategy="session_closure",
-        session_position="end",
-        session_id=session_id,
+    system_prompt_body = build_system_prompt_v2(
+        profile,
+        session,
+        "session_closure",
     )
-    system_prompt = f"{language_tone_prefix}\n\n{full_prompt}"
+    system_prompt = f"{language_tone_prefix}\n\n{system_prompt_body}"
 
     messages = [{"role": "system", "content": system_prompt}] + user_entries
 

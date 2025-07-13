@@ -18,7 +18,7 @@ from backend.functions.active_function import (
     pop_closure_question,
     pop_session_prefix,
 )
-from backend.prompt_builder import build_system_prompt
+from backend.prompt.prompt_builder_v2 import build_system_prompt_v2
 
 
 def test_active_function_trigger_and_prompt_integration():
@@ -77,18 +77,18 @@ def test_active_function_trigger_and_prompt_integration():
         assert prompt == dummy_function.prompt_addition
 
     with patch(
-            "backend.prompt_builder.fetch_profile",
-            return_value={"name": "Reflecta", "prompt_core": ""},
-        ), patch("backend.prompt_builder.fetch_profile_metadata", return_value={}), patch(
             "backend.functions.function_registry.FUNCTIONS",
-            [dummy_function],
-        ):
-            system_prompt = build_system_prompt(
-                "u1",
-                "Reflecta",
-                "hello",
-                session_id=session_id,
-            )
+        [dummy_function],
+    ):
+        system_prompt = build_system_prompt_v2(
+            {"name": "Reflecta", "prompt_core": ""},
+            {
+                "preferences": None,
+                "recent_strategies": [],
+                "active_function_state": dummy_function.prompt_addition,
+            },
+            "explorative",
+        )
 
     assert prompt in system_prompt
 
@@ -234,20 +234,17 @@ def test_dynamic_detection_and_prompt_integration():
         assert dyn and dyn.get("type") == "supportive"
 
     with patch(
-        "backend.prompt_builder.fetch_profile",
-        return_value={"name": "Reflecta", "prompt_core": ""},
-    ), patch(
-        "backend.prompt_builder.fetch_profile_metadata",
-        return_value={},
-    ), patch(
         "backend.functions.function_registry.FUNCTIONS",
         [dummy_function],
     ):
-        system_prompt = build_system_prompt(
-            "u1",
-            "Reflecta",
-            "hello",
-            session_id=session_id,
+        system_prompt = build_system_prompt_v2(
+            {"name": "Reflecta", "prompt_core": ""},
+            {
+                "preferences": None,
+                "recent_strategies": [],
+                "active_function_state": "dynamic mode\nThe current relationship dynamic is: supportive",
+            },
+            "explorative",
         )
 
     assert "dynamic mode" in system_prompt
