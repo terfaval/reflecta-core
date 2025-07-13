@@ -18,7 +18,7 @@ from openai import AsyncOpenAI
 
 from .auth import Role, role_guard
 from .db import get_client
-from .prompt_builder import build_system_prompt
+from .prompt.prompt_builder_v2 import build_system_prompt_v2
 from .functions.active_function import handle_user_message, pop_closure_question
 from .language import strategy as strategy_detector
 from .arc_state_estimator import estimate_arc_state
@@ -30,7 +30,7 @@ from .profile_recommender import (
 from .language.analyzer import analyze_message
 from .entry_label_store import store_entry_labels
 from lib.entry_utils import get_last_user_entry
-from .supabase_client import _execute, get_user_by_id
+from .supabase_client import _execute, get_user_by_id, get_profile_by_name
 from .profile_suggester import suggest_profiles
 from .metadata_fallback import get_profile_metadata
 from .profile_intro import get_profile_intro
@@ -58,7 +58,7 @@ async def _fetch_session(client: Any, session_id: str) -> Dict[str, Any]:
     try:
         result = (
             client.table("sessions")
-            .select("id, user_id, profile, ended_at")
+            .select("id, user_id, profile, ended_at, preferences, recent_strategies, active_function_state")
             .eq("id", session_id)
             .maybe_single()
             .execute()
@@ -219,16 +219,19 @@ async def generate_ai_reply(session_id: str, is_admin: bool) -> Dict[str, Any]:
         strategy_history.append(det[0]["strategy"] if det else "explorative")
     arc_state = estimate_arc_state(len(message_entries), strategy_history)
     try:
-        system_prompt = build_system_prompt(
-            session["user_id"],
-            session["profile"],
-            user_input,
-            strategy,
-            session_position=position,
-            suggested_profiles=suggestions if is_admin else [],
-            arc_state=arc_state,
-            session_id=session_id,
-        )
+        profile_row = get_profile_by_name(session["profile"])
+        profile = {**profile_row, **metadata}
+        system_prompt = build_system_prompt_v2(profile, session, strategy)
+        # system_prompt = build_system_prompt(
+        #     session["user_id"],
+        #     session["profile"],
+        #     user_input,
+        #     strategy,
+        #     session_position=position,
+        #     suggested_profiles=suggestions if is_admin else [],
+        #     arc_state=arc_state,
+        #     session_id=session_id,
+        # )
     except Exception as exc:
         logger.error("[respond] system prompt build failed: %s", exc)
         raise HTTPException(
