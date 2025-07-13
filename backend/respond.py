@@ -6,6 +6,7 @@ import os
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 import asyncio
+import json
 import logging
 
 logger = logging.getLogger(__name__)
@@ -77,8 +78,13 @@ async def _fetch_session(client: Any, session_id: str) -> Dict[str, Any]:
         session["preferences"] = {}
     if session.get("recent_strategies") is None:
         session["recent_strategies"] = []
-    if session.get("active_function_state") is None:
-        session["active_function_state"] = None
+    state = session.get("active_function_state")
+    if isinstance(state, str):
+        try:
+            state = json.loads(state)
+        except Exception:
+            state = None
+    session["active_function_state"] = state
     return session
 
 

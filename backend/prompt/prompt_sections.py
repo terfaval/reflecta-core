@@ -5,7 +5,6 @@ from typing import List
 from .prompt_constants import (
     CORE_ESSENCE_LINES,
     STRUCTURE_GUIDELINE_LINES,
-    TRANSITION_LINES,
 )
 from .strategy_templates import STRATEGY_TEMPLATES
 from .prompt_utils import human_list
@@ -81,12 +80,17 @@ def get_function_state_lines(session: dict) -> List[str]:
 
 
 def get_transition_lines(session: dict) -> List[str]:
-    """Return transition lines based on the session's transition flag."""
-    key = session.get("transition")
-    if not key:
-        return []
-    line = TRANSITION_LINES.get(key)
-    return [line] if line else []
+    """Return transition lines based on the active function status."""
+    state = session.get("active_function_state")
+    if isinstance(state, dict):
+        status = state.get("status")
+        if status == "open":
+            return [
+                "You may ask if the user wishes to continue or close the exercise."
+            ]
+        if status == "closing":
+            return ["You may now close the exercise if the user agrees."]
+    return []
 
 
 def get_preferences_lines(session: dict) -> List[str]:

@@ -85,12 +85,13 @@ def test_active_function_trigger_and_prompt_integration():
             {
                 "preferences": None,
                 "recent_strategies": [],
-                "active_function_state": dummy_function.prompt_addition,
+                "active_function_state": {"name": dummy_function.name, "status": "open"},
             },
             "explorative",
         )
 
-    assert prompt in system_prompt
+    assert "You may ask if the user wishes to continue or close the exercise." in system_prompt
+    assert dummy_function.name in system_prompt
 
     # Trigger closing after verifying prompt integration
     with patch.object(active_function, "_fetch_row", side_effect=fetch), patch.object(
@@ -242,10 +243,9 @@ def test_dynamic_detection_and_prompt_integration():
             {
                 "preferences": None,
                 "recent_strategies": [],
-                "active_function_state": "dynamic mode\nThe current relationship dynamic is: supportive",
+                "active_function_state": {"name": dummy_function.name, "status": "open"},
             },
             "explorative",
         )
 
-    assert "dynamic mode" in system_prompt
-    assert "The current relationship dynamic is: supportive" in system_prompt
+    assert dummy_function.name in system_prompt

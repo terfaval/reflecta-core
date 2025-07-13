@@ -42,10 +42,10 @@ def build_system_prompt_v2(profile: dict, session: dict, strategy: str) -> str:
     # 7. Strategy block
     lines.extend(get_strategy_section_lines(strategy))
 
-    # 8. Function state line
-    lines.extend(get_function_state_lines(session))
-
-    # 9. Transition line, if applicable
+     # 8. Transition line, if applicable
     lines.extend(get_transition_lines(session))
+
+    # 9. Function state line
+    lines.extend(get_function_state_lines(session))
 
     return safe_join_lines(lines)
