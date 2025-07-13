@@ -262,7 +262,7 @@ export default function ChatPage() {
     setSessionId,
     userRole,
     entries,
-    onRecommendedProfile: setPendingProfileSuggestion,
+    onRecommendedProfile: userRole === 'admin' ? setPendingProfileSuggestion : undefined,
   });
 
   useEffect(() => {
@@ -330,7 +330,7 @@ export default function ChatPage() {
   };
 
   const handleAcceptProfileSuggestion = async () => {
-    if (!pendingProfileSuggestion || !sessionId || userRole === 'guest') {
+    if (!pendingProfileSuggestion || !sessionId || userRole !== 'admin') {
       setPendingProfileSuggestion(null);
       return;
     }
@@ -490,7 +490,7 @@ export default function ChatPage() {
 
   return (
     <div className="reflecta-chat chat-layout" style={currentStyle}>
-      {pendingProfileSuggestion && (
+      {pendingProfileSuggestion && userRole === 'admin' && (
         <ProfileSwitchSuggestion
           profileName={pendingProfileSuggestion}
           onAccept={handleAcceptProfileSuggestion}
