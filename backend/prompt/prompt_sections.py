@@ -25,13 +25,21 @@ def get_strategy_formatting_lines(strategy_template: dict) -> List[str]:
     """Return natural language lines describing formatting cues."""
     lines: List[str] = []
 
+    intro = strategy_template.get("intro_type")
+    if intro:
+        lines.append(f"Begin with a {intro}.")
+
+    body = strategy_template.get("body_type")
+    if body:
+        lines.append(f"Structure the body as {body}.")
+        
     tone = strategy_template.get("preferred_tone")
     if tone:
-        lines.append(f"Keep the tone {tone}.")
+        lines.append(f"Use a {tone} tone.")
 
     layout = strategy_template.get("layout")
     if layout:
-        lines.append(f"Use {layout}.")
+        lines.append(f"Follow a {layout} layout.")
 
     invitation = strategy_template.get("invitation_type")
     if invitation:
@@ -60,7 +68,7 @@ def get_strategy_section_lines(strategy: str) -> List[str]:
 
     if template.get("example_outline"):
         lines.append(template["example_outline"])
-        
+
     return lines
 
 
