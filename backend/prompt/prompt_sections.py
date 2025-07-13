@@ -107,3 +107,13 @@ def get_preferences_lines(session: dict) -> List[str]:
             formatted = human_list(parts)
             return [f"User preferences: {formatted}."]
     return []
+
+
+def get_recent_strategy_lines(session: dict) -> List[str]:
+    """Return a line summarizing recent strategies used."""
+    strategies = session.get("recent_strategies") or []
+    strategies = [s for s in strategies if s]
+    if not strategies:
+        return []
+    joined = human_list(strategies)
+    return [f"Recent strategies: {joined}."]

@@ -10,6 +10,7 @@ from .prompt_sections import (
     get_function_state_lines,
     get_transition_lines,
     get_preferences_lines,
+    get_recent_strategy_lines,
 )
 from .prompt_utils import safe_join_lines
 
@@ -35,13 +36,16 @@ def build_system_prompt_v2(profile: dict, session: dict, strategy: str) -> str:
     # 5. User preferences
     lines.extend(get_preferences_lines(session))
 
-    # 6. Strategy block
+    # 6. Recent strategies recap
+    lines.extend(get_recent_strategy_lines(session))
+
+    # 7. Strategy block
     lines.extend(get_strategy_section_lines(strategy))
 
-    # 7. Function state line
+    # 8. Function state line
     lines.extend(get_function_state_lines(session))
 
-    # 8. Transition line, if applicable
+    # 9. Transition line, if applicable
     lines.extend(get_transition_lines(session))
 
     return safe_join_lines(lines)

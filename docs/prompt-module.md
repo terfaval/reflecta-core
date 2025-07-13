@@ -16,9 +16,10 @@ The `prompt/` directory provides helper utilities for composing a full system pr
 3. **Profile style** – single style summary line from the profile (`get_style_summary_line`).
 4. **Profile tone examples** – optional example quotes (`get_tone_example_lines`).
 5. **Preferences** – per-session preference notes (`get_preferences_lines`).
-6. **Strategy section** – formatting cues and example outline from the chosen strategy (`get_strategy_section_lines`).
-7. **Function state** – active tool invocation information (`get_function_state_lines`).
-8. **Transition cues** – optional reminder or closing line (`get_transition_lines`).
+6. **Recent strategies** – summary of the last few strategies (`get_recent_strategy_lines`).
+7. **Strategy section** – formatting cues and example outline from the chosen strategy (`get_strategy_section_lines`).
+8. **Function state** – active tool invocation information (`get_function_state_lines`).
+9. **Transition cues** – optional reminder or closing line (`get_transition_lines`).
 
 `prompt_utils.safe_join_lines` joins the non-empty lines with blank lines.
 
@@ -43,7 +44,8 @@ The session dictionary may contain:
 
 - `preferences: Union[str, List[str], Dict[str, str]]` – user preferences to echo back.
 - `active_function_state: Any` – description of a currently running function/tool.
-- `recent_strategies: List[str]` – history of used strategies (not yet consumed by the builder).
+- `recent_strategies: List[str]` – history of used strategies, used for the recent strategy recap line.
+
 - `transition: str` – optional key for transition prompts (`"reminder"` or `"closing"`).
 
 ## 5. Extending the system

@@ -222,6 +222,20 @@ async def generate_ai_reply(session_id: str, is_admin: bool) -> Dict[str, Any]:
     detected = strategy_detector.analyze_text(user_input)
     strategy = detected[0]["strategy"] if detected else "explorative"
 
+    session["recent_strategies"] = (
+        session.get("recent_strategies", []) + [strategy]
+    )[-3:]
+    try:
+        result = (
+            client.table("sessions")
+            .update({"recent_strategies": session["recent_strategies"]})
+            .eq("id", session_id)
+            .execute()
+        )
+        _execute(result)
+    except Exception as exc:
+        logger.warning("[respond] recent_strategies update error: %s", exc)
+
     message_entries = [e for e in entries if e.get("role") in {"user", "assistant"}]
     strategy_history = []
     for text in history_texts:
