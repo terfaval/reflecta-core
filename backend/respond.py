@@ -22,6 +22,7 @@ from .db import get_client
 from .prompt.prompt_builder_v2 import build_system_prompt_v2
 from .functions.active_function import handle_user_message, pop_closure_question
 from .strategy_detector_v2 import detect_strategy
+from .conversation_arcs import update_conversation_arc
 from .language.depth_estimator import estimate_depth
 from .arc_state_estimator import estimate_arc_state
 from .profile_recommender import (
@@ -478,6 +479,19 @@ async def respond(
         except Exception as exc:
             logger.warning("[respond] entry labeling failed: %s", exc)
 
+        try:
+            update_conversation_arc(
+                payload.sessionId,
+                {
+                    "strategy": strategy,
+                    "depth_estimate": depth,
+                    "depth_confidence": depth_conf,
+                    "pivot_points": [entry_id] if entry_id else [],
+                },
+            )
+        except Exception as exc:  # pragma: no cover - db error
+            logger.warning("[respond] arc update failed: %s", exc)
+            
         meta_intent = analysis.get("meta_intent") if isinstance(analysis, dict) else None
         if meta_intent in {"system", "profile", "compare_profiles"}:
             if meta_intent == "system":

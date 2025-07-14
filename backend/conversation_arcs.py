@@ -67,6 +67,8 @@ def update_conversation_arc(session_id: str, analysis_result: dict) -> None:
     except Exception:
         logging.exception("[conversation_arcs] Failed to fetch arc")
         return
+    
+    LIMIT = 10
 
     def _dedup(values: List[str]) -> List[str]:
         seen = set()
@@ -75,7 +77,7 @@ def update_conversation_arc(session_id: str, analysis_result: dict) -> None:
             if v and v not in seen:
                 out.append(v)
                 seen.add(v)
-        return out
+        return out[-LIMIT:]
 
     if arc:
         update_fields = {}
@@ -121,7 +123,7 @@ def update_conversation_arc(session_id: str, analysis_result: dict) -> None:
         if depth_confidence is not None:
             row["depth_confidence"] = depth_confidence
         if pivot_points:
-            row["pivot_points"] = list(pivot_points)
+            row["pivot_points"] = _dedup(list(pivot_points))
         if strategy:
             row["strategy_summary"] = [strategy]
         if profile:
