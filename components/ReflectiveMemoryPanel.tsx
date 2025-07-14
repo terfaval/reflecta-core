@@ -3,6 +3,7 @@ import styles from './ReflectiveMemoryPanel.module.css';
 import MemoryIcon from './MemoryIcon';
 import ReflectaGuideButton from './ReflectaGuideButton';
 import AdminReviewButton from './AdminReviewButton';
+import SessionHistory from './SessionHistory';
 
 import { apiFetch } from 'lib/api';
 import { useUserContext } from '@/contexts/UserContext';
@@ -138,16 +139,17 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
     <div className={styles.panel}>
       <div className={styles.topButtons}>
         <ReflectaGuideButton
-          userColor="var(--user-color)"
+          userColor="currentColor"
           style={{ position: 'static', bottom: 'auto', right: 'auto' }}
         />
         {userRole === 'admin' && (
           <AdminReviewButton
-            userColor="var(--user-color)"
+            userColor="currentColor"
             style={{ position: 'static', bottom: 'auto', right: 'auto' }}
           />
         )}
       </div>
+      <SessionHistory />
       {loading && !error && <p className={styles.loading}>Töltés...</p>}
       {filterTypes.length > 0 && (
         <div className={styles.filters}>

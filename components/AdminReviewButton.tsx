@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import { CheckCheck } from 'lucide-react';
-import styles from './ReflectaGuideButton.module.css';
+import styles from './AdminReviewButton.module.css';
 
 export default function AdminReviewButton({ userColor = 'currentColor', style }: { userColor?: string; style?: React.CSSProperties }) {
   const router = useRouter();
