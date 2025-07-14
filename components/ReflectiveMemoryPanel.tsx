@@ -54,9 +54,11 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
     load();
   }, [sessionId, userRole]);
 
-  const reconnect = (label: string) => {
-    const msg = `Múltkor már meséltem neked ${label} témáról, most szeretnék erről tovább beszélni.`;
-    handleSend(msg);
+  const scrollToEntry = (id: string) => {
+    if (!id) return;
+    document
+      .getElementById(`entry-${id}`)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   if (userRole === 'guest') return null;
@@ -90,7 +92,7 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
           <button
             key={item.id}
             className={`${styles.item} ${item.pivot ? styles.pivot : ''}`}
-            onClick={() => reconnect(item.label)}
+            onClick={() => scrollToEntry(item.id)}
             aria-label={item.label}
           >
             <MemoryIcon type={item.type} />

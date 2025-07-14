@@ -89,7 +89,11 @@ export function ChatMessagesList({
         </div>
       ) : (
         entries.map((entry, index) => (
-          <div key={entry.id} className={`reflecta-message-block ${entry.role}`}> 
+          <div
+            key={entry.id}
+            id={`entry-${entry.id}`}
+            className={`reflecta-message-block ${entry.role}`}
+          > 
             <div className={`reflecta-message ${entry.role}`}> 
               {entry.content === '__thinking__' ? (
                 <ThinkingDots />
