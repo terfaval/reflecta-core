@@ -38,6 +38,7 @@ from lib.entry_utils import get_last_user_entry
 from .supabase_client import _execute, get_user_by_id
 from .memory_summary import summarize_messages
 from .profile_suggester import suggest_profiles
+from .language.question_relevance import filter_questions
 from .profile_loader import get_profile
 from .profile_intro import get_profile_intro
 
@@ -341,6 +342,7 @@ async def generate_ai_reply(session_id: str, is_admin: bool) -> Dict[str, Any]:
 
     reply = chat.choices[0].message.content or ""
     reply = reply.strip()
+    reply = filter_questions(reply, user_input, strategy, depth)
 
     logger.debug("[respond] 💬 reply ready, %s chars", len(reply))
 
@@ -491,7 +493,7 @@ async def respond(
             )
         except Exception as exc:  # pragma: no cover - db error
             logger.warning("[respond] arc update failed: %s", exc)
-            
+
         meta_intent = analysis.get("meta_intent") if isinstance(analysis, dict) else None
         if meta_intent in {"system", "profile", "compare_profiles"}:
             if meta_intent == "system":
