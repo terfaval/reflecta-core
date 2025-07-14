@@ -11,6 +11,7 @@ from .prompt_sections import (
     get_core_essence_lines,
     get_structure_guideline_lines,
     get_depth_guideline_lines,
+    get_attunement_lines,
     get_strategy_section_lines,
     get_function_state_lines,
     get_transition_lines,
@@ -28,6 +29,7 @@ def build_system_prompt_v2(profile: dict, session: dict, strategy: str) -> str:
     lines.extend(get_core_essence_lines())
 
     depth = session.get("conversation_arc", {}).get("depth_estimate", "moderate")
+    depth_conf = session.get("conversation_arc", {}).get("depth_confidence")
     strategy = (
         session.get("recent_strategies", [])[-1]
         if session.get("recent_strategies")
@@ -37,6 +39,7 @@ def build_system_prompt_v2(profile: dict, session: dict, strategy: str) -> str:
     # 2. Structure guidelines
     lines.extend(get_structure_guideline_lines())
     lines.extend(get_depth_guideline_lines(depth))
+    lines.extend(get_attunement_lines(strategy, depth, depth_conf))
 
     # 3. Profile style summary
     style_line = get_style_summary_line(profile)

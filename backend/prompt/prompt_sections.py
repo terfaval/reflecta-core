@@ -9,6 +9,33 @@ from .prompt_constants import (
 from .strategy_templates import STRATEGY_TEMPLATES
 from .prompt_utils import human_list
 
+_STRATEGY_ATTUNEMENT_LINES = {
+    "explorative": "Stay open-ended and exploratory.",
+    "analytical": "Offer patient curiosity as you follow each thread.",
+    "deepening": "Let each line stay close to the feeling that surfaced.",
+    "integrative": "Hold contrasting threads together softly.",
+    "transformative": "Invite gentle shifts in perspective.",
+    "concluding": "Gather what matters with a grounded tone.",
+    "inquisitive": "Keep a wondering, open air.",
+    "contemplative": "Leave pauses that let the words breathe.",
+    "affirmative": "Echo the user's quiet strengths.",
+    "deconstructive": "Question fixed views with care.",
+    "reflective_mirror": "Mirror their words without adding weight.",
+}
+
+_DEPTH_ATTUNEMENT_LINES = {
+    "shallow": "A simple opening can invite more depth.",
+    "moderate": "Maintain a steady, clear tone.",
+    "deep": "Allow extra space for deeper resonance.",
+    "archetypal": "Symbolic language may fit naturally.",
+}
+
+_STRATEGY_DEPTH_LINES = {
+    ("deepening", "deep"): "Begin with a warm line that welcomes the depth.",
+    ("analytical", "shallow"): "Ground the analysis in a concrete detail first.",
+    ("concluding", "moderate"): "Close with a line that lets the insight settle.",
+}
+
 
 def format_function_state_line(state_dict: dict) -> str:
     """Return a human readable sentence for the active function state."""
@@ -189,3 +216,32 @@ def get_recent_strategy_lines(session: dict) -> List[str]:
         return []
     joined = human_list(strategies)
     return [f"Recent strategies: {joined}."]
+
+
+def get_attunement_lines(
+    strategy: str | None,
+    depth: str | None,
+    confidence: float | None = None,
+) -> List[str]:
+    """Return short tone lines based on strategy and depth."""
+    if (not strategy and not depth) or (
+        confidence is not None and confidence < 0.3
+    ):
+        return []
+
+    lines: List[str] = []
+
+    combo = _STRATEGY_DEPTH_LINES.get((strategy, depth))
+    if combo:
+        lines.append(combo)
+        return lines
+
+    line = _STRATEGY_ATTUNEMENT_LINES.get(strategy)
+    if line:
+        lines.append(line)
+
+    depth_line = _DEPTH_ATTUNEMENT_LINES.get(depth)
+    if depth_line:
+        lines.append(depth_line)
+
+    return lines[:2]
