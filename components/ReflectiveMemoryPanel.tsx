@@ -12,13 +12,20 @@ interface MemoryLabel {
   pivot?: boolean;
 }
 
+interface Entry {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  created_at: string;
+}
+
 interface ReflectiveMemoryPanelProps {
   sessionId: string | null;
   handleSend: (text?: string) => void;
 }
 
 export default function ReflectiveMemoryPanel({ sessionId, handleSend }: ReflectiveMemoryPanelProps) {
-  const [items, setItems] = useState<MemoryLabel[]>([]);
+  const [items, setItems] = useState<(MemoryLabel & { preview?: string })[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [typeFilters, setTypeFilters] = useState<Record<string, boolean>>({});
@@ -29,11 +36,31 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
     const load = async () => {
       setLoading(true);
       try {
-        const data = await apiFetch<{ labels?: MemoryLabel[] }>(
-          `/api/memory/summary?sessionId=${sessionId}`
-        );
-        const newItems = Array.isArray(data?.labels) ? data.labels : [];
+        const [summaryData, entriesData] = await Promise.all([
+          apiFetch<{ labels?: MemoryLabel[] }>(
+            `/api/memory/summary?sessionId=${sessionId}`
+          ),
+          apiFetch<{ entries?: Entry[] }>(
+            `/api/entries?sessionId=${encodeURIComponent(sessionId)}`
+          ),
+        ]);
+
+        const labels = Array.isArray(summaryData?.labels)
+          ? summaryData.labels
+          : [];
+        const entries = Array.isArray(entriesData?.entries)
+          ? entriesData.entries
+          : [];
+
+        const newItems = labels.map((lbl) => {
+          const entry = entries.find((e) => e.id === lbl.id);
+          let preview = entry?.content ? entry.content.replace(/\s+/g, ' ').trim() : '';
+          if (preview.length > 80) preview = `${preview.slice(0, 77)}...`;
+          return { ...lbl, preview };
+        });
+
         setItems(newItems);
+
         const newTypes = Array.from(
           new Set(newItems.map((i) => i.type).filter(Boolean))
         ) as string[];
@@ -93,10 +120,10 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
             key={item.id}
             className={`${styles.item} ${item.pivot ? styles.pivot : ''}`}
             onClick={() => scrollToEntry(item.id)}
-            aria-label={item.label}
+            aria-label={item.preview || item.label}
           >
             <MemoryIcon type={item.type} />
-            <span className={styles.tooltip}>{item.label}</span>
+            <span className={styles.tooltip}>{item.preview || item.label}</span>
           </button>
         ))}
       </div>
