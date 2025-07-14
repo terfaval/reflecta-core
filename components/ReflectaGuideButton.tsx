@@ -5,15 +5,16 @@ import styles from './ReflectaGuideButton.module.css';
 
 interface ReflectaGuideButtonProps {
   userColor?: string;
+  style?: React.CSSProperties;
 }
 
-export default function ReflectaGuideButton({ userColor = 'currentColor' }: ReflectaGuideButtonProps) {
+export default function ReflectaGuideButton({ userColor = 'currentColor', style }: ReflectaGuideButtonProps) {
   const router = useRouter();
 
   return (
     <div
       className={styles.container}
-      style={{ '--user-color': userColor } as React.CSSProperties}
+      style={{ '--user-color': userColor, ...style } as React.CSSProperties}
     >
       <button
         className={styles.button}

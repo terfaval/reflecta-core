@@ -3,10 +3,10 @@ import { useRouter } from 'next/router';
 import { CheckCheck } from 'lucide-react';
 import styles from './ReflectaGuideButton.module.css';
 
-export default function AdminReviewButton({ userColor = 'currentColor' }: { userColor?: string }) {
+export default function AdminReviewButton({ userColor = 'currentColor', style }: { userColor?: string; style?: React.CSSProperties }) {
   const router = useRouter();
   return (
-    <div className={styles.container} style={{ '--user-color': userColor } as React.CSSProperties}>
+    <div className={styles.container} style={{ '--user-color': userColor, ...style } as React.CSSProperties}>
       <button
         className={styles.button}
         aria-label="Exemplar jóváhagyás"
