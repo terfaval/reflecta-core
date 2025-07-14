@@ -138,13 +138,13 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
     <div className={styles.panel}>
       <div className={styles.topButtons}>
         <ReflectaGuideButton
-          userColor="currentColor"
-          style={{ position: 'static', bottom: 'auto', right: 'auto' }}
+          userColor="user-color"
+          style={{ position: 'static', bottom: 'auto', right: 'auto', fill: "currentColor", color: "currentColor" }}
         />
         {userRole === 'admin' && (
           <AdminReviewButton
-            userColor="currentColor"
-            style={{ position: 'static', bottom: 'auto', right: 'auto' }}
+            userColor="user-color"
+            style={{ position: 'static', bottom: 'auto', right: 'auto', stroke: "currentColor", color: "currentColor" }}
           />
         )}
       </div>
