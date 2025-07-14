@@ -31,6 +31,23 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
   const [typeFilters, setTypeFilters] = useState<Record<string, boolean>>({});
   const { userRole } = useUserContext();
 
+  const USER_TYPES = new Set(['theme', 'pivot', 'section_start']);
+  const AI_TYPES = new Set(['emotion', 'strategy', 'tone']);
+
+  const getItemStyle = (type?: string, pivot?: boolean) => {
+    const useUser = pivot || USER_TYPES.has(type || '');
+    const bg = useUser
+      ? 'var(--user-color)'
+      : AI_TYPES.has(type || '')
+      ? 'var(--ai-color)'
+      : 'var(--user-color)';
+    return {
+      backgroundColor: bg,
+      color: '#fff',
+      '--tooltip-bg': bg,
+    } as React.CSSProperties;
+  };
+  
   useEffect(() => {
     if (!sessionId || userRole === 'guest') return;
     const load = async () => {
@@ -118,7 +135,8 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
         {filteredItems.map((item) => (
           <button
             key={item.id}
-            className={`${styles.item} ${item.pivot ? styles.pivot : ''}`}
+            className={styles.item}
+            style={getItemStyle(item.type, item.pivot)}
             onClick={() => scrollToEntry(item.id)}
             aria-label={item.preview || item.label}
           >

@@ -30,15 +30,15 @@
 
 .item {
   position: relative;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  border: 1px solid var(--user-color);
-  background: transparent;
-  color: var(--user-color);
+  border-radius: 999px;
+  background: var(--user-color);
+  color: #fff;
+  border: none;
   cursor: pointer;
 }
 
@@ -52,7 +52,7 @@
   left: calc(100% + 6px);
   top: 50%;
   transform: translateY(-50%);
-  background: var(--user-color);
+  background: var(--tooltip-bg, var(--user-color));
   color: var(--bg-color);
   padding: 2px 6px;
   border-radius: 4px;
