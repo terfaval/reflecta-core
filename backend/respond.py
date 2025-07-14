@@ -21,8 +21,8 @@ from .auth import Role, role_guard
 from .db import get_client
 from .prompt.prompt_builder_v2 import build_system_prompt_v2
 from .functions.active_function import handle_user_message, pop_closure_question
-from .language import strategy as strategy_detector  # deprecated rule-based detection
 from .strategy_detector_v2 import detect_strategy
+from .language.depth_estimator import estimate_depth
 from .arc_state_estimator import estimate_arc_state
 from .profile_recommender import (
     recommend_profile_switch,
@@ -228,8 +228,11 @@ async def generate_ai_reply(session_id: str, is_admin: bool) -> Dict[str, Any]:
             suggestions = suggest_profiles(user_input, session["profile"])
 
     # Use the new embedding-based strategy detector
-    detected = detect_strategy(user_input)
-    strategy = detected[0]["strategy"] if detected else "explorative"
+    try:
+        detected = detect_strategy(user_input)
+        strategy = detected[0]["strategy"] if detected else "explorative"
+    except Exception:
+        strategy = "explorative"
 
     session["recent_strategies"] = (
         session.get("recent_strategies", []) + [strategy]
@@ -248,8 +251,11 @@ async def generate_ai_reply(session_id: str, is_admin: bool) -> Dict[str, Any]:
     message_entries = [e for e in entries if e.get("role") in {"user", "assistant"}]
     strategy_history = []
     for text in history_texts:
-        det = detect_strategy(text)
-        strategy_history.append(det[0]["strategy"] if det else "explorative")
+        try:
+            det = detect_strategy(text)
+            strategy_history.append(det[0]["strategy"] if det else "explorative")
+        except Exception:
+            strategy_history.append("explorative")
     arc_state = estimate_arc_state(len(message_entries), strategy_history)
     try:
         system_prompt = build_system_prompt_v2(profile, session, strategy)
@@ -432,10 +438,45 @@ async def respond(
         # Analyze and label the message. Failures are logged but ignored
         try:
             analysis = analyze_message(payload.content, user_history)
-            store_entry_labels(entry_id, analysis)
         except Exception as exc:  # pragma: no cover - analysis failure
             logger.warning("[respond] entry analysis failed: %s", exc)
             analysis = {}
+
+        try:
+            detected = detect_strategy(payload.content)
+            strategy = detected[0]["strategy"] if detected else "explorative"
+        except Exception:
+            strategy = "explorative"
+
+        try:
+            depth_res = estimate_depth(payload.content)
+            depth = depth_res["depth"]
+            depth_conf = depth_res["confidence"]
+        except Exception:
+            depth = "shallow"
+            depth_conf = 0.0
+
+        try:
+            store_entry_labels(entry_id, analysis)
+            store_entry_labels(
+                entry_id=entry_id,
+                labels=[
+                    {
+                        "type": "strategy",
+                        "value": strategy,
+                        "confidence": None,
+                        "added_by": "system",
+                    },
+                    {
+                        "type": "depth",
+                        "value": depth,
+                        "confidence": depth_conf,
+                        "added_by": "system",
+                    },
+                ],
+            )
+        except Exception as exc:
+            logger.warning("[respond] entry labeling failed: %s", exc)
 
         meta_intent = analysis.get("meta_intent") if isinstance(analysis, dict) else None
         if meta_intent in {"system", "profile", "compare_profiles"}:

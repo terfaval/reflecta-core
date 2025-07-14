@@ -7,11 +7,8 @@ import logging
 
 from ..language.analyzer import analyze_message
 from ..strategy_detector_v2 import detect_strategy
-from ..strategy_detector import detect_strategy
-from ..arc_state_estimator import (
-    classify_depth as deprecated_classify_depth,  # deprecated
-    estimate_arc_state,
-)
+from ..arc_state_estimator import estimate_arc_state
+
 from ..language.depth_estimator import estimate_depth
 from ..arc_pivot_detector import find_pivot_points
 from ..profile_recommender import recommend_profile_from_analysis

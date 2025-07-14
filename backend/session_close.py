@@ -20,12 +20,8 @@ from .auth import role_guard, Role
 from .conversation_arcs import record_conversation_arc
 from .functions.active_function import close_function, pop_session_prefix
 from .arc_pivot_detector import find_pivot_points
-from .language import strategy as strategy_detector  # deprecated rule-based detection
 from .strategy_detector_v2 import detect_strategy
-from .arc_state_estimator import (
-    classify_depth as deprecated_classify_depth,  # deprecated
-    estimate_arc_state,
-)
+from .arc_state_estimator import estimate_arc_state
 from .language.depth_estimator import estimate_depth
 
 router = APIRouter()
@@ -221,8 +217,11 @@ def close_session(session_id: str) -> Dict[str, str]:
     user_entries = [e for e in entries if e.get("role") == "user"]
     strategies = []
     for e in user_entries:
-        det = detect_strategy(e.get("content", ""))
-        strategies.append(det[0]["strategy"] if det else "explorative")
+        try:
+            det = detect_strategy(e.get("content", ""))
+            strategies.append(det[0]["strategy"] if det else "explorative")
+        except Exception:
+            strategies.append("explorative")
     durations = []
     for a, b in zip(user_entries, user_entries[1:]):
         try:
@@ -233,9 +232,13 @@ def close_session(session_id: str) -> Dict[str, str]:
             durations = []
             break
     joined_text = "\n".join(e.get("content", "") for e in user_entries)
-    res = estimate_depth(joined_text)
-    depth_label = res["depth"]
-    depth_conf = res["confidence"]
+    try:
+        res = estimate_depth(joined_text)
+        depth_label = res["depth"]
+        depth_conf = res["confidence"]
+    except Exception:
+        depth_label = "shallow"
+        depth_conf = 0.0
     pivot_points = find_pivot_points(user_entries, strategies, durations)
     if os.getenv("DEV_MODE"):
         logger.debug("[session_close] Detected %s pivot points", len(pivot_points))

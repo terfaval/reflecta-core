@@ -1,12 +1,16 @@
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from .supabase_client import supabase, _execute
 
 logger = logging.getLogger(__name__)
 
 
-def store_entry_labels(entry_id: str, analysis: Dict[str, Any]) -> None:
+def store_entry_labels(
+    entry_id: str,
+    analysis: Optional[Dict[str, Any]] = None,
+    labels: Optional[List[Dict[str, Any]]] = None,
+) -> None:
     """Persist analysis labels for a conversation entry.
 
     Any errors are logged but not raised so the main flow can continue.
@@ -16,7 +20,7 @@ def store_entry_labels(entry_id: str, analysis: Dict[str, Any]) -> None:
 
     rows: List[Dict[str, Any]] = []
 
-    for topic in analysis.get("topics") or []:
+    for topic in (analysis or {}).get("topics") or []:
         if topic:
             rows.append(
                 {
@@ -27,7 +31,7 @@ def store_entry_labels(entry_id: str, analysis: Dict[str, Any]) -> None:
                 }
             )
 
-    emotion = analysis.get("emotion")
+    emotion = (analysis or {}).get("emotion")
     if emotion:
         rows.append(
             {
@@ -38,7 +42,7 @@ def store_entry_labels(entry_id: str, analysis: Dict[str, Any]) -> None:
             }
         )
 
-    tone = analysis.get("tone")
+    tone = (analysis or {}).get("tone")
     if tone:
         rows.append(
             {
@@ -49,7 +53,7 @@ def store_entry_labels(entry_id: str, analysis: Dict[str, Any]) -> None:
             }
         )
 
-    strategy = analysis.get("relationship_mode")
+    strategy = (analysis or {}).get("relationship_mode")
     if strategy:
         rows.append(
             {
@@ -59,6 +63,20 @@ def store_entry_labels(entry_id: str, analysis: Dict[str, Any]) -> None:
                 "added_by": "system",
             }
         )
+
+    if labels:
+        for label in labels:
+            if not label:
+                continue
+            rows.append(
+                {
+                    "entry_id": entry_id,
+                    "label_type": label.get("type"),
+                    "label_value": label.get("value"),
+                    "confidence": label.get("confidence"),
+                    "added_by": label.get("added_by", "system"),
+                }
+            )
 
     if not rows:
         return
