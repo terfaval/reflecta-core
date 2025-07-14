@@ -4,58 +4,23 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 import os
+import time
+import logging
 
 from openai import OpenAI
 
 from .language.embeddings import cosine_similarity
+from .db import get_client
+from .supabase_client import _execute
 
-# Short exemplar phrases for each strategy. These can be extended or loaded from a file.
-_EXEMPLARS: Dict[str, List[str]] = {
-    "explorative": [
-        "Csak leírom, ami most eszembe jut, nincs konkrét célom.",
-        "Nem tudom, mit akarok ezzel, de muszáj kiírni magamból."
-    ],
-    "analytical": [
-        "Mindig ismét előkerül ugyanaz a dinamika, amikor apámmal beszélek.",
-        "A reakcióm nem az adott helyzetről szólt, hanem valami régebbiről."
-    ],
-    "deepening": [
-        "Van bennem valami fájó húzás, amit nem tudok megfogalmazni.",
-        "Mindig összerezzenek, amikor megdicsérnek, mintha veszélyt jelezne a testem.",
-        "Ez most nem csak érzés, hanem valami mélyebb emlék is megmozdult."
-    ],
-    "integrative": [
-        "Egyrészt dühös vagyok, másrészt meg megértem őt.",
-        "Kavarognak bennem a gondolatok – jó is volt, meg ijesztő is."
-    ],
-    "transformative": [
-        "Most először érzem azt, hogy tényleg meg tudok bocsátani.",
-        "Mintha egy másik nézőpontból látnám magam, és ez felszabadító."
-    ],
-    "concluding": [
-        "Most már világos, mit kellett ebből megtanulnom.",
-        "Le tudom zárni ezt az időszakot – köszönöm, hogy végigkísérted."
-    ],
-    "inquisitive": [
-        "Nem tudom, hogy elmondjam-e neki, vagy inkább várjak még.",
-        "Azt érzem, hogy döntés előtt állok, de nem látok tisztán."
-    ],
-    "contemplative": [
-        "Most nem keresem a választ, csak hagyom, hogy legyen.",
-        "Csendes figyelem van bennem, ahogy ez végiggondolódik."
-    ],
-    "affirmative": [
-        "Megcsináltam. Nem hittem volna, de végig tudtam vinni.",
-        "Most először érzem, hogy tényleg elfogadom magam ebben a helyzetben."
-    ],
-    "deconstructive": [
-        "Mi értelme ennek az egész körnek megint?",
-        "Az egész rendszer hazugság, és én részt vettem benne – miért?"
-    ],
-}
+# NOTE: The previous static ``_EXEMPLARS`` dictionary was migrated to the
+# ``strategy_exemplars`` table.  Exemplars are now loaded dynamically from the
+# database at runtime.
 
 _CLIENT: Optional[OpenAI] = None
 _EXEMPLAR_EMBEDDINGS: Dict[str, List[List[float]]] = {}
+_LAST_LOAD_TS = 0.0
+_CACHE_TTL = 300  # seconds
 _MODEL_NAME = os.getenv("STRATEGY_EMBEDDING_MODEL", "text-embedding-ada-002")
 
 
@@ -72,11 +37,45 @@ def _embed(text: str) -> List[float]:
     return result.data[0].embedding
 
 
+def _load_exemplars() -> Dict[str, List[str]]:
+    """Fetch exemplars from the database."""
+    client = get_client()
+    result = (
+        client.table("strategy_exemplars")
+        .select("strategy, content")
+        .eq("language", "hu")
+        .is_("profile", None)
+        .execute()
+    )
+    rows = _execute(result) or []
+    data: Dict[str, List[str]] = {}
+    for row in rows:
+        strategy = row.get("strategy")
+        content = row.get("content")
+        if not strategy or not content:
+            continue
+        data.setdefault(strategy, []).append(content)
+    return data
+
+
 def _ensure_exemplar_embeddings() -> None:
-    if _EXEMPLAR_EMBEDDINGS:
+    global _LAST_LOAD_TS
+    now = time.time()
+    if _EXEMPLAR_EMBEDDINGS and now - _LAST_LOAD_TS < _CACHE_TTL:
         return
-    for label, texts in _EXEMPLARS.items():
-        _EXEMPLAR_EMBEDDINGS[label] = [_embed(t) for t in texts]
+    try:
+        exemplars = _load_exemplars()
+    except Exception:
+        logging.exception("[strategy_detector] Failed to load exemplars")
+        exemplars = {}
+    _EXEMPLAR_EMBEDDINGS.clear()
+    for label, texts in exemplars.items():
+        try:
+            _EXEMPLAR_EMBEDDINGS[label] = [_embed(t) for t in texts]
+        except Exception:
+            logging.exception("[strategy_detector] Embedding failed: %s", label)
+            _EXEMPLAR_EMBEDDINGS[label] = []
+    _LAST_LOAD_TS = now
 
 
 def detect_strategy(text: str) -> List[Dict[str, float]]:

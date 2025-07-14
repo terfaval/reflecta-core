@@ -144,3 +144,15 @@ create table if not exists login_tokens (
 );
 
 create index if not exists login_tokens_user_idx on login_tokens(user_id);
+
+-- EXEMPLAR PHRASES FOR STRATEGY DETECTION
+create table if not exists strategy_exemplars (
+  id serial primary key,
+  strategy text not null,
+  profile text,
+  language text default 'hu',
+  content text not null,
+  source text,
+  created_at timestamp default now(),
+  added_by text
+);
