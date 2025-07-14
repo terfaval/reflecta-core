@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styles from './ReflectiveMemoryPanel.module.css';
+import MemoryIcon from './MemoryIcon';
 
 import { apiFetch } from 'lib/api';
 import { useUserContext } from '@/contexts/UserContext';
@@ -47,38 +48,25 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
     handleSend(msg);
   };
 
-  const labelIcon = (
-    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-      <circle cx="12" cy="12" r="5" />
-    </svg>
-  );
-
-  const strategyIcon = (
-    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-      <rect x="6" y="6" width="12" height="12" />
-    </svg>
-  );
-
   if (userRole === 'guest') return null;
   
   return (
     <div className={styles.panel}>
       {loading && !error && <p className={styles.loading}>Töltés...</p>}
-      {items.map((item) => (
-        <div key={item.id} className={`${styles.item} ${item.pivot ? styles.pivot : ''}`}>
-          <div className={styles.iconWrapper} aria-label={item.label}>
-            {item.type === 'strategy' ? strategyIcon : labelIcon}
+      <div className={styles.timeline}>
+        {items.map((item) => (
+          <button
+            key={item.id}
+            className={`${styles.item} ${item.pivot ? styles.pivot : ''}`}
+            onClick={() => reconnect(item.label)}
+            aria-label={item.label}
+          >
+            <MemoryIcon type={item.type} />
             <span className={styles.tooltip}>{item.label}</span>
-          </div>
-          <button className={styles.reopen} onClick={() => reconnect(item.label)} aria-label="Újranyitás">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
           </button>
-        </div>
-      ))}
-      {error && <p className={styles.error}>{error}</p>} 
+        ))}
+      </div>
+      {error && <p className={styles.error}>{error}</p>}
     </div>
   );
 }
