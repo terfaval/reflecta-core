@@ -46,7 +46,7 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
     return {
       backgroundColor: bg,
       color: '#fff',
-      '--tooltip-bg': bg,
+      '--tooltip-bg': 'var(--ai-color)',
     } as React.CSSProperties;
   };
   
