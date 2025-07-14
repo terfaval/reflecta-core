@@ -39,6 +39,26 @@ export default function LoadingPage() {
           method: 'GET',
         });
 
+        try {
+          const list = await apiFetch<
+            {
+              profile: string;
+              conversation_id: string;
+              session: { id: string; started_at: string; ended_at: string | null } | null;
+            }[]
+          >(`/api/conversations/last-sessions?userId=${encodeURIComponent(userId)}`);
+          list.forEach((item) => {
+            if (item.conversation_id) {
+              sessionStorage.setItem(`reflecta_conversation_${item.profile}`, item.conversation_id);
+            }
+            if (item.session?.id) {
+              sessionStorage.setItem(`reflecta_session_${item.profile}`, item.session.id);
+            }
+          });
+        } catch (err) {
+          console.error('[conversations/last-sessions]', err);
+        }
+
         const navigate = () => {
           if (data.conversationId && data.sessionId && !data.endedAt) {
             if (data.profile) setProfile(data.profile);
