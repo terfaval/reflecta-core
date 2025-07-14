@@ -11,20 +11,47 @@ from .language.embeddings import cosine_similarity
 
 # Short exemplar phrases for each strategy. These can be extended or loaded from a file.
 _EXEMPLARS: Dict[str, List[str]] = {
-    "explorative": ["Csak leírom ami eszembe jut."],
-    "analytical": ["Mindig ismét előkerül ugyanaz."],
-    "deepening": [
-        "Mély érzések mozognak bennem.",
-        "Mindig összerezzenek, amikor megdicsérnek.",
+    "explorative": [
+        "Csak leírom, ami most eszembe jut, nincs konkrét célom.",
+        "Nem tudom, mit akarok ezzel, de muszáj kiírni magamból."
     ],
-    "integrative": ["Egyrészt ezt érzem, másrészt azt."],
-    "transformative": ["Új szemmel nézek mindenre."],
-    "concluding": ["Most már tudom, mit tanultam."],
-    "inquisitive": ["Nem tudom melyik lenne jobb?"],
-    "contemplative": ["Csak csendben figyelek."],
-    "affirmative": ["Képes vagyok rá."],
-    "deconstructive": ["Mi értelme ennek?"],
-    "reflective_mirror": ["Most csak jelen vagyok."],
+    "analytical": [
+        "Mindig ismét előkerül ugyanaz a dinamika, amikor apámmal beszélek.",
+        "A reakcióm nem az adott helyzetről szólt, hanem valami régebbiről."
+    ],
+    "deepening": [
+        "Van bennem valami fájó húzás, amit nem tudok megfogalmazni.",
+        "Mindig összerezzenek, amikor megdicsérnek, mintha veszélyt jelezne a testem.",
+        "Ez most nem csak érzés, hanem valami mélyebb emlék is megmozdult."
+    ],
+    "integrative": [
+        "Egyrészt dühös vagyok, másrészt meg megértem őt.",
+        "Kavarognak bennem a gondolatok – jó is volt, meg ijesztő is."
+    ],
+    "transformative": [
+        "Most először érzem azt, hogy tényleg meg tudok bocsátani.",
+        "Mintha egy másik nézőpontból látnám magam, és ez felszabadító."
+    ],
+    "concluding": [
+        "Most már világos, mit kellett ebből megtanulnom.",
+        "Le tudom zárni ezt az időszakot – köszönöm, hogy végigkísérted."
+    ],
+    "inquisitive": [
+        "Nem tudom, hogy elmondjam-e neki, vagy inkább várjak még.",
+        "Azt érzem, hogy döntés előtt állok, de nem látok tisztán."
+    ],
+    "contemplative": [
+        "Most nem keresem a választ, csak hagyom, hogy legyen.",
+        "Csendes figyelem van bennem, ahogy ez végiggondolódik."
+    ],
+    "affirmative": [
+        "Megcsináltam. Nem hittem volna, de végig tudtam vinni.",
+        "Most először érzem, hogy tényleg elfogadom magam ebben a helyzetben."
+    ],
+    "deconstructive": [
+        "Mi értelme ennek az egész körnek megint?",
+        "Az egész rendszer hazugság, és én részt vettem benne – miért?"
+    ],
 }
 
 _CLIENT: Optional[OpenAI] = None
