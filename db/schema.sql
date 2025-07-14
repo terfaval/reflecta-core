@@ -156,3 +156,15 @@ create table if not exists strategy_exemplars (
   created_at timestamp default now(),
   added_by text
 );
+
+create table if not exists strategy_exemplar_suggestions (
+  id serial primary key,
+  strategy text not null,
+  profile text,
+  language text default 'hu',
+  content text not null,
+  confidence numeric,
+  source_entry_id uuid references entries(id) on delete cascade,
+  status text default 'pending',
+  created_at timestamp default now()
+);

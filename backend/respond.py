@@ -41,6 +41,7 @@ from .profile_suggester import suggest_profiles
 from .language.question_relevance import filter_questions
 from .profile_loader import get_profile
 from .profile_intro import get_profile_intro
+from .learning.strategy_learning import suggest_exemplar_from_entry
 
 
 router = APIRouter()
@@ -500,6 +501,16 @@ async def respond(
         except Exception as exc:  # pragma: no cover - db error
             logger.warning("[respond] arc update failed: %s", exc)
 
+        try:
+            suggest_exemplar_from_entry(
+                {"id": entry_id, "content": payload.content},
+                strategy,
+                depth,
+                depth_conf,
+            )
+        except Exception as exc:  # pragma: no cover - db error
+            logger.warning("[respond] exemplar suggestion failed: %s", exc)
+            
         meta_intent = analysis.get("meta_intent") if isinstance(analysis, dict) else None
         if meta_intent in {"system", "profile", "compare_profiles"}:
             if meta_intent == "system":
