@@ -21,6 +21,7 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
   const [items, setItems] = useState<MemoryLabel[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [typeFilters, setTypeFilters] = useState<Record<string, boolean>>({});
   const { userRole } = useUserContext();
 
   useEffect(() => {
@@ -31,8 +32,18 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
         const data = await apiFetch<{ labels?: MemoryLabel[] }>(
           `/api/memory/summary?sessionId=${sessionId}`
         );
-        // expecting { labels: MemoryLabel[] }
-        setItems(Array.isArray(data?.labels) ? data.labels : []);
+        const newItems = Array.isArray(data?.labels) ? data.labels : [];
+        setItems(newItems);
+        const newTypes = Array.from(
+          new Set(newItems.map((i) => i.type).filter(Boolean))
+        ) as string[];
+        setTypeFilters((prev) => {
+          const next: Record<string, boolean> = {};
+          newTypes.forEach((t) => {
+            next[t] = prev[t] ?? true;
+          });
+          return next;
+        });
         setError(null);
       } catch (err) {
         console.error('Failed to fetch memory summary', err);
@@ -49,12 +60,33 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
   };
 
   if (userRole === 'guest') return null;
+
+  const filteredItems = items.filter(
+    (item) => !item.type || typeFilters[item.type]
+  );
+  const filterTypes = Object.keys(typeFilters);
   
   return (
     <div className={styles.panel}>
       {loading && !error && <p className={styles.loading}>Töltés...</p>}
+      {filterTypes.length > 0 && (
+        <div className={styles.filters}>
+          {filterTypes.map((t) => (
+            <label key={t} className={styles.filterLabel}>
+              <input
+                type="checkbox"
+                checked={typeFilters[t]}
+                onChange={() =>
+                  setTypeFilters((prev) => ({ ...prev, [t]: !prev[t] }))
+                }
+              />
+              {t}
+            </label>
+          ))}
+        </div>
+      )}
       <div className={styles.timeline}>
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <button
             key={item.id}
             className={`${styles.item} ${item.pivot ? styles.pivot : ''}`}

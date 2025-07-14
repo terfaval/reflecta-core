@@ -81,3 +81,19 @@
   font-family: 'Raleway', sans-serif;
   color: #666;
 }
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  font-family: 'Raleway', sans-serif;
+}
+
+.filterLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
