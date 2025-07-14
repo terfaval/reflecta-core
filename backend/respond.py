@@ -239,6 +239,12 @@ async def generate_ai_reply(session_id: str, is_admin: bool) -> Dict[str, Any]:
     session["recent_strategies"] = (
         session.get("recent_strategies", []) + [strategy]
     )[-3:]
+    
+    try:
+        depth_res = estimate_depth(user_input)
+        depth = depth_res["depth"]
+    except Exception:
+        depth = "shallow"
     try:
         result = (
             client.table("sessions")
