@@ -37,6 +37,22 @@ def get_structure_guideline_lines() -> List[str]:
     return STRUCTURE_GUIDELINE_LINES.copy()
 
 
+def get_depth_guideline_lines(depth: str) -> List[str]:
+    """Return additional guidelines based on the estimated depth."""
+    depth_value = (depth or "").lower()
+    if depth_value in {"shallow", "surface"}:
+        return [
+            "Offer a bit more structure and guiding questions for clarity.",
+            "Use concrete examples when possible.",
+        ]
+    if depth_value in {"deep", "archetypal"}:
+        return [
+            "Allow more openness and a slower rhythm, even symbolic language.",
+            "Provide fewer but spacious questions to invite reflection.",
+        ]
+    return []
+
+
 def get_strategy_formatting_lines(strategy_template: dict) -> List[str]:
     """Return natural language lines describing formatting cues."""
     lines: List[str] = []
@@ -108,6 +124,11 @@ def get_strategy_section_lines(
     if template.get("example_outline"):
         lines.append(template["example_outline"])
 
+    if strategy == "contemplative":
+        lines.append("Leave space for silence or ambiguity in your reply.")
+    elif strategy == "analytical":
+        lines.append("Seek out connections and possible causality in the user's thoughts.")
+        
     return lines
 
 

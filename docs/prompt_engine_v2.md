@@ -14,11 +14,18 @@ This design makes it easier to add new strategies or style options without chang
 
 ### build_system_prompt_v2
 
-`build_system_prompt_v2(profile, session, strategy)` in [`prompt_builder_v2.py`](../backend/prompt/prompt_builder_v2.py) orchestrates the process. Lines from the source show the ordered steps:
+`build_system_prompt_v2(profile, session, strategy)` in [`prompt_builder_v2.py`](../backend/prompt/prompt_builder_v2.py) orchestrates the process. Lines from the source show the ordered steps. The builder now also adapts to the session's depth and recent strategy:
 
 ```python
 lines.extend(get_core_essence_lines())          # 1
+depth = session.get("conversation_arc", {}).get("depth_estimate", "moderate")
+strategy = (
+    session.get("recent_strategies", [])[-1]
+    if session.get("recent_strategies")
+    else "explorative"
+)
 lines.extend(get_structure_guideline_lines())   # 2
+lines.extend(get_depth_guideline_lines(depth))
 style_line = get_style_summary_line(profile)    # 3
 lines.extend(get_tone_example_lines(profile, session))   # 4
 lines.extend(get_preferences_lines(session))    # 5
@@ -29,14 +36,15 @@ lines.extend(get_function_state_lines(session)) # 9
 return safe_join_lines(lines)
 ```
 
-【F:backend/prompt/prompt_builder_v2.py†L22-L51】
+【F:backend/prompt/prompt_builder_v2.py†L23-L67】
 
 ### prompt_sections.py functions
 
 The helper functions in `prompt_sections.py` provide standard fragments:
 
 - `get_core_essence_lines()` and `get_structure_guideline_lines()` return constant lists of base instructions.【F:backend/prompt/prompt_sections.py†L13-L20】
-- `get_strategy_section_lines()` builds formatting hints and examples for a selected strategy.【F:backend/prompt/prompt_sections.py†L57-L71】
+- `get_depth_guideline_lines(depth)` adjusts structure hints based on the estimated conversation depth.【F:backend/prompt/prompt_sections.py†L23-L36】
+- `get_strategy_section_lines()` builds formatting hints and examples for a selected strategy.【F:backend/prompt/prompt_sections.py†L57-L74】
 - `get_preferences_lines()` and `get_recent_strategy_lines()` parse session data to reflect user preferences and recent strategies.【F:backend/prompt/prompt_sections.py†L96-L123】
 - `get_transition_lines()` and `get_function_state_lines()` inject lines related to an active function or closing transition.【F:backend/prompt/prompt_sections.py†L74-L94】
 
@@ -74,7 +82,9 @@ STRATEGY_TEMPLATES = {
 
 - `preferences` – string, list or dict describing user preferences.
 - `recent_strategies` – list of strategy keys previously used.
+- `conversation_arc` – dictionary containing `depth_estimate` and other arc data used for adaptive prompts.
 - `active_function_state` – object describing an ongoing reflective function, used for transition cues and state summaries.
+
 
 ### Profile
 
