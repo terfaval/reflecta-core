@@ -24,9 +24,10 @@ interface Entry {
 interface ReflectiveMemoryPanelProps {
   sessionId: string | null;
   handleSend: (text?: string) => void;
+  userColor?: string;
 }
 
-export default function ReflectiveMemoryPanel({ sessionId, handleSend }: ReflectiveMemoryPanelProps) {
+export default function ReflectiveMemoryPanel({ sessionId, handleSend, userColor = 'var(--user-color)' }: ReflectiveMemoryPanelProps) {
   const [items, setItems] = useState<(MemoryLabel & { preview?: string })[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -138,13 +139,13 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
     <div className={styles.panel}>
       <div className={styles.topButtons}>
         <ReflectaGuideButton
-          userColor="user-color"
-          style={{ position: 'static', bottom: 'auto', right: 'auto', fill: "currentColor", color: "currentColor" }}
+          userColor={userColor}
+          style={{ position: 'static', bottom: 'auto', right: 'auto', fill: 'currentColor', color: 'currentColor' }}
         />
         {userRole === 'admin' && (
           <AdminReviewButton
-            userColor="user-color"
-            style={{ position: 'static', bottom: 'auto', right: 'auto', stroke: "currentColor", color: "currentColor" }}
+            userColor={userColor}
+            style={{ position: 'static', bottom: 'auto', right: 'auto', stroke: 'currentColor', color: 'currentColor' }}
           />
         )}
       </div>

@@ -542,7 +542,10 @@ export default function ChatPage() {
       </div>
       <div className="chat-memory-panel">
         {userRole !== 'guest' && (
-          <ReflectiveMemoryPanel sessionId={sessionId} handleSend={handleSend} />
+          <ReflectiveMemoryPanel
+            sessionId={sessionId}
+            handleSend={handleSend}
+            userColor={currentStyle['--user-color']}
         )}
       </div>
     </div>
