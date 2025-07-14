@@ -20,21 +20,24 @@ class ChatloadRequest(BaseModel):
     profile: str
     limit: int = Field(default=20, ge=1, le=100)
     offset: int = Field(default=0, ge=0, le=1000)
-    conversationCount: int = Field(default=1, ge=1, le=10)
+    conversationCount: int | None = Field(default=None, ge=1)
 
 
-def _fetch_recent_conversations(user_id: str, profile: str, count: int) -> List[Dict[str, Any]]:
+def _fetch_recent_conversations(
+    user_id: str, profile: str, count: int | None
+) -> List[Dict[str, Any]]:
     """Return the most recent conversation ids for the user and profile."""
     normalized = normalize_profile(profile)
-    result = (
+    query = (
         supabase.table("conversations")
         .select("id")
         .eq("user_id", user_id)
         .ilike("profile", normalized)
         .order("started_at", desc=True)
-        .limit(count)
-        .execute()
     )
+    if count is not None:
+        query = query.limit(count)
+    result = query.execute()
     return _execute(result) or []
 
 
