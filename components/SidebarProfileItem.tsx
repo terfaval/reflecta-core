@@ -95,8 +95,8 @@ export default function SidebarProfileItem({
         ) : (
           <div className="w-8 h-8 rounded-full" style={{ backgroundColor: isActive ? 'white' : color }} />
         )}
+        {unused && <span className={styles.newDot} />}
       </div>
-      {unused && <span className={styles.newDot} />}
       <div className={styles.textContainer}>
         <span className={styles.itemHeader}>{truncate(name)}</span>
         <span className={`${styles.itemSubtext} ${bottomClassName}`}>{truncate(bottomText)}</span>
