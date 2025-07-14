@@ -7,9 +7,7 @@ import SessionLabelBubble from './SessionLabelBubble';
 import ScrollToBottomButton from './ScrollToBottomButton';
 import ResponseTweakButtons from './ResponseTweakButtons';
 // import FloatingFeatureToolbar from './FloatingFeatureToolbar';
-import ReflectaGuideButton from './ReflectaGuideButton';
-import AdminReviewButton from './AdminReviewButton';
-import { useUserContext } from '@/contexts/UserContext';
+// Guide and admin review buttons were moved to ReflectiveMemoryPanel.
 
 interface Entry {
   id: string;
@@ -50,7 +48,6 @@ export function ChatMessagesList({
   messagesRef,
 }: ChatMessagesListProps) {
   const lastAssistantIndex = entries.map((e) => e.role).lastIndexOf('assistant');
-  const { userRole } = useUserContext();
   return (
     <div
       className="reflecta-messages"
@@ -58,10 +55,6 @@ export function ChatMessagesList({
       data-session-id={sessionId || undefined}
       style={{ flex: 1, overflowY: 'auto', padding: '1rem', position: 'relative' }}
     >
-      <ReflectaGuideButton userColor={currentStyle['--user-color']} />
-      {userRole === 'admin' && (
-        <AdminReviewButton userColor={currentStyle['--user-color']} />
-      )}
       {loadError && !entries.length ? (
         <div style={{ textAlign: 'center' }}>
           <p>{loadError}</p>
