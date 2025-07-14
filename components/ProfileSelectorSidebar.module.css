@@ -109,6 +109,16 @@
   display: none;
 }
 
+.newDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #4ade80; /* green-400 */
+  border-radius: 9999px;
+  margin-left: -0.25rem;
+  margin-right: 0.25rem;
+  flex-shrink: 0;
+}
+
 .toggle {
   background: transparent;
   border: none;

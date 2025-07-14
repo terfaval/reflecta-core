@@ -7,6 +7,7 @@ import styles from "./ProfileSelectorSidebar.module.css";
 import { useProfileContext } from "@/contexts/ProfileContext";
 import { useAvailableProfiles } from "@/hooks/useAvailableProfiles";
 import { useUserContext } from "@/contexts/UserContext";
+import { useProfileUsage } from "@/hooks/useProfileUsage";
 
 const MAX_TEXT_LENGTH = 32;
 
@@ -61,6 +62,7 @@ export default function ProfileSelectorSidebar({
   const router = useRouter();
   const { profiles: availableProfiles, personalNames, role } = useAvailableProfiles();
   const { userRole } = useUserContext();
+  const { usage, recordUse } = useProfileUsage();
   const [open, setOpen] = React.useState(true);
 
   if (userRole === 'guest') return null;
@@ -91,16 +93,17 @@ export default function ProfileSelectorSidebar({
   }, [allProfiles, activeProfileId]);
 
   const otherProfiles = React.useMemo<Profile[]>(() => {
-    const arr: Profile[] = [];
     const activeId = activeProfileId?.toLowerCase();
-    customProfiles.forEach((p) => {
-      if (p.id.toLowerCase() !== activeId) arr.push(p);
+    const used: Profile[] = [];
+    const unused: Profile[] = [];
+    allProfiles.forEach((p) => {
+      if (p.id.toLowerCase() === activeId) return;
+      if (usage[p.id]) used.push(p);
+      else unused.push(p);
     });
-    baseProfiles.forEach((p) => {
-      if (p.id.toLowerCase() !== activeId) arr.push(p);
-    });
-    return arr;
-  }, [baseProfiles, customProfiles, activeProfileId]);
+    used.sort((a, b) => (usage[b.id] || 0) - (usage[a.id] || 0));
+    return [...used, ...unused];
+  }, [allProfiles, usage, activeProfileId]);
 
   const showCreateButton =
         userRole !== 'guest' && (role === 'admin' || (role !== 'basic' && customProfiles.length === 0));
@@ -114,25 +117,6 @@ export default function ProfileSelectorSidebar({
       >
         {open ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
       </button>
-      {open && activeProfile && (
-        (() => {
-          const list = entries[activeProfile.id] || [];
-          const lastUser = [...list].reverse().find((e) => e.role === "user");
-          const bottomText = lastUser ? lastUser.content : activeProfile.role;
-          const bottomClass = lastUser ? "text-sm" : "text-sm font-medium";
-          return (
-            <SidebarProfileItem
-              name={activeProfile.name}
-              bottomText={bottomText}
-              bottomClassName={bottomClass}
-              iconName={activeProfile.iconName}
-              color={activeProfile.user_color}
-              isActive
-              onEdit={personalNames.includes(activeProfile.name) ? () => router.push(`/edit-profile/${encodeURIComponent(activeProfile.name)}`) : undefined}
-            />
-          );
-        })()
-      )}
       {open && showCreateButton && (
         <button
           key="create-custom"
@@ -147,6 +131,27 @@ export default function ProfileSelectorSidebar({
           </span>
         </button>
       )}
+      {open && activeProfile && (
+        (() => {
+          const list = entries[activeProfile.id] || [];
+          const lastUser = [...list].reverse().find((e) => e.role === 'user');
+          const bottomText = lastUser ? lastUser.content : activeProfile.role;
+          const bottomClass = lastUser ? 'text-sm' : 'text-sm font-medium';
+          return (
+            <SidebarProfileItem
+              name={activeProfile.name}
+              bottomText={bottomText}
+              bottomClassName={bottomClass}
+              iconName={activeProfile.iconName}
+              color={activeProfile.user_color}
+              isActive
+              onEdit={personalNames.includes(activeProfile.name) ? () =>
+                router.push(`/edit-profile/${encodeURIComponent(activeProfile.name)}`)
+                : undefined}
+            />
+          );
+        })()
+      )}
       {open && otherProfiles.map((p) => {
         const list = entries[p.id] || [];
         const lastUser = [...list].reverse().find((e) => e.role === "user");
@@ -155,7 +160,10 @@ export default function ProfileSelectorSidebar({
         return (
           <SidebarProfileItem
             key={p.id}
-            onClick={() => onProfileSelect(p)}
+            onClick={() => {
+              recordUse(p.id);
+              onProfileSelect(p);
+            }}
             name={p.name}
             bottomText={bottomText}
             bottomClassName={bottomClass}
@@ -163,6 +171,7 @@ export default function ProfileSelectorSidebar({
             color={p.user_color}
             hoverBackground={p.ai_color}
             onEdit={personalNames.includes(p.name) ? () => router.push(`/edit-profile/${encodeURIComponent(p.name)}`) : undefined}
+            unused={!usage[p.id]}
           />
         );
       })}

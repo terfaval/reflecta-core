@@ -33,6 +33,7 @@ export interface SidebarProfileItemProps {
   onClick?: () => void;
   hoverBackground?: string;
   onEdit?: () => void;
+  unused?: boolean;
 }
 
 export default function SidebarProfileItem({
@@ -45,6 +46,7 @@ export default function SidebarProfileItem({
   onClick,
   hoverBackground,
   onEdit,
+  unused = false,
 }: SidebarProfileItemProps) {
   const IconComp = iconName && iconMap[iconName];
   const [isHovered, setIsHovered] = React.useState(false);
@@ -72,6 +74,7 @@ export default function SidebarProfileItem({
           <div className="w-8 h-8 rounded-full" style={{ backgroundColor: isActive ? 'white' : color }} />
         )}
       </div>
+      {unused && <span className={styles.newDot} />}
       <div className={styles.textContainer}>
         <span className={styles.itemHeader}>{truncate(name)}</span>
         <span className={`${styles.itemSubtext} ${bottomClassName}`}>{truncate(bottomText)}</span>
