@@ -122,7 +122,7 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
             onClick={() => scrollToEntry(item.id)}
             aria-label={item.preview || item.label}
           >
-            <MemoryIcon type={item.type} />
+            <MemoryIcon type={item.type} label={item.label} />
             <span className={styles.tooltip}>{item.preview || item.label}</span>
           </button>
         ))}
