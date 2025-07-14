@@ -20,10 +20,11 @@ class ChatloadRequest(BaseModel):
     profile: str
     limit: int = Field(default=20, ge=1, le=100)
     offset: int = Field(default=0, ge=0, le=1000)
+    conversationCount: int = Field(default=1, ge=1, le=10)
 
 
-def _fetch_latest_conversation(user_id: str, profile: str) -> Dict[str, Any]:
-    """Return the most recent conversation id for the user and profile."""
+def _fetch_recent_conversations(user_id: str, profile: str, count: int) -> List[Dict[str, Any]]:
+    """Return the most recent conversation ids for the user and profile."""
     normalized = normalize_profile(profile)
     result = (
         supabase.table("conversations")
@@ -31,11 +32,10 @@ def _fetch_latest_conversation(user_id: str, profile: str) -> Dict[str, Any]:
         .eq("user_id", user_id)
         .ilike("profile", normalized)
         .order("started_at", desc=True)
-        .limit(1)
-        .maybe_single()
+        .limit(count)
         .execute()
     )
-    return _execute(result)
+    return _execute(result) or []
 
 
 def _fetch_sessions(conversation_id: str) -> List[Dict[str, Any]]:
@@ -119,21 +119,26 @@ async def chatload(
     profile = payload.profile
     limit = payload.limit
     offset = payload.offset
+    convo_count = payload.conversationCount
 
     if not userId or not profile:
         raise HTTPException(status_code=400, detail="Missing userId or profile")
 
-    conversation = _fetch_latest_conversation(userId, profile)
-    if not conversation:
+    conversations = _fetch_recent_conversations(userId, profile, convo_count)
+    if not conversations:
         raise HTTPException(status_code=404, detail="No conversation found")
 
-    sessions = _fetch_sessions(conversation["id"])
-    if not sessions:
-        raise HTTPException(status_code=404, detail="No sessions found for conversation")
+    session_ids: List[str] = []
+    session_map: Dict[str, str] = {}
+    latest_session_id = None
 
-    session_ids = [s["id"] for s in sessions]
-    session_map = {s["id"]: s.get("label", "") for s in sessions}
-    latest_session_id = session_ids[-1]
+    for idx, conv in enumerate(conversations):
+        conv_sessions = _fetch_sessions(conv["id"])
+        if idx == 0 and conv_sessions:
+            latest_session_id = conv_sessions[-1]["id"]
+        for s in conv_sessions:
+            session_ids.append(s["id"])
+            session_map[s["id"]] = s.get("label", "")
 
     entries = _fetch_entries(session_ids, offset, limit)
     closing_trigger = _fetch_closing_trigger(profile)
@@ -141,7 +146,8 @@ async def chatload(
     arcs = _fetch_arcs(session_ids)
 
     return {
-        "conversationId": conversation["id"],
+        "conversationId": conversations[0]["id"],
+        "conversationIds": [c["id"] for c in conversations],
         "sessionId": latest_session_id,
         "sessionIds": session_ids,
         "entries": entries,

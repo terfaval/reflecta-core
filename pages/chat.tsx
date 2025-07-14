@@ -56,6 +56,7 @@ export default function ChatPage() {
   const [page, setPage] = useState(0);
   const [isClosing, setIsClosing] = useState(false);
   const limit = 20;
+  const conversationCount = 10;
   const isFetchingRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
@@ -404,6 +405,7 @@ export default function ChatPage() {
           profile,
           offset: pageIndex * limit,
           limit,
+          conversationCount,
         }),
       });
 
