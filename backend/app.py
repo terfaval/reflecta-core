@@ -14,6 +14,7 @@ from .respond import router as respond_router
 from .session import router as session_router
 from .chatload import router as chatload_router
 from .conversation_new import router as conversation_router
+from .conversation_by_profile import router as conversation_by_profile_router
 from .entries import router as entries_router
 from .session_close import router as session_close_router
 from .session_update_label import router as session_update_label_router
@@ -74,6 +75,7 @@ api_router.include_router(respond_router)
 api_router.include_router(session_router)
 api_router.include_router(chatload_router)
 api_router.include_router(conversation_router)
+api_router.include_router(conversation_by_profile_router)
 api_router.include_router(entries_router)
 api_router.include_router(session_close_router)
 api_router.include_router(session_update_label_router)

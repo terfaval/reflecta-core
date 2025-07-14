@@ -290,18 +290,42 @@ export default function ChatPage() {
     // eslint-disable-next-line no-console
     console.log('[switch profile]', { userId, profile_name: name });
     try {
+      const params = new URLSearchParams({ profile: name });
       const data = await apiFetch<{
-        status: string; conversation_id: string; session_id: string 
-}>(
-        "/api/conversation/new",
+        conversation_id: string | null;
+        session_id: string | null;
+      }>(`/api/conversation/by-profile?${params.toString()}`);
+      if (data.conversation_id && data.session_id) {
+        sessionStorage.setItem(`reflecta_session_${name}`, data.session_id);
+        setProfile(name);
+        setSessionId(data.session_id);
+        const style = {
+          '--bg-color': p.bg_color,
+          '--user-color': p.user_color,
+          '--ai-color': p.ai_color,
+        } as Record<string, string>;
+        sessionStorage.setItem('reflecta_colors', JSON.stringify(style));
+        setCurrentStyle(style);
+        redirectToChat(router, data.conversation_id, data.session_id, true);
+        setEntries([]);
+        setStartingPrompt('');
+        setSessionIsFresh(true);
+        return;
+      }
+    } catch (err) {
+      console.error('[conversation/by-profile]', err);
+    }
+    try {
+      const data = await apiFetch<{
+        status: string; conversation_id: string; session_id: string
+      }>(
+        '/api/conversation/new',
         {
-          method: "POST",
+          method: 'POST',
           body: JSON.stringify({ user_id: userId, profile_name: name }),
         },
       );
       if (data.conversation_id && data.session_id) {
-        // Store the new session id so useUserSession can resume without
-        // attempting to create another session.
         sessionStorage.setItem(`reflecta_session_${name}`, data.session_id);
 
         setProfile(name);
@@ -325,7 +349,7 @@ export default function ChatPage() {
         setSessionIsFresh(true);
       }
     } catch (err) {
-      console.error("[switch profile]", err);
+      console.error('[switch profile]', err);
       errorToast({ message: 'Nem sikerült váltani a profilok között.', type: 'network' });
     }
   };
