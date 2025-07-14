@@ -8,6 +8,10 @@ import { useProfileContext } from "@/contexts/ProfileContext";
 import { useAvailableProfiles } from "@/hooks/useAvailableProfiles";
 import { useUserContext } from "@/contexts/UserContext";
 import { useProfileUsage } from "../hooks/useProfileUsage";
+import { useHiddenProfiles } from "../hooks/useHiddenProfiles";
+import { useToast } from "../hooks/useToast";
+import { useErrorToast } from "../hooks/useErrorToast";
+import { apiFetch } from "@/lib/api";
 
 const MAX_TEXT_LENGTH = 32;
 
@@ -61,9 +65,28 @@ export default function ProfileSelectorSidebar({
   const { profile: activeProfileId } = useProfileContext();
   const router = useRouter();
   const { profiles: availableProfiles, personalNames, role } = useAvailableProfiles();
-  const { userRole } = useUserContext();
+  const { userRole, userId } = useUserContext();
   const { usage, recordUse } = useProfileUsage();
+  const { hidden, hideProfile, showAll } = useHiddenProfiles();
+  const toast = useToast();
+  const errorToast = useErrorToast();
   const [open, setOpen] = React.useState(true);
+
+  const handleDelete = async (name: string) => {
+    if (!userId) return;
+    if (!window.confirm('Biztosan törlöd a profilt?')) return;
+    try {
+      await apiFetch('/api/profile/delete', {
+        method: 'POST',
+        body: JSON.stringify({ user_id: userId, profile: name }),
+      });
+      toast('Profil törölve');
+      hideProfile(name);
+    } catch (err) {
+      console.error('[delete_profile]', err);
+      errorToast({ message: 'Hiba a törlés közben.', type: 'network', error: err });
+    }
+  };
 
   if (userRole === 'guest') return null;
 
@@ -98,12 +121,13 @@ export default function ProfileSelectorSidebar({
     const unused: Profile[] = [];
     allProfiles.forEach((p) => {
       if (p.id.toLowerCase() === activeId) return;
+      if (hidden.includes(p.id)) return;
       if (usage[p.id]) used.push(p);
       else unused.push(p);
     });
     used.sort((a, b) => (usage[b.id] || 0) - (usage[a.id] || 0));
     return [...used, ...unused];
-  }, [allProfiles, usage, activeProfileId]);
+  }, [allProfiles, usage, activeProfileId, hidden]);
 
   const showCreateButton =
         userRole !== 'guest' && (role === 'admin' || (role !== 'basic' && customProfiles.length === 0));
@@ -148,6 +172,10 @@ export default function ProfileSelectorSidebar({
               onEdit={personalNames.includes(activeProfile.name) ? () =>
                 router.push(`/edit-profile/${encodeURIComponent(activeProfile.name)}`)
                 : undefined}
+              onDelete={personalNames.includes(activeProfile.name) ? () => handleDelete(activeProfile.name) : undefined}
+              onHide={() => hideProfile(activeProfile.id)}
+              onShowAll={showAll}
+              showShowAll={hidden.length > 0}
             />
           );
         })()
@@ -171,6 +199,10 @@ export default function ProfileSelectorSidebar({
             color={p.user_color}
             hoverBackground={p.ai_color}
             onEdit={personalNames.includes(p.name) ? () => router.push(`/edit-profile/${encodeURIComponent(p.name)}`) : undefined}
+            onDelete={personalNames.includes(p.name) ? () => handleDelete(p.name) : undefined}
+            onHide={() => hideProfile(p.id)}
+            onShowAll={showAll}
+            showShowAll={hidden.length > 0}
             unused={!usage[p.id]}
           />
         );

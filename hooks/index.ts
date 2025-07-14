@@ -7,3 +7,5 @@ export * from './useToast';
 export * from './useErrorToast';
 export * from './useScrollHandler';
 export * from './useUserSession';
+export * from './useUserSession';
+export * from './useHiddenProfiles';

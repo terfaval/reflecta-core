@@ -34,6 +34,10 @@ export interface SidebarProfileItemProps {
   hoverBackground?: string;
   onEdit?: () => void;
   unused?: boolean;
+  onDelete?: () => void;
+  onHide?: () => void;
+  onShowAll?: () => void;
+  showShowAll?: boolean;
 }
 
 export default function SidebarProfileItem({
@@ -47,9 +51,27 @@ export default function SidebarProfileItem({
   hoverBackground,
   onEdit,
   unused = false,
+  onDelete,
+  onHide,
+  onShowAll,
+  showShowAll = false,
 }: SidebarProfileItemProps) {
   const IconComp = iconName && iconMap[iconName];
   const [isHovered, setIsHovered] = React.useState(false);
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!menuOpen) return;
+    const handle = (e: MouseEvent) => {
+      if (!menuRef.current) return;
+      if (!menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, [menuOpen]);
 
   const style: React.CSSProperties = { transition: 'background-color 0.2s ease' };
   if (isActive) {
@@ -79,31 +101,84 @@ export default function SidebarProfileItem({
         <span className={styles.itemHeader}>{truncate(name)}</span>
         <span className={`${styles.itemSubtext} ${bottomClassName}`}>{truncate(bottomText)}</span>
       </div>
-      {onEdit && (
+      <div className={styles.menuWrapper} ref={menuRef}>
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            onEdit();
+            setMenuOpen((o) => !o);
           }}
-          className={styles.editButton}
-          aria-label="Profil szerkesztése"
+          className={styles.menuButton}
+          aria-label="Profil menü"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="w-4 h-4"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
+            className="w-4 h-4"
           >
-            <path d="M12 20h9" />
-            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+            <circle cx="12" cy="5" r="1" />
+            <circle cx="12" cy="12" r="1" />
+            <circle cx="12" cy="19" r="1" />
           </svg>
         </button>
-      )}
+      {menuOpen && (
+          <div className={styles.menu}>
+            {onHide && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuOpen(false);
+                  onHide();
+                }}
+              >
+                Profil elrejtése
+              </button>
+            )}
+            {showShowAll && onShowAll && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuOpen(false);
+                  onShowAll();
+                }}
+              >
+                Összes profil mutatása
+              </button>
+            )}
+            {onEdit && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuOpen(false);
+                  onEdit();
+                }}
+              >
+                Profil szerkesztése
+              </button>
+            )}
+            {onDelete && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuOpen(false);
+                  onDelete();
+                }}
+              >
+                Profil törlése
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
