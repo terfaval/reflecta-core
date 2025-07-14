@@ -24,3 +24,24 @@ def test_filter_questions(mock_cos, mock_embed):
     filtered = module.filter_questions(text, "Aggódom a munkám miatt", "explorative", "moderate")
     assert "vacsorára" not in filtered
     assert "munkáddal" in filtered
+
+
+def fake_cosine_low(v1, v2):
+    if not v1 or not v2:
+        return 0.0
+    return 0.3 if "dics\xE9rnek" in v1[0] and "dics\xE9rnek" in v2[0] else 0.1
+
+
+@patch("backend.language.question_relevance.embed_text", side_effect=fake_embed_text)
+@patch("backend.language.question_relevance.cosine_similarity", side_effect=fake_cosine_low)
+def test_filter_questions_fallback(mock_cos, mock_embed):
+    import backend.language.question_relevance as module
+    module._THRESHOLD = 0.55
+    text = "• Hogy vagy?\n• Mit érzel, amikor megdicsérnek?"
+    filtered = module.filter_questions(
+        text,
+        "Mindig összerezzenek, amikor megdicsérnek.",
+        "deepening",
+        "moderate",
+    )
+    assert "megdicsérnek" in filtered

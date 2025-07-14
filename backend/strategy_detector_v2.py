@@ -13,7 +13,10 @@ from .language.embeddings import cosine_similarity
 _EXEMPLARS: Dict[str, List[str]] = {
     "explorative": ["Csak leírom ami eszembe jut."],
     "analytical": ["Mindig ismét előkerül ugyanaz."],
-    "deepening": ["Mély érzések mozognak bennem."],
+    "deepening": [
+        "Mély érzések mozognak bennem.",
+        "Mindig összerezzenek, amikor megdicsérnek.",
+    ],
     "integrative": ["Egyrészt ezt érzem, másrészt azt."],
     "transformative": ["Új szemmel nézek mindenre."],
     "concluding": ["Most már tudom, mit tanultam."],
