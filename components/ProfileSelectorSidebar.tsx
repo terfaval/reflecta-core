@@ -7,7 +7,7 @@ import styles from "./ProfileSelectorSidebar.module.css";
 import { useProfileContext } from "@/contexts/ProfileContext";
 import { useAvailableProfiles } from "@/hooks/useAvailableProfiles";
 import { useUserContext } from "@/contexts/UserContext";
-import { useProfileUsage } from "@/hooks/useProfileUsage";
+import { useProfileUsage } from "../hooks/useProfileUsage";
 
 const MAX_TEXT_LENGTH = 32;
 
