@@ -1,0 +1,51 @@
+.container {
+  padding: 2rem;
+  font-family: 'Raleway', sans-serif;
+}
+
+.group {
+  margin-bottom: 2rem;
+}
+
+.item {
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.meta {
+  font-size: 0.875rem;
+  color: #555;
+  margin-top: 0.5rem;
+}
+
+.buttons {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.accept {
+  background-color: #5DAE8B;
+  color: #fff;
+  border: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.reject {
+  background-color: #E59866;
+  color: #fff;
+  border: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.error {
+  color: red;
+  text-align: center;
+  margin-top: 1rem;
+}
