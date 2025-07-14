@@ -69,7 +69,27 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend }: Reflect
           ? entriesData.entries
           : [];
 
-        const newItems = labels.map((lbl) => {
+        // Filter labels so that each entry appears at most once based on
+        // priority while ignoring strategy labels.
+        const priority = (lbl: MemoryLabel): number => {
+          if (lbl.type === 'section_start') return 0;
+          if (lbl.type === 'pivot' || lbl.pivot) return 1;
+          if (lbl.type === 'theme' || lbl.type === 'topic') return 2;
+          if (lbl.type === 'emotion') return 3;
+          if (lbl.type === 'tone') return 4;
+          return 5;
+        };
+
+        const filteredMap = new Map<string, MemoryLabel>();
+        labels.forEach((lbl) => {
+          if (lbl.type === 'strategy') return;
+          const existing = filteredMap.get(lbl.id);
+          if (!existing || priority(lbl) < priority(existing)) {
+            filteredMap.set(lbl.id, lbl);
+          }
+        });
+
+        const newItems = Array.from(filteredMap.values()).map((lbl) => {
           const entry = entries.find((e) => e.id === lbl.id);
           let preview = entry?.content ? entry.content.replace(/\s+/g, ' ').trim() : '';
           if (preview.length > 80) preview = `${preview.slice(0, 77)}...`;
