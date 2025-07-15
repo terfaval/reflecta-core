@@ -9,7 +9,7 @@ from backend.analysis.analyze_entry import analyze_entry
 
 
 def test_analyze_entry_composition():
-    analysis_result = {"topics": ["kapcsolat"], "emotion": "düh", "tone": "feladó"}
+    analysis_result = {"topics": ["kapcsolat"], "emotion": "düh", "tone": "kritikus"}
     with patch("backend.analysis.analyze_entry.analyze_message", return_value=analysis_result) as am, \
         patch("backend.analysis.analyze_entry.detect_strategy", side_effect=["deepening", "deepening"]) as ds, \
         patch("backend.analysis.analyze_entry.estimate_arc_state", return_value="deepening") as eas, \
@@ -24,7 +24,7 @@ def test_analyze_entry_composition():
         result = analyze_entry("új bejegyzés", "s1", ["korábbi"])
         cd.assert_called_once_with("új bejegyzés")
 
-    assert result["tone"] == "feladó"
+    assert result["tone"] == "kritikus"
     assert result["strategy"] == "deepening"
     assert result["arc_state"] == "deepening"
     assert result["depth_estimate"] == "mély"

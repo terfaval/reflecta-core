@@ -18,9 +18,43 @@ TRIGGER_SETS: Dict[str, Dict[str, List[str]]] = {
         "megkönnyebbülés": ["megkonnyebb", "felszabadul", "konnyebb"],
     },
     "tones": {
-        "önostorozó": ["onvad", "hibaztatom magam", "bantom magam"],
-        "segítségkérő": ["segitseget ker", "tanacsot ker", "segitenel"],
-        "feladó": ["feladom", "feladtam", "eleg.*"],
+         # self-blaming, harsh inner voice
+        "kritikus": [
+            "gyenge vagyok",
+            "semmit se csinalok jol",
+            "mindig elrontom",
+            "szanalmas vagyok",
+            "nem ertek semmihez",
+            "hibas vagyok",
+        ],
+        # self-accepting, gentle tone
+        "megengedo": [
+            "probalok kedves lenni",
+            "elfogadom magam",
+            "rendben van hogy",
+            "megengedom magamnak",
+        ],
+        # pleading, needing support
+        "segelykero": [
+            "nem tudom mit tegyek",
+            "segitseget ker",
+            "barcsak valaki megertene",
+            "segits meg",
+        ],
+        # calm, reasoning
+        "racionalis": [
+            "logikusan",
+            "esszeru",
+            "racionalis",
+            "nezzuk meg",
+        ],
+        # sarcastic, distancing
+        "ironikus": [
+            "persze",
+            "nyilvan",
+            "ja persze",
+            "haha",
+        ],
     },
     "relationship_modes": {
         "támogatást keres": ["tamogatast", "segitseget", "tamogass"],

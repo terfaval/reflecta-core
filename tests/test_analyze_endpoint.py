@@ -20,5 +20,5 @@ def test_analyze_endpoint_basic():
     data = resp.json()
     assert "kapcsolat" in data["topics"]
     assert data["emotion"] == "düh"
-    assert data["tone"] == "feladó"
+    assert data["tone"] is None
     assert data["meta_intent"] is None

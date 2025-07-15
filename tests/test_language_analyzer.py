@@ -13,7 +13,7 @@ def test_analyze_message_basic():
         result = analyzer.analyze_message(text)
     assert "kapcsolat" in result["topics"]
     assert result["emotion"] == "düh"
-    assert result["tone"] == "feladó"
+    assert result["tone"] is None
     assert result["relationship_mode"] == "elhatárolódik"
     assert result["suggested_profile"] is None
     assert result["suggested_strategy"] is None

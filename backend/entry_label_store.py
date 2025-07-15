@@ -22,6 +22,18 @@ _CURRENT_EVENT = [
     r"this (?:morning|afternoon|evening)",
 ]
 
+# Phrases suggesting a personal attitude or inner stance.
+_ATTITUDE_CUES = [
+    r"\b(i|me|my|en|magam)\b",
+    r"\bnem tudom\b",
+    r"\bprobalok\b",
+    r"\bgyenge vagyok\b",
+    r"\belrontom\b",
+    r"barcsak",
+    r"logikusan",
+    r"persze",
+]
+
 def _text_matches_any(text: str, patterns: List[str]) -> bool:
     text_low = text.lower()
     for pat in patterns:
@@ -34,6 +46,10 @@ def _looks_thematic(text: str) -> bool:
 
 def _describes_current_event(text: str) -> bool:
     return _text_matches_any(text, _CURRENT_EVENT)
+
+
+def _looks_attitudinal(text: str) -> bool:
+    return _text_matches_any(text, _ATTITUDE_CUES)
 
 
 def _fetch_session_and_content(entry_id: str) -> Dict[str, Any]:
@@ -88,6 +104,23 @@ def _has_priority_label(labels: List[Dict[str, Any]]) -> bool:
     return False
 
 
+def _should_store_tone(
+    text: str, analysis: Dict[str, Any], extra_labels: List[Dict[str, Any]]
+) -> bool:
+    """Return True if a tone label should be stored for this entry."""
+    if not analysis.get("tone"):
+        return False
+    if analysis.get("topics") or analysis.get("emotion"):
+        return False
+    if _has_priority_label(extra_labels):
+        return False
+    if not _looks_attitudinal(text):
+        return False
+    if _describes_current_event(text):
+        return False
+    return True
+
+
 def store_entry_labels(
     entry_id: str,
     analysis: Optional[Dict[str, Any]] = None,
@@ -132,7 +165,7 @@ def store_entry_labels(
         )
 
     tone = (analysis or {}).get("tone")
-    if tone:
+    if _should_store_tone(content, analysis or {}, labels or []):
         rows.append(
             {
                 "entry_id": entry_id,
