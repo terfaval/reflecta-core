@@ -6,6 +6,8 @@ import AdminReviewButton from './AdminReviewButton';
 
 import { apiFetch } from 'lib/api';
 import { useUserContext } from '@/contexts/UserContext';
+import { useProfileContext } from '@/contexts/ProfileContext';
+import { useMemoryContext, MemorySummary } from '@/contexts/MemoryContext';
 
 interface MemoryLabel {
   id: string;
@@ -28,11 +30,13 @@ interface ReflectiveMemoryPanelProps {
 }
 
 export default function ReflectiveMemoryPanel({ sessionId, handleSend, userColor = 'var(--user-color)' }: ReflectiveMemoryPanelProps) {
-  const [items, setItems] = useState<(MemoryLabel & { preview?: string })[]>([]);
+  const [items, setItems] = useState<MemorySummary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [typeFilters, setTypeFilters] = useState<Record<string, boolean>>({});
   const { userRole } = useUserContext();
+  const { profile } = useProfileContext();
+  const { memoryMap, setMemoryMap } = useMemoryContext();
 
   const USER_TYPES = new Set(['theme', 'pivot', 'section_start']);
   const AI_TYPES = new Set(['emotion', 'strategy', 'tone']);
@@ -52,7 +56,27 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend, userColor
   };
   
   useEffect(() => {
-    if (!sessionId || userRole === 'guest') return;
+    if (!profile || userRole === 'guest') return;
+
+    const cached = memoryMap[profile];
+    if (cached) {
+      setItems(cached);
+      const newTypes = Array.from(
+        new Set(cached.map((i) => i.type).filter(Boolean))
+      ) as string[];
+      setTypeFilters((prev) => {
+        const next: Record<string, boolean> = {};
+        newTypes.forEach((t) => {
+          next[t] = prev[t] ?? true;
+        });
+        return next;
+      });
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
+    if (!sessionId) return;
     const load = async () => {
       setLoading(true);
       try {
@@ -100,6 +124,7 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend, userColor
         });
 
         setItems(newItems);
+        setMemoryMap((prev) => ({ ...prev, [profile]: newItems }));
 
         const newTypes = Array.from(
           new Set(newItems.map((i) => i.type).filter(Boolean))
@@ -119,7 +144,7 @@ export default function ReflectiveMemoryPanel({ sessionId, handleSend, userColor
       setLoading(false);
     };
     load();
-  }, [sessionId, userRole]);
+  }, [sessionId, userRole, profile, memoryMap]);
 
   const scrollToEntry = (id: string) => {
     if (!id) return;

@@ -17,6 +17,8 @@ import { useUserContext } from "@/contexts/UserContext";
 import { useProfileContext } from "@/contexts/ProfileContext";
 import { useSessionContext } from "@/contexts/SessionContext";
 import { v4 as uuidv4 } from 'uuid';
+import { useAvailableProfiles } from '@/hooks/useAvailableProfiles';
+import { useMemoryContext, MemoryMap, MemorySummary } from '@/contexts/MemoryContext';
 import ProfileSwitchSuggestion from "@/components/ProfileSwitchSuggestion";
 
 import { apiFetch } from "@/lib/api";
@@ -43,6 +45,8 @@ export default function ChatPage() {
   const [pendingProfileSuggestion, setPendingProfileSuggestion] = useState<string | null>(null);
   const { userId, setUserId, userInitialized, userError, userRole, guestSessionId, setGuestSessionId } = useUserContext();
   const { sessionMap, setSessionMap } = useSessionContext();
+  const { profiles: availableProfiles } = useAvailableProfiles();
+  const { memoryMap, setMemoryMap } = useMemoryContext();
   const errorToast = useErrorToast();
   useEffect(() => {
     if (!router.isReady) return;
@@ -76,6 +80,30 @@ export default function ChatPage() {
     };
     loadMap();
   }, [userId, userRole, sessionMap, setSessionMap]);
+
+  useEffect(() => {
+    if (!availableProfiles.length || userRole === 'guest') return;
+    const load = async () => {
+      const updates: MemoryMap = {};
+      await Promise.all(
+        availableProfiles.map(async (p) => {
+          if (memoryMap[p.name]) return;
+          try {
+            const data = await apiFetch<{ labels?: MemorySummary[] }>(
+              `/api/memory/summary?profile=${encodeURIComponent(p.name)}`
+            );
+            updates[p.name] = Array.isArray(data?.labels) ? data.labels : [];
+          } catch (err) {
+            console.error('[memory preload]', err);
+          }
+        })
+      );
+      if (Object.keys(updates).length) {
+        setMemoryMap((prev) => ({ ...prev, ...updates }));
+      }
+    };
+    load();
+  }, [availableProfiles]);
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [entriesError, setEntriesError] = useState<string | null>(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
