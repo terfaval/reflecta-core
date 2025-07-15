@@ -161,16 +161,28 @@ export default function ProfileSelectorSidebar({
         (() => {
           const list = entries[activeProfile.id] || [];
           let lastUser = [...list].reverse().find((e) => e.role === 'user');
-          if (!lastUser && lastEntryMap[activeProfile.id]) {
+          const entryInfo = lastEntryMap[activeProfile.id];
+          if (!lastUser && entryInfo && entryInfo.status === 'ok') {
             lastUser = {
               id: '',
               role: 'user',
-              content: lastEntryMap[activeProfile.id]!.content,
-              created_at: lastEntryMap[activeProfile.id]!.created_at,
+              content: entryInfo.content || '',
+              created_at: entryInfo.created_at || '',
             };
           }
-          const bottomText = lastUser ? lastUser.content : activeProfile.role;
-          const bottomClass = lastUser ? 'text-sm' : 'text-sm font-medium';
+          let bottomText = '';
+          let bottomClass = 'text-sm';
+          if (lastUser) {
+            bottomText = lastUser.content;
+          } else if (entryInfo?.status === 'no-entry') {
+            bottomText = 'No messages yet';
+            bottomClass = 'text-sm italic text-gray-600';
+          } else if (entryInfo) {
+            bottomText = entryInfo.content || '';
+          } else {
+            bottomText = 'Loading…';
+            bottomClass = 'text-sm italic text-gray-600';
+          }
           return (
             <SidebarProfileItem
               name={activeProfile.name}
@@ -192,17 +204,29 @@ export default function ProfileSelectorSidebar({
       )}
       {open && otherProfiles.map((p) => {
         const list = entries[p.id] || [];
-        let lastUser = [...list].reverse().find((e) => e.role === "user");
-        if (!lastUser && lastEntryMap[p.id]) {
+                let lastUser = [...list].reverse().find((e) => e.role === 'user');
+        const entryInfo = lastEntryMap[p.id];
+        if (!lastUser && entryInfo && entryInfo.status === 'ok') {
           lastUser = {
             id: '',
             role: 'user',
-            content: lastEntryMap[p.id]!.content,
-            created_at: lastEntryMap[p.id]!.created_at,
+            content: entryInfo.content || '',
+            created_at: entryInfo.created_at || '',
           };
         }
-        const bottomText = lastUser ? lastUser.content : p.role;
-        const bottomClass = lastUser ? "text-sm" : "text-sm font-medium text-gray-600";
+        let bottomText = '';
+        let bottomClass = 'text-sm';
+        if (lastUser) {
+          bottomText = lastUser.content;
+        } else if (entryInfo?.status === 'no-entry') {
+          bottomText = 'No messages yet';
+          bottomClass = 'text-sm italic text-gray-600';
+        } else if (entryInfo) {
+          bottomText = entryInfo.content || '';
+        } else {
+          bottomText = 'Loading…';
+          bottomClass = 'text-sm italic text-gray-600';
+        }
         return (
           <SidebarProfileItem
             key={p.id}

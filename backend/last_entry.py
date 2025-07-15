@@ -29,11 +29,12 @@ def _fetch_last_entry(session_id: str) -> Dict[str, Any]:
         raise HTTPException(500, f"Failed to load last entry: {exc}") from exc
 
     if not entry:
-        return {"content": "", "created_at": ""}
+        return {"content": None, "created_at": None, "status": "no-entry"}
 
     return {
         "content": entry.get("content", ""),
         "created_at": entry.get("created_at", ""),
+        "status": "ok",
     }
 
 

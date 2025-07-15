@@ -1,8 +1,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
 
 export interface LastEntry {
-  content: string;
-  created_at: string;
+  content: string | null;
+  created_at: string | null;
+  status: 'ok' | 'no-entry';
 }
 
 export type LastEntryMap = Record<string, LastEntry | null>;

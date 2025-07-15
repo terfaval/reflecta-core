@@ -17,7 +17,7 @@ import { useHandleSend } from "../hooks/useHandleSend";
 import { useUserContext } from "@/contexts/UserContext";
 import { useProfileContext } from "@/contexts/ProfileContext";
 import { useSessionContext } from "@/contexts/SessionContext";
-import { useLastEntryContext } from "@/contexts/LastEntryContext";
+import { useLastEntryContext, LastEntry } from "@/contexts/LastEntryContext";
 import { v4 as uuidv4 } from 'uuid';
 import { useAvailableProfiles } from '@/hooks/useAvailableProfiles';
 import { useMemoryContext, MemoryMap, MemorySummary } from '@/contexts/MemoryContext';
@@ -143,16 +143,16 @@ export default function ChatPage() {
       return;
     }
     const load = async () => {
-      const updates: Record<string, { content: string; created_at: string }> = {};
+      const updates: Record<string, LastEntry> = {};
       await Promise.all(
         missing.map(async (p) => {
           const sid = sessionMap[p]?.[0]?.sessions?.[0]?.id;
           if (!sid) return;
           try {
-            const data = await apiFetch<{ content: string; created_at: string }>(
+            const data = await apiFetch<LastEntry>(
               `/api/last-entry?sessionId=${encodeURIComponent(sid)}`,
             );
-            if (data && data.content) updates[p] = data;
+            if (data) updates[p] = data;
           } catch (err) {
             console.error('[last-entry preload]', err);
             setLoadingError('Nem sikerült betölteni a legutóbbi bejegyzéseket.');
@@ -746,7 +746,7 @@ export default function ChatPage() {
       </div>
     );
   }
-  
+
   if (showProfileSelect || (userInitialized && !profile && !sessionId)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
