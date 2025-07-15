@@ -174,15 +174,15 @@ export default function ProfileSelectorSidebar({
           let bottomClass = 'text-sm';
           if (lastUser) {
             bottomText = lastUser.content;
-          } else if (entryInfo?.status === 'no-entry') {
-            bottomText = 'No messages yet';
-            bottomClass = 'text-sm italic text-gray-600';
-          } else if (entryInfo) {
+                    } else if (entryInfo?.status === 'ok') {
             bottomText = entryInfo.content || '';
+          } else if (entryInfo?.status === 'no-entry') {
+            bottomText = activeProfile.role;
           } else {
             bottomText = 'Loading…';
             bottomClass = 'text-sm italic text-gray-600';
           }
+          if (!bottomText) bottomText = activeProfile.role;
           return (
             <SidebarProfileItem
               name={activeProfile.name}
@@ -218,15 +218,16 @@ export default function ProfileSelectorSidebar({
         let bottomClass = 'text-sm';
         if (lastUser) {
           bottomText = lastUser.content;
-        } else if (entryInfo?.status === 'no-entry') {
-          bottomText = 'No messages yet';
-          bottomClass = 'text-sm italic text-gray-600';
-        } else if (entryInfo) {
+        } else if (entryInfo?.status === 'ok') {
           bottomText = entryInfo.content || '';
+        } else if (entryInfo?.status === 'no-entry') {
+          bottomText = p.role;
         } else {
           bottomText = 'Loading…';
           bottomClass = 'text-sm italic text-gray-600';
         }
+        if (!bottomText) bottomText = p.role;
+
         return (
           <SidebarProfileItem
             key={p.id}

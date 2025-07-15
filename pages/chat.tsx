@@ -160,9 +160,14 @@ export default function ChatPage() {
             const data = await apiFetch<LastEntry>(
               `/api/last-entry?sessionId=${encodeURIComponent(sid)}`,
             );
-            if (data) updates[p] = data;
+            updates[p] = data ?? {
+              content: null,
+              created_at: null,
+              status: 'no-entry',
+            };
           } catch (err) {
             console.error('[last-entry preload]', err);
+            updates[p] = { content: null, created_at: null, status: 'no-entry' };
             setLoadingError('Nem sikerült betölteni a legutóbbi bejegyzéseket.');
           }
         }),
