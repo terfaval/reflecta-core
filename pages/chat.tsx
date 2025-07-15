@@ -1,4 +1,4 @@
-import React from "react"; 
+import React from "react";
 
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/router";
@@ -7,6 +7,7 @@ import ReflectiveMemoryPanel from "../components/ReflectiveMemoryPanel";
 import ProfileSelectorSidebar, { Profile } from "../components/ProfileSelectorSidebar";
 import ProfileSlider from "@/components/ProfileSlider";
 import MobileProfileDropdown from "@/components/MobileProfileDropdown";
+import SpiralLoader from "@/components/SpiralLoader";
 import { useUserSession } from "../hooks/useUserSession";
 import { useAutoTextareaResize } from "../hooks/useAutoTextareaResize";
 import { ChatFooter } from "../components/ChatFooter";
@@ -50,6 +51,11 @@ export default function ChatPage() {
   const { memoryMap, setMemoryMap } = useMemoryContext();
   const { lastEntryMap, setLastEntryMap } = useLastEntryContext();
   const errorToast = useErrorToast();
+  const [sessionsReady, setSessionsReady] = useState(false);
+  const [entriesReady, setEntriesReady] = useState(false);
+  const [lastEntriesReady, setLastEntriesReady] = useState(false);
+  const [memoryReady, setMemoryReady] = useState(userRole === 'guest');
+  const [loadingError, setLoadingError] = useState<string | null>(null);
   useEffect(() => {
     if (!router.isReady) return;
     if (userRole === 'guest') {
@@ -59,7 +65,10 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!userId || userRole === 'guest') return;
-    if (Object.keys(sessionMap || {}).length) return;
+    if (Object.keys(sessionMap || {}).length) {
+      setSessionsReady(true);
+      return;
+    }
     const loadMap = async () => {
       try {
         const all = await apiFetch<{
@@ -76,20 +85,32 @@ export default function ChatPage() {
           map[conv.profile] = arr;
         });
         setSessionMap(map);
+        setSessionsReady(true);
       } catch (err) {
         console.error('[conversations/list]', err);
+        setLoadingError('Nem sikerült betölteni a beszélgetéseket.');
       }
     };
     loadMap();
   }, [userId, userRole, sessionMap, setSessionMap]);
 
   useEffect(() => {
-    if (!availableProfiles.length || userRole === 'guest') return;
+    if (!availableProfiles.length) return;
+    if (userRole === 'guest') {
+      setMemoryReady(true);
+      return;
+    }
+
+    const missing = availableProfiles.filter((p) => !memoryMap[p.name]);
+    if (missing.length === 0) {
+      setMemoryReady(true);
+      return;
+    }
+
     const load = async () => {
       const updates: MemoryMap = {};
       await Promise.all(
-        availableProfiles.map(async (p) => {
-          if (memoryMap[p.name]) return;
+        missing.map(async (p) => {
           try {
             const data = await apiFetch<{ labels?: MemorySummary[] }>(
               `/api/memory/summary?profile=${encodeURIComponent(p.name)}`
@@ -97,24 +118,36 @@ export default function ChatPage() {
             updates[p.name] = Array.isArray(data?.labels) ? data.labels : [];
           } catch (err) {
             console.error('[memory preload]', err);
+            setLoadingError('Nem sikerült betölteni a memóriát.');
           }
         })
       );
       if (Object.keys(updates).length) {
         setMemoryMap((prev) => ({ ...prev, ...updates }));
       }
+      const stillMissing = availableProfiles.filter((p) => !memoryMap[p.name] && !updates[p.name]);
+      if (stillMissing.length === 0) setMemoryReady(true);
     };
     load();
-  }, [availableProfiles]);
+  }, [availableProfiles, memoryMap, userRole]);
 
   useEffect(() => {
-    if (!Object.keys(sessionMap || {}).length || userRole === 'guest') return;
+    if (!Object.keys(sessionMap || {}).length) return;
+    if (userRole === 'guest') {
+      setLastEntriesReady(true);
+      return;
+    }
+    const missing = Object.keys(sessionMap).filter((p) => !lastEntryMap[p]);
+    if (missing.length === 0) {
+      setLastEntriesReady(true);
+      return;
+    }
     const load = async () => {
       const updates: Record<string, { content: string; created_at: string }> = {};
       await Promise.all(
-        Object.entries(sessionMap).map(async ([p, convs]) => {
-          const sid = convs?.[0]?.sessions?.[0]?.id;
-          if (!sid || lastEntryMap[p]) return;
+        missing.map(async (p) => {
+          const sid = sessionMap[p]?.[0]?.sessions?.[0]?.id;
+          if (!sid) return;
           try {
             const data = await apiFetch<{ content: string; created_at: string }>(
               `/api/last-entry?sessionId=${encodeURIComponent(sid)}`,
@@ -122,15 +155,20 @@ export default function ChatPage() {
             if (data && data.content) updates[p] = data;
           } catch (err) {
             console.error('[last-entry preload]', err);
+            setLoadingError('Nem sikerült betölteni a legutóbbi bejegyzéseket.');
           }
         }),
       );
       if (Object.keys(updates).length) {
         setLastEntryMap((prev) => ({ ...prev, ...updates }));
       }
+      const stillMissing = Object.keys(sessionMap).filter(
+        (p) => !lastEntryMap[p] && !updates[p],
+      );
+      if (stillMissing.length === 0) setLastEntriesReady(true);
     };
     load();
-  }, [sessionMap, userRole]);
+  }, [sessionMap, lastEntryMap, userRole]);
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [entriesError, setEntriesError] = useState<string | null>(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
@@ -308,6 +346,7 @@ export default function ChatPage() {
       if (initEntries && initEntries.length) {
         setEntries(initEntries);
       }
+      setEntriesReady(true);
     },
     [
       setUserId,
@@ -364,6 +403,12 @@ export default function ChatPage() {
   useEffect(() => {
     if (debug) console.log("[Debug] loadingEntries", loadingEntries);
   }, [debug, loadingEntries]);
+
+  useEffect(() => {
+    if (sessionId && !loadingEntries) {
+      setEntriesReady(true);
+    }
+  }, [sessionId, loadingEntries]);
 
   const assistantReplyCount = useMemo(() => {
     return entries.filter(
@@ -612,6 +657,9 @@ export default function ChatPage() {
     } catch (err) {
       console.error("[chatload] fetch error:", err);
       setEntriesError('Hiba történt az üzenetek betöltésekor.');
+      if (pageIndex === 0 && entries.length === 0) {
+        setLoadingError('Hiba történt az üzenetek betöltésekor.');
+      }
       errorToast({ message: 'Hiba történt az üzenetek betöltésekor.', type: 'network', retry: () => fetchMoreEntries(pageIndex) });
       setLoadingEntries(false);
     } finally {
@@ -619,6 +667,7 @@ export default function ChatPage() {
       isFetchingRef.current = false;
 
       if (debug) console.log("[Debug] fetch complete");
+      setEntriesReady(true);
     }
   };
 
@@ -677,6 +726,27 @@ export default function ChatPage() {
     );
   }
 
+  if (loadingError) {
+    return (
+      <UserErrorDisplay
+        message={loadingError}
+        onRetry={() => window.location.reload()}
+      />
+    );
+  }
+
+  const ready = sessionsReady && lastEntriesReady && memoryReady && entriesReady;
+  if (!ready) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <SpiralLoader
+          userColor={currentStyle['--user-color']}
+          aiColor={currentStyle['--ai-color']}
+        />
+      </div>
+    );
+  }
+  
   if (showProfileSelect || (userInitialized && !profile && !sessionId)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
