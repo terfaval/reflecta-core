@@ -12,6 +12,7 @@ import { useHiddenProfiles } from "../hooks/useHiddenProfiles";
 import { useToast } from "../hooks/useToast";
 import { useErrorToast } from "../hooks/useErrorToast";
 import { apiFetch } from "@/lib/api";
+import { useLastEntryContext } from "@/contexts/LastEntryContext";
 
 const MAX_TEXT_LENGTH = 32;
 
@@ -70,6 +71,7 @@ export default function ProfileSelectorSidebar({
   const { hidden, hideProfile, showAll } = useHiddenProfiles();
   const toast = useToast();
   const errorToast = useErrorToast();
+  const { lastEntryMap } = useLastEntryContext();
   const [open, setOpen] = React.useState(true);
 
   const handleDelete = async (name: string) => {
@@ -158,7 +160,15 @@ export default function ProfileSelectorSidebar({
       {open && activeProfile && (
         (() => {
           const list = entries[activeProfile.id] || [];
-          const lastUser = [...list].reverse().find((e) => e.role === 'user');
+          let lastUser = [...list].reverse().find((e) => e.role === 'user');
+          if (!lastUser && lastEntryMap[activeProfile.id]) {
+            lastUser = {
+              id: '',
+              role: 'user',
+              content: lastEntryMap[activeProfile.id]!.content,
+              created_at: lastEntryMap[activeProfile.id]!.created_at,
+            };
+          }
           const bottomText = lastUser ? lastUser.content : activeProfile.role;
           const bottomClass = lastUser ? 'text-sm' : 'text-sm font-medium';
           return (
@@ -182,7 +192,15 @@ export default function ProfileSelectorSidebar({
       )}
       {open && otherProfiles.map((p) => {
         const list = entries[p.id] || [];
-        const lastUser = [...list].reverse().find((e) => e.role === "user");
+        let lastUser = [...list].reverse().find((e) => e.role === "user");
+        if (!lastUser && lastEntryMap[p.id]) {
+          lastUser = {
+            id: '',
+            role: 'user',
+            content: lastEntryMap[p.id]!.content,
+            created_at: lastEntryMap[p.id]!.created_at,
+          };
+        }
         const bottomText = lastUser ? lastUser.content : p.role;
         const bottomClass = lastUser ? "text-sm" : "text-sm font-medium text-gray-600";
         return (

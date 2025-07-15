@@ -26,6 +26,7 @@ from .check_profile_access import router as check_profile_access_router
 from .memory_summary import router as memory_summary_router
 from .generate_personal_profile import router as generate_profile_router
 from .last_session import router as last_session_router
+from .last_entry import router as last_entry_router
 from .session_validate import router as session_validate_router
 from .conversations_last_sessions import (
     router as conversations_last_sessions_router,
@@ -91,6 +92,7 @@ api_router.include_router(check_profile_access_router)
 api_router.include_router(memory_summary_router)
 api_router.include_router(generate_profile_router)
 api_router.include_router(last_session_router)
+api_router.include_router(last_entry_router)
 api_router.include_router(session_validate_router)
 api_router.include_router(starting_prompt_router)
 api_router.include_router(conversations_last_sessions_router)

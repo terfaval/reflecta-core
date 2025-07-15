@@ -16,6 +16,7 @@ import { useHandleSend } from "../hooks/useHandleSend";
 import { useUserContext } from "@/contexts/UserContext";
 import { useProfileContext } from "@/contexts/ProfileContext";
 import { useSessionContext } from "@/contexts/SessionContext";
+import { useLastEntryContext } from "@/contexts/LastEntryContext";
 import { v4 as uuidv4 } from 'uuid';
 import { useAvailableProfiles } from '@/hooks/useAvailableProfiles';
 import { useMemoryContext, MemoryMap, MemorySummary } from '@/contexts/MemoryContext';
@@ -47,6 +48,7 @@ export default function ChatPage() {
   const { sessionMap, setSessionMap } = useSessionContext();
   const { profiles: availableProfiles } = useAvailableProfiles();
   const { memoryMap, setMemoryMap } = useMemoryContext();
+  const { lastEntryMap, setLastEntryMap } = useLastEntryContext();
   const errorToast = useErrorToast();
   useEffect(() => {
     if (!router.isReady) return;
@@ -104,6 +106,31 @@ export default function ChatPage() {
     };
     load();
   }, [availableProfiles]);
+
+  useEffect(() => {
+    if (!Object.keys(sessionMap || {}).length || userRole === 'guest') return;
+    const load = async () => {
+      const updates: Record<string, { content: string; created_at: string }> = {};
+      await Promise.all(
+        Object.entries(sessionMap).map(async ([p, convs]) => {
+          const sid = convs?.[0]?.sessions?.[0]?.id;
+          if (!sid || lastEntryMap[p]) return;
+          try {
+            const data = await apiFetch<{ content: string; created_at: string }>(
+              `/api/last-entry?sessionId=${encodeURIComponent(sid)}`,
+            );
+            if (data && data.content) updates[p] = data;
+          } catch (err) {
+            console.error('[last-entry preload]', err);
+          }
+        }),
+      );
+      if (Object.keys(updates).length) {
+        setLastEntryMap((prev) => ({ ...prev, ...updates }));
+      }
+    };
+    load();
+  }, [sessionMap, userRole]);
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [entriesError, setEntriesError] = useState<string | null>(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
