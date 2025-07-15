@@ -43,6 +43,35 @@ def _fetch_labels(entry_ids: List[str]) -> List[Dict[str, Any]]:
     return safe_call(_query, context="fetch_labels")
 
 
+def _fetch_pivot_points(session_id: str) -> List[str]:
+    """Return pivot point entry IDs recorded for the session."""
+
+    def _query():
+        result = (
+            supabase.table("conversation_arcs")
+            .select("pivot_points")
+            .eq("session_id", session_id)
+            .maybe_single()
+            .execute()
+        )
+        return _execute(result) or {}
+
+    row = safe_call(_query, context="fetch_pivot_points")
+    raw = row.get("pivot_points") if isinstance(row, dict) else None
+    if not raw:
+        return []
+
+    pivots: List[str] = []
+    for item in raw:
+        if isinstance(item, dict):
+            eid = item.get("entry_id") or item.get("id")
+        else:
+            eid = item
+        if isinstance(eid, str) and eid:
+            pivots.append(eid)
+    return pivots
+
+
 @router.get("/memory/summary")
 async def memory_summary(sessionId: str) -> Dict[str, Any]:
     if not sessionId:
@@ -53,6 +82,7 @@ async def memory_summary(sessionId: str) -> Dict[str, Any]:
         if not entry_ids:
             return {"labels": [], "status": "no-memory"}
         labels = _fetch_labels(entry_ids)
+        pivots = _fetch_pivot_points(sessionId)
     except Exception as exc:
         print(f"[memory_summary] error: {exc}")
         return {"labels": [], "status": "error"}
@@ -67,7 +97,36 @@ async def memory_summary(sessionId: str) -> Dict[str, Any]:
         for lbl in labels
     ]
 
-    return {"labels": items, "status": "ok"}
+    by_id: Dict[str, List[Dict[str, Any]]] = {}
+    for it in items:
+        by_id.setdefault(it["id"], []).append(it)
+
+    for eid in pivots:
+        if eid in by_id:
+            for it in by_id[eid]:
+                it["pivot"] = True
+        else:
+            new_item = {
+                "id": eid,
+                "label": "Fordulópont",
+                "type": "pivot",
+                "pivot": True,
+            }
+            items.append(new_item)
+            by_id.setdefault(eid, []).append(new_item)
+
+    seen: set[tuple[str, str, Optional[str]]] = set()
+    deduped: List[Dict[str, Any]] = []
+    for it in items:
+        key = (it["id"], it.get("label", ""), it.get("type"))
+        if key not in seen:
+            deduped.append(it)
+            seen.add(key)
+
+    order = {eid: idx for idx, eid in enumerate(entry_ids)}
+    deduped.sort(key=lambda it: order.get(it["id"], len(order)))
+
+    return {"labels": deduped, "status": "ok"}
 
 
 async def summarize_messages(entries: List[Dict[str, Any]], *, client: Optional[AsyncOpenAI] = None) -> str:
