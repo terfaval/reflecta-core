@@ -7,7 +7,7 @@ import ReflectiveMemoryPanel from "../components/ReflectiveMemoryPanel";
 import ProfileSelectorSidebar, { Profile } from "../components/ProfileSelectorSidebar";
 import ProfileSlider from "@/components/ProfileSlider";
 import MobileProfileDropdown from "@/components/MobileProfileDropdown";
-import SpiralLoader from "@/components/SpiralLoader";
+import LoadingPage from "./loading";
 import { useUserSession } from "../hooks/useUserSession";
 import { useAutoTextareaResize } from "../hooks/useAutoTextareaResize";
 import { ChatFooter } from "../components/ChatFooter";
@@ -111,9 +111,11 @@ export default function ChatPage() {
       const updates: MemoryMap = {};
       await Promise.all(
         missing.map(async (p) => {
+          const sid = sessionMap[p.name]?.[0]?.sessions?.[0]?.id;
+          if (!sid) return;
           try {
             const data = await apiFetch<{ labels?: MemorySummary[] }>(
-              `/api/memory/summary?profile=${encodeURIComponent(p.name)}`
+              `/api/memory/summary?sessionId=${encodeURIComponent(sid)}`
             );
             updates[p.name] = Array.isArray(data?.labels) ? data.labels : [];
           } catch (err) {
@@ -129,7 +131,7 @@ export default function ChatPage() {
       if (stillMissing.length === 0) setMemoryReady(true);
     };
     load();
-  }, [availableProfiles, memoryMap, userRole]);
+  }, [availableProfiles, memoryMap, sessionMap, userRole]);
 
   useEffect(() => {
     if (!Object.keys(sessionMap || {}).length) return;
@@ -737,14 +739,7 @@ export default function ChatPage() {
 
   const ready = sessionsReady && lastEntriesReady && memoryReady && entriesReady;
   if (!ready) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <SpiralLoader
-          userColor={currentStyle['--user-color']}
-          aiColor={currentStyle['--ai-color']}
-        />
-      </div>
-    );
+    return <LoadingPage />;
   }
 
   if (showProfileSelect || (userInitialized && !profile && !sessionId)) {
