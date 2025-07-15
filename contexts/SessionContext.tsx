@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+  Dispatch,
+  SetStateAction,
+} from 'react';
 
 export interface SessionMeta {
   id: string;
@@ -18,7 +26,7 @@ export type SessionMap = Record<string, ConversationMeta[]>;
 
 interface SessionContextType {
   sessionMap: SessionMap;
-  setSessionMap: (map: SessionMap) => void;
+  setSessionMap: Dispatch<SetStateAction<SessionMap>>;
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);

@@ -42,7 +42,7 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [pendingProfileSuggestion, setPendingProfileSuggestion] = useState<string | null>(null);
   const { userId, setUserId, userInitialized, userError, userRole, guestSessionId, setGuestSessionId } = useUserContext();
-  const { sessionMap } = useSessionContext();
+  const { sessionMap, setSessionMap } = useSessionContext();
   const errorToast = useErrorToast();
   useEffect(() => {
     if (!router.isReady) return;
@@ -50,6 +50,32 @@ export default function ChatPage() {
       router.replace('/guest-chat');
     }
   }, [router, userRole]);
+
+  useEffect(() => {
+    if (!userId || userRole === 'guest') return;
+    if (Object.keys(sessionMap || {}).length) return;
+    const loadMap = async () => {
+      try {
+        const all = await apiFetch<{
+          conversation_id: string;
+          profile: string;
+          title: string | null;
+          started_at: string;
+          sessions: { id: string; started_at: string; ended_at: string | null }[];
+        }[]>(`/api/conversations/list?userId=${encodeURIComponent(userId)}`);
+        const map: Record<string, any[]> = {};
+        all.forEach((conv) => {
+          const arr = map[conv.profile] || [];
+          arr.push(conv);
+          map[conv.profile] = arr;
+        });
+        setSessionMap(map);
+      } catch (err) {
+        console.error('[conversations/list]', err);
+      }
+    };
+    loadMap();
+  }, [userId, userRole, sessionMap, setSessionMap]);
   const [loadingEntries, setLoadingEntries] = useState(true);
   const [entriesError, setEntriesError] = useState<string | null>(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
@@ -331,6 +357,17 @@ export default function ChatPage() {
         sessionStorage.setItem(`reflecta_session_${name}`, data.session_id);
         setProfile(name);
         setSessionId(data.session_id);
+        setSessionMap((prev) => {
+          const arr = prev[name] ? [...prev[name]] : [];
+          arr.unshift({
+            conversation_id: data.conversation_id,
+            profile: name,
+            sessions: [
+              { id: data.session_id, started_at: '', ended_at: null },
+            ],
+          });
+          return { ...prev, [name]: arr };
+        });
         const style = {
           '--bg-color': p.bg_color,
           '--user-color': p.user_color,
@@ -362,6 +399,17 @@ export default function ChatPage() {
 
         setProfile(name);
         setSessionId(data.session_id);
+        setSessionMap((prev) => {
+          const arr = prev[name] ? [...prev[name]] : [];
+          arr.unshift({
+            conversation_id: data.conversation_id,
+            profile: name,
+            sessions: [
+              { id: data.session_id, started_at: '', ended_at: null },
+            ],
+          });
+          return { ...prev, [name]: arr };
+        });
         const style = {
           '--bg-color': p.bg_color,
           '--user-color': p.user_color,

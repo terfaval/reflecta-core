@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 
 import { apiFetch } from 'lib/api';
 import { useErrorToast } from './useErrorToast';
+import { useSessionContext } from '@/contexts/SessionContext';
 
 interface Entry {
   id: string;
@@ -34,6 +35,11 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
     typeof profile === 'string'
       ? sessionStorage.getItem(`reflecta_session_${profile}`)
       : null;
+  const { sessionMap } = useSessionContext();
+  const mappedSessionId =
+    typeof profile === 'string'
+      ? sessionMap[profile]?.[0]?.sessions?.find((s) => !s.ended_at)?.id || null
+      : null;
 
   useEffect(() => {
     if (!enabled || !router.isReady || userRole === 'guest') return;
@@ -57,8 +63,31 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
 
       const closingTrigger = profileData?.closing_trigger || '';
 
+      if (typeof sessionOverride === 'string') {
+        initialized.current = true;
+        sessionStorage.setItem(`reflecta_session_${profile}`, sessionOverride);
+        let entries: Entry[] = [];
+        try {
+          const data = await apiFetch<{ entries?: Entry[] }>(
+            `/api/entries?sessionId=${encodeURIComponent(sessionOverride)}`,
+          );
+          entries = data.entries || [];
+        } catch (err) {
+          console.error('[load entries]', err);
+          errorToast({ message: 'Az előzmények betöltése nem sikerült.', type: 'network' });
+        }
+        onReady({
+          userId: uid,
+          sessionId: sessionOverride,
+          startingPrompt: '',
+          closingTrigger,
+          entries,
+        });
+        return;
+      }
+
       // If we have a stored session and no override in the URL,
-            // validate and resume that session without creating a new one.
+      // validate and resume that session without creating a new one.
       if (!sessionOverride && storedSessionId) {
         const params = new URLSearchParams({ sessionId: storedSessionId });
         try {
@@ -95,13 +124,13 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
         }
       }
 
-      if (typeof sessionOverride === 'string') {
+      if (!sessionOverride && !storedSessionId && mappedSessionId) {
         initialized.current = true;
-        sessionStorage.setItem(`reflecta_session_${profile}`, sessionOverride);
+        sessionStorage.setItem(`reflecta_session_${profile}`, mappedSessionId);
         let entries: Entry[] = [];
         try {
           const data = await apiFetch<{ entries?: Entry[] }>(
-            `/api/entries?sessionId=${encodeURIComponent(sessionOverride)}`,
+            `/api/entries?sessionId=${encodeURIComponent(mappedSessionId)}`,
           );
           entries = data.entries || [];
         } catch (err) {
@@ -110,7 +139,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
         }
         onReady({
           userId: uid,
-          sessionId: sessionOverride,
+          sessionId: mappedSessionId,
           startingPrompt: '',
           closingTrigger,
           entries,
@@ -170,6 +199,7 @@ export function useUserSession({ profile, onReady, enabled = true, userId, userR
     router.isReady,
     sessionOverride,
     storedSessionId,
+    sessionMap,
     userRole,
   ]);
 }
