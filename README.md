@@ -134,6 +134,11 @@ eltárolásra, és a React felhasználói kontextusban `guestSessionId` mezőn k
 elérhető. A chat felület így ugyanúgy sessionId-t kap, mint a bejelentkezett
 felhasználók esetén.
 
+Az oldalsáv az "Új" jelöléseket felhasználónként tárolja. A profilhasználat időbélyegei
+a böngésző `localStorage` tárhelyén `reflecta_profile_usage_<felhasználó_id>`
+néven kerülnek elmentésre (vendégmódban a vendég session azonosítójával), így
+mindenki csak a saját korábban kipróbált profiljait látja használtként.
+
 A frontend minden betöltéskor meghívja a `/api/guest-session` végpontot,
 amely visszaigazolja vagy létrehozza ezt az ideiglenes azonosítót. Üzenetküldéskor
 a `/api/guest/respond` hívódik meg, ahol a korábbi beszélgetési előzmény és az új

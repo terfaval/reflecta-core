@@ -1,27 +1,33 @@
 import { useEffect, useState } from 'react';
 import { useProfileContext } from '@/contexts/ProfileContext';
+import { useUserContext } from '@/contexts/UserContext';
 
 export interface UsageMap {
   [id: string]: number;
 }
 
-const STORAGE_KEY = 'reflecta_profile_usage';
+const BASE_KEY = 'reflecta_profile_usage';
 
 export function useProfileUsage() {
   const { profile } = useProfileContext();
+  const { userId, guestSessionId } = useUserContext();
   const [usage, setUsage] = useState<UsageMap>({});
+
+  const getKey = () => `${BASE_KEY}_${userId || guestSessionId || 'unknown'}`
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(getKey());
       if (raw) {
         const parsed = JSON.parse(raw) as UsageMap;
         setUsage(parsed);
+        } else {
+        setUsage({});
       }
     } catch {
       // ignore
     }
-  }, []);
+  }, [userId, guestSessionId]);
 
   useEffect(() => {
     if (!profile) return;
@@ -33,7 +39,7 @@ export function useProfileUsage() {
     setUsage((prev) => {
       const next = { ...prev, [id]: Date.now() };
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        localStorage.setItem(getKey(), JSON.stringify(next));
       } catch {
         // ignore
       }
