@@ -112,7 +112,10 @@ export default function ChatPage() {
       await Promise.all(
         missing.map(async (p) => {
           const sid = sessionMap[p.name]?.[0]?.sessions?.[0]?.id;
-          if (!sid) return;
+          if (!sid) {
+            updates[p.name] = [];
+            return;
+          }
           try {
             const data = await apiFetch<{ labels?: MemorySummary[] }>(
               `/api/memory/summary?sessionId=${encodeURIComponent(sid)}`
@@ -149,7 +152,10 @@ export default function ChatPage() {
       await Promise.all(
         missing.map(async (p) => {
           const sid = sessionMap[p]?.[0]?.sessions?.[0]?.id;
-          if (!sid) return;
+          if (!sid) {
+            updates[p] = { content: null, created_at: null, status: 'no-entry' };
+            return;
+          }
           try {
             const data = await apiFetch<LastEntry>(
               `/api/last-entry?sessionId=${encodeURIComponent(sid)}`,
