@@ -30,6 +30,7 @@ from .session_validate import router as session_validate_router
 from .conversations_last_sessions import (
     router as conversations_last_sessions_router,
 )
+from .conversations_list import router as conversations_list_router
 from .starting_prompt import router as starting_prompt_router
 from .profile_update import router as profile_update_router
 from .profile_metadata_api import router as profile_metadata_router
@@ -93,6 +94,7 @@ api_router.include_router(last_session_router)
 api_router.include_router(session_validate_router)
 api_router.include_router(starting_prompt_router)
 api_router.include_router(conversations_last_sessions_router)
+api_router.include_router(conversations_list_router)
 api_router.include_router(profile_update_router)
 api_router.include_router(profile_metadata_router)
 api_router.include_router(ping_router)

@@ -5,6 +5,7 @@ import { ReflectaIcon } from '@/components/icons';
 import { apiFetch } from '@/lib/api';
 import { useProfileContext } from '@/contexts/ProfileContext';
 import { useUserContext } from '@/contexts/UserContext';
+import { useSessionContext } from '@/contexts/SessionContext';
 import { redirectToChat } from '@/lib/navigation';
 import { useErrorToast } from '@/hooks/useErrorToast';
 
@@ -12,6 +13,7 @@ export default function LoadingPage() {
   const router = useRouter();
   const { setProfile } = useProfileContext();
   const { userId, userInitialized, userError, userRole, wpEmbed } = useUserContext();
+  const { setSessionMap } = useSessionContext();
   const errorToast = useErrorToast();
 
   useEffect(() => {
@@ -59,6 +61,29 @@ export default function LoadingPage() {
           console.error('[conversations/last-sessions]', err);
         }
 
+        try {
+          const all = await apiFetch<
+            {
+              conversation_id: string;
+              profile: string;
+              title: string | null;
+              started_at: string;
+              sessions: { id: string; started_at: string; ended_at: string | null }[];
+            }[]
+          >(`/api/conversations/list?userId=${encodeURIComponent(userId)}`);
+
+          const map: Record<string, any[]> = {};
+          all.forEach((conv) => {
+            const arr = map[conv.profile] || [];
+            arr.push(conv);
+            map[conv.profile] = arr;
+          });
+          sessionStorage.setItem('reflecta_session_map', JSON.stringify(map));
+          setSessionMap(map);
+        } catch (err) {
+          console.error('[conversations/list]', err);
+        }
+        
         const navigate = () => {
           if (data.conversationId && data.sessionId && !data.endedAt) {
             if (data.profile) setProfile(data.profile);

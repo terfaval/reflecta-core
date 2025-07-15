@@ -15,6 +15,7 @@ import { useScrollHandler } from "../hooks/useScrollHandler";
 import { useHandleSend } from "../hooks/useHandleSend";
 import { useUserContext } from "@/contexts/UserContext";
 import { useProfileContext } from "@/contexts/ProfileContext";
+import { useSessionContext } from "@/contexts/SessionContext";
 import { v4 as uuidv4 } from 'uuid';
 import ProfileSwitchSuggestion from "@/components/ProfileSwitchSuggestion";
 
@@ -41,6 +42,7 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [pendingProfileSuggestion, setPendingProfileSuggestion] = useState<string | null>(null);
   const { userId, setUserId, userInitialized, userError, userRole, guestSessionId, setGuestSessionId } = useUserContext();
+  const { sessionMap } = useSessionContext();
   const errorToast = useErrorToast();
   useEffect(() => {
     if (!router.isReady) return;
@@ -169,6 +171,14 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!userId || profile || userRole === 'guest') return;
+    const mapProfiles = Object.keys(sessionMap || {});
+    if (mapProfiles.length) {
+      const p = mapProfiles[0];
+      const conv = sessionMap[p]?.[0];
+      if (p) setProfile(p);
+      if (conv?.sessions?.length) setSessionId(conv.sessions[0].id);
+      return;
+    }
     const load = async () => {
       try {
         const data = await apiFetch<{
@@ -193,7 +203,7 @@ export default function ChatPage() {
       setShowProfileSelect(true);
     };
     load();
-  }, [userId, profile, setProfile]);
+  }, [userId, profile, setProfile, sessionMap, userRole]);
   
   useEffect(() => {
     if (debug) console.log("[Debug] sessionId", sessionId);
@@ -463,6 +473,14 @@ export default function ChatPage() {
     if (debug) console.log("[Debug] fetchMoreEntries called. Page:", page);
   }, [debug, page]);
 
+  useEffect(() => {
+    if (!profile || sessionId || userRole === 'guest') return;
+    const convs = sessionMap[profile];
+    if (convs && convs[0]?.sessions?.length) {
+      setSessionId(convs[0].sessions[0].id);
+    }
+  }, [profile, sessionId, sessionMap, userRole]);
+  
   useEffect(() => {
     if (!profile || typeof profile !== "string" || !userId || !sessionId || userRole === 'guest')
       return;
