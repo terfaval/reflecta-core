@@ -299,6 +299,28 @@ export default function ChatPage() {
     }
     // eslint-disable-next-line no-console
     console.log('[switch profile]', { userId, profile_name: name });
+    
+    const convs = sessionMap[name];
+    if (convs && convs[0]?.sessions?.length) {
+      const conversationId = convs[0].conversation_id;
+      const storedSessionId = convs[0].sessions[0].id;
+      sessionStorage.setItem(`reflecta_session_${name}`, storedSessionId);
+      setProfile(name);
+      setSessionId(storedSessionId);
+      const style = {
+        '--bg-color': p.bg_color,
+        '--user-color': p.user_color,
+        '--ai-color': p.ai_color,
+      } as Record<string, string>;
+      sessionStorage.setItem('reflecta_colors', JSON.stringify(style));
+      setCurrentStyle(style);
+      redirectToChat(router, conversationId, storedSessionId, true);
+      setEntries([]);
+      setStartingPrompt('');
+      setSessionIsFresh(true);
+      return;
+    }
+    
     try {
       const params = new URLSearchParams({ profile: name });
       const data = await apiFetch<{
