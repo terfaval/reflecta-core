@@ -50,3 +50,20 @@ export async function apiFetch<T = any>(
     return {} as T;
   }
 }
+
+export async function validateSession(
+  sessionId: string,
+  conversationId?: string,
+): Promise<boolean> {
+  const params = new URLSearchParams({ sessionId });
+  if (conversationId) params.set('conversationId', conversationId);
+  try {
+    const resp = await apiFetch<{ valid: boolean }>(
+      `/api/session/validate?${params.toString()}`,
+    );
+    return resp.valid;
+  } catch (err) {
+    console.error('[session/validate]', err);
+    return false;
+  }
+}

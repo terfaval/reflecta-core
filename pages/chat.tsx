@@ -21,7 +21,7 @@ import { useAvailableProfiles } from '@/hooks/useAvailableProfiles';
 import { useMemoryContext, MemoryMap, MemorySummary } from '@/contexts/MemoryContext';
 import ProfileSwitchSuggestion from "@/components/ProfileSwitchSuggestion";
 
-import { apiFetch } from "@/lib/api";
+import { apiFetch, validateSession } from "@/lib/api";
 import { redirectToChat } from "@/lib/navigation";
 import { useErrorToast } from "@/hooks/useErrorToast";
 
@@ -70,7 +70,7 @@ export default function ChatPage() {
         const map: Record<string, any[]> = {};
         all.forEach((conv) => {
           const arr = map[conv.profile] || [];
-          arr.push(conv);
+          arr.push({ ...conv, updatedAt: Date.now() });
           map[conv.profile] = arr;
         });
         setSessionMap(map);
@@ -358,21 +358,47 @@ export default function ChatPage() {
     if (convs && convs[0]?.sessions?.length) {
       const conversationId = convs[0].conversation_id;
       const storedSessionId = convs[0].sessions[0].id;
-      sessionStorage.setItem(`reflecta_session_${name}`, storedSessionId);
-      setProfile(name);
-      setSessionId(storedSessionId);
-      const style = {
-        '--bg-color': p.bg_color,
-        '--user-color': p.user_color,
-        '--ai-color': p.ai_color,
-      } as Record<string, string>;
-      sessionStorage.setItem('reflecta_colors', JSON.stringify(style));
-      setCurrentStyle(style);
-      redirectToChat(router, conversationId, storedSessionId, true);
-      setEntries([]);
-      setStartingPrompt('');
-      setSessionIsFresh(true);
-      return;
+      
+      let valid = false;
+      const stale =
+        !convs[0].updatedAt || Date.now() - convs[0].updatedAt > 5 * 60 * 1000;
+      if (!stale) {
+        valid = true;
+      } else {
+        valid = await validateSession(storedSessionId, conversationId);
+      }
+
+      if (valid) {
+        setSessionMap((prev) => {
+          const arr = prev[name] ? [...prev[name]] : [];
+          if (arr[0]) arr[0].updatedAt = Date.now();
+          return { ...prev, [name]: arr };
+        });
+
+        sessionStorage.setItem(`reflecta_session_${name}`, storedSessionId);
+        setProfile(name);
+        setSessionId(storedSessionId);
+        const style = {
+          '--bg-color': p.bg_color,
+          '--user-color': p.user_color,
+          '--ai-color': p.ai_color,
+        } as Record<string, string>;
+        sessionStorage.setItem('reflecta_colors', JSON.stringify(style));
+        setCurrentStyle(style);
+        redirectToChat(router, conversationId, storedSessionId, true);
+        setEntries([]);
+        setStartingPrompt('');
+        setSessionIsFresh(true);
+        return;
+      }
+
+      // invalid or failed validation -> remove corrupted entry and fall through
+      setSessionMap((prev) => {
+        const arr = (prev[name] || []).filter(
+          (c) => c.conversation_id !== conversationId,
+        );
+        return { ...prev, [name]: arr };
+      });
     }
     
     try {
@@ -393,6 +419,7 @@ export default function ChatPage() {
             sessions: [
               { id: data.session_id, started_at: '', ended_at: null },
             ],
+            updatedAt: Date.now(),
           });
           return { ...prev, [name]: arr };
         });
@@ -435,6 +462,7 @@ export default function ChatPage() {
             sessions: [
               { id: data.session_id, started_at: '', ended_at: null },
             ],
+            updatedAt: Date.now(),
           });
           return { ...prev, [name]: arr };
         });

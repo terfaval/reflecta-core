@@ -20,6 +20,8 @@ export interface ConversationMeta {
   title?: string | null;
   started_at?: string;
   sessions: SessionMeta[];
+  /** Timestamp when this record was last validated */
+  updatedAt?: number;
 }
 
 export type SessionMap = Record<string, ConversationMeta[]>;

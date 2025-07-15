@@ -75,7 +75,7 @@ export default function LoadingPage() {
           const map: Record<string, any[]> = {};
           all.forEach((conv) => {
             const arr = map[conv.profile] || [];
-            arr.push(conv);
+            arr.push({ ...conv, updatedAt: Date.now() });
             map[conv.profile] = arr;
           });
           sessionStorage.setItem('reflecta_session_map', JSON.stringify(map));
