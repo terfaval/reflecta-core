@@ -49,6 +49,8 @@ The session dictionary may contain:
 
 - `transition: str` – optional key for transition prompts (`"reminder"` or `"closing"`).
 
+The builder keeps the final system prompt under a configurable token budget (default 1200 tokens). Lower priority sections are dropped first when necessary.
+
 ## 5. Extending the system
 
 - **Add a new strategy** – create a new entry in `strategy_templates.py` with the desired fields (`intro_type`, `body_type`, `layout`, etc.).  The key becomes selectable via the `strategy` argument in `build_system_prompt_v2`.

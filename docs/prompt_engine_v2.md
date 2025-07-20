@@ -97,6 +97,17 @@ STRATEGY_TEMPLATES = {
 
 The final prompt is assembled in the order shown in the code snippet from `build_system_prompt_v2`. Transitions from an active function are inserted after the strategy block, followed by the function state line. Summaries of style and tone precede user preferences and recent strategy reminders. Empty lines are removed and the pieces are joined using `safe_join_lines` from `prompt_utils.py`.【F:backend/prompt/prompt_utils.py†L6-L9】
 
+### Token budgeting
+
+`build_system_prompt_v2` now enforces a configurable token budget (default 1200 tokens). Each section contributes roughly:
+
+- Core essence and structure guidelines – ~60 tokens
+- Style summary and preferences – ~35 tokens
+- Strategy formatting and outline – ~60 tokens
+- Tone examples and recent strategies – up to ~40 tokens
+
+Low priority sections (tone examples, recent strategies, visual hints) are skipped first when the limit is reached. Medium priority sections are truncated line by line. High priority pieces like the core essence and function state are always preserved.
+
 ## 5. Extending the Engine
 
 - **Add new strategies** by creating an entry in `strategy_templates.py` with the desired formatting fields and examples.

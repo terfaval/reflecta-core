@@ -18,15 +18,44 @@ from .prompt_sections import (
     get_preferences_lines,
     get_recent_strategy_lines,
 )
-from .prompt_utils import safe_join_lines
+from .prompt_utils import (
+    safe_join_lines,
+    estimate_tokens_for_lines,
+    truncate_lines_by_token_estimate,
+)
+
+DEFAULT_PROMPT_TOKEN_BUDGET = 1200
 
 
-def build_system_prompt_v2(profile: dict, session: dict, strategy: str) -> str:
-    """Assemble and return the full system prompt."""
+def build_system_prompt_v2(
+    profile: dict,
+    session: dict,
+    strategy: str,
+    token_budget: int = DEFAULT_PROMPT_TOKEN_BUDGET,
+) -> str:
+    """Assemble and return the full system prompt respecting the token budget."""
+
     lines: List[str] = []
+    remaining = token_budget
+
+    def add(section_lines: List[str], priority: str) -> None:
+        nonlocal remaining
+        if not section_lines:
+            return
+        tokens = estimate_tokens_for_lines(section_lines)
+        if tokens <= remaining:
+            lines.extend(section_lines)
+            remaining -= tokens
+            return
+        if priority == "low":
+            return
+        truncated = truncate_lines_by_token_estimate(section_lines, remaining)
+        if truncated:
+            lines.extend(truncated)
+            remaining -= estimate_tokens_for_lines(truncated)
 
     # 1. Core essence
-    lines.extend(get_core_essence_lines())
+    add(get_core_essence_lines(), "high")
 
     depth = session.get("conversation_arc", {}).get("depth_estimate", "moderate")
     depth_conf = session.get("conversation_arc", {}).get("depth_confidence")
@@ -37,34 +66,33 @@ def build_system_prompt_v2(profile: dict, session: dict, strategy: str) -> str:
     )
 
     # 2. Structure guidelines
-    lines.extend(get_structure_guideline_lines())
-    lines.extend(get_depth_guideline_lines(depth))
-    lines.extend(get_attunement_lines(strategy, depth, depth_conf))
+    add(get_structure_guideline_lines(), "high")
+    add(get_depth_guideline_lines(depth), "high")
+    add(get_attunement_lines(strategy, depth, depth_conf), "medium")
 
     # 3. Profile style summary
     style_line = get_style_summary_line(profile)
-    if style_line:
-        lines.append(style_line)
+    add([style_line] if style_line else [], "medium")
 
     # 4. Profile tone examples
-    lines.extend(get_tone_example_lines(profile, session))
+    add(get_tone_example_lines(profile, session), "low")
 
     # 5. Profile domain/worldview context
-    lines.extend(get_profile_context_lines(profile))
+    add(get_profile_context_lines(profile), "medium")
 
     # 6. User preferences
-    lines.extend(get_preferences_lines(session))
+    add(get_preferences_lines(session), "medium")
 
     # 7. Recent strategies recap
-    lines.extend(get_recent_strategy_lines(session))
+    add(get_recent_strategy_lines(session), "low")
 
     # 8. Strategy block
-    lines.extend(get_strategy_section_lines(strategy, session, profile))
+    add(get_strategy_section_lines(strategy, session, profile), "medium")
 
-     # 9. Transition line, if applicable
-    lines.extend(get_transition_lines(session))
+    # 9. Transition line, if applicable
+    add(get_transition_lines(session), "high")
 
     # 10. Function state line
-    lines.extend(get_function_state_lines(session))
+    add(get_function_state_lines(session), "high")
 
     return safe_join_lines(lines)
