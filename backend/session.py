@@ -9,7 +9,6 @@ from .users import get_user_by_id
 from .profile_utils import validate_profile_name
 from .conversation_manager import get_or_create_conversation
 from .session_factory import create_session
-from .supabase_client import supabase
 from .supabase_client_async import get_async_client, _execute
 
 router = APIRouter()
