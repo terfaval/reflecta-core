@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Any, Optional
 
 from dotenv import load_dotenv
-from fastapi import HTTPException
 from supabase import AsyncClient, create_async_client
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -34,12 +33,12 @@ async def get_async_client() -> AsyncClient:
 
 
 def _execute(result: Any) -> Any:
-    """Return data or raise an exception on error."""
+    """Return data from ``result`` or raise ``RuntimeError`` on failure."""
     if result is None:
         logging.debug("[supabase async] Query executed, no data returned")
         return None
 
     if hasattr(result, "error") and result.error:
-        raise HTTPException(status_code=500, detail=result.error.message)
+        raise RuntimeError(result.error.message)
 
     return getattr(result, "data", None)

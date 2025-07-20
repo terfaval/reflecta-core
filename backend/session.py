@@ -9,7 +9,8 @@ from .users import get_user_by_id
 from .profile_utils import validate_profile_name
 from .conversation_manager import get_or_create_conversation
 from .session_factory import create_session
-from .supabase_client import supabase, _execute
+from .supabase_client import supabase
+from .supabase_client_async import get_async_client, _execute
 
 router = APIRouter()
 
@@ -21,10 +22,11 @@ class SessionRequest(BaseModel):
     profile: str
     
 
-def fetch_active_session(user_id: str, profile: str) -> dict | None:
+async def fetch_active_session_async(user_id: str, profile: str) -> dict | None:
     """Return the most recent active session for the user/profile if any."""
-    result = (
-        supabase.table("conversations")
+    client = await get_async_client()
+    query = (
+        client.table("conversations")
         .select("id, sessions(id, ended_at, started_at)")
         .eq("user_id", user_id)
         .ilike("profile", profile)
@@ -34,8 +36,8 @@ def fetch_active_session(user_id: str, profile: str) -> dict | None:
         .limit(1)
         .limit(1, foreign_table="sessions")
         .maybe_single()
-        .execute()
     )
+    result = await query.execute()
     row = _execute(result)
     if row and row.get("sessions"):
         session = row["sessions"][0]
@@ -49,7 +51,7 @@ async def get_or_create_conversation_and_session(
     user_id: str, profile: str
 ) -> tuple[str, dict, str]:
     """Return conversation_id, session dict and status ('new' or 'existing')."""
-    active = fetch_active_session(user_id, profile)
+    active = await fetch_active_session_async(user_id, profile)
     if active:
         return active["conversation_id"], active, "existing"
     conversation, _ = get_or_create_conversation(user_id, profile)
