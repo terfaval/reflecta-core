@@ -11,6 +11,7 @@ from .utils import normalize_profile
 
 router = APIRouter()
 
+
 @router.get("/conversation/by-profile")
 async def conversation_by_profile(
     profile: str = Query(...),
@@ -20,7 +21,9 @@ async def conversation_by_profile(
     """Return the latest conversation and session for the user/profile if any."""
     uid = user_id or x_user_id
     if not uid:
-        raise HTTPException(status_code=400, detail="Hiányzó vagy érvénytelen mező: user_id")
+        raise HTTPException(
+            status_code=400, detail="Hiányzó vagy érvénytelen mező: user_id"
+        )
 
     try:
         get_user_by_id(uid)
@@ -30,46 +33,40 @@ async def conversation_by_profile(
         conv_result = safe_call(
             lambda: (
                 supabase.table("conversations")
-                .select("id")
+                .select("id, sessions(id, ended_at, started_at)")
                 .eq("user_id", uid)
                 .ilike("profile", normalized)
                 .eq("is_archived", False)
                 .order("started_at", desc=True)
+                .order("sessions.started_at", desc=True, foreign_table="sessions")
                 .limit(1)
+                .limit(1, foreign_table="sessions")
                 .maybe_single()
                 .execute()
             ),
             context="conversation_lookup",
         )
-        conversation = _execute(conv_result)
-        if not conversation:
+        row = _execute(conv_result)
+        if not row:
             return {"conversation_id": None, "session_id": None}
 
-        conv_id = conversation["id"]
-
-        sess_result = safe_call(
-            lambda: (
-                supabase.table("sessions")
-                .select("id, ended_at")
-                .eq("conversation_id", conv_id)
-                .order("started_at", desc=True)
-                .limit(1)
-                .maybe_single()
-                .execute()
-            ),
-            context="session_lookup",
-        )
-        session = _execute(sess_result)
-        if not session:
-            return {"conversation_id": conv_id, "session_id": None}
+        session = None
+        if row.get("sessions"):
+            session = row["sessions"][0]
 
         return {
-            "conversation_id": conv_id,
-            "session_id": session.get("id"),
-            "ended_at": session.get("ended_at"),
+            "conversation_id": row.get("id"),
+            "session_id": session.get("id") if session else None,
+            "ended_at": session.get("ended_at") if session else None,
         }
     except HTTPException as exc:
         raise exc
     except Exception:
         logging.exception("[conversation/by-profile] Hiba történt")
-        return JSONResponse(status_code=500, content={"status": "error", "error": "Nem sikerült betölteni a beszélgetést."})
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "error": "Nem sikerült betölteni a beszélgetést.",
+            },
+        )

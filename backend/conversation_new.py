@@ -71,29 +71,18 @@ async def conversation_new(
             existing_result = safe_call(
                 lambda: (
                     supabase.table("sessions")
-                    .select("*")
+                    .select("id, entries(id)")
                     .eq("conversation_id", conv_id)
                     .is_("ended_at", None)
                     .limit(1)
                     .maybe_single()
                     .execute()
-                    ),
+                ),
                 context="session_lookup",
             )
             session = _execute(existing_result)
             if session:
-                entry_result = safe_call(
-                    lambda: (
-                        supabase.table("entries")
-                        .select("id")
-                        .eq("session_id", session["id"])
-                        .limit(1)
-                        .maybe_single()
-                        .execute()
-                    ),
-                    context="entry_lookup",
-                )
-                has_entries = bool(_execute(entry_result))
+                has_entries = bool(session.get("entries"))
                 return {
                     "conversation_id": conv_id,
                     "session_id": session["id"],

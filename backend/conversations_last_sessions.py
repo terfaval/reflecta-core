@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 import logging
 
 from .supabase_client import supabase, _execute, safe_call
+from .supabase_utils import fetch_sessions_for_conversations
 from .users import get_user_by_id
 
 router = APIRouter()
@@ -18,7 +19,9 @@ async def conversations_last_sessions(
     """Return last session info for all conversations of the user."""
     uid = user_id or x_user_id
     if not uid:
-        raise HTTPException(status_code=400, detail="Hiányzó vagy érvénytelen mező: user_id")
+        raise HTTPException(
+            status_code=400, detail="Hiányzó vagy érvénytelen mező: user_id"
+        )
 
     try:
         get_user_by_id(uid)
@@ -35,32 +38,35 @@ async def conversations_last_sessions(
         )
         conversations = _execute(conv_result) or []
 
+        conv_ids = [c.get("id") for c in conversations if c.get("id")]
+        sessions_map = {}
+        if conv_ids:
+            for s in fetch_sessions_for_conversations(conv_ids):
+                cid = s["conversation_id"]
+                if cid not in sessions_map:
+                    sessions_map[cid] = s
+
         results = []
         for conv in conversations:
             conv_id = conv.get("id")
             profile = conv.get("profile")
-            sess_result = safe_call(
-                lambda: (
-                    supabase.table("sessions")
-                    .select("id, started_at, ended_at")
-                    .eq("conversation_id", conv_id)
-                    .order("started_at", desc=True)
-                    .limit(1)
-                    .maybe_single()
-                    .execute()
-                ),
-                context="session_lookup",
+            results.append(
+                {
+                    "profile": profile,
+                    "conversation_id": conv_id,
+                    "session": sessions_map.get(conv_id),
+                }
             )
-            session = _execute(sess_result)
-            results.append({
-                "profile": profile,
-                "conversation_id": conv_id,
-                "session": session,
-            })
 
         return results
     except HTTPException as exc:
         raise exc
     except Exception:  # pragma: no cover - network/database issues
         logging.exception("[conversations/last-sessions] Hiba történt")
-        return JSONResponse(status_code=500, content={"status": "error", "error": "Nem sikerült betölteni a beszélgetéseket."})
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "error": "Nem sikerült betölteni a beszélgetéseket.",
+            },
+        )

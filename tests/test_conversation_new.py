@@ -49,13 +49,10 @@ def test_conversation_new_internal_error():
 def test_conversation_new_existing_flag():
     supabase = MagicMock()
     chain_sessions = MagicMock()
-    chain_entries = MagicMock()
 
     def table_side(name):
         if name == "sessions":
             return chain_sessions
-        if name == "entries":
-            return chain_entries
         raise AssertionError
 
     supabase.table.side_effect = table_side
@@ -65,12 +62,6 @@ def test_conversation_new_existing_flag():
     chain_sessions.limit.return_value = chain_sessions
     chain_sessions.maybe_single.return_value = chain_sessions
     chain_sessions.execute.return_value = "session_result"
-
-    chain_entries.select.return_value = chain_entries
-    chain_entries.eq.return_value = chain_entries
-    chain_entries.limit.return_value = chain_entries
-    chain_entries.maybe_single.return_value = chain_entries
-    chain_entries.execute.return_value = "entries_result"
 
     with patch(
         "backend.conversation_new.validate_profile_name", return_value="Reflecta"
@@ -84,7 +75,7 @@ def test_conversation_new_existing_flag():
         "backend.conversation_new.supabase", supabase
     ), patch(
         "backend.conversation_new._execute",
-        side_effect=lambda x: {"id": "s1"} if x == "session_result" else [{"id": "e1"}],
+        return_value={"id": "s1", "entries": [{"id": "e1"}]},
     ):
         resp = client.post(
             "/api/conversation/new", json={"user_id": "u1", "profile_name": "Reflecta"}

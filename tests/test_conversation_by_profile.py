@@ -15,13 +15,10 @@ client = TestClient(app)
 def make_supabase():
     supabase = MagicMock()
     conv_chain = MagicMock()
-    sess_chain = MagicMock()
 
     def table_side(name):
         if name == "conversations":
             return conv_chain
-        if name == "sessions":
-            return sess_chain
         raise AssertionError
 
     supabase.table.side_effect = table_side
@@ -35,18 +32,11 @@ def make_supabase():
     conv_chain.maybe_single.return_value = conv_chain
     conv_chain.execute.return_value = "conv_result"
 
-    sess_chain.select.return_value = sess_chain
-    sess_chain.eq.return_value = sess_chain
-    sess_chain.order.return_value = sess_chain
-    sess_chain.limit.return_value = sess_chain
-    sess_chain.maybe_single.return_value = sess_chain
-    sess_chain.execute.return_value = "sess_result"
-
-    return supabase, conv_chain, sess_chain
+    return supabase, conv_chain
 
 
 def test_conversation_by_profile_none():
-    supabase, _, _ = make_supabase()
+    supabase, _ = make_supabase()
     with patch("backend.conversation_by_profile.supabase", supabase), patch(
         "backend.conversation_by_profile._execute", return_value=None
     ), patch(
@@ -63,10 +53,10 @@ def test_conversation_by_profile_none():
 
 
 def test_conversation_by_profile_found():
-    supabase, _, _ = make_supabase()
+    supabase, _ = make_supabase()
     with patch("backend.conversation_by_profile.supabase", supabase), patch(
         "backend.conversation_by_profile._execute",
-        side_effect=[{"id": "c1"}, {"id": "s1"}],
+        return_value={"id": "c1", "sessions": [{"id": "s1"}]},
     ), patch(
         "backend.conversation_by_profile.get_user_by_id", return_value={"id": "u1"}
     ), patch(

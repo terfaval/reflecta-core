@@ -32,7 +32,7 @@ def make_supabase():
     conv_chain.execute.return_value = "conv_result"
 
     sess_chain.select.return_value = sess_chain
-    sess_chain.eq.return_value = sess_chain
+    sess_chain.in_.return_value = sess_chain
     sess_chain.order.return_value = sess_chain
     sess_chain.execute.return_value = "sess_result"
 
@@ -43,9 +43,7 @@ def test_conversations_list_empty():
     supabase, _, _ = make_supabase()
     with patch("backend.conversations_list.supabase", supabase), patch(
         "backend.conversations_list._execute", return_value=[]
-    ), patch(
-        "backend.conversations_list.get_user_by_id", return_value={"id": "u1"}
-    ):
+    ), patch("backend.conversations_list.get_user_by_id", return_value={"id": "u1"}):
         resp = client.get("/api/conversations/list", params={"user_id": "u1"})
     assert resp.status_code == 200
     assert resp.json() == []
@@ -54,14 +52,18 @@ def test_conversations_list_empty():
 def test_conversations_list_multiple():
     supabase, _, _ = make_supabase()
     with patch("backend.conversations_list.supabase", supabase), patch(
+        "backend.supabase_utils.supabase", supabase
+    ), patch(
         "backend.conversations_list._execute",
-        side_effect=[
-            [
-                {"id": "c1", "profile": "Akasza", "title": "T1", "started_at": "t0"},
-                {"id": "c2", "profile": "Reflecta", "title": "T2", "started_at": "t3"},
-            ],
-            [{"id": "s1", "started_at": "t1", "ended_at": None}],
-            [{"id": "s2", "started_at": "t2", "ended_at": "e2"}],
+        return_value=[
+            {"id": "c1", "profile": "Akasza", "title": "T1", "started_at": "t0"},
+            {"id": "c2", "profile": "Reflecta", "title": "T2", "started_at": "t3"},
+        ],
+    ), patch(
+        "backend.supabase_utils._execute",
+        return_value=[
+            {"id": "s1", "conversation_id": "c1", "started_at": "t1", "ended_at": None},
+            {"id": "s2", "conversation_id": "c2", "started_at": "t2", "ended_at": "e2"},
         ],
     ), patch(
         "backend.conversations_list.get_user_by_id", return_value={"id": "u1"}

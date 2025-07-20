@@ -5,11 +5,11 @@ from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 import logging
 
-from .db import get_client
 from .users import get_user_by_id
 from .profile_utils import validate_profile_name
 from .conversation_manager import get_or_create_conversation
 from .session_factory import create_session
+from .supabase_client import supabase, _execute
 
 router = APIRouter()
 
@@ -21,25 +21,39 @@ class SessionRequest(BaseModel):
     profile: str
     
 
+def fetch_active_session(user_id: str, profile: str) -> dict | None:
+    """Return the most recent active session for the user/profile if any."""
+    result = (
+        supabase.table("conversations")
+        .select("id, sessions(id, ended_at, started_at)")
+        .eq("user_id", user_id)
+        .ilike("profile", profile)
+        .eq("is_archived", False)
+        .order("started_at", desc=True)
+        .order("sessions.started_at", desc=True, foreign_table="sessions")
+        .limit(1)
+        .limit(1, foreign_table="sessions")
+        .maybe_single()
+        .execute()
+    )
+    row = _execute(result)
+    if row and row.get("sessions"):
+        session = row["sessions"][0]
+        if session.get("ended_at") is None:
+            session["conversation_id"] = row["id"]
+            return session
+    return None
+
+
 async def get_or_create_conversation_and_session(
     user_id: str, profile: str
 ) -> tuple[str, dict, str]:
     """Return conversation_id, session dict and status ('new' or 'existing')."""
-    client = get_client()
+    active = fetch_active_session(user_id, profile)
+    if active:
+        return active["conversation_id"], active, "existing"
     conversation, _ = get_or_create_conversation(user_id, profile)
     conversation_id = conversation["id"]
-
-    existing_session, _ = (
-        client.table("sessions")
-        .select("*")
-        .eq("conversation_id", conversation_id)
-        .is_("ended_at", None)
-        .limit(1)
-        .maybe_single()
-        .execute()
-    )
-    if existing_session:
-        return conversation_id, existing_session, "existing"
 
     try:
         new_session = create_session(user_id, profile, conversation_id)
