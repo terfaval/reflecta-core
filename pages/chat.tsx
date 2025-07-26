@@ -44,6 +44,8 @@ export default function ChatPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [closingTrigger, setClosingTrigger] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(false);
+  const [sessionInitError, setSessionInitError] = useState<string | null>(null);
   const [pendingProfileSuggestion, setPendingProfileSuggestion] = useState<string | null>(null);
   const { userId, userInitialized, userError, userRole, guestSessionId, setGuestSessionId } = useUserContext();
   const { sessionMap, setSessionMap } = useSessionContext();
@@ -345,24 +347,35 @@ export default function ChatPage() {
     if (debug) console.log("[Debug] entries", entries.length);
   }, [debug, entries]);
 
-  useEffect(() => {
+  const initSession = async () => {
     if (!router.isReady) return;
     if (!userId || !profile || sessionId || userRole === 'guest') return;
     const urlSessionId = typeof router.query.session === 'string' ? router.query.session : undefined;
     const manager = new SessionManager(sessionMap);
-    manager
-      .init(profile as string, userId, userRole ?? '', urlSessionId)
-      .then(({ sessionId: sid, entries: initEntries, isNew, closingTrigger }) => {
-        if (!sid) return;
-        setSessionId(sid);
-        setEntries(initEntries);
-        setClosingTrigger(closingTrigger);
-        setSessionIsFresh(isNew);
-        setEntriesReady(true);
-      })
-      .catch((err) => {
-        console.error('[SessionManager]', err);
-      });
+    setSessionInitError(null);
+    setSessionLoading(true);
+    try {
+      const { sessionId: sid, entries: initEntries, isNew, closingTrigger } =
+        await manager.init(profile as string, userId, userRole ?? '', urlSessionId);
+      if (!sid) {
+        setSessionInitError('Could not load the conversation. Try reloading or select a profile.');
+        return;
+      }
+      setSessionId(sid);
+      setEntries(initEntries);
+      setClosingTrigger(closingTrigger);
+      setSessionIsFresh(isNew);
+      setEntriesReady(true);
+    } catch (err) {
+      console.error('[SessionManager]', err);
+      setSessionInitError('Could not load the conversation. Try reloading or select a profile.');
+    } finally {
+      setSessionLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    initSession();
   }, [router.isReady, profile, userId, userRole, sessionId, router.query.session, sessionMap]);
 
   useAutoTextareaResize();
@@ -409,6 +422,12 @@ export default function ChatPage() {
       setEntriesReady(true);
     }
   }, [sessionId, loadingEntries]);
+
+  useEffect(() => {
+    if (sessionId && typeof window !== 'undefined') {
+      sessionStorage.setItem('reflecta_last_route', router.asPath);
+    }
+  }, [sessionId, router.asPath]);
 
   const assistantReplyCount = useMemo(() => {
     return entries.filter(
@@ -735,7 +754,21 @@ export default function ChatPage() {
     );
   }
 
-  const ready = sessionsReady && lastEntriesReady && memoryReady && entriesReady;
+  if (sessionInitError) {
+    return (
+      <UserErrorDisplay
+        message={sessionInitError}
+        onRetry={initSession}
+      />
+    );
+  }
+
+  const ready =
+    sessionsReady &&
+    lastEntriesReady &&
+    memoryReady &&
+    entriesReady &&
+    !sessionLoading;
   if (!ready) {
     return <LoadingPage />;
   }
