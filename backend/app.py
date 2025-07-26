@@ -41,6 +41,7 @@ from .register_user import router as register_user_router
 from .login_user import router as login_user_router
 from .analyze import router as analyze_router
 from .strategy_review_api import router as strategy_review_router
+from .start_session import router as start_session_router
 
 DEFAULT_ALLOWED_ORIGINS = [
     "https://reflecta-core.vercel.app",
@@ -78,6 +79,7 @@ api_router.include_router(users_router)
 api_router.include_router(user_create_router)
 api_router.include_router(respond_router)
 api_router.include_router(session_router)
+api_router.include_router(start_session_router)
 api_router.include_router(chatload_router)
 api_router.include_router(conversation_router)
 api_router.include_router(conversation_by_profile_router)
