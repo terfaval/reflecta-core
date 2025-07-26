@@ -96,8 +96,8 @@ export default function LoadingPage() {
             redirectToChat(router, data.conversationId, data.sessionId, true);
           } else if (lastRoute) {
             router.replace(lastRoute);
-          } else if (mounted) {
-            setNoSession(true);
+          } else {
+            router.replace('/select-profile');
           }
         };
 
@@ -108,8 +108,14 @@ export default function LoadingPage() {
         } else {
           navigate();
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('[last-session]', err);
+        const msg = String(err?.message || '');
+        const isNotFound = msg.includes('404');
+        if (isNotFound) {
+          router.replace('/select-profile');
+          return;
+        }
         const lastRoute =
           typeof window !== 'undefined'
             ? sessionStorage.getItem('reflecta_last_route')
