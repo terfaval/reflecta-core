@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import SpiralLoader from '@/components/SpiralLoader';
 import { ReflectaIcon } from '@/components/icons';
@@ -15,8 +15,10 @@ export default function LoadingPage() {
   const { userId, userInitialized, userError, userRole, wpEmbed } = useUserContext();
   const { setSessionMap } = useSessionContext();
   const errorToast = useErrorToast();
+  const [noSession, setNoSession] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
     if (!router.isReady) return;
     if (!wpEmbed && !userId && !userInitialized) {
       router.replace('/login');
@@ -85,11 +87,17 @@ export default function LoadingPage() {
         }
         
         const navigate = () => {
+          const lastRoute =
+            typeof window !== 'undefined'
+              ? sessionStorage.getItem('reflecta_last_route')
+              : null;
           if (data.conversationId && data.sessionId && !data.endedAt) {
             if (data.profile) setProfile(data.profile);
             redirectToChat(router, data.conversationId, data.sessionId, true);
-          } else {
-            router.replace('/select-profile');
+          } else if (lastRoute) {
+            router.replace(lastRoute);
+          } else if (mounted) {
+            setNoSession(true);
           }
         };
 
@@ -102,18 +110,49 @@ export default function LoadingPage() {
         }
       } catch (err) {
         console.error('[last-session]', err);
-        setTimeout(() => router.replace('/select-profile'), 500);
-        errorToast({ message: 'Nem sikerült betölteni az előző munkamenetet.', type: 'network', retry: check });
+        const lastRoute =
+          typeof window !== 'undefined'
+            ? sessionStorage.getItem('reflecta_last_route')
+            : null;
+        setTimeout(() => {
+          if (lastRoute) {
+            router.replace(lastRoute);
+          } else if (mounted) {
+            setNoSession(true);
+          }
+        }, 500);
+        errorToast({
+          message: 'Nem sikerült betölteni az előző munkamenetet.',
+          type: 'network',
+          retry: check,
+        });
       }
     };
 
     check();
+    return () => {
+      mounted = false;
+    };
   }, [router, userId, userInitialized, userRole, wpEmbed, setProfile]);
 
   if (userError) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center' }}>
         <p>{userError}</p>
+      </div>
+    );
+  }
+
+  if (noSession) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center' }}>
+        <p>We couldn’t find an active session.</p>
+        <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+          <button onClick={() => window.location.reload()}>Try again</button>
+          <button onClick={() => router.replace('/select-profile')}>
+            Go to profile selection
+          </button>
+        </div>
       </div>
     );
   }
