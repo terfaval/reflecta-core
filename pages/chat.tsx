@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useRouter } from "next/router";
 import UserErrorDisplay from "../components/UserErrorDisplay";
 import ReflectiveMemoryPanel from "../components/ReflectiveMemoryPanel";
@@ -8,7 +8,7 @@ import ProfileSelectorSidebar, { Profile } from "../components/ProfileSelectorSi
 import ProfileSlider from "@/components/ProfileSlider";
 import MobileProfileDropdown from "@/components/MobileProfileDropdown";
 import LoadingPage from "./loading";
-import { useUserSession } from "../hooks/useUserSession";
+import { SessionManager } from "@/lib/SessionManager";
 import { useAutoTextareaResize } from "../hooks/useAutoTextareaResize";
 import { ChatFooter } from "../components/ChatFooter";
 import { ChatMessagesList } from "../components/ChatMessagesList";
@@ -45,7 +45,7 @@ export default function ChatPage() {
   const [closingTrigger, setClosingTrigger] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [pendingProfileSuggestion, setPendingProfileSuggestion] = useState<string | null>(null);
-  const { userId, setUserId, userInitialized, userError, userRole, guestSessionId, setGuestSessionId } = useUserContext();
+  const { userId, userInitialized, userError, userRole, guestSessionId, setGuestSessionId } = useUserContext();
   const { sessionMap, setSessionMap } = useSessionContext();
   const { profiles: availableProfiles } = useAvailableProfiles();
   const { memoryMap, setMemoryMap } = useMemoryContext();
@@ -345,38 +345,25 @@ export default function ChatPage() {
     if (debug) console.log("[Debug] entries", entries.length);
   }, [debug, entries]);
 
-  const handleReady = useCallback(
-    ({ userId, sessionId, startingPrompt, closingTrigger, entries: initEntries }) => {
-      if (debug) {
-        console.log("[Debug] session ready", { userId, sessionId });
-      }
-
-      setUserId(userId);
-      setSessionId(sessionId);
-      setStartingPrompt(startingPrompt);
-      setClosingTrigger(closingTrigger);
-      setSessionIsFresh(true);
-      if (initEntries && initEntries.length) {
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (!userId || !profile || sessionId || userRole === 'guest') return;
+    const urlSessionId = typeof router.query.session === 'string' ? router.query.session : undefined;
+    const manager = new SessionManager(sessionMap);
+    manager
+      .init(profile as string, userId, userRole ?? '', urlSessionId)
+      .then(({ sessionId: sid, entries: initEntries, isNew, closingTrigger }) => {
+        if (!sid) return;
+        setSessionId(sid);
         setEntries(initEntries);
-      }
-      setEntriesReady(true);
-    },
-    [
-      setUserId,
-      setSessionId,
-      setStartingPrompt,
-      setClosingTrigger,
-      setSessionIsFresh,
-    ],
-  );
-
-  useUserSession({
-    profile,
-    onReady: handleReady,
-    enabled: !!userId && !!profile && !sessionId && userRole !== 'guest',
-    userId,
-    userRole,
-  });
+        setClosingTrigger(closingTrigger);
+        setSessionIsFresh(isNew);
+        setEntriesReady(true);
+      })
+      .catch((err) => {
+        console.error('[SessionManager]', err);
+      });
+  }, [router.isReady, profile, userId, userRole, sessionId, router.query.session, sessionMap]);
 
   useAutoTextareaResize();
 
