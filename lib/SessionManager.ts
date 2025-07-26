@@ -62,7 +62,12 @@ export class SessionManager {
       return { sessionId: '', entries: [], isNew: true, closingTrigger };
     }
     sessionStorage.setItem(`reflecta_session_${profile}`, created.sessionId);
-    return { ...created, isNew: true, closingTrigger };
+    return {
+      sessionId: created.sessionId,
+      entries: created.entries,
+      isNew: true,
+      closingTrigger: created.closingTrigger || closingTrigger,
+    };
   }
 
   async loadFromUrl(
@@ -113,7 +118,7 @@ export class SessionManager {
   async createNewSession(
     profile: string,
     userId: string,
-  ): Promise<{ sessionId: string; entries: Entry[] } | null> {
+  ): Promise<{ sessionId: string; entries: Entry[]; closingTrigger: string } | null> {
     try {
       await apiFetch('/api/starting-prompt', {
         method: 'POST',
@@ -124,15 +129,21 @@ export class SessionManager {
     }
 
     try {
-      const sessionData = await apiFetch<{ session?: { id: string } }>(
-        '/api/session',
-        {
-          method: 'POST',
-          body: JSON.stringify({ userId, profile }),
-        },
-      );
-      if (!sessionData.session?.id) return null;
-      return { sessionId: sessionData.session.id, entries: [] };
+      const data = await apiFetch<{
+        session_id?: string;
+        conversation_id?: string;
+        is_new?: boolean;
+        closing_trigger?: string;
+      }>('/api/start-session', {
+        method: 'POST',
+        body: JSON.stringify({ profile, user_id: userId, create_new: true }),
+      });
+      if (!data.session_id) return null;
+      return {
+        sessionId: data.session_id,
+        entries: [],
+        closingTrigger: data.closing_trigger || '',
+      };
     } catch {
       return null;
     }
