@@ -25,6 +25,13 @@ def _tone_is_neutral(question: str) -> bool:
     return "!" not in question and not any(d in lowered for d in disallowed)
 
 
+def _not_offensive(text: str) -> bool:
+    """Return True if the text does not contain obvious profanity."""
+    lowered = text.lower()
+    bad_words = ["fuck", "shit", "bitch"]
+    return not any(b in lowered for b in bad_words)
+
+
 def is_question_relevant(question: str, entry_text: str, strategy: str | None = None, depth: str | None = None) -> bool:
     """Return True if the question is semantically similar to the entry text."""
     if not question or not entry_text:
@@ -60,4 +67,11 @@ def filter_questions(text: str, entry_text: str, strategy: str | None = None, de
     result = "\n".join(l for l in output_lines if l.strip())
     if not kept_question and best and _tone_is_neutral(best[0]):
         result = (result + "\n" if result else "") + best[0]
+    
+    # fallback for social greetings or opening remarks
+    if not kept_question and (best is None or not _tone_is_neutral(best[0])):
+        sentence = re.split(r"(?<=[.!?])\s", text.strip(), 1)[0]
+        if len(sentence) >= 5 and _not_offensive(sentence):
+            return sentence
+
     return result

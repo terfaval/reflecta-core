@@ -45,3 +45,16 @@ def test_filter_questions_fallback(mock_cos, mock_embed):
         "moderate",
     )
     assert "megdicsérnek" in filtered
+
+
+def fake_cosine_none(v1, v2):
+    return 0.0
+
+
+@patch("backend.language.question_relevance.embed_text", side_effect=fake_embed_text)
+@patch("backend.language.question_relevance.cosine_similarity", side_effect=fake_cosine_none)
+def test_filter_questions_social(mock_cos, mock_embed):
+    import backend.language.question_relevance as module
+    text = "üdv akasza! Hogyan segíthetek?"
+    filtered = module.filter_questions(text, "", None, None)
+    assert filtered == "üdv akasza!"
