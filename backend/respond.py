@@ -90,6 +90,21 @@ async def _fetch_session(client: Any, session_id: str) -> Dict[str, Any]:
         except Exception:
             state = None
     session["active_function_state"] = state
+    try:
+        result = (
+            client.table("conversation_arcs")
+            .select(
+                "arc_type, depth_estimate, depth_confidence, pivot_points, strategy_summary, profile_sequence"
+            )
+            .eq("session_id", session_id)
+            .maybe_single()
+            .execute()
+        )
+        arc = _execute(result) or {}
+    except Exception as exc:
+        logging.warning(f"[respond] arc fetch error: {exc}")
+        arc = {}
+    session["conversation_arc"] = arc
     return session
 
 
