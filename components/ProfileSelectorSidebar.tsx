@@ -170,19 +170,19 @@ export default function ProfileSelectorSidebar({
               created_at: entryInfo.created_at || '',
             };
           }
-          let bottomText = '';
-          let bottomClass = 'text-sm';
-          if (lastUser) {
-            bottomText = lastUser.content;
-                    } else if (entryInfo?.status === 'ok') {
-            bottomText = entryInfo.content || '';
-          } else if (entryInfo?.status === 'no-entry') {
-            bottomText = activeProfile.role;
-          } else {
-            bottomText = 'Loading…';
-            bottomClass = 'text-sm italic text-gray-600';
-          }
-          if (!bottomText) bottomText = activeProfile.role;
+        let bottomText = '';
+        let bottomClass = 'text-sm';
+        if (lastUser) {
+          bottomText = lastUser.content;
+        } else if (entryInfo?.status === 'ok') {
+          bottomText = entryInfo.content || '';
+        } else if (!entryInfo || entryInfo?.status === 'no-entry') {
+          bottomText = activeProfile.role;
+        } else {
+          bottomText = 'Loading…';
+          bottomClass = 'text-sm italic text-gray-600';
+        }
+        if (!bottomText) bottomText = activeProfile.role;
           return (
             <SidebarProfileItem
               name={activeProfile.name}
@@ -220,7 +220,7 @@ export default function ProfileSelectorSidebar({
           bottomText = lastUser.content;
         } else if (entryInfo?.status === 'ok') {
           bottomText = entryInfo.content || '';
-        } else if (entryInfo?.status === 'no-entry') {
+        } else if (!entryInfo || entryInfo?.status === 'no-entry') {
           bottomText = p.role;
         } else {
           bottomText = 'Loading…';
