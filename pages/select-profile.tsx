@@ -41,7 +41,7 @@ export default function ProfileSelectorPage() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent: "flex-start",
           gap: "1.5rem",
           textAlign: "center",
           width: "100%",
