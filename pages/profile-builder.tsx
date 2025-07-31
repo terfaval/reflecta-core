@@ -207,22 +207,24 @@ export default function ProfileBuilder() {
   return (
     <>
       <BackToLogsButton />
-      <AnimatePresence mode="wait">
-      <SurveySlide
-        key={step}
-        direction={direction}
-        question={q.q}
-        instruction={q.i}
-        value={answers[step]}
-        progress={progress}
-        isLast={isLastQuestion}
-        onChange={handleChange}
-        onNext={handleNext}
-        onBack={!isFirstQuestion ? prevQuestion : undefined}
-        bgColor={COLORS[step % COLORS.length]}
-      />
-      </AnimatePresence>
-      {errorMsg && <p className={styles.error}>{errorMsg}</p>}
+      <div className={styles.wrapper}>
+        <AnimatePresence mode="wait">
+          <SurveySlide
+            key={step}
+            direction={direction}
+            question={q.q}
+            instruction={q.i}
+            value={answers[step]}
+            progress={progress}
+            isLast={isLastQuestion}
+            onChange={handleChange}
+            onNext={handleNext}
+            onBack={!isFirstQuestion ? prevQuestion : undefined}
+            bgColor={COLORS[step % COLORS.length]}
+          />
+        </AnimatePresence>
+        {errorMsg && <p className={styles.error}>{errorMsg}</p>}
+      </div>
     </>
   );
 }

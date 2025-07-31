@@ -37,6 +37,8 @@
   font-family: 'Raleway', sans-serif;
   border-radius: 0.5rem;
   border: 1px solid #ccc;
+  background-color: #fff;
+  color: #333;
   resize: none;
   overflow-y: auto;
 }
